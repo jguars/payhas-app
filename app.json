@@ -16,7 +16,9 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.onki.payhas",
+      "versionCode": 1
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -26,7 +28,15 @@
       "expo-video",
       "expo-font",
       "expo-asset",
-      "expo-router"
+      "expo-router",
+      "expo-sqlite",
+      [
+        "expo-navigation-bar",
+        {
+          "enforceContrast": false,
+          "style": "light"
+        }
+      ]
     ],
     "scheme": "payhas",
     "backgroundColor": "#0A0A0F",

@@ -1,16 +1,19 @@
 import { useEvent } from 'expo';
 import { useVideoPlayer, VideoView } from 'expo-video';
-import { memo, useEffect, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Icon } from '@/components/Icon';
+import { Pop } from '@/components/motion/Pop';
+import { useLibrary } from '@/features/library/LibraryProvider';
 import { color, font } from '@/theme/tokens';
 
 import { FeedVideo, formatCount } from './data';
 
-type Props = { video: FeedVideo; active: boolean; height: number };
+/** chromeBottom: space taken by the floating tab bar; captions and the rail sit above it. */
+type Props = { video: FeedVideo; active: boolean; height: number; chromeBottom: number };
 
-function FeedItemBase({ video, active, height }: Props) {
+function FeedItemBase({ video, active, height, chromeBottom }: Props) {
   const player = useVideoPlayer(video.source, (p) => {
     p.loop = true;
     // Browsers block autoplay with sound; native starts unmuted.
@@ -22,9 +25,10 @@ function FeedItemBase({ video, active, height }: Props) {
   const time = useEvent(player, 'timeUpdate', { currentTime: 0, currentLiveTimestamp: null, currentOffsetFromLive: null, bufferedPosition: 0 });
   const progress = player.duration > 0 ? Math.min(1, time.currentTime / player.duration) : 0;
 
-  const [liked, setLiked] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [following, setFollowing] = useState(false);
+  const { saved: savedSet, following: followingSet, toggleSave, toggleFollow, logWatch } = useLibrary();
+  const [liked, setLiked] = useState(false); // likes stay local until the counts are server-side
+  const saved = savedSet.has(video.id);
+  const following = followingSet.has(video.creator.name);
 
   useEffect(() => {
     if (active) {
@@ -34,6 +38,17 @@ function FeedItemBase({ video, active, height }: Props) {
       player.pause();
     }
   }, [active, player]);
+
+  // Watch time: from becoming active until swiped away (or the screen goes).
+  const startedAt = useRef<number | null>(null);
+  useEffect(() => {
+    if (!active) return;
+    startedAt.current = Date.now();
+    return () => {
+      if (startedAt.current) logWatch(video.id, (Date.now() - startedAt.current) / 1000);
+      startedAt.current = null;
+    };
+  }, [active, video.id, logWatch]);
 
   const onTap = () => {
     if (muted) player.muted = false;
@@ -55,34 +70,38 @@ function FeedItemBase({ video, active, height }: Props) {
         </View>
       )}
 
-      <View style={styles.rail}>
+      <View style={[styles.rail, { bottom: chromeBottom + 74 }]}>
         <View style={styles.avatarWrap}>
           <View style={styles.avatar}>
             <Text style={styles.avatarLetter}>{video.creator.name[0]}</Text>
           </View>
           {!following && (
-            <Pressable style={styles.follow} onPress={() => setFollowing(true)} accessibilityLabel={`Follow ${video.creator.name}`} hitSlop={10}>
+            <Pressable style={styles.follow} onPress={() => toggleFollow(video.creator.name)} accessibilityLabel={`Follow ${video.creator.name}`} hitSlop={10}>
               <Icon name="plus" size={12} color={color.ink} strokeWidth={3.5} />
             </Pressable>
           )}
         </View>
         <Pressable style={styles.action} onPress={() => setLiked((v) => !v)} accessibilityLabel="Like" accessibilityState={{ selected: liked }}>
-          <Icon name="heart" size={32} color={liked ? color.ember : color.text} filled={liked} strokeWidth={1.9} />
+          <Pop on={liked}>
+            <Icon name="heart" size={32} color={liked ? color.ember : color.text} filled={liked} strokeWidth={1.9} />
+          </Pop>
           <Text style={styles.count}>{formatCount(video.likes + (liked ? 1 : 0))}</Text>
         </Pressable>
         <Pressable style={styles.action} accessibilityLabel="Comments">
           <Icon name="comment" size={30} strokeWidth={1.9} />
           <Text style={styles.count}>{formatCount(video.comments)}</Text>
         </Pressable>
-        <Pressable style={styles.action} onPress={() => setSaved((v) => !v)} accessibilityLabel="Save" accessibilityState={{ selected: saved }}>
-          <Icon name="save" size={28} filled={saved} strokeWidth={1.9} />
+        <Pressable style={styles.action} onPress={() => toggleSave(video.id)} accessibilityLabel="Save" accessibilityState={{ selected: saved }}>
+          <Pop on={saved}>
+            <Icon name="save" size={28} filled={saved} strokeWidth={1.9} />
+          </Pop>
         </Pressable>
         <Pressable style={styles.action} accessibilityLabel="Share">
           <Icon name="share" size={28} strokeWidth={1.9} />
         </Pressable>
       </View>
 
-      <View style={styles.meta} pointerEvents="box-none">
+      <View style={[styles.meta, { bottom: chromeBottom + 4 }]} pointerEvents="box-none">
         <View style={styles.creatorRow}>
           <Text style={styles.creator}>{video.creator.name}</Text>
           {video.creator.verified && <Icon name="verified" size={15} color={color.verified} />}
@@ -92,7 +111,7 @@ function FeedItemBase({ video, active, height }: Props) {
         </Text>
       </View>
 
-      <View style={styles.progressTrack}>
+      <View style={[styles.progressTrack, { bottom: chromeBottom - 8 }]}>
         <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
       </View>
     </View>
@@ -109,7 +128,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    height: 220,
+    height: 320,
     experimental_backgroundImage: 'linear-gradient(0deg, rgba(10,10,15,0.8), rgba(10,10,15,0))',
   },
   mutedHint: {
@@ -125,7 +144,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(10,10,15,0.55)',
   },
   mutedText: { color: color.text, fontFamily: font.semibold, fontSize: 13 },
-  rail: { position: 'absolute', right: 12, bottom: 96, alignItems: 'center', gap: 20 },
+  rail: { position: 'absolute', right: 12, alignItems: 'center', gap: 20 },
   avatarWrap: { width: 46, height: 54, alignItems: 'center' },
   avatar: {
     width: 44,
@@ -150,10 +169,10 @@ const styles = StyleSheet.create({
   },
   action: { minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center', gap: 2 },
   count: { color: color.text, fontFamily: font.mono, fontSize: 12 },
-  meta: { position: 'absolute', left: 16, right: 84, bottom: 22, gap: 6 },
+  meta: { position: 'absolute', left: 16, right: 84, gap: 6 },
   creatorRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   creator: { color: color.text, fontFamily: font.bold, fontSize: 16 },
   caption: { color: color.text, fontFamily: font.body, fontSize: 15, lineHeight: 21 },
-  progressTrack: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 2, backgroundColor: 'rgba(244,243,239,0.2)' },
+  progressTrack: { position: 'absolute', left: 16, right: 16, height: 2, borderRadius: 1, overflow: 'hidden', backgroundColor: 'rgba(244,243,239,0.2)' },
   progressFill: { height: 2, backgroundColor: color.text },
 });

@@ -17,10 +17,10 @@ Design source: https://claude.ai/artifact/EEnQUr5xZXq3b8utWGQyA4 — Feed Varian
 - [ ] Comments sheet, share sheet, long-press "Why this?" / "Not for me"
 
 ## Phase 2 — Accounts & age lanes
-- [ ] Supabase project, auth, family + profiles schema
-- [ ] "Who's watching?" profile picker, parent PIN
-- [ ] Interest picker (cold start)
-- [ ] Lane rules enforced server-side (RLS)
+- [x] Supabase project, auth, family + profiles schema (`supabase/migrations/`)
+- [x] "Who's watching?" profile picker, parent PIN (5 tries → 15 min lockout)
+- [x] Interest picker (cold start; lane-filtered, enforced by RLS)
+- [x] Lane rules enforced server-side (RLS + `get_feed()` mirrors `passesLaneGate`)
 
 ## Phase 3 — Content safety pipeline
 - [ ] Upload flow (record/pick, trim, caption, topic)
@@ -33,7 +33,12 @@ Design source: https://claude.ai/artifact/EEnQUr5xZXq3b8utWGQyA4 — Feed Varian
 - [ ] "Why this?" chips and taste dials
 
 ## Phase 5 — Remaining screens
-- [ ] Discover, Inbox, Me (taste + family controls)
+- [x] Discover (search, shelf, trending, topics; Reanimated motion — presets in `src/theme/motion.ts`)
+- [x] Inbox (welcome, new-for-you, family notices) and Me (stats, taste, daily limit + quiet hours behind the PIN) — needs `20261006210000_me_inbox.sql` applied
+
+## Phase 5b — Play
+- [x] Create tab → Play: Bubble Pop (lane-tuned: free play for Little, target rounds for Kids+) and Memory Match (2–8 pairs by lane, timed for Teen/Adult)
+- [x] Game time counts toward the daily limit, quiet hours block games; best scores stay on the device — needs `20261007090000_play_time.sql` applied
 
 ## Phase 6 — Launch readiness
 - [ ] COPPA / GDPR-K / UK Children's Code, store kids-category rules

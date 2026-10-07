@@ -1,22 +1,42 @@
-import { useIsFocused } from 'expo-router';
-import { useCallback, useRef, useState } from 'react';
+import { router, useIsFocused, useLocalSearchParams } from 'expo-router';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { FlatList, LayoutChangeEvent, Pressable, StyleSheet, Text, View, ViewToken } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useInsets, useTabBarSpace } from '@/lib/useInsets';
 
 import { Icon } from '@/components/Icon';
 import { LaneBadge } from '@/components/LaneBadge';
-import { seedFeed } from '@/features/feed/data';
+import { useFamily } from '@/features/family/FamilyProvider';
 import { FeedItem } from '@/features/feed/FeedItem';
+import { useFeed } from '@/features/feed/useFeed';
+import { TimesUp } from '@/features/library/TimesUp';
+import { useScreenTime } from '@/features/library/useScreenTime';
 import { color, font } from '@/theme/tokens';
 
 type FeedTab = 'following' | 'forYou';
 
 export default function FeedScreen() {
-  const insets = useSafeAreaInsets();
+  const insets = useInsets();
+  const barSpace = useTabBarSpace();
   const focused = useIsFocused();
   const [height, setHeight] = useState(0);
   const [activeIndex, setActiveIndex] = useState(0);
   const [tab, setTab] = useState<FeedTab>('forYou');
+  const { active, leaveProfile } = useFamily();
+  const { videos } = useFeed();
+  const { lock } = useScreenTime();
+  const list = useRef<FlatList>(null);
+
+  // Discover opens a specific video with /?v=<id>: jump straight to it, then drop the param.
+  const { v: target } = useLocalSearchParams<{ v?: string }>();
+  useEffect(() => {
+    if (!target || height === 0 || videos.length === 0) return;
+    const index = videos.findIndex((x) => x.id === target);
+    if (index >= 0) {
+      list.current?.scrollToOffset({ offset: index * height, animated: false });
+      setActiveIndex(index);
+    }
+    router.setParams({ v: undefined });
+  }, [target, height, videos]);
 
   const onLayout = (e: LayoutChangeEvent) => setHeight(e.nativeEvent.layout.height);
 
@@ -34,9 +54,10 @@ export default function FeedScreen() {
     <View style={styles.root} onLayout={onLayout}>
       {height > 0 && (
         <FlatList
-          data={seedFeed}
+          ref={list}
+          data={videos}
           keyExtractor={(v) => v.id}
-          renderItem={({ item, index }) => <FeedItem video={item} height={height} active={focused && index === activeIndex} />}
+          renderItem={({ item, index }) => <FeedItem video={item} height={height} chromeBottom={barSpace} active={focused && !lock && index === activeIndex} />}
           pagingEnabled
           snapToInterval={height}
           decelerationRate="fast"
@@ -52,7 +73,7 @@ export default function FeedScreen() {
 
       <View pointerEvents="box-none" style={[styles.top, { paddingTop: insets.top + 8 }]}>
         <View pointerEvents="none" style={styles.scrimTop} />
-        <LaneBadge lane="kids" />
+        {active && <LaneBadge lane={active.profile.lane} onPress={leaveProfile} />}
         <View style={styles.tabs} accessibilityRole="tablist">
           {(['following', 'forYou'] as const).map((t) => {
             const on = tab === t;
@@ -68,6 +89,7 @@ export default function FeedScreen() {
           <Icon name="search" size={24} strokeWidth={2.2} />
         </Pressable>
       </View>
+      {lock && <TimesUp lock={lock} />}
     </View>
   );
 }

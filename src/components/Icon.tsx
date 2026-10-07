@@ -15,7 +15,17 @@ export type IconName =
   | 'share'
   | 'shield'
   | 'verified'
-  | 'muted';
+  | 'muted'
+  | 'play'
+  | 'close'
+  | 'sliders'
+  | 'moon'
+  | 'lock'
+  | 'chevron'
+  | 'sparkle'
+  | 'clock'
+  | 'game'
+  | 'star';
 
 type Props = { name: IconName; size?: number; color?: string; filled?: boolean; strokeWidth?: number };
 
@@ -84,6 +94,43 @@ export function Icon({ name, size = 24, color = c.text, filled = false, strokeWi
             {...solid}
           />
         );
+      case 'play':
+        return <Path d="M7 4v16l13-8z" {...solid} />;
+      case 'close':
+        return <Path d="M6 6l12 12M18 6 6 18" {...stroke} />;
+      case 'sliders':
+        return <Path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6" {...stroke} />;
+      case 'moon':
+        return <Path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" {...(filled ? solid : stroke)} />;
+      case 'lock':
+        return (
+          <>
+            <Path d="M6 11h12a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2z" {...stroke} />
+            <Path d="M8 11V7a4 4 0 0 1 8 0v4" {...stroke} />
+          </>
+        );
+      case 'chevron':
+        return <Path d="m9 6 6 6-6 6" {...stroke} />;
+      case 'sparkle':
+        return <Path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z" {...(filled ? solid : stroke)} />;
+      case 'clock':
+        return (
+          <>
+            <Circle cx={12} cy={12} r={9} {...stroke} />
+            <Path d="M12 7v5l3 2" {...stroke} />
+          </>
+        );
+      case 'game':
+        return (
+          <>
+            <Path d="M7 7h10a5 5 0 0 1 4.9 6l-.8 4a2.5 2.5 0 0 1-4.3 1.2L14.5 16h-5l-2.3 2.2A2.5 2.5 0 0 1 2.9 17l-.8-4A5 5 0 0 1 7 7z" {...stroke} />
+            <Path d="M7.5 10v3M6 11.5h3" {...stroke} />
+            <Circle cx={15.5} cy={10.5} r={0.6} {...stroke} />
+            <Circle cx={17} cy={12.5} r={0.6} {...stroke} />
+          </>
+        );
+      case 'star':
+        return <Path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z" {...(filled ? solid : stroke)} />;
       case 'muted':
         return (
           <>

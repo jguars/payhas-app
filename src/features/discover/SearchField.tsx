@@ -1,0 +1,101 @@
+import { useEffect, useState } from 'react';
+import { Pressable, StyleSheet, TextInput, View } from 'react-native';
+import Animated, {
+  FadeIn,
+  FadeInDown,
+  FadeOut,
+  FadeOutUp,
+  interpolateColor,
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
+
+import { Icon } from '@/components/Icon';
+import { spring } from '@/theme/motion';
+import { color, font } from '@/theme/tokens';
+
+type Props = { value: string; onChange: (v: string) => void; suggestions: string[] };
+
+/**
+ * Search with a placeholder that rolls through this lane's topics while idle,
+ * and a border that warms to ember on focus.
+ */
+export function SearchField({ value, onChange, suggestions }: Props) {
+  const reduce = useReducedMotion();
+  const [focused, setFocused] = useState(false);
+  const [i, setI] = useState(0);
+  const focus = useSharedValue(0);
+
+  const idle = !focused && value.length === 0 && suggestions.length > 1 && !reduce;
+  useEffect(() => {
+    if (!idle) return;
+    const id = setInterval(() => setI((n) => (n + 1) % suggestions.length), 2400);
+    return () => clearInterval(id);
+  }, [idle, suggestions.length]);
+
+  useEffect(() => {
+    focus.value = withSpring(focused ? 1 : 0, spring.snappy);
+  }, [focused, focus]);
+
+  const box = useAnimatedStyle(() => ({
+    borderColor: interpolateColor(focus.value, [0, 1], [color.line, 'rgba(255,90,60,0.7)']),
+    backgroundColor: interpolateColor(focus.value, [0, 1], [color.surface1, color.surface2]),
+  }));
+  const glass = useAnimatedStyle(() => ({
+    transform: [{ scale: 1 + 0.12 * focus.value }, { rotate: `${-12 * focus.value}deg` }],
+  }));
+
+  const word = suggestions[i % Math.max(1, suggestions.length)] ?? '';
+
+  return (
+    <Animated.View style={[styles.box, box]}>
+      <Animated.View style={glass}>
+        <Icon name="search" size={20} color={focused ? color.text : color.text3} strokeWidth={2.2} />
+      </Animated.View>
+      <View style={styles.field}>
+        <TextInput
+          value={value}
+          onChangeText={onChange}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          accessibilityLabel="Search"
+          returnKeyType="search"
+          autoCorrect={false}
+          style={styles.input}
+        />
+        {value.length === 0 && (
+          <View pointerEvents="none" style={styles.placeholder}>
+            <Animated.Text style={styles.placeholderText}>Search </Animated.Text>
+            <Animated.Text
+              key={word}
+              entering={reduce ? undefined : FadeInDown.duration(280)}
+              exiting={reduce ? undefined : FadeOutUp.duration(200)}
+              style={[styles.placeholderText, styles.placeholderWord]}
+            >
+              {word.toLowerCase()}
+            </Animated.Text>
+          </View>
+        )}
+      </View>
+      {value.length > 0 && (
+        <Animated.View entering={FadeIn.duration(150)} exiting={FadeOut.duration(120)}>
+          <Pressable onPress={() => onChange('')} accessibilityLabel="Clear search" hitSlop={12} style={styles.clear}>
+            <Icon name="close" size={14} color={color.ink} strokeWidth={3} />
+          </Pressable>
+        </Animated.View>
+      )}
+    </Animated.View>
+  );
+}
+
+const styles = StyleSheet.create({
+  box: { flexDirection: 'row', alignItems: 'center', gap: 10, height: 48, paddingHorizontal: 16, borderRadius: 16, borderWidth: 1 },
+  field: { flex: 1, height: '100%', justifyContent: 'center' },
+  input: { flex: 1, color: color.text, fontFamily: font.medium, fontSize: 15, outlineStyle: 'none' } as never,
+  placeholder: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, flexDirection: 'row', alignItems: 'center', overflow: 'hidden' },
+  placeholderText: { color: color.text3, fontFamily: font.medium, fontSize: 15 },
+  placeholderWord: { color: color.text2 },
+  clear: { width: 22, height: 22, borderRadius: 11, backgroundColor: color.text3, alignItems: 'center', justifyContent: 'center' },
+});
