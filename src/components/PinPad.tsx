@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { fx } from '@/lib/feedback';
 import { color, font, space } from '@/theme/tokens';
 
 type Props = {
@@ -19,6 +20,7 @@ export function PinPad({ title, onComplete, onCancel }: Props) {
 
   const press = async (key: string) => {
     if (busy || !key) return;
+    fx.key();
     if (key === '⌫') return setPin((p) => p.slice(0, -1));
     const next = pin + key;
     setError(null);
@@ -27,11 +29,14 @@ export function PinPad({ title, onComplete, onCancel }: Props) {
     setBusy(true);
     try {
       const result = await onComplete(next);
+      if (result === true) fx.success();
+      else fx.error();
       if (result !== true) {
         setError(typeof result === 'string' ? result : 'Wrong PIN');
         setPin('');
       }
     } catch (e) {
+      fx.error();
       setError(e instanceof Error ? e.message : 'Something went wrong');
       setPin('');
     } finally {

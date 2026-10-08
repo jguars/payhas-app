@@ -54,7 +54,7 @@ export function TrendingGrid({ videos, loading, onOpen, baseIndex = 0 }: Props) 
               <View pointerEvents="none" style={styles.scrim} />
               <View style={styles.views}>
                 <Icon name="play" size={10} color={color.text} />
-                <CountUp value={v.likes} format={formatCount} delay={stagger(baseIndex + i) + 380} style={styles.viewsText} />
+                <CountUp value={v.views} format={formatCount} delay={stagger(baseIndex + i) + 380} style={styles.viewsText} />
               </View>
             </PressScale>
           </Enter>

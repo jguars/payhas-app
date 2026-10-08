@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, {
@@ -15,9 +16,10 @@ import Svg, { Circle, Path } from 'react-native-svg';
 import { Enter } from '@/components/motion/Enter';
 import { PressScale } from '@/components/motion/PressScale';
 import { useFamily } from '@/features/family/FamilyProvider';
+import { fx } from '@/lib/feedback';
 import { color, font, radius, space } from '@/theme/tokens';
 
-import { Lock, QUIET_END_HOUR } from './useScreenTime';
+import { hourLabel, Lock } from './useScreenTime';
 
 const STARS = [
   { x: -78, y: -54, s: 6, d: 0 },
@@ -29,26 +31,34 @@ const STARS = [
 
 /** Full-screen stop shown over the feed when the family controls say so. */
 export function TimesUp({ lock }: { lock: Exclude<Lock, null> }) {
-  const { leaveProfile } = useFamily();
+  const { leaveProfile, current } = useFamily();
   const quiet = lock === 'quiet';
+  const copy = {
+    paused: { title: 'Paused by a parent', body: 'Time for something else' },
+    quiet: { title: 'Quiet hours', body: `Back at ${hourLabel(current?.wake_hour ?? 7)}` },
+    limit: { title: "That's today's watching", body: 'Back tomorrow' },
+    games: { title: 'Games are off for now', body: 'A parent turned them off. Videos are still on.' },
+  }[lock];
+  // A gentle three-note "goodnight" when the stop screen appears.
+  useEffect(() => fx.timesUp(), []);
 
   return (
     <Animated.View entering={FadeIn.duration(320)} style={styles.root}>
       <Enter index={0} rise={10}>
         <View style={styles.art}>
           {quiet && STARS.map((st, i) => <Star key={i} {...st} />)}
-          <Float>{quiet ? <Moon /> : <Hourglass />}</Float>
+          <Float>{quiet ? <Moon /> : lock === 'paused' ? <PauseArt /> : lock === 'games' ? <GamesOff /> : <Hourglass />}</Float>
         </View>
       </Enter>
       <Enter index={2}>
-        <Text style={styles.title}>{quiet ? 'Quiet hours' : "That's today's watching"}</Text>
+        <Text style={styles.title}>{copy.title}</Text>
       </Enter>
       <Enter index={3}>
-        <Text style={styles.body}>{quiet ? `Back at ${QUIET_END_HOUR}am` : 'Back tomorrow'}</Text>
+        <Text style={styles.body}>{copy.body}</Text>
       </Enter>
       <Enter index={5}>
-        <PressScale onPress={leaveProfile} accessibilityRole="button" style={styles.button}>
-          <Text style={styles.buttonText}>Switch profile</Text>
+        <PressScale onPress={lock === 'games' ? () => router.navigate('/') : leaveProfile} accessibilityRole="button" style={styles.button}>
+          <Text style={styles.buttonText}>{lock === 'games' ? 'Watch videos' : 'Switch profile'}</Text>
         </PressScale>
       </Enter>
     </Animated.View>
@@ -80,6 +90,24 @@ function Moon() {
   return (
     <Svg width={96} height={96} viewBox="0 0 24 24">
       <Path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" fill="#FFD25E" />
+    </Svg>
+  );
+}
+
+function PauseArt() {
+  return (
+    <Svg width={92} height={92} viewBox="0 0 24 24">
+      <Circle cx={12} cy={12} r={10} fill={color.verified} opacity={0.18} />
+      <Path d="M9.5 8v8M14.5 8v8" stroke={color.verified} strokeWidth={2.4} strokeLinecap="round" />
+    </Svg>
+  );
+}
+
+function GamesOff() {
+  return (
+    <Svg width={92} height={92} viewBox="0 0 24 24">
+      <Path d="M7 8h10a4 4 0 0 1 4 4v1a3 3 0 0 1-5.4 1.8L14.5 13h-5l-1.1 1.8A3 3 0 0 1 3 13v-1a4 4 0 0 1 4-4z" stroke={color.text2} strokeWidth={1.6} fill="none" strokeLinejoin="round" />
+      <Path d="M4 4l16 16" stroke={color.ember} strokeWidth={1.8} strokeLinecap="round" />
     </Svg>
   );
 }

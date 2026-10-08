@@ -6,6 +6,7 @@ import { Icon } from '@/components/Icon';
 import { PinPad } from '@/components/PinPad';
 import { SafeScreen } from '@/components/SafeScreen';
 import { Profile, useFamily } from '@/features/family/FamilyProvider';
+import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
 import { color, font, lane as lanes, space } from '@/theme/tokens';
 
@@ -42,7 +43,11 @@ export default function WhoScreen() {
     );
   }
 
-  const pick = (p: Profile) => (p.pin_protected ? setPinFor(p) : selectProfile(p));
+  const pick = (p: Profile) => {
+    fx.tap();
+    if (p.pin_protected) setPinFor(p);
+    else selectProfile(p);
+  };
 
   return (
     <SafeScreen style={styles.root}>
@@ -75,9 +80,15 @@ export default function WhoScreen() {
           )}
         </View>
       </View>
-      <Pressable onPress={signOut} hitSlop={10} style={styles.signOut}>
-        <Text style={styles.signOutText}>Sign out</Text>
-      </Pressable>
+      <View style={styles.footer}>
+        <Pressable onPress={() => router.push('/parent')} hitSlop={10} style={styles.footerButton} accessibilityRole="button">
+          <Icon name="sliders" size={16} color={color.text2} strokeWidth={2.2} />
+          <Text style={[styles.signOutText, { color: color.text2 }]}>Parent dashboard</Text>
+        </Pressable>
+        <Pressable onPress={signOut} hitSlop={10} style={styles.footerButton}>
+          <Text style={styles.signOutText}>Sign out</Text>
+        </Pressable>
+      </View>
     </SafeScreen>
   );
 }
@@ -105,6 +116,7 @@ const styles = StyleSheet.create({
   },
   add: { backgroundColor: color.surface1, borderWidth: 1, borderColor: color.line },
   name: { color: color.text, fontFamily: font.semibold, fontSize: 15 },
-  signOut: { alignSelf: 'center', paddingVertical: space.lg },
+  footer: { flexDirection: 'row', justifyContent: 'center', gap: space.xl, paddingVertical: space.lg },
+  footerButton: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   signOutText: { color: color.text3, fontFamily: font.semibold, fontSize: 14 },
 });

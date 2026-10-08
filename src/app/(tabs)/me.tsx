@@ -1,22 +1,24 @@
-import { useIsFocused } from 'expo-router';
+import { router, useIsFocused } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useReducedMotion, useSharedValue, withDelay, withSpring } from 'react-native-reanimated';
-import { useInsets, useTabBarSpace } from '@/lib/useInsets';
 
 import { Icon, IconName } from '@/components/Icon';
-import { StatusScrim } from '@/components/StatusScrim';
 import { CountUp } from '@/components/motion/CountUp';
 import { Enter } from '@/components/motion/Enter';
 import { PressScale } from '@/components/motion/PressScale';
 import { Ring } from '@/components/motion/Ring';
 import { Toggle } from '@/components/motion/Toggle';
+import { StatusScrim } from '@/components/StatusScrim';
+import { useRoles } from '@/features/creator/useRoles';
 import { useFamily } from '@/features/family/FamilyProvider';
 import { useLibrary } from '@/features/library/LibraryProvider';
 import { useScreenTime } from '@/features/library/useScreenTime';
-import { ControlsSheet } from '@/features/me/ControlsSheet';
 import { TasteCard } from '@/features/me/TasteCard';
 import { useMe } from '@/features/me/useMe';
+import { fx, getFeedbackSettings, setFeedbackSettings } from '@/lib/feedback';
+import { supabase } from '@/lib/supabase';
+import { useInsets, useTabBarSpace } from '@/lib/useInsets';
 import { spring } from '@/theme/motion';
 import { color, font, lane as lanes, space } from '@/theme/tokens';
 
@@ -30,7 +32,16 @@ export default function MeScreen() {
   const { todaySeconds } = useLibrary();
   const { limitMinutes } = useScreenTime();
   const { data, reload, resetTaste } = useMe();
-  const [controlsOpen, setControlsOpen] = useState(false);
+  const roles = useRoles();
+  const [waiting, setWaiting] = useState(0);
+
+  // Moderators see how much is waiting each time they open Me.
+  useEffect(() => {
+    if (!focused || !roles.is_moderator) return;
+    Promise.all([supabase.rpc('get_review_queue'), supabase.rpc('get_report_queue')]).then(([u, r]) =>
+      setWaiting((u.data?.length ?? 0) + (r.data?.length ?? 0)),
+    );
+  }, [focused, roles.is_moderator]);
 
   // Fresh numbers each time the tab comes into view.
   useEffect(() => {
@@ -42,6 +53,10 @@ export default function MeScreen() {
   const l = lanes[current.lane];
   const isAdult = current.lane === 'adult';
   const todayMin = Math.floor(todaySeconds / 60);
+  const openParent = () => {
+    fx.tap();
+    router.push({ pathname: '/parent', params: { child: isAdult ? undefined : current.id } });
+  };
 
   return (
     <View style={styles.root}>
@@ -60,7 +75,7 @@ export default function MeScreen() {
           </Enter>
           {!isAdult && (
             <Enter index={2}>
-              <PressScale onPress={() => setControlsOpen(true)} pressedScale={0.9} accessibilityRole="button" accessibilityLabel="Family controls" style={styles.iconButton}>
+              <PressScale onPress={openParent} pressedScale={0.9} accessibilityRole="button" accessibilityLabel="Family controls" style={styles.iconButton}>
                 <Icon name="sliders" size={20} />
               </PressScale>
             </Enter>
@@ -69,8 +84,8 @@ export default function MeScreen() {
 
         <View style={styles.stats}>
           <Stat index={3} value={todayMin} format={(n) => `${n}m`} label="Today" />
-          <Stat index={4} value={data?.saved ?? 0} label="Saved" />
-          <Stat index={5} value={data?.following ?? 0} label="Following" />
+          <Stat index={4} value={data?.saved ?? 0} label="Saved" onPress={() => router.push('/saved')} />
+          <Stat index={5} value={data?.following ?? 0} label="Following" onPress={() => router.push('/following')} />
         </View>
 
         <Enter index={6}>
@@ -80,7 +95,7 @@ export default function MeScreen() {
         <Enter index={7} style={styles.list}>
           {!isAdult && (
             <>
-              <Row icon="shield" label="Daily limit" onPress={() => setControlsOpen(true)}>
+              <Row icon="shield" label="Daily limit" onPress={openParent}>
                 {limitMinutes != null ? (
                   <View style={styles.limitValue}>
                     <Text style={styles.value}>
@@ -92,10 +107,30 @@ export default function MeScreen() {
                   <Text style={styles.value}>Off</Text>
                 )}
               </Row>
-              <Row icon="moon" label="Quiet hours" onPress={() => setControlsOpen(true)}>
+              <Row icon="moon" label="Quiet hours" onPress={openParent}>
                 <Toggle on={current.quiet_hours} tint={GREEN} />
               </Row>
             </>
+          )}
+          {isAdult && (
+            <Row icon="sliders" label="Family dashboard" onPress={openParent}>
+              <Icon name="chevron" size={16} color={color.text3} strokeWidth={2.4} />
+            </Row>
+          )}
+          {isAdult && roles.is_creator && (
+            <Row icon="plus" label="Creator studio" onPress={() => router.push('/studio')}>
+              <Icon name="chevron" size={16} color={color.text3} strokeWidth={2.4} />
+            </Row>
+          )}
+          {isAdult && roles.is_moderator && (
+            <Row icon="shield" label="Review" onPress={() => router.push('/review')}>
+              {waiting > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>{waiting}</Text>
+                </View>
+              )}
+              <Icon name="chevron" size={16} color={color.text3} strokeWidth={2.4} />
+            </Row>
           )}
           <Row icon="lock" label="Switch profile" onPress={leaveProfile} last={!isAdult}>
             <Icon name="chevron" size={16} color={color.text3} strokeWidth={2.4} />
@@ -106,10 +141,34 @@ export default function MeScreen() {
             </Row>
           )}
         </Enter>
+
+        <Enter index={8}>
+          <DeviceCard />
+        </Enter>
       </ScrollView>
       <StatusScrim />
 
-      {!isAdult && <ControlsSheet profile={current} open={controlsOpen} onClose={() => setControlsOpen(false)} />}
+    </View>
+  );
+}
+
+/** Sounds and vibration for this phone (every profile on it). */
+function DeviceCard() {
+  const [prefs, setPrefs] = useState(getFeedbackSettings);
+  const flip = (key: 'sound' | 'haptics') => {
+    const next = { ...prefs, [key]: !prefs[key] };
+    setFeedbackSettings(next);
+    setPrefs(next);
+    fx.toggle(next[key]); // plays/buzzes only if the setting just turned on
+  };
+  return (
+    <View style={styles.list}>
+      <Row icon="sound" label="Sounds" onPress={() => flip('sound')}>
+        <Toggle on={prefs.sound} tint={GREEN} />
+      </Row>
+      <Row icon="vibrate" label="Vibration" onPress={() => flip('haptics')} last>
+        <Toggle on={prefs.haptics} tint={GREEN} />
+      </Row>
     </View>
   );
 }
@@ -132,11 +191,25 @@ function Avatar({ letter, tint }: { letter: string; tint: string }) {
   );
 }
 
-function Stat({ index, value, label, format = String }: { index: number; value: number; label: string; format?: (n: number) => string }) {
-  return (
-    <Enter index={index} style={styles.stat}>
+function Stat({ index, value, label, format = String, onPress }: { index: number; value: number; label: string; format?: (n: number) => string; onPress?: () => void }) {
+  const body = (
+    <>
       <CountUp value={value} format={format} delay={300 + index * 60} style={styles.statValue} />
-      <Text style={styles.statLabel}>{label}</Text>
+      <View style={styles.statLabelRow}>
+        <Text style={styles.statLabel}>{label}</Text>
+        {onPress && <Icon name="chevron" size={12} color={color.text3} strokeWidth={2.6} />}
+      </View>
+    </>
+  );
+  return (
+    <Enter index={index} style={{ flex: 1 }}>
+      {onPress ? (
+        <PressScale onPress={onPress} pressedScale={0.95} accessibilityRole="button" accessibilityLabel={`${label}: ${value}`} style={styles.stat}>
+          {body}
+        </PressScale>
+      ) : (
+        <View style={styles.stat}>{body}</View>
+      )}
     </Enter>
   );
 }
@@ -162,7 +235,8 @@ const styles = StyleSheet.create({
   lanePillText: { color: color.ink, fontFamily: font.bold, fontSize: 11 },
   iconButton: { width: 44, height: 44, borderRadius: 22, borderWidth: 1, borderColor: color.line, backgroundColor: color.surface1, alignItems: 'center', justifyContent: 'center' },
   stats: { flexDirection: 'row', gap: 8 },
-  stat: { flex: 1, backgroundColor: color.surface1, borderRadius: 16, padding: 12, gap: 2 },
+  stat: { backgroundColor: color.surface1, borderRadius: 16, padding: 12, gap: 2 },
+  statLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 2 },
   statValue: { color: color.text, fontFamily: font.mono, fontSize: 20 },
   statLabel: { color: color.text2, fontFamily: font.medium, fontSize: 12 },
   list: { backgroundColor: color.surface1, borderRadius: 24, paddingHorizontal: 18, paddingVertical: 6 },
@@ -171,4 +245,6 @@ const styles = StyleSheet.create({
   rowLabel: { flex: 1, color: color.text, fontFamily: font.semibold, fontSize: 15 },
   value: { color: color.text2, fontFamily: font.medium, fontSize: 14 },
   limitValue: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  badge: { minWidth: 22, height: 22, paddingHorizontal: 6, borderRadius: 11, backgroundColor: color.ember, alignItems: 'center', justifyContent: 'center' },
+  badgeText: { color: color.ink, fontFamily: font.bold, fontSize: 12 },
 });

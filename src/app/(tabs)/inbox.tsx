@@ -18,6 +18,7 @@ import { Icon } from '@/components/Icon';
 import { StatusScrim } from '@/components/StatusScrim';
 import { Enter } from '@/components/motion/Enter';
 import { PressScale } from '@/components/motion/PressScale';
+import { MediaSource } from '@/features/feed/data';
 import { useFeed } from '@/features/feed/useFeed';
 import { InboxItem, useLibrary } from '@/features/library/LibraryProvider';
 import { spring, stagger } from '@/theme/motion';
@@ -107,7 +108,7 @@ function Row({
   onPress,
 }: {
   item: InboxItem;
-  thumb?: number;
+  thumb?: MediaSource;
   unread: boolean;
   fading: boolean;
   order: number;
@@ -135,9 +136,18 @@ function Row({
   );
 }
 
-function Badge({ item, thumb }: { item: InboxItem; thumb?: number }) {
-  if (item.kind === 'new_video' && thumb != null) {
-    return <Image source={thumb} style={styles.thumb} resizeMode="cover" />;
+function Badge({ item, thumb }: { item: InboxItem; thumb?: MediaSource }) {
+  if ((item.kind === 'new_video' || item.kind === 'shared') && thumb != null) {
+    return (
+      <View>
+        <Image source={thumb} style={styles.thumb} resizeMode="cover" />
+        {item.kind === 'shared' && (
+          <View style={styles.sentBadge}>
+            <Icon name="send" size={11} color={color.ink} strokeWidth={2.6} />
+          </View>
+        )}
+      </View>
+    );
   }
   const family = item.kind === 'family';
   return (
@@ -195,6 +205,7 @@ const styles = StyleSheet.create({
   h2: { color: color.text2, fontFamily: font.semibold, fontSize: 13, letterSpacing: 0.4, textTransform: 'uppercase' },
   row: { flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.md, borderRadius: 18, backgroundColor: color.surface1 },
   thumb: { width: 48, height: 60, borderRadius: 10, backgroundColor: color.surface2 },
+  sentBadge: { position: 'absolute', right: -5, bottom: -5, width: 22, height: 22, borderRadius: 11, backgroundColor: color.ember, borderWidth: 2, borderColor: color.surface1, alignItems: 'center', justifyContent: 'center' },
   badge: { width: 48, height: 48, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
   rowTitle: { color: color.text, fontFamily: font.bold, fontSize: 15 },
   rowBody: { color: color.text2, fontFamily: font.body, fontSize: 13, lineHeight: 18 },

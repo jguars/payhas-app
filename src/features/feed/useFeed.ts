@@ -1,50 +1,46 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { useFamily } from '@/features/family/FamilyProvider';
+import { useLibrary } from '@/features/library/LibraryProvider';
 import { supabase } from '@/lib/supabase';
 
-import { FeedVideo, seedFeed } from './data';
+import { FeedVideo, toFeedVideos } from './data';
+
+export type FeedMode = 'forYou' | 'following';
 
 /**
  * The feed for the active profile. Lane filtering happens server-side in
- * get_feed(); the client only maps rows onto bundled assets until Phase 3
- * moves video hosting off-device.
+ * get_feed()/get_following_feed(); videos marked "Not interested" this
+ * session drop out locally straight away.
  */
-export function useFeed() {
+export function useFeed(mode: FeedMode = 'forYou') {
   const { active, leaveProfile } = useFamily();
+  const { hidden, following } = useLibrary();
   const [videos, setVideos] = useState<FeedVideo[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (!active) return;
-    let cancelled = false;
-    setLoading(true);
-    supabase.rpc('get_feed', { p_session: active.token }).then(({ data, error }) => {
-      if (cancelled) return;
-      setLoading(false);
-      // Stale or revoked session (e.g. the lane changed) → back to "Who's watching?".
-      if (error) return leaveProfile();
-      setVideos(
-        (data ?? []).flatMap((row) => {
-          const local = seedFeed.find((v) => v.id === row.asset_key);
-          if (!local) return [];
-          return [
-            {
-              ...local,
-              id: row.id,
-              caption: row.caption,
-              lane: row.lane,
-              topics: row.topics,
-              creator: { name: row.creator_name, verified: row.creator_verified },
-            },
-          ];
-        }),
-      );
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [active, leaveProfile]);
+  // Following refetches when the follow list changes, so a new follow shows up.
+  const followKey = mode === 'following' ? [...following].sort().join('|') : '';
 
-  return { videos, loading };
+  const load = useCallback(async () => {
+    if (!active) return;
+    setLoading(true);
+    const { data, error } =
+      mode === 'following'
+        ? await supabase.rpc('get_following_feed', { p_session: active.token })
+        : await supabase.rpc('get_feed', { p_session: active.token });
+    // Stale or revoked session (e.g. the lane changed) → back to "Who's watching?".
+    if (error) {
+      setLoading(false);
+      return leaveProfile();
+    }
+    setVideos(await toFeedVideos(data));
+    setLoading(false);
+  }, [active, mode, leaveProfile]);
+
+  useEffect(() => {
+    load();
+  }, [load, followKey]);
+
+  return { videos: videos.filter((v) => !hidden.has(v.id)), loading, reload: load };
 }

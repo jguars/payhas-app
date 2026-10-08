@@ -4,6 +4,7 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from
 import { SafeScreen } from '@/components/SafeScreen';
 import { useFamily } from '@/features/family/FamilyProvider';
 import { Constants, Tables } from '@/lib/database.types';
+import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
 import { color, font, radius, space } from '@/theme/tokens';
 
@@ -62,7 +63,10 @@ export default function InterestsScreen() {
           return (
             <Pressable
               key={i.slug}
-              onPress={() => toggle(i.slug)}
+              onPress={() => {
+                fx.tab();
+                toggle(i.slug);
+              }}
               accessibilityRole="checkbox"
               accessibilityState={{ checked: on }}
               accessibilityLabel={i.label}

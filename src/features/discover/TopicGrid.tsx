@@ -4,6 +4,7 @@ import Animated, { interpolateColor, useAnimatedStyle, useSharedValue, withSprin
 
 import { Enter } from '@/components/motion/Enter';
 import { PressScale } from '@/components/motion/PressScale';
+import { fx } from '@/lib/feedback';
 import { spring } from '@/theme/motion';
 import { color, font } from '@/theme/tokens';
 
@@ -23,7 +24,10 @@ export function TopicGrid({ topics, selected, onSelect, baseIndex = 0 }: Props) 
             topic={t}
             swatch={SWATCHES[i % SWATCHES.length]}
             on={selected === t.slug}
-            onPress={() => onSelect(selected === t.slug ? null : t.slug)}
+            onPress={() => {
+              fx.tab();
+              onSelect(selected === t.slug ? null : t.slug);
+            }}
           />
         </Enter>
       ))}

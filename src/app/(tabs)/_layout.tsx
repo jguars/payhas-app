@@ -6,7 +6,8 @@ import Animated, { useAnimatedStyle, useSharedValue, withSpring, ZoomIn } from '
 
 import { Icon, IconName } from '@/components/Icon';
 import { Pop } from '@/components/motion/Pop';
-import { LibraryProvider, useLibrary } from '@/features/library/LibraryProvider';
+import { useLibrary } from '@/features/library/LibraryProvider';
+import { fx } from '@/lib/feedback';
 import { TAB_BAR, useInsets } from '@/lib/useInsets';
 import { spring } from '@/theme/motion';
 import { color, radius } from '@/theme/tokens';
@@ -20,7 +21,7 @@ type TabButtonProps = PressableProps & { icon: IconName; label: string; isFocuse
 
 const TabButton = forwardRef<View, TabButtonProps>(({ icon, label, isFocused, primary, badge, ...rest }, ref) => (
   // `rest` last except style: TabTrigger passes its own style, which would undo the equal-width slots.
-  <Pressable ref={ref} accessibilityRole="tab" accessibilityLabel={label} accessibilityState={{ selected: !!isFocused }} {...rest} style={styles.tab}>
+  <Pressable ref={ref} accessibilityRole="tab" accessibilityLabel={label} accessibilityState={{ selected: !!isFocused }} {...rest} onPressIn={() => !isFocused && fx.tab()} style={styles.tab}>
     {primary ? (
       <Pop on={isFocused ?? false} peak={1.1}>
         <View style={styles.play}>
@@ -68,30 +69,28 @@ export default function TabsLayout() {
   const [width, setWidth] = useState(0);
 
   return (
-    <LibraryProvider>
-      <Tabs style={styles.root}>
-        <TabSlot style={styles.root} />
-        {/* Floats above the gesture bar; screens add useTabBarSpace() so content clears it. */}
-        <TabList style={[styles.bar, { bottom: bottom + TAB_BAR.gap }]} onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
-          <Highlight width={width} />
-          <TabTrigger name="index" href="/" asChild>
-            <TabButton icon="home" label="Home" />
-          </TabTrigger>
-          <TabTrigger name="discover" href="/discover" asChild>
-            <TabButton icon="discover" label="Discover" />
-          </TabTrigger>
-          <TabTrigger name="play" href="/play" asChild>
-            <TabButton icon="game" label="Play" primary />
-          </TabTrigger>
-          <TabTrigger name="inbox" href="/inbox" asChild>
-            <InboxTabButton />
-          </TabTrigger>
-          <TabTrigger name="me" href="/me" asChild>
-            <TabButton icon="me" label="Me" />
-          </TabTrigger>
-        </TabList>
-      </Tabs>
-    </LibraryProvider>
+    <Tabs style={styles.root}>
+      <TabSlot style={styles.root} />
+      {/* Floats above the gesture bar; screens add useTabBarSpace() so content clears it. */}
+      <TabList style={[styles.bar, { bottom: bottom + TAB_BAR.gap }]} onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
+        <Highlight width={width} />
+        <TabTrigger name="index" href="/" asChild>
+          <TabButton icon="home" label="Home" />
+        </TabTrigger>
+        <TabTrigger name="discover" href="/discover" asChild>
+          <TabButton icon="discover" label="Discover" />
+        </TabTrigger>
+        <TabTrigger name="play" href="/play" asChild>
+          <TabButton icon="game" label="Play" primary />
+        </TabTrigger>
+        <TabTrigger name="inbox" href="/inbox" asChild>
+          <InboxTabButton />
+        </TabTrigger>
+        <TabTrigger name="me" href="/me" asChild>
+          <TabButton icon="me" label="Me" />
+        </TabTrigger>
+      </TabList>
+    </Tabs>
   );
 }
 

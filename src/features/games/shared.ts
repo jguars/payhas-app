@@ -30,7 +30,7 @@ export const CRITTERS = ['🐶', '🐱', '🐰', '🐻', '🐼', '🐸', '🦊',
  */
 export function useGameSession(game: GameId) {
   const { logPlay } = useLibrary();
-  const { lock } = useScreenTime();
+  const { lock } = useScreenTime({ games: true });
   const since = useRef(Date.now());
 
   const flush = () => {

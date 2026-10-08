@@ -25,7 +25,20 @@ export type IconName =
   | 'sparkle'
   | 'clock'
   | 'game'
-  | 'star';
+  | 'star'
+  | 'smile'
+  | 'link'
+  | 'flag'
+  | 'eyeOff'
+  | 'help'
+  | 'check'
+  | 'send'
+  | 'more'
+  | 'back'
+  | 'sound'
+  | 'vibrate'
+  | 'pause'
+  | 'minus';
 
 type Props = { name: IconName; size?: number; color?: string; filled?: boolean; strokeWidth?: number };
 
@@ -96,6 +109,10 @@ export function Icon({ name, size = 24, color = c.text, filled = false, strokeWi
         );
       case 'play':
         return <Path d="M7 4v16l13-8z" {...solid} />;
+      case 'pause':
+        return <Path d="M8 5v14M16 5v14" {...stroke} />;
+      case 'minus':
+        return <Path d="M5 12h14" {...stroke} />;
       case 'close':
         return <Path d="M6 6l12 12M18 6 6 18" {...stroke} />;
       case 'sliders':
@@ -131,6 +148,67 @@ export function Icon({ name, size = 24, color = c.text, filled = false, strokeWi
         );
       case 'star':
         return <Path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z" {...(filled ? solid : stroke)} />;
+      case 'smile':
+        return (
+          <>
+            <Circle cx={12} cy={12} r={9} {...stroke} />
+            <Path d="M8.5 14.5a4.5 4.5 0 0 0 7 0" {...stroke} />
+            <Circle cx={9} cy={10} r={0.9} {...solid} />
+            <Circle cx={15} cy={10} r={0.9} {...solid} />
+          </>
+        );
+      case 'link':
+        return (
+          <>
+            <Path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1" {...stroke} />
+            <Path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" {...stroke} />
+          </>
+        );
+      case 'flag':
+        return <Path d="M5 21V4m0 0h11l-2 4 2 4H5" {...stroke} />;
+      case 'eyeOff':
+        return (
+          <>
+            <Path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c5 0 9 4.5 10 7a12 12 0 0 1-2.7 3.6M6.6 6.6C4.4 8 2.8 10.1 2 12c1 2.5 5 7 10 7a9.6 9.6 0 0 0 4.4-1.1" {...stroke} />
+            <Path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" {...stroke} />
+          </>
+        );
+      case 'help':
+        return (
+          <>
+            <Circle cx={12} cy={12} r={9} {...stroke} />
+            <Path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.4" {...stroke} />
+            <Circle cx={12} cy={17} r={0.9} {...solid} />
+          </>
+        );
+      case 'check':
+        return <Path d="m5 12.5 4.5 4.5L19 7.5" {...stroke} />;
+      case 'send':
+        return <Path d="M21 3 10 14M21 3l-7 18-4-7-7-4z" {...stroke} />;
+      case 'more':
+        return (
+          <>
+            <Circle cx={5} cy={12} r={1.6} {...solid} />
+            <Circle cx={12} cy={12} r={1.6} {...solid} />
+            <Circle cx={19} cy={12} r={1.6} {...solid} />
+          </>
+        );
+      case 'back':
+        return <Path d="m15 6-6 6 6 6" {...stroke} />;
+      case 'sound':
+        return (
+          <>
+            <Path d="M11 5 6 9H2v6h4l5 4z" {...stroke} />
+            <Path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" {...stroke} />
+          </>
+        );
+      case 'vibrate':
+        return (
+          <>
+            <Path d="M9 4h6a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z" {...stroke} />
+            <Path d="M4 8v8M20 8v8M1.5 10v4M22.5 10v4" {...stroke} />
+          </>
+        );
       case 'muted':
         return (
           <>

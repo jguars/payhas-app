@@ -15,6 +15,7 @@ import { scheduleOnRN } from 'react-native-worklets';
 
 import { Enter } from '@/components/motion/Enter';
 import { TimesUp } from '@/features/library/TimesUp';
+import { fx } from '@/lib/feedback';
 import { spring } from '@/theme/motion';
 import { color, font, Lane, radius, space } from '@/theme/tokens';
 
@@ -80,6 +81,7 @@ export function BubblePop({ lane, onAgain }: { lane: Lane; onAgain: () => void }
   useEffect(() => {
     if (cfg.round != null && left <= 0 && !done) {
       setBubbles([]);
+      fx.win();
       setDone({ record: best.submit(score) });
     }
   }, [left]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -90,15 +92,20 @@ export function BubblePop({ lane, onAgain }: { lane: Lane; onAgain: () => void }
   const pop = useCallback(
     (b: Bubble): { label: string; right: boolean } => {
       if (!cfg.targets) {
+        fx.pop();
         setScore((s) => s + 1);
         return { label: '+1', right: true };
       }
       if (b.symbol !== target) {
+        fx.wrong();
         setCombo(0);
         return { label: '✗', right: false };
       }
       const nextCombo = combo + 1;
       const mult = nextCombo >= 10 ? 3 : nextCombo >= 5 ? 2 : 1;
+      // Stepping up to ×2 or ×3 gets its own chime; every other hit just pops.
+      if (nextCombo === 5 || nextCombo === 10) fx.combo();
+      else fx.pop();
       setCombo(nextCombo);
       setScore((s) => s + mult);
       hits.current += 1;

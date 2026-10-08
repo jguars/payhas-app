@@ -1,5 +1,6 @@
 import type { Session } from '@supabase/supabase-js';
 import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { AppState } from 'react-native';
 
 import type { Tables } from '@/lib/database.types';
 import { supabase } from '@/lib/supabase';
@@ -85,6 +86,27 @@ export function FamilyProvider({ children }: { children: ReactNode }) {
     setReady(false);
     refresh().finally(() => setReady(true));
   }, [authChecked, userId, refresh]);
+
+  // Parent remote control: any change to a family profile (pause, limits,
+  // bedtime, extra time) made on another device lands here within a second.
+  // RLS on profiles lets the realtime server send only this family's rows.
+  useEffect(() => {
+    if (!userId) return;
+    const channel = supabase
+      .channel(`family:${userId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => {
+        refresh();
+      })
+      .subscribe();
+    // Catch anything missed while the app was in the background.
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state === 'active') refresh();
+    });
+    return () => {
+      supabase.removeChannel(channel);
+      sub.remove();
+    };
+  }, [userId, refresh]);
 
   const selectProfile = useCallback(async (profile: Profile, pin?: string) => {
     const { data: token, error } = await supabase.rpc('start_profile_session', { p_profile_id: profile.id, p_pin: pin });

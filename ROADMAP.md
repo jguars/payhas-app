@@ -40,6 +40,11 @@ Design source: https://claude.ai/artifact/EEnQUr5xZXq3b8utWGQyA4 — Feed Varian
 - [x] Create tab → Play: Bubble Pop (lane-tuned: free play for Little, target rounds for Kids+) and Memory Match (2–8 pairs by lane, timed for Teen/Adult)
 - [x] Game time counts toward the daily limit, quiet hours block games; best scores stay on the device — needs `20261007090000_play_time.sql` applied
 
+## Phase 5c — Parent dashboard + remote control
+- [x] One PIN opens a 15-minute parent session (`/parent`, from Me or "Who's watching?")
+- [x] Per child: live status (watching / playing / last seen), today vs limit, 7-day chart (videos + games), top topics, recent videos, anything they flagged
+- [x] Remote: pause now, +15 min today, daily limit, custom bedtime/wake, games on/off, hide a video — lands on the child's device over Realtime — needs `20261011090000_parent_dashboard.sql` applied
+
 ## Phase 6 — Launch readiness
 - [ ] COPPA / GDPR-K / UK Children's Code, store kids-category rules
 - [ ] Analytics, crash reporting, performance budget (first frame < 1s, 60fps swipe)

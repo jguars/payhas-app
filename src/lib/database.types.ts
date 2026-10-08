@@ -110,6 +110,12 @@ export type Database = {
           pin_protected: boolean
           quiet_hours: boolean
           taste_reset_at: string | null
+          paused: boolean
+          bedtime_hour: number
+          wake_hour: number
+          games_enabled: boolean
+          extra_minutes: number
+          extra_until: string | null
         }
         Insert: {
           avatar?: string
@@ -153,6 +159,18 @@ export type Database = {
           safety: number
           status: string
           topics: string[]
+          view_count: number
+          like_count: number
+          save_count: number
+          share_count: number
+          reaction_counts: Json
+          storage_path: string | null
+          thumb_path: string | null
+          duration_s: number | null
+          uploaded_by: string | null
+          review_reason: string | null
+          reviewed_by: string | null
+          reviewed_at: string | null
         }
         Insert: {
           asset_key?: string | null
@@ -208,6 +226,18 @@ export type Database = {
           safety: number
           status: string
           topics: string[]
+          view_count: number
+          like_count: number
+          save_count: number
+          share_count: number
+          reaction_counts: Json
+          storage_path: string | null
+          thumb_path: string | null
+          duration_s: number | null
+          uploaded_by: string | null
+          review_reason: string | null
+          reviewed_by: string | null
+          reviewed_at: string | null
         }[]
         SetofOptions: {
           from: "*"
@@ -216,12 +246,127 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      create_upload: {
+        Args: { p_caption: string; p_duration: number; p_lane: Database["public"]["Enums"]["lane"]; p_topics: string[] }
+        Returns: Json
+      }
+      finish_upload: { Args: { p_video_id: string }; Returns: undefined }
+      get_my_roles: { Args: never; Returns: Json }
+      get_my_uploads: { Args: never; Returns: Database["public"]["Functions"]["get_feed"]["Returns"] }
+      get_review_queue: { Args: never; Returns: Database["public"]["Functions"]["get_feed"]["Returns"] }
+      get_report_queue: {
+        Args: never
+        Returns: {
+          asset_key: string | null
+          caption: string
+          creator_name: string
+          lane: Database["public"]["Enums"]["lane"]
+          latest: string
+          reasons: Json
+          report_count: number
+          storage_path: string | null
+          thumb_path: string | null
+          video_id: string
+        }[]
+      }
+      resolve_reports: { Args: { p_reason?: string; p_remove: boolean; p_video_id: string }; Returns: undefined }
+      review_video: {
+        Args: { p_approve: boolean; p_lane: Database["public"]["Enums"]["lane"]; p_reason?: string; p_topics: string[]; p_video_id: string }
+        Returns: undefined
+      }
+      get_creators: {
+        Args: { p_only_following?: boolean; p_session: string }
+        Returns: {
+          creator_name: string
+          follower_count: number
+          following: boolean
+          latest_video_id: string
+          verified: boolean
+          video_count: number
+        }[]
+      }
+      get_following_feed: {
+        Args: { p_limit?: number; p_session: string }
+        Returns: {
+          asset_key: string | null
+          caption: string
+          created_at: string
+          creator_name: string
+          creator_verified: boolean
+          human_reviewed: boolean
+          id: string
+          lane: Database["public"]["Enums"]["lane"]
+          published_at: string | null
+          safety: number
+          status: string
+          topics: string[]
+          view_count: number
+          like_count: number
+          save_count: number
+          share_count: number
+          reaction_counts: Json
+          storage_path: string | null
+          thumb_path: string | null
+          duration_s: number | null
+          uploaded_by: string | null
+          review_reason: string | null
+          reviewed_by: string | null
+          reviewed_at: string | null
+        }[]
+      }
+      get_saved: { Args: { p_session: string }; Returns: {
+          asset_key: string | null
+          caption: string
+          created_at: string
+          creator_name: string
+          creator_verified: boolean
+          human_reviewed: boolean
+          id: string
+          lane: Database["public"]["Enums"]["lane"]
+          published_at: string | null
+          safety: number
+          status: string
+          topics: string[]
+          view_count: number
+          like_count: number
+          save_count: number
+          share_count: number
+          reaction_counts: Json
+          storage_path: string | null
+          thumb_path: string | null
+          duration_s: number | null
+          uploaded_by: string | null
+          review_reason: string | null
+          reviewed_by: string | null
+          reviewed_at: string | null
+        }[] }
+      hide_video: { Args: { p_session: string; p_video_id: string }; Returns: undefined }
+      log_event: {
+        Args: { p_kind: string; p_session: string; p_video_id: string }
+        Returns: undefined
+      }
+      log_external_share: { Args: { p_session: string; p_video_id: string }; Returns: boolean }
+      report_video: {
+        Args: { p_reason: string; p_session: string; p_video_id: string }
+        Returns: undefined
+      }
+      send_to_family: {
+        Args: { p_session: string; p_to_profile_id: string; p_video_id: string }
+        Returns: boolean
+      }
+      set_like: { Args: { p_session: string; p_video_id: string }; Returns: undefined }
+      toggle_like: { Args: { p_session: string; p_video_id: string }; Returns: boolean }
+      toggle_reaction: {
+        Args: { p_emoji: string; p_session: string; p_video_id: string }
+        Returns: boolean
+      }
       get_inbox: {
         Args: { p_session: string }
         Returns: {
           body: string
           created_at: string
           id: string
+          from_profile_id: string | null
           kind: string
           profile_id: string
           read_at: string | null
@@ -291,6 +436,25 @@ export type Database = {
         Args: { p_current_pin?: string; p_new_pin: string }
         Returns: boolean
       }
+      start_parent_session: { Args: { p_pin: string }; Returns: string | null }
+      end_parent_session: { Args: { p_parent: string }; Returns: undefined }
+      ping_session: { Args: { p_session: string; p_activity?: string }; Returns: undefined }
+      get_family_dashboard: { Args: { p_parent: string; p_tz?: string }; Returns: Json }
+      set_profile_controls: {
+        Args: {
+          p_parent: string
+          p_profile_id: string
+          p_daily_limit_minutes: number | null
+          p_quiet_hours: boolean
+          p_bedtime_hour: number
+          p_wake_hour: number
+          p_games_enabled: boolean
+        }
+        Returns: undefined
+      }
+      set_profile_paused: { Args: { p_parent: string; p_profile_id: string; p_paused: boolean }; Returns: undefined }
+      grant_extra_time: { Args: { p_parent: string; p_profile_id: string; p_minutes: number; p_until: string }; Returns: undefined }
+      parent_hide_video: { Args: { p_parent: string; p_profile_id: string; p_video_id: string }; Returns: undefined }
       start_profile_session: {
         Args: { p_pin?: string; p_profile_id: string }
         Returns: string

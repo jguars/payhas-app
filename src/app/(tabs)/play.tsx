@@ -12,6 +12,7 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
+import { fx } from '@/lib/feedback';
 import { useInsets, useTabBarSpace } from '@/lib/useInsets';
 
 import { Icon } from '@/components/Icon';
@@ -29,7 +30,7 @@ export default function PlayScreen() {
   const barSpace = useTabBarSpace();
   const focused = useIsFocused();
   const { current } = useFamily();
-  const { lock } = useScreenTime();
+  const { lock } = useScreenTime({ games: true });
   if (!current) return <View style={styles.root} />;
   const lane = current.lane;
 
@@ -47,7 +48,10 @@ export default function PlayScreen() {
             sub={BUBBLES[lane].targets ? `Find the right ones · ${BUBBLES[lane].round}s` : 'Pop as many as you like'}
             tint="#78A6FF"
             best={<Best game="bubbles" lane={lane} focused={focused} format={(n) => `${n} pts`} />}
-            onPress={() => router.push('/games/bubbles')}
+            onPress={() => {
+              fx.tap();
+              router.push('/games/bubbles');
+            }}
           >
             <BubblesPreview active={focused} />
           </GameCard>
@@ -62,7 +66,10 @@ export default function PlayScreen() {
                 <Best game="memory" lane={lane} focused={focused} format={(n) => (MEMORY[lane].timed ? `${Math.floor(n / 60)}:${String(n % 60).padStart(2, '0')}` : `${n} moves`)} />
               )
             }
-            onPress={() => router.push('/games/memory')}
+            onPress={() => {
+              fx.tap();
+              router.push('/games/memory');
+            }}
           >
             <MemoryPreview active={focused} />
           </GameCard>

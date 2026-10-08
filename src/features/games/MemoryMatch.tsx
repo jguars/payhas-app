@@ -12,6 +12,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { TimesUp } from '@/features/library/TimesUp';
+import { fx } from '@/lib/feedback';
 import { spring } from '@/theme/motion';
 import { color, font, Lane, space } from '@/theme/tokens';
 
@@ -63,6 +64,7 @@ export function MemoryMatch({ lane, onAgain }: { lane: Lane; onAgain: () => void
   const flip = (i: number) => {
     if (busy.current || peeking || done || open.includes(i) || matched.has(i)) return;
     const next = [...open, i];
+    fx.flip();
     setOpen(next);
     if (next.length < 2) return;
 
@@ -72,6 +74,8 @@ export function MemoryMatch({ lane, onAgain }: { lane: Lane; onAgain: () => void
     if (deck[a].symbol === deck[b].symbol) {
       setTimeout(() => {
         const nowMatched = new Set(matched).add(a).add(b);
+        if (nowMatched.size === deck.length) fx.win();
+        else fx.match();
         setMatched(nowMatched);
         setOpen([]);
         busy.current = false;
@@ -81,6 +85,7 @@ export function MemoryMatch({ lane, onAgain }: { lane: Lane; onAgain: () => void
         }
       }, 260);
     } else {
+      setTimeout(fx.wrong, 260); // after the second card has turned
       setMissed(next);
       setTimeout(() => {
         setOpen([]);

@@ -1,53 +1,88 @@
+import { supabase } from '@/lib/supabase';
+import type { Database } from '@/lib/database.types';
 import type { Lane } from '@/theme/tokens';
+
+export type VideoRow = Database['public']['Functions']['get_feed']['Returns'][number];
+export type MediaSource = number | { uri: string };
 
 export type FeedVideo = {
   id: string;
-  source: number; // require()'d local asset until the video backend exists
-  thumb: number; // poster frame, same story
+  source: MediaSource; // bundled asset (seed clips) or a signed storage URL (uploads)
+  thumb: MediaSource;
   creator: { name: string; verified: boolean };
   caption: string;
   lane: Lane; // youngest lane the video is rated for
   topics: string[];
+  views: number;
   likes: number;
-  comments: number;
+  saves: number;
+  shares: number;
+  reactions: Record<string, number>;
 };
 
-/** Seed content: the three clips from the payhas folder. */
-export const seedFeed: FeedVideo[] = [
-  {
-    id: 'eyes-rhyme',
+/** Bundled media for the seed clips, keyed by videos.asset_key. */
+const LOCAL_MEDIA: Record<string, { source: number; thumb: number }> = {
+  'eyes-rhyme': {
     source: require('../../../assets/videos/eyes-rhyme.mp4'),
     thumb: require('../../../assets/thumbs/eyes-rhyme.jpg'),
-    creator: { name: 'Children Rhymes', verified: true },
-    caption: 'Where are your eyes? Point along and sing!',
-    lane: 'little',
-    topics: ['rhymes', 'learning'],
-    likes: 24100,
-    comments: 860,
   },
-  {
-    id: 'playground',
+  playground: {
     source: require('../../../assets/videos/playground.mp4'),
     thumb: require('../../../assets/thumbs/playground.jpg'),
-    creator: { name: 'Chubby Playhouse', verified: true },
-    caption: "Water-balloon day — who's going to giggle first?",
-    lane: 'little',
-    topics: ['play', 'stories'],
-    likes: 18700,
-    comments: 412,
   },
-  {
-    id: 'bunny',
+  bunny: {
     source: require('../../../assets/videos/bunny.mp4'),
     thumb: require('../../../assets/thumbs/bunny.jpg'),
-    creator: { name: 'Benny the Bunny', verified: false },
-    caption: 'Benny says hi from the card shop!',
-    lane: 'little',
-    topics: ['animals', 'puppets'],
-    likes: 9300,
-    comments: 157,
   },
-];
+};
+
+/** Signed links live an hour; a feed session is far shorter, and every fetch re-signs. */
+const SIGNED_FOR_S = 60 * 60;
+
+/**
+ * Signed URLs for any uploaded files among these rows, in one request.
+ * Storage policies decide what can be signed: published files for everyone,
+ * pending ones only for their creator and moderators.
+ */
+export async function signMedia(rows: { storage_path?: string | null; thumb_path?: string | null }[]): Promise<Record<string, string>> {
+  const paths = rows.flatMap((r) => [r.storage_path, r.thumb_path]).filter((p): p is string => !!p);
+  if (paths.length === 0) return {};
+  const { data } = await supabase.storage.from('videos').createSignedUrls(paths, SIGNED_FOR_S);
+  return Object.fromEntries((data ?? []).flatMap((d) => (d.signedUrl && d.path ? [[d.path, d.signedUrl] as const] : [])));
+}
+
+export function mediaFor(row: { asset_key?: string | null; storage_path?: string | null; thumb_path?: string | null }, urls: Record<string, string>) {
+  if (row.asset_key && LOCAL_MEDIA[row.asset_key]) return LOCAL_MEDIA[row.asset_key];
+  const src = row.storage_path ? urls[row.storage_path] : undefined;
+  const th = row.thumb_path ? urls[row.thumb_path] : undefined;
+  return src ? { source: { uri: src }, thumb: th ? { uri: th } : { uri: src } } : null;
+}
+
+/** Server row → what the UI plays. Rows whose media can't be resolved are skipped (null). */
+export function toFeedVideo(row: VideoRow, urls: Record<string, string> = {}): FeedVideo | null {
+  const media = mediaFor(row, urls);
+  if (!media) return null;
+  return {
+    id: row.id,
+    ...media,
+    creator: { name: row.creator_name, verified: row.creator_verified },
+    caption: row.caption,
+    lane: row.lane,
+    topics: row.topics,
+    views: row.view_count,
+    likes: row.like_count,
+    saves: row.save_count,
+    shares: row.share_count,
+    reactions: (row.reaction_counts ?? {}) as Record<string, number>,
+  };
+}
+
+/** Rows → playable videos, signing uploaded files first. */
+export async function toFeedVideos(rows: VideoRow[] | null): Promise<FeedVideo[]> {
+  const list = rows ?? [];
+  const urls = await signMedia(list);
+  return list.flatMap((r) => toFeedVideo(r, urls) ?? []);
+}
 
 export function formatCount(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`;
