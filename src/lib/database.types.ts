@@ -455,6 +455,12 @@ export type Database = {
       set_profile_paused: { Args: { p_parent: string; p_profile_id: string; p_paused: boolean }; Returns: undefined }
       grant_extra_time: { Args: { p_parent: string; p_profile_id: string; p_minutes: number; p_until: string }; Returns: undefined }
       parent_hide_video: { Args: { p_parent: string; p_profile_id: string; p_video_id: string }; Returns: undefined }
+      register_push_device: { Args: { p_parent: string; p_token: string; p_name: string; p_tz?: string }; Returns: undefined }
+      unregister_push_device: { Args: { p_token: string }; Returns: undefined }
+      refresh_push_device: { Args: { p_old: string; p_new: string }; Returns: boolean | null }
+      request_more_time: { Args: { p_session: string }; Returns: string }
+      get_time_request: { Args: { p_session: string }; Returns: Json }
+      answer_time_request: { Args: { p_parent: string; p_request_id: string; p_minutes: number | null; p_until: string }; Returns: undefined }
       start_profile_session: {
         Args: { p_pin?: string; p_profile_id: string }
         Returns: string

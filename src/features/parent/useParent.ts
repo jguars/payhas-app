@@ -32,6 +32,8 @@ export type Child = {
   extra_minutes: number;
   last_seen_at: string | null;
   last_activity: 'watching' | 'playing' | 'browsing' | null;
+  /** An open "Ask for more time" from the child's stop screen. */
+  request: { id: string; created_at: string } | null;
   week: DayRow[];
   topics: TopicRow[];
   recent: RecentRow[];
@@ -136,12 +138,18 @@ export function useParent() {
       supabase.rpc('grant_extra_time', { p_parent: t, p_profile_id: c.id, p_minutes: minutes, p_until: endOfToday() }),
     );
 
+  /** Answer "Ask for more time": minutes, or null for "Not today". */
+  const answer = (c: Child, minutes: number | null) =>
+    act(c.id, { request: null, ...(minutes ? { extra_minutes: Math.min(240, c.extra_minutes + minutes) } : {}) }, (t) =>
+      supabase.rpc('answer_time_request', { p_parent: t, p_request_id: c.request!.id, p_minutes: minutes, p_until: endOfToday() }),
+    );
+
   const hideVideo = (c: Child, videoId: string) =>
     act(c.id, { recent: c.recent.map((r) => (r.id === videoId ? { ...r, hidden: true } : r)) }, (t) =>
       supabase.rpc('parent_hide_video', { p_parent: t, p_profile_id: c.id, p_video_id: videoId }),
     );
 
-  return { unlocked: !!token, children, unlock, lock, reload: load, setControls, setPaused, addTime, hideVideo };
+  return { token, unlocked: !!token, children, unlock, lock, reload: load, setControls, setPaused, addTime, answer, hideVideo };
 }
 
 /** "Watching now" if the child's device pinged in the last 2½ minutes. */

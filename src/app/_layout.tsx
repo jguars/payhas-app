@@ -18,6 +18,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ToastProvider } from '@/components/Toast';
 import { FamilyProvider, useFamily } from '@/features/family/FamilyProvider';
 import { usePresence } from '@/features/family/usePresence';
+import { useParentAlerts } from '@/features/parent/push';
 import { LibraryProvider } from '@/features/library/LibraryProvider';
 import { initFeedback } from '@/lib/feedback';
 import { color } from '@/theme/tokens';
@@ -56,6 +57,7 @@ export default function RootLayout() {
 function Routes() {
   const { ready, session, active, needsInterests } = useFamily();
   usePresence();
+  useParentAlerts(ready && !!session);
   if (!ready) return <Blank />;
 
   return (

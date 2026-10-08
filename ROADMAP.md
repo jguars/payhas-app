@@ -45,6 +45,11 @@ Design source: https://claude.ai/artifact/EEnQUr5xZXq3b8utWGQyA4 — Feed Varian
 - [x] Per child: live status (watching / playing / last seen), today vs limit, 7-day chart (videos + games), top topics, recent videos, anything they flagged
 - [x] Remote: pause now, +15 min today, daily limit, custom bedtime/wake, games on/off, hide a video — lands on the child's device over Realtime — needs `20261011090000_parent_dashboard.sql` applied
 
+## Phase 5d — Parent alerts (push)
+- [x] Firebase Cloud Messaging direct from the `push` Edge Function (secret `FIREBASE_SERVICE_ACCOUNT`); outbox `push_events` + pg_net trigger
+- [x] Parents opt a phone in from the dashboard; children never get notifications
+- [x] Alerts: limit reached (once a day), video flagged, "Ask for more time" (answered from the dashboard: +15 / +30 / Not today) — needs `20261012090000_push_notifications.sql` applied and `google-services.json` in the app folder
+
 ## Phase 6 — Launch readiness
 - [ ] COPPA / GDPR-K / UK Children's Code, store kids-category rules
 - [ ] Analytics, crash reporting, performance budget (first frame < 1s, 60fps swipe)

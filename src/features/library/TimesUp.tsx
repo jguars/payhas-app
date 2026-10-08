@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, {
   Easing,
@@ -17,6 +17,7 @@ import { Enter } from '@/components/motion/Enter';
 import { PressScale } from '@/components/motion/PressScale';
 import { useFamily } from '@/features/family/FamilyProvider';
 import { fx } from '@/lib/feedback';
+import { supabase } from '@/lib/supabase';
 import { color, font, radius, space } from '@/theme/tokens';
 
 import { hourLabel, Lock } from './useScreenTime';
@@ -56,6 +57,11 @@ export function TimesUp({ lock }: { lock: Exclude<Lock, null> }) {
       <Enter index={3}>
         <Text style={styles.body}>{copy.body}</Text>
       </Enter>
+      {lock === 'limit' && (
+        <Enter index={4}>
+          <AskForTime />
+        </Enter>
+      )}
       <Enter index={5}>
         <PressScale onPress={lock === 'games' ? () => router.navigate('/') : leaveProfile} accessibilityRole="button" style={styles.button}>
           <Text style={styles.buttonText}>{lock === 'games' ? 'Watch videos' : 'Switch profile'}</Text>
@@ -63,6 +69,93 @@ export function TimesUp({ lock }: { lock: Exclude<Lock, null> }) {
       </Enter>
     </Animated.View>
   );
+}
+
+type Ask = 'idle' | 'sending' | 'waiting' | 'declined' | 'too_many' | 'error';
+
+/**
+ * "Ask for more time": sends a request to the parent's phone. If a parent
+ * says yes, the extra minutes arrive over Realtime and this screen goes away
+ * by itself; while waiting it checks for a "not today" every 8 seconds.
+ */
+function AskForTime() {
+  const { active } = useFamily();
+  const token = active?.token;
+  const [state, setState] = useState<Ask>('idle');
+
+  const check = async () => {
+    if (!token) return;
+    const { data } = await supabase.rpc('get_time_request', { p_session: token });
+    const status = (data as { status?: string } | null)?.status;
+    if (status === 'pending') setState('waiting');
+    else if (status === 'declined') setState((s) => (s === 'waiting' ? 'declined' : s));
+  };
+
+  // Pick up a request already sent from this screen earlier.
+  useEffect(() => {
+    check();
+  }, [token]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (state !== 'waiting') return;
+    const id = setInterval(check, 8000);
+    return () => clearInterval(id);
+  }, [state]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const ask = async () => {
+    if (!token) return;
+    fx.send();
+    setState('sending');
+    const { data, error } = await supabase.rpc('request_more_time', { p_session: token });
+    if (error) {
+      fx.error();
+      return setState('error');
+    }
+    setState(data === 'too_many' ? 'too_many' : 'waiting');
+  };
+
+  if (state === 'idle' || state === 'sending' || state === 'error') {
+    return (
+      <View style={{ alignItems: 'center', gap: space.sm }}>
+        <PressScale onPress={ask} disabled={state === 'sending'} accessibilityRole="button" style={styles.ask}>
+          <Text style={styles.askText}>Ask for more time</Text>
+        </PressScale>
+        {state === 'error' && <Text style={styles.askNote}>Couldn’t send — try again</Text>}
+      </View>
+    );
+  }
+  const note = {
+    waiting: 'Asked a parent — waiting for an answer',
+    declined: 'A parent said not today',
+    too_many: 'You’ve asked enough today',
+  }[state];
+  return (
+    <View style={styles.askState}>
+      {state === 'waiting' && <Pulse />}
+      <Text style={styles.askNote}>{note}</Text>
+    </View>
+  );
+}
+
+/** Three dots breathing in turn while the request is out. */
+function Pulse() {
+  return (
+    <View style={{ flexDirection: 'row', gap: 4 }}>
+      {[0, 1, 2].map((i) => (
+        <Breath key={i} delay={i * 180} />
+      ))}
+    </View>
+  );
+}
+
+function Breath({ delay }: { delay: number }) {
+  const reduce = useReducedMotion();
+  const t = useSharedValue(reduce ? 1 : 0);
+  useEffect(() => {
+    if (!reduce) t.value = withDelay(delay, withRepeat(withTiming(1, { duration: 600, easing: Easing.inOut(Easing.quad) }), -1, true));
+  }, [delay, reduce, t]);
+  const anim = useAnimatedStyle(() => ({ opacity: 0.3 + 0.7 * t.value, transform: [{ scale: 0.8 + 0.2 * t.value }] }));
+  return <Animated.View style={[styles.breath, anim]} />;
 }
 
 /** Slow bob, like something drifting off to sleep. */
@@ -127,6 +220,11 @@ const styles = StyleSheet.create({
   star: { position: 'absolute', backgroundColor: color.text, left: '50%', top: '50%' },
   title: { color: color.text, fontFamily: font.display, fontSize: 28, textAlign: 'center', letterSpacing: -0.6 },
   body: { color: color.text2, fontFamily: font.medium, fontSize: 16, textAlign: 'center' },
+  ask: { height: 48, paddingHorizontal: space.xxl, borderRadius: radius.pill, backgroundColor: '#FFD25E', justifyContent: 'center', marginTop: space.lg },
+  askText: { color: color.ink, fontFamily: font.bold, fontSize: 15 },
+  askState: { flexDirection: 'row', alignItems: 'center', gap: space.sm, marginTop: space.lg, height: 48 },
+  askNote: { color: color.text2, fontFamily: font.semibold, fontSize: 14 },
+  breath: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#FFD25E' },
   button: { marginTop: space.xl, height: 48, paddingHorizontal: space.xxl, borderRadius: radius.pill, backgroundColor: color.surface2, justifyContent: 'center' },
   buttonText: { color: color.text, fontFamily: font.bold, fontSize: 15 },
 });

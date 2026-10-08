@@ -42,3 +42,9 @@ yarn-error.*
 
 # local env (copy .env.example to .env)
 .env
+
+# Firebase client config (kept local; download from the Firebase console)
+google-services.json
+
+# Supabase CLI scratch
+supabase/.temp/

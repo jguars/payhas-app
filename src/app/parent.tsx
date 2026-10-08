@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -25,6 +25,7 @@ import { useToast } from '@/components/Toast';
 import { REASON_LABEL } from '@/features/creator/useReviewQueue';
 import { mediaFor, signMedia } from '@/features/feed/data';
 import { hourLabel } from '@/features/library/useScreenTime';
+import { disableParentAlerts, enableParentAlerts, storedPushToken } from '@/features/parent/push';
 import { Child, Controls, minutes, presence, RecentRow, useParent } from '@/features/parent/useParent';
 import { fx } from '@/lib/feedback';
 import { useInsets } from '@/lib/useInsets';
@@ -42,7 +43,7 @@ const DAY_LETTER = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
  */
 export default function ParentScreen() {
   const { child: initial } = useLocalSearchParams<{ child?: string }>();
-  const { unlocked, children, unlock, lock, setControls, setPaused, addTime, hideVideo } = useParent();
+  const { token, unlocked, children, unlock, lock, setControls, setPaused, addTime, answer, hideVideo } = useParent();
   const { bottom } = useInsets();
   const toast = useToast();
   const [selected, setSelected] = useState<string | undefined>(initial);
@@ -136,6 +137,10 @@ export default function ParentScreen() {
               fx.tap();
               done(await addTime(child, 15), `+15 min for ${child.display_name} today`);
             }}
+            onAnswer={async (m) => {
+              fx.tap();
+              done(await answer(child, m), m ? `+${m} min for ${child.display_name} today` : `Told ${child.display_name} not today`);
+            }}
           />
 
           <Enter index={2}>
@@ -180,6 +185,10 @@ export default function ParentScreen() {
           </Enter>
 
           <Enter index={5}>
+            <AlertsCard parent={token} onResult={(text, ok) => done(ok, text)} />
+          </Enter>
+
+          <Enter index={6}>
             <PressScale
               onPress={() => {
                 fx.tap();
@@ -221,7 +230,7 @@ export default function ParentScreen() {
 }
 
 /** Today at a glance: the ring, live status, and the two remote buttons. */
-function Hero({ child, onPause, onAddTime }: { child: Child; onPause: () => void; onAddTime: () => void }) {
+function Hero({ child, onPause, onAddTime, onAnswer }: { child: Child; onPause: () => void; onAddTime: () => void; onAnswer: (m: number | null) => void }) {
   const L = lanes[child.lane];
   const today = child.week[child.week.length - 1];
   const used = (today?.video_s ?? 0) + (today?.game_s ?? 0);
@@ -255,6 +264,8 @@ function Hero({ child, onPause, onAddTime }: { child: Child; onPause: () => void
         </View>
       </View>
 
+      {child.request && <RequestCard name={child.display_name} at={child.request.created_at} onAnswer={onAnswer} />}
+
       <View style={styles.actions}>
         <PressScale onPress={onPause} accessibilityRole="button" style={[styles.action, child.paused ? styles.resume : styles.pause]}>
           <Icon name={child.paused ? 'play' : 'pause'} size={18} color={color.ink} strokeWidth={2.8} />
@@ -266,6 +277,80 @@ function Hero({ child, onPause, onAddTime }: { child: Child; onPause: () => void
         </PressScale>
       </View>
     </Enter>
+  );
+}
+
+/** "Hugo is asking for more time": answer right here. */
+function RequestCard({ name, at, onAnswer }: { name: string; at: string; onAnswer: (m: number | null) => void }) {
+  const mins = Math.max(1, Math.round((Date.now() - new Date(at).getTime()) / 60_000));
+  return (
+    <Enter index={0} rise={8} style={styles.request}>
+      <View style={styles.requestHead}>
+        <Icon name="clock" size={18} color="#FFD25E" strokeWidth={2.4} />
+        <Text style={styles.requestTitle}>
+          {name} is asking for more time <Text style={styles.requestAgo}>· {mins < 60 ? `${mins}m` : `${Math.round(mins / 60)}h`} ago</Text>
+        </Text>
+      </View>
+      <View style={styles.requestActions}>
+        {[15, 30].map((m) => (
+          <PressScale key={m} onPress={() => onAnswer(m)} accessibilityRole="button" style={[styles.requestButton, styles.requestYes]}>
+            <Text style={styles.requestYesText}>+{m} min</Text>
+          </PressScale>
+        ))}
+        <PressScale onPress={() => onAnswer(null)} accessibilityRole="button" style={styles.requestButton}>
+          <Text style={styles.requestNoText}>Not today</Text>
+        </PressScale>
+      </View>
+    </Enter>
+  );
+}
+
+/** Opt this phone in to parent alerts. Pushes go only to phones switched on here. */
+function AlertsCard({ parent, onResult }: { parent: string | null; onResult: (text: string, ok: boolean) => void }) {
+  const [on, setOn] = useState(() => !!storedPushToken());
+  const [busy, setBusy] = useState(false);
+
+  const flip = async () => {
+    if (busy) return;
+    fx.toggle(!on);
+    setBusy(true);
+    if (on) {
+      await disableParentAlerts();
+      setOn(false);
+      onResult('Alerts off on this phone', true);
+    } else if (parent) {
+      const r = await enableParentAlerts(parent);
+      if (r === 'on') {
+        setOn(true);
+        onResult('Alerts on for this phone', true);
+      } else {
+        fx.error();
+        Alert.alert(
+          'Alerts not turned on',
+          r === 'denied'
+            ? 'Payhas needs permission to send notifications. You can allow it in your phone’s settings.'
+            : r === 'unsupported'
+              ? 'Alerts work on a phone or tablet, not here.'
+              : 'Couldn’t reach Payhas. Try again in a moment.',
+        );
+      }
+    }
+    setBusy(false);
+  };
+
+  return (
+    <View style={styles.card}>
+      <Pressable onPress={flip} style={styles.toggleRow} accessibilityRole="switch" accessibilityState={{ checked: on, busy }}>
+        <View style={styles.alertIcon}>
+          <Icon name="inbox" size={18} color={GREEN} strokeWidth={2.2} />
+        </View>
+        <View style={{ flex: 1, gap: 2 }}>
+          <Text style={styles.label}>Alerts on this phone</Text>
+          <Text style={styles.sub}>Limit reached, a flagged video, or a request for more time. Children never get notifications.</Text>
+        </View>
+        <Toggle on={on} tint={GREEN} />
+      </Pressable>
+    </View>
   );
 }
 
@@ -577,6 +662,16 @@ const styles = StyleSheet.create({
   hideButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space.sm, height: 52, borderRadius: radius.pill, backgroundColor: color.ember, marginTop: space.sm },
   hideText: { color: color.ink, fontFamily: font.bold, fontSize: 16 },
 
+  request: { padding: space.md, borderRadius: 18, backgroundColor: 'rgba(255,210,94,0.1)', borderWidth: 1, borderColor: 'rgba(255,210,94,0.35)', gap: space.md },
+  requestHead: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
+  requestTitle: { flex: 1, color: color.text, fontFamily: font.semibold, fontSize: 14 },
+  requestAgo: { color: color.text3, fontFamily: font.medium },
+  requestActions: { flexDirection: 'row', gap: space.sm },
+  requestButton: { flex: 1, height: 40, borderRadius: radius.pill, backgroundColor: color.surface2, alignItems: 'center', justifyContent: 'center' },
+  requestYes: { backgroundColor: '#FFD25E' },
+  requestYesText: { color: color.ink, fontFamily: font.bold, fontSize: 14 },
+  requestNoText: { color: color.text, fontFamily: font.semibold, fontSize: 14 },
+  alertIcon: { width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(79,227,176,0.12)', alignItems: 'center', justifyContent: 'center' },
   liveDot: { width: 10, height: 10, alignItems: 'center', justifyContent: 'center' },
   liveHalo: { position: 'absolute', width: 10, height: 10, borderRadius: 5, backgroundColor: GREEN },
   liveCore: { width: 8, height: 8, borderRadius: 4, backgroundColor: GREEN },
