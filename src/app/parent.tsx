@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -22,6 +22,7 @@ import { PinPad } from '@/components/PinPad';
 import { ScreenHeader } from '@/components/ScreenHeader';
 import { Segmented } from '@/components/Segmented';
 import { useToast } from '@/components/Toast';
+import { useFamily } from '@/features/family/FamilyProvider';
 import { REASON_LABEL } from '@/features/creator/useReviewQueue';
 import { mediaFor, signMedia } from '@/features/feed/data';
 import { hourLabel } from '@/features/library/useScreenTime';
@@ -29,6 +30,7 @@ import { disableParentAlerts, enableParentAlerts, storedPushToken } from '@/feat
 import { Child, Controls, minutes, presence, RecentRow, useParent } from '@/features/parent/useParent';
 import { fx } from '@/lib/feedback';
 import { useInsets } from '@/lib/useInsets';
+import { useGoBack } from '@/lib/useGoBack';
 import { spring } from '@/theme/motion';
 import { color, font, lane as lanes, radius, space } from '@/theme/tokens';
 
@@ -46,6 +48,8 @@ export default function ParentScreen() {
   const { token, unlocked, children, unlock, lock, setControls, setPaused, addTime, answer, hideVideo } = useParent();
   const { bottom } = useInsets();
   const toast = useToast();
+  const goBack = useGoBack();
+  const { signOut } = useFamily();
   const [selected, setSelected] = useState<string | undefined>(initial);
   const [hiding, setHiding] = useState<RecentRow | null>(null);
 
@@ -54,7 +58,7 @@ export default function ParentScreen() {
       <View style={styles.root}>
         <ScreenHeader title="Family" />
         <View style={styles.pinWrap}>
-          <PinPad title="Parent PIN" onComplete={unlock} onCancel={() => router.back()} />
+          <PinPad title="Parent PIN" onComplete={unlock} onCancel={() => goBack()} />
           <Text style={styles.pinHint}>Unlocks the dashboard for 15 minutes.</Text>
         </View>
       </View>
@@ -93,6 +97,7 @@ export default function ParentScreen() {
         <Enter index={0} style={styles.empty}>
           <Text style={styles.emptyTitle}>No children’s profiles yet</Text>
           <Text style={styles.emptySub}>Add a Little, Kids or Teen profile from “Who’s watching?” to manage it here.</Text>
+          <AccountActions onLock={() => { lock(); goBack(); }} onSignOut={() => { lock(); signOut(); }} />
         </Enter>
       )}
 
@@ -189,18 +194,7 @@ export default function ParentScreen() {
           </Enter>
 
           <Enter index={6}>
-            <PressScale
-              onPress={() => {
-                fx.tap();
-                lock();
-                router.back();
-              }}
-              accessibilityRole="button"
-              style={styles.lockButton}
-            >
-              <Icon name="lock" size={16} color={color.text2} strokeWidth={2.2} />
-              <Text style={styles.lockText}>Lock dashboard</Text>
-            </PressScale>
+            <AccountActions onLock={() => { lock(); goBack(); }} onSignOut={() => { lock(); signOut(); }} />
           </Enter>
         </ScrollView>
       )}
@@ -582,7 +576,39 @@ function LiveDot() {
   );
 }
 
+/** Leaving the dashboard: lock it, or sign the whole family out (to switch accounts). */
+function AccountActions({ onLock, onSignOut }: { onLock: () => void; onSignOut: () => void }) {
+  return (
+    <View style={styles.accountRow}>
+      <PressScale onPress={() => { fx.tap(); onLock(); }} accessibilityRole="button" style={[styles.lockButton, styles.accountButton]}>
+        <Icon name="lock" size={16} color={color.text2} strokeWidth={2.2} />
+        <Text style={styles.lockText}>Lock dashboard</Text>
+      </PressScale>
+      <PressScale
+        onPress={() => {
+          fx.tap();
+          const title = 'Sign out of Payhas?';
+          const body = 'Everyone on this phone is signed out. You can sign in with another family account.';
+          // react-native-web's Alert shows nothing, so the browser build confirms natively.
+          if (Platform.OS === 'web') return window.confirm(`${title}\n\n${body}`) && onSignOut();
+          Alert.alert(title, body, [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Sign out', style: 'destructive', onPress: onSignOut },
+          ]);
+        }}
+        accessibilityRole="button"
+        style={[styles.lockButton, styles.accountButton]}
+      >
+        <Icon name="close" size={16} color={RED} strokeWidth={2.2} />
+        <Text style={[styles.lockText, { color: RED }]}>Sign out</Text>
+      </PressScale>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
+  accountRow: { flexDirection: 'row', gap: space.sm },
+  accountButton: { flex: 1, justifyContent: 'center', borderRadius: radius.pill, backgroundColor: color.surface1 },
   root: { flex: 1, backgroundColor: color.ink },
   pinWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.lg, paddingBottom: 80 },
   pinHint: { color: color.text3, fontFamily: font.medium, fontSize: 13 },

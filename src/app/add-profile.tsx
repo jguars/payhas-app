@@ -6,12 +6,14 @@ import { PinPad } from '@/components/PinPad';
 import { SafeScreen } from '@/components/SafeScreen';
 import { useFamily } from '@/features/family/FamilyProvider';
 import { supabase } from '@/lib/supabase';
+import { useGoBack } from '@/lib/useGoBack';
 import { color, font, Lane, lane as lanes, radius, space } from '@/theme/tokens';
 
 const LANES: Lane[] = ['little', 'kids', 'teen', 'adult'];
 
 export default function AddProfileScreen() {
   const { refresh } = useFamily();
+  const goBack = useGoBack();
   const [name, setName] = useState('');
   const [lane, setLane] = useState<Lane | null>(null);
   const [confirming, setConfirming] = useState(false);
@@ -28,7 +30,7 @@ export default function AddProfileScreen() {
               if (error) return error.message;
               if (!data) return false;
               await refresh();
-              router.back();
+              goBack();
               return true;
             }}
           />
@@ -71,7 +73,7 @@ export default function AddProfileScreen() {
         </View>
       </View>
       <View style={styles.footer}>
-        <Pressable onPress={() => router.back()} hitSlop={10}>
+        <Pressable onPress={() => goBack()} hitSlop={10}>
           <Text style={styles.cancel}>Cancel</Text>
         </Pressable>
         <Pressable onPress={() => setConfirming(true)} disabled={!ready} style={[styles.button, !ready && styles.buttonOff]}>

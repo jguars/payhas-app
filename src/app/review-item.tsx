@@ -14,6 +14,7 @@ import { Constants, Tables } from '@/lib/database.types';
 import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
 import { useInsets } from '@/lib/useInsets';
+import { useGoBack } from '@/lib/useGoBack';
 import { color, font, Lane, lane as lanes, radius, space } from '@/theme/tokens';
 
 const GREEN = '#4FE3B0';
@@ -25,6 +26,7 @@ export default function ReviewItemScreen() {
   const { uploads, reports, urls, loaded } = useReviewQueue();
   const { bottom } = useInsets();
   const toast = useToast();
+  const goBack = useGoBack();
   const [interests, setInterests] = useState<Tables<'interests'>[]>([]);
   const [lane, setLane] = useState<Lane | null>(null);
   const [topics, setTopics] = useState<string[]>([]);
@@ -50,7 +52,7 @@ export default function ReviewItemScreen() {
   const finish = (text: string) => {
     fx.success();
     toast({ text, icon: 'check' });
-    router.back();
+    goBack();
   };
 
   const approve = async () => {

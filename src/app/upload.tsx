@@ -16,6 +16,7 @@ import { Constants, Tables } from '@/lib/database.types';
 import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
 import { useInsets } from '@/lib/useInsets';
+import { useGoBack } from '@/lib/useGoBack';
 import { color, font, Lane, lane as lanes, radius, space } from '@/theme/tokens';
 
 type Picked = { uri: string; seconds: number; type: string };
@@ -26,6 +27,7 @@ const CAPTION_MAX = 150;
 
 export default function UploadScreen() {
   const { bottom } = useInsets();
+  const goBack = useGoBack();
   const [picked, setPicked] = useState<Picked | null>(null);
   const [caption, setCaption] = useState('');
   const [topics, setTopics] = useState<string[]>([]);
@@ -105,7 +107,7 @@ export default function UploadScreen() {
             <Text style={styles.doneSub}>A moderator checks every video before children can see it. You’ll hear back in your Inbox.</Text>
           </Enter>
           <Enter index={5} style={styles.doneRow}>
-            <PressScale onPress={() => router.back()} accessibilityRole="button" style={[styles.button, styles.secondary]}>
+            <PressScale onPress={() => goBack()} accessibilityRole="button" style={[styles.button, styles.secondary]}>
               <Text style={[styles.buttonText, { color: color.text }]}>Done</Text>
             </PressScale>
             <PressScale

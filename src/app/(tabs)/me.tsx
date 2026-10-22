@@ -132,14 +132,14 @@ export default function MeScreen() {
               <Icon name="chevron" size={16} color={color.text3} strokeWidth={2.4} />
             </Row>
           )}
-          <Row icon="lock" label="Switch profile" onPress={leaveProfile} last={!isAdult}>
+          <Row icon="lock" label="Switch profile" onPress={leaveProfile}>
             <Icon name="chevron" size={16} color={color.text3} strokeWidth={2.4} />
           </Row>
-          {isAdult && (
-            <Row icon="close" label="Sign out" onPress={signOut} last>
-              <Icon name="chevron" size={16} color={color.text3} strokeWidth={2.4} />
-            </Row>
-          )}
+          {/* Children reach Sign out through the parent PIN, so they can't sign the family out. */}
+          <Row icon="close" label="Sign out" onPress={isAdult ? signOut : openParent} last>
+            {!isAdult && <Icon name="shield" size={16} color={color.text3} strokeWidth={2.2} />}
+            <Icon name="chevron" size={16} color={color.text3} strokeWidth={2.4} />
+          </Row>
         </Enter>
 
         <Enter index={8}>

@@ -11,7 +11,7 @@ import { supabase } from '@/lib/supabase';
 import { color, font, lane as lanes, space } from '@/theme/tokens';
 
 export default function WhoScreen() {
-  const { profiles, hasPin, selectProfile, refresh, signOut } = useFamily();
+  const { profiles, hasPin, selectProfile, refresh } = useFamily();
   const [pinFor, setPinFor] = useState<Profile | null>(null);
 
   // First run: the parent sets a PIN before anything else.
@@ -83,10 +83,7 @@ export default function WhoScreen() {
       <View style={styles.footer}>
         <Pressable onPress={() => router.push('/parent')} hitSlop={10} style={styles.footerButton} accessibilityRole="button">
           <Icon name="sliders" size={16} color={color.text2} strokeWidth={2.2} />
-          <Text style={[styles.signOutText, { color: color.text2 }]}>Parent dashboard</Text>
-        </Pressable>
-        <Pressable onPress={signOut} hitSlop={10} style={styles.footerButton}>
-          <Text style={styles.signOutText}>Sign out</Text>
+          <Text style={[styles.signOutText, { color: color.text2 }]}>Parent dashboard · Sign out</Text>
         </Pressable>
       </View>
     </SafeScreen>

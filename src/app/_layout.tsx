@@ -69,9 +69,6 @@ function Routes() {
         <Stack.Screen name="who" />
         <Stack.Screen name="add-profile" options={{ presentation: 'modal' }} />
       </Stack.Protected>
-      <Stack.Protected guard={!!session}>
-        <Stack.Screen name="parent" options={{ animation: 'slide_from_right' }} />
-      </Stack.Protected>
       <Stack.Protected guard={!!active && needsInterests}>
         <Stack.Screen name="interests" />
       </Stack.Protected>
@@ -85,6 +82,12 @@ function Routes() {
         <Stack.Screen name="upload" options={{ animation: 'slide_from_bottom', gestureEnabled: false }} />
         <Stack.Screen name="review" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="review-item" options={{ animation: 'slide_from_right' }} />
+      </Stack.Protected>
+      {/* Last on purpose: when the current screen stops being allowed, the router
+          falls back to the first allowed one in this list. The PIN-locked
+          dashboard must never be that fallback. */}
+      <Stack.Protected guard={!!session}>
+        <Stack.Screen name="parent" options={{ animation: 'slide_from_right' }} />
       </Stack.Protected>
     </Stack>
   );

@@ -13,7 +13,7 @@ const laneRank = (l: Interest['youngest_lane']) => Constants.public.Enums.lane.i
 
 /** Cold start: the active profile picks a few things it likes before its first feed. */
 export default function InterestsScreen() {
-  const { active, refresh } = useFamily();
+  const { active, refresh, leaveProfile } = useFamily();
   const [options, setOptions] = useState<Interest[]>([]);
   const [picked, setPicked] = useState<Set<string>>(new Set());
   const [saving, setSaving] = useState(false);
@@ -83,6 +83,9 @@ export default function InterestsScreen() {
         <Pressable onPress={save} disabled={picked.size === 0 || saving} style={[styles.button, (picked.size === 0 || saving) && styles.buttonOff]}>
           {saving ? <ActivityIndicator color={color.ink} /> : <Text style={styles.buttonText}>Done</Text>}
         </Pressable>
+        <Pressable onPress={leaveProfile} hitSlop={10} accessibilityRole="button" style={styles.switch}>
+          <Text style={styles.switchText}>Not {profile?.display_name ?? 'you'}? Switch profile</Text>
+        </Pressable>
       </View>
     </SafeScreen>
   );
@@ -112,4 +115,6 @@ const styles = StyleSheet.create({
   button: { height: 52, borderRadius: radius.pill, backgroundColor: color.ember, alignItems: 'center', justifyContent: 'center' },
   buttonOff: { opacity: 0.4 },
   buttonText: { color: color.ink, fontFamily: font.bold, fontSize: 16 },
+  switch: { alignSelf: 'center', minHeight: 44, justifyContent: 'center' },
+  switchText: { color: color.text2, fontFamily: font.semibold, fontSize: 14 },
 });
