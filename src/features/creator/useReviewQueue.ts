@@ -2,8 +2,16 @@ import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 
 import { signMedia, VideoRow } from '@/features/feed/data';
+import type { T, TKey } from '@/i18n';
 import type { Database } from '@/lib/database.types';
 import { supabase } from '@/lib/supabase';
+
+/**
+ * Human review is switched off for now (private.settings.review_required =
+ * false): uploads and imports publish straight away, gated only by age lane.
+ * Flip both this and the database setting to bring the Review queue back.
+ */
+export const REVIEW_ENABLED = false;
 
 export type ReportRow = Database['public']['Functions']['get_report_queue']['Returns'][number];
 
@@ -33,12 +41,33 @@ export function useReviewQueue() {
   return { uploads, reports, urls, loaded, reload: load };
 }
 
-export const REJECT_REASONS = [
-  'Not right for children',
-  'Doesn’t fit any lane clearly',
-  'Shows personal details or someone without permission',
-  'Copyright — not the creator’s own content',
-  'Poor quality',
+/**
+ * Why a video was rejected or taken down. `text` (English) is what gets sent and
+ * stored, so it stays stable; the key is only for showing it in the app's language.
+ */
+export const REJECT_REASONS: { text: string; key: TKey }[] = [
+  { text: 'Not right for children', key: 'creator.reject.children' },
+  { text: 'Doesn’t fit any lane clearly', key: 'creator.reject.lane' },
+  { text: 'Shows personal details or someone without permission', key: 'creator.reject.personal' },
+  { text: 'Copyright — not the creator’s own content', key: 'creator.reject.copyright' },
+  { text: 'Poor quality', key: 'creator.reject.quality' },
 ];
 
-export const REASON_LABEL: Record<string, string> = { scary: 'Scary', not_my_age: 'Wrong age', mean: 'Mean', other: 'Other' };
+/** A stored rejection reason in the current language (free text stays as it was written). */
+export function rejectReasonLabel(t: T, stored: string) {
+  const r = REJECT_REASONS.find((x) => x.text === stored);
+  return r ? t(r.key) : stored;
+}
+
+const REASON_KEY: Record<string, TKey> = {
+  scary: 'creator.reason.scary',
+  not_my_age: 'creator.reason.not_my_age',
+  mean: 'creator.reason.mean',
+  other: 'creator.reason.other',
+};
+
+/** A viewer's report reason ("scary", "not_my_age", …) as a label. */
+export function reasonLabel(t: T, reason: string) {
+  const k = REASON_KEY[reason];
+  return k ? t(k) : reason;
+}

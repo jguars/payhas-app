@@ -12,6 +12,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { TimesUp } from '@/features/library/TimesUp';
+import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { spring } from '@/theme/motion';
 import { color, font, Lane, space } from '@/theme/tokens';
@@ -34,6 +35,7 @@ export function MemoryMatch({ lane, onAgain }: { lane: Lane; onAgain: () => void
   const peek = lane === 'little' || lane === 'kids';
   const { lock } = useGameSession('memory');
   const best = useBest('memory', lane);
+  const { t } = useT();
 
   const [deck] = useState<Card[]>(() => {
     const symbols = shuffle(CRITTERS).slice(0, cfg.pairs);
@@ -109,9 +111,9 @@ export function MemoryMatch({ lane, onAgain }: { lane: Lane; onAgain: () => void
   return (
     <View style={styles.root} onLayout={onLayout}>
       <GameBar>
-        {cfg.timed && <Readout label="Time" value={fmt(seconds)} />}
-        {lane !== 'little' && <Readout label="Moves" value={String(moves)} />}
-        <Readout label="Pairs" value={`${matched.size / 2}/${cfg.pairs}`} />
+        {cfg.timed && <Readout label={t('play.readout.time')} value={fmt(seconds)} />}
+        {lane !== 'little' && <Readout label={t('play.readout.moves')} value={String(moves)} />}
+        <Readout label={t('play.readout.pairs')} value={`${matched.size / 2}/${cfg.pairs}`} />
       </GameBar>
 
       {cardW > 0 && (
@@ -144,8 +146,14 @@ export function MemoryMatch({ lane, onAgain }: { lane: Lane; onAgain: () => void
         <>
           <Confetti x={size.w / 2} y={size.h * 0.4} count={44} spread={1.3} />
           <Finish
-            title="You found them all!"
-            lines={[cfg.timed ? `${fmt(seconds)} · ${moves} moves` : lane === 'little' ? 'Every pair matched' : `${moves} moves`]}
+            title={t('play.foundAll')}
+            lines={[
+              cfg.timed
+                ? `${fmt(seconds)} · ${t('play.moves', { count: moves })}`
+                : lane === 'little'
+                  ? t('play.everyPair')
+                  : t('play.moves', { count: moves }),
+            ]}
             record={done.record && lane !== 'little'}
             onAgain={onAgain}
           />
@@ -172,6 +180,7 @@ type CardProps = {
 };
 
 function CardView({ card, index, w, h, x, y, fromX, fromY, faceUp, matched, missed, onPress }: CardProps) {
+  const { t } = useT();
   const reduce = useReducedMotion();
   const deal = useSharedValue(reduce ? 1 : 0);
   const flip = useSharedValue(faceUp ? 1 : 0);
@@ -221,7 +230,7 @@ function CardView({ card, index, w, h, x, y, fromX, fromY, faceUp, matched, miss
 
   return (
     <Animated.View style={[styles.card, { width: w, height: h }, shell]}>
-      <Pressable onPress={onPress} style={StyleSheet.absoluteFill} accessibilityRole="button" accessibilityLabel={faceUp ? card.symbol : 'Hidden card'}>
+      <Pressable onPress={onPress} style={StyleSheet.absoluteFill} accessibilityRole="button" accessibilityLabel={faceUp ? card.symbol : t('play.hiddenCard')}>
         <Animated.View style={[styles.face, styles.back, back]}>
           <View style={[styles.backMark, { width: w * 0.32, height: w * 0.32, borderRadius: w * 0.1 }]} />
         </Animated.View>

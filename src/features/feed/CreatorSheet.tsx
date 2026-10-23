@@ -4,6 +4,7 @@ import Animated, { FadeIn } from 'react-native-reanimated';
 import { BottomSheet } from '@/components/BottomSheet';
 import { Icon } from '@/components/Icon';
 import { PressScale } from '@/components/motion/PressScale';
+import { useT } from '@/i18n';
 import { color, font, radius, space } from '@/theme/tokens';
 
 import { FeedVideo, formatCount } from './data';
@@ -15,6 +16,7 @@ type Props = { name: string | null; videos: FeedVideo[]; onClose: () => void; on
 /** Tap an avatar → who made this, follow them, and what else they've made for your lane. */
 export function CreatorSheet({ name, videos, onClose, onOpenVideo }: Props) {
   const { creators } = useCreators();
+  const { t } = useT();
   const creator = creators.find((c) => c.creator_name === name);
   const theirs = videos.filter((v) => v.creator.name === name);
 
@@ -34,7 +36,7 @@ export function CreatorSheet({ name, videos, onClose, onOpenVideo }: Props) {
                 {creator?.verified && <Icon name="verified" size={16} color={color.verified} />}
               </View>
               <Text style={styles.meta}>
-                {formatCount(creator?.follower_count ?? 0)} followers · {creator?.video_count ?? theirs.length} videos
+                {t('feed.followers', { count: creator?.follower_count ?? 0, n: formatCount(creator?.follower_count ?? 0) })} · {t('feed.videos', { count: creator?.video_count ?? theirs.length })}
               </Text>
             </View>
           </View>

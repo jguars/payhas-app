@@ -10,6 +10,7 @@ import { formatCount } from '@/features/feed/data';
 import { FollowButton } from '@/features/feed/FollowButton';
 import { useCreators } from '@/features/feed/useCreators';
 import { useLibrary } from '@/features/library/LibraryProvider';
+import { useT } from '@/i18n';
 import { useInsets } from '@/lib/useInsets';
 import { color, font, space } from '@/theme/tokens';
 
@@ -21,6 +22,7 @@ export default function FollowingScreen() {
   const { creators, loading } = useCreators();
   const { following } = useLibrary();
   const { bottom } = useInsets();
+  const { t } = useT();
   // Everyone followed at any point during this visit keeps their row.
   const seen = useRef(new Set<string>());
   for (const c of creators) if (c.following || following.has(c.creator_name)) seen.current.add(c.creator_name);
@@ -28,12 +30,12 @@ export default function FollowingScreen() {
 
   return (
     <View style={styles.root}>
-      <ScreenHeader title="Following" />
+      <ScreenHeader title={t('feed.following.title')} />
       {!loading && rows.length === 0 ? (
         <Enter index={0} style={styles.empty}>
-          <Text style={styles.emptyTitle}>Not following anyone yet</Text>
+          <Text style={styles.emptyTitle}>{t('feed.following.empty')}</Text>
           <PressScale onPress={() => router.navigate('/')} accessibilityRole="button" style={styles.emptyButton}>
-            <Text style={styles.emptyButtonText}>Find creators</Text>
+            <Text style={styles.emptyButtonText}>{t('feed.following.find')}</Text>
           </PressScale>
         </Enter>
       ) : (
@@ -51,7 +53,7 @@ export default function FollowingScreen() {
                   {c.verified && <Icon name="verified" size={14} color={color.verified} />}
                 </View>
                 <Text style={styles.meta}>
-                  {formatCount(c.follower_count)} followers · {c.video_count} {c.video_count === 1 ? 'video' : 'videos'}
+                  {t('feed.followers', { count: c.follower_count, n: formatCount(c.follower_count) })} · {t('feed.videos', { count: c.video_count })}
                 </Text>
               </View>
               <FollowButton creator={c.creator_name} size="sm" />

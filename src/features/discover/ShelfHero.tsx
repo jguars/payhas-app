@@ -17,6 +17,7 @@ import Animated, {
 import { Icon } from '@/components/Icon';
 import { PressScale } from '@/components/motion/PressScale';
 import { FeedVideo } from '@/features/feed/data';
+import { topicLabel, useT } from '@/i18n';
 import { color, font, radius } from '@/theme/tokens';
 
 import type { Topic } from './useDiscover';
@@ -37,6 +38,7 @@ type Props = {
  */
 export function ShelfHero({ topic, videos, scrollY, playing, onPlay }: Props) {
   const reduce = useReducedMotion();
+  const { t, lang } = useT();
   const lead = videos[0];
 
   const player = useVideoPlayer(lead.source, (p) => {
@@ -74,7 +76,9 @@ export function ShelfHero({ topic, videos, scrollY, playing, onPlay }: Props) {
         <View style={{ gap: 6 }}>
           <View style={styles.kickerRow}>
             <Equalizer />
-            <Text style={styles.kicker}>{topic.label.toUpperCase()} SHELF</Text>
+            <Text style={[styles.kicker, { flexShrink: 1 }]} numberOfLines={1}>
+              {t('discover.shelf', { topic: topicLabel(t, topic.slug, topic.label) }).toLocaleUpperCase(lang)}
+            </Text>
           </View>
           <Text style={styles.title} numberOfLines={3}>
             {lead.caption}
@@ -120,6 +124,8 @@ function Bar({ i, still }: { i: number; still: boolean }) {
 /** White play pill with a soft ember ring breathing out behind it. */
 function PlayPill({ count, onPress }: { count: number; onPress: () => void }) {
   const reduce = useReducedMotion();
+  const { t } = useT();
+  const play = t('discover.playVideos', { count });
   const ring = useSharedValue(0);
   useEffect(() => {
     if (!reduce) ring.value = withDelay(900, withRepeat(withTiming(1, { duration: 1800, easing: Easing.out(Easing.quad) }), -1, false));
@@ -132,10 +138,10 @@ function PlayPill({ count, onPress }: { count: number; onPress: () => void }) {
   return (
     <View style={{ alignSelf: 'flex-start' }}>
       <Animated.View pointerEvents="none" style={[styles.ring, ringStyle]} />
-      <PressScale onPress={onPress} pressedScale={0.92} accessibilityRole="button" accessibilityLabel={`Play ${count} videos`} style={styles.pill}>
+      <PressScale onPress={onPress} pressedScale={0.92} accessibilityRole="button" accessibilityLabel={play} style={styles.pill}>
         <Icon name="play" size={12} color={color.ink} />
-        <Text style={styles.pillText}>
-          Play {count} {count === 1 ? 'video' : 'videos'}
+        <Text style={styles.pillText} numberOfLines={1}>
+          {play}
         </Text>
       </PressScale>
     </View>

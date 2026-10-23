@@ -2,6 +2,7 @@ import { ReactNode, useEffect, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 
+import { useT } from '@/i18n';
 import { useInsets } from '@/lib/useInsets';
 import { spring } from '@/theme/motion';
 import { color, font, space } from '@/theme/tokens';
@@ -13,6 +14,7 @@ type Props = { open: boolean; onClose: () => void; title?: string; children: Rea
 /** Slides up over a dimmed screen; tap outside or back to close. Stays mounted through its exit. */
 export function BottomSheet({ open, onClose, title, children }: Props) {
   const { bottom } = useInsets();
+  const { t } = useT();
   const [visible, setVisible] = useState(open);
   const y = useSharedValue(TRAVEL);
   const dim = useSharedValue(0);
@@ -36,7 +38,7 @@ export function BottomSheet({ open, onClose, title, children }: Props) {
   return (
     <Modal visible={visible} transparent animationType="none" onRequestClose={onClose} statusBarTranslucent navigationBarTranslucent>
       <Animated.View style={[styles.backdrop, backdrop]}>
-        <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel="Close" />
+        <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel={t('common.close')} />
       </Animated.View>
       <Animated.View style={[styles.sheet, { paddingBottom: bottom + space.lg }, sheet]}>
         <View style={styles.grabber} />

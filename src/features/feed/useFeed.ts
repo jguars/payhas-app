@@ -1,46 +1,81 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Image } from 'react-native';
 
 import { useFamily } from '@/features/family/FamilyProvider';
 import { useLibrary } from '@/features/library/LibraryProvider';
+import { useT } from '@/i18n';
 import { supabase } from '@/lib/supabase';
 
 import { FeedVideo, toFeedVideos } from './data';
 
 export type FeedMode = 'forYou' | 'following';
 
+const PAGE = 15;
+
 /**
- * The feed for the active profile. Lane filtering happens server-side in
- * get_feed()/get_following_feed(); videos marked "Not interested" this
- * session drop out locally straight away.
+ * The feed for the active profile. For You is ranked per profile on the
+ * server (interests, learning mix, follows, freshness, what was watched —
+ * see get_for_you) and pages by excluding what's already loaded; Following
+ * is newest-first from followed channels. Lane filtering is server-side;
+ * videos marked "Not interested" this session drop out locally straight away.
  */
 export function useFeed(mode: FeedMode = 'forYou') {
   const { active, leaveProfile } = useFamily();
   const { hidden, following } = useLibrary();
+  const { lang } = useT();
   const [videos, setVideos] = useState<FeedVideo[]>([]);
   const [loading, setLoading] = useState(true);
+  const [done, setDone] = useState(false);
+  const busy = useRef(false);
 
   // Following refetches when the follow list changes, so a new follow shows up.
   const followKey = mode === 'following' ? [...following].sort().join('|') : '';
 
+  const fetchPage = useCallback(
+    async (exclude: string[]) => {
+      if (!active) return null;
+      const { data, error } =
+        mode === 'following'
+          ? await supabase.rpc('get_following_feed', { p_session: active.token })
+          : await supabase.rpc('get_for_you', { p_session: active.token, p_limit: PAGE, p_exclude: exclude });
+      // Stale or revoked session (e.g. the lane changed) → back to "Who's watching?".
+      if (error) {
+        leaveProfile();
+        return null;
+      }
+      const page = await toFeedVideos(data, lang);
+      // Posters back the blurred fill behind each video; fetch them before the videos scroll in.
+      for (const v of page) if (typeof v.thumb === 'object') Image.prefetch(v.thumb.uri).catch(() => {});
+      return page;
+    },
+    [active, mode, leaveProfile, lang],
+  );
+
   const load = useCallback(async () => {
-    if (!active) return;
     setLoading(true);
-    const { data, error } =
-      mode === 'following'
-        ? await supabase.rpc('get_following_feed', { p_session: active.token })
-        : await supabase.rpc('get_feed', { p_session: active.token });
-    // Stale or revoked session (e.g. the lane changed) → back to "Who's watching?".
-    if (error) {
-      setLoading(false);
-      return leaveProfile();
+    const page = await fetchPage([]);
+    if (page) {
+      setVideos(page);
+      setDone(mode === 'following' || page.length < PAGE);
     }
-    setVideos(await toFeedVideos(data));
     setLoading(false);
-  }, [active, mode, leaveProfile]);
+  }, [fetchPage, mode]);
+
+  /** Next page of For You; call near the end of the list. */
+  const loadMore = useCallback(async () => {
+    if (mode !== 'forYou' || done || busy.current || loading) return;
+    busy.current = true;
+    const page = await fetchPage(videos.map((v) => v.id));
+    if (page) {
+      setVideos((cur) => [...cur, ...page.filter((p) => !cur.some((c) => c.id === p.id))]);
+      if (page.length < PAGE) setDone(true);
+    }
+    busy.current = false;
+  }, [mode, done, loading, fetchPage, videos]);
 
   useEffect(() => {
     load();
   }, [load, followKey]);
 
-  return { videos: videos.filter((v) => !hidden.has(v.id)), loading, reload: load };
+  return { videos: videos.filter((v) => !hidden.has(v.id)), loading, reload: load, loadMore };
 }

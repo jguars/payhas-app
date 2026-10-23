@@ -15,6 +15,7 @@ import { scheduleOnRN } from 'react-native-worklets';
 
 import { Enter } from '@/components/motion/Enter';
 import { TimesUp } from '@/features/library/TimesUp';
+import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { spring } from '@/theme/motion';
 import { color, font, Lane, radius, space } from '@/theme/tokens';
@@ -34,6 +35,7 @@ export function BubblePop({ lane, onAgain }: { lane: Lane; onAgain: () => void }
   const cfg = BUBBLES[lane];
   const { lock } = useGameSession('bubbles');
   const best = useBest('bubbles', lane);
+  const { t } = useT();
 
   const [size, setSize] = useState({ w: 0, h: 0 });
   const [bubbles, setBubbles] = useState<Bubble[]>([]);
@@ -129,14 +131,14 @@ export function BubblePop({ lane, onAgain }: { lane: Lane; onAgain: () => void }
       {size.h > 0 && bubbles.map((b) => <BubbleView key={b.id} b={b} h={size.h} onPop={pop} onGone={remove} />)}
 
       <GameBar>
-        {cfg.round != null && <Readout label="Time" value={`${Math.max(0, left)}`} />}
-        <Readout label={cfg.targets ? 'Score' : 'Pops'} value={String(score)} />
+        {cfg.round != null && <Readout label={t('play.readout.time')} value={`${Math.max(0, left)}`} />}
+        <Readout label={cfg.targets ? t('play.readout.score') : t('play.readout.pops')} value={String(score)} />
       </GameBar>
 
       {cfg.targets && !done && (
         <View pointerEvents="none" style={styles.targetWrap}>
           <Enter key={target} rise={8} style={styles.target}>
-            <Text style={styles.targetText}>Pop the</Text>
+            <Text style={styles.targetText}>{t('play.popThe')}</Text>
             <Text style={styles.targetEmoji}>{target}</Text>
             {mult > 1 && <Text style={styles.mult}>×{mult}</Text>}
           </Enter>
@@ -147,8 +149,8 @@ export function BubblePop({ lane, onAgain }: { lane: Lane; onAgain: () => void }
         <>
           <Confetti x={size.w / 2} y={size.h * 0.35} count={36} />
           <Finish
-            title={score > 0 ? 'Nice popping!' : 'Time!'}
-            lines={[`${score} points`, ...(best.read() != null && !done.record ? [`Best ${best.read()}`] : [])]}
+            title={score > 0 ? t('play.nicePopping') : t('play.timeUp')}
+            lines={[t('play.points', { count: score }), ...(best.read() != null && !done.record ? [t('play.best', { n: best.read() ?? 0 })] : [])]}
             record={done.record && score > 0}
             onAgain={onAgain}
           />
@@ -170,6 +172,7 @@ function BubbleView({
   onPop: (b: Bubble) => { label: string; right: boolean };
   onGone: (id: number) => void;
 }) {
+  const { t } = useT();
   const reduce = useReducedMotion();
   const y = useSharedValue(0);
   const burst = useSharedValue(0);
@@ -220,7 +223,7 @@ function BubbleView({
     <>
       <Animated.View pointerEvents="none" style={[styles.ring, { left: b.x, width: b.size, height: b.size, borderRadius: b.size / 2 }, ring]} />
       <Animated.View style={[styles.bubbleWrap, { left: b.x, width: b.size, height: b.size }, body]}>
-        <Pressable onPressIn={press} style={[styles.bubble, { borderRadius: b.size / 2, backgroundColor: b.tint }]} accessibilityRole="button" accessibilityLabel={`Bubble ${b.symbol}`}>
+        <Pressable onPressIn={press} style={[styles.bubble, { borderRadius: b.size / 2, backgroundColor: b.tint }]} accessibilityRole="button" accessibilityLabel={t('play.bubble', { symbol: b.symbol })}>
           <View style={[styles.shine, { width: b.size * 0.28, height: b.size * 0.16, borderRadius: b.size }]} />
           <Text style={{ fontSize: b.size * 0.44 }}>{b.symbol}</Text>
         </Pressable>

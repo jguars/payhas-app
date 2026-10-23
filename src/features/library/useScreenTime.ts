@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
 
 import { useFamily } from '@/features/family/FamilyProvider';
+import type { Lang } from '@/i18n';
 
 import { useLibrary } from './LibraryProvider';
 
 export type Lock = 'paused' | 'quiet' | 'limit' | 'games' | null;
 
-/** "8pm", "7am", "12am". */
-export const hourLabel = (h: number) => `${h % 12 === 0 ? 12 : h % 12}${h < 12 ? 'am' : 'pm'}`;
+/** English "8pm", "7am"; Turkmen, Turkish and Russian use the 24-hour "20:00". */
+export const hourLabel = (h: number, lang: Lang = 'en') =>
+  lang === 'en' ? `${h % 12 === 0 ? 12 : h % 12}${h < 12 ? 'am' : 'pm'}` : `${String(h).padStart(2, '0')}:00`;
 
 /** Quiet hours run from bedtime to wake time, wrapping past midnight when bedtime is later. */
 export function inQuietHours(hour: number, bedtime: number, wake: number) {

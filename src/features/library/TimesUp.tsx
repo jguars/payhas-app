@@ -16,6 +16,7 @@ import Svg, { Circle, Path } from 'react-native-svg';
 import { Enter } from '@/components/motion/Enter';
 import { PressScale } from '@/components/motion/PressScale';
 import { useFamily } from '@/features/family/FamilyProvider';
+import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
 import { color, font, radius, space } from '@/theme/tokens';
@@ -33,12 +34,13 @@ const STARS = [
 /** Full-screen stop shown over the feed when the family controls say so. */
 export function TimesUp({ lock }: { lock: Exclude<Lock, null> }) {
   const { leaveProfile, current } = useFamily();
+  const { t, lang } = useT();
   const quiet = lock === 'quiet';
   const copy = {
-    paused: { title: 'Paused by a parent', body: 'Time for something else' },
-    quiet: { title: 'Quiet hours', body: `Back at ${hourLabel(current?.wake_hour ?? 7)}` },
-    limit: { title: "That's today's watching", body: 'Back tomorrow' },
-    games: { title: 'Games are off for now', body: 'A parent turned them off. Videos are still on.' },
+    paused: { title: t('me.stop.pausedTitle'), body: t('me.stop.pausedBody') },
+    quiet: { title: t('me.quietHours'), body: t('me.stop.quietBody', { time: hourLabel(current?.wake_hour ?? 7, lang) }) },
+    limit: { title: t('me.stop.limitTitle'), body: t('me.stop.limitBody') },
+    games: { title: t('me.stop.gamesTitle'), body: t('me.stop.gamesBody') },
   }[lock];
   // A gentle three-note "goodnight" when the stop screen appears.
   useEffect(() => fx.timesUp(), []);
@@ -64,7 +66,7 @@ export function TimesUp({ lock }: { lock: Exclude<Lock, null> }) {
       )}
       <Enter index={5}>
         <PressScale onPress={lock === 'games' ? () => router.navigate('/') : leaveProfile} accessibilityRole="button" style={styles.button}>
-          <Text style={styles.buttonText}>{lock === 'games' ? 'Watch videos' : 'Switch profile'}</Text>
+          <Text style={styles.buttonText}>{lock === 'games' ? t('me.stop.watchVideos') : t('me.switchProfile')}</Text>
         </PressScale>
       </Enter>
     </Animated.View>
@@ -80,6 +82,7 @@ type Ask = 'idle' | 'sending' | 'waiting' | 'declined' | 'too_many' | 'error';
  */
 function AskForTime() {
   const { active } = useFamily();
+  const { t } = useT();
   const token = active?.token;
   const [state, setState] = useState<Ask>('idle');
 
@@ -118,21 +121,23 @@ function AskForTime() {
     return (
       <View style={{ alignItems: 'center', gap: space.sm }}>
         <PressScale onPress={ask} disabled={state === 'sending'} accessibilityRole="button" style={styles.ask}>
-          <Text style={styles.askText}>Ask for more time</Text>
+          <Text style={styles.askText}>{t('me.ask.button')}</Text>
         </PressScale>
-        {state === 'error' && <Text style={styles.askNote}>Couldn’t send — try again</Text>}
+        {state === 'error' && <Text style={[styles.askNote, { textAlign: 'center' }]}>{t('me.ask.error')}</Text>}
       </View>
     );
   }
   const note = {
-    waiting: 'Asked a parent — waiting for an answer',
-    declined: 'A parent said not today',
-    too_many: 'You’ve asked enough today',
+    waiting: t('me.ask.waiting'),
+    declined: t('me.ask.declined'),
+    too_many: t('me.ask.tooMany'),
   }[state];
   return (
     <View style={styles.askState}>
       {state === 'waiting' && <Pulse />}
-      <Text style={styles.askNote}>{note}</Text>
+      <Text style={[styles.askNote, { flexShrink: 1 }]} numberOfLines={2}>
+        {note}
+      </Text>
     </View>
   );
 }

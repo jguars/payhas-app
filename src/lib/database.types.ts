@@ -26,6 +26,8 @@ export type Database = {
           id: string
           name: string
           owner_id: string
+          language: string
+          onboarded_at: string | null
         }
         Insert: {
           created_at?: string
@@ -116,6 +118,9 @@ export type Database = {
           games_enabled: boolean
           extra_minutes: number
           extra_until: string | null
+          birth_month: string | null
+          language: string | null
+          learning_mix: number
         }
         Insert: {
           avatar?: string
@@ -166,6 +171,12 @@ export type Database = {
           reaction_counts: Json
           storage_path: string | null
           thumb_path: string | null
+          source: string
+          source_id: string | null
+          source_url: string | null
+          license: string | null
+          attribution: string | null
+          caption_i18n: Json
           duration_s: number | null
           uploaded_by: string | null
           review_reason: string | null
@@ -233,6 +244,12 @@ export type Database = {
           reaction_counts: Json
           storage_path: string | null
           thumb_path: string | null
+          source: string
+          source_id: string | null
+          source_url: string | null
+          license: string | null
+          attribution: string | null
+          caption_i18n: Json
           duration_s: number | null
           uploaded_by: string | null
           review_reason: string | null
@@ -266,6 +283,12 @@ export type Database = {
           report_count: number
           storage_path: string | null
           thumb_path: string | null
+          source: string
+          source_id: string | null
+          source_url: string | null
+          license: string | null
+          attribution: string | null
+          caption_i18n: Json
           video_id: string
         }[]
       }
@@ -307,6 +330,12 @@ export type Database = {
           reaction_counts: Json
           storage_path: string | null
           thumb_path: string | null
+          source: string
+          source_id: string | null
+          source_url: string | null
+          license: string | null
+          attribution: string | null
+          caption_i18n: Json
           duration_s: number | null
           uploaded_by: string | null
           review_reason: string | null
@@ -334,6 +363,12 @@ export type Database = {
           reaction_counts: Json
           storage_path: string | null
           thumb_path: string | null
+          source: string
+          source_id: string | null
+          source_url: string | null
+          license: string | null
+          attribution: string | null
+          caption_i18n: Json
           duration_s: number | null
           uploaded_by: string | null
           review_reason: string | null
@@ -372,6 +407,7 @@ export type Database = {
           read_at: string | null
           title: string
           video_id: string | null
+          body_i18n: Json | null
         }[]
       }
       get_library: { Args: { p_session: string }; Returns: Json }
@@ -461,6 +497,29 @@ export type Database = {
       request_more_time: { Args: { p_session: string }; Returns: string }
       get_time_request: { Args: { p_session: string }; Returns: Json }
       answer_time_request: { Args: { p_parent: string; p_request_id: string; p_minutes: number | null; p_until: string }; Returns: undefined }
+      approve_videos: { Args: { p_ids: string[] }; Returns: number }
+      get_for_you: {
+        Args: { p_session: string; p_limit?: number; p_exclude?: string[] }
+        Returns: Database['public']['Functions']['get_feed']['Returns']
+      }
+      create_profile: {
+        Args: {
+          p_parent: string
+          p_name: string
+          p_birth_month: string | null
+          p_language?: string | null
+          p_learning_mix?: number
+          p_interests?: string[]
+          p_daily_limit_minutes?: number | null
+          p_quiet_hours?: boolean
+          p_bedtime_hour?: number
+          p_wake_hour?: number
+          p_adult?: boolean
+        }
+        Returns: string
+      }
+      finish_onboarding: { Args: { p_parent: string; p_language: string }; Returns: undefined }
+      set_family_language: { Args: { p_language: string }; Returns: undefined }
       start_profile_session: {
         Args: { p_pin?: string; p_profile_id: string }
         Returns: string

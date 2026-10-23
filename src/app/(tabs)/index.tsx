@@ -13,15 +13,16 @@ import { FollowingEmpty } from '@/features/feed/FollowingEmpty';
 import { FeedMode, useFeed } from '@/features/feed/useFeed';
 import { SheetMode, VideoSheet } from '@/features/feed/VideoSheet';
 import { TimesUp } from '@/features/library/TimesUp';
+import { TKey, useT } from '@/i18n';
 import { useScreenTime } from '@/features/library/useScreenTime';
 import { fx } from '@/lib/feedback';
 import { useInsets, useTabBarSpace } from '@/lib/useInsets';
 import { spring } from '@/theme/motion';
 import { color, font } from '@/theme/tokens';
 
-const TABS: { mode: FeedMode; label: string }[] = [
-  { mode: 'following', label: 'Following' },
-  { mode: 'forYou', label: 'For you' },
+const TABS: { mode: FeedMode; label: TKey }[] = [
+  { mode: 'following', label: 'feed.tab.following' },
+  { mode: 'forYou', label: 'feed.tab.forYou' },
 ];
 
 export default function FeedScreen() {
@@ -37,6 +38,7 @@ export default function FeedScreen() {
   const feed = mode === 'forYou' ? forYou : followingFeed;
   const { lock } = useScreenTime();
   const list = useRef<FlatList>(null);
+  const { t } = useT();
 
   const [sheet, setSheet] = useState<{ video: FeedVideo; mode: SheetMode } | null>(null);
   const [creator, setCreator] = useState<string | null>(null);
@@ -91,6 +93,8 @@ export default function FeedScreen() {
           ref={list}
           data={feed.videos}
           keyExtractor={(v) => v.id}
+          onEndReached={feed.loadMore}
+          onEndReachedThreshold={3}
           renderItem={({ item, index }) => (
             <FeedItem
               video={item}
@@ -124,7 +128,7 @@ export default function FeedScreen() {
         <View pointerEvents="none" style={styles.scrimTop} />
         {active && <LaneBadge lane={active.profile.lane} onPress={leaveProfile} />}
         <FeedTabs mode={mode} onChange={setMode} />
-        <Pressable onPress={() => router.navigate('/discover')} accessibilityRole="button" accessibilityLabel="Search" style={styles.search} hitSlop={8}>
+        <Pressable onPress={() => router.navigate('/discover')} accessibilityRole="button" accessibilityLabel={t('feed.search')} style={styles.search} hitSlop={8}>
           <Icon name="search" size={24} strokeWidth={2.2} />
         </Pressable>
       </View>
@@ -147,6 +151,7 @@ export default function FeedScreen() {
 
 /** Following | For you, with an underline that slides to the selected one. */
 function FeedTabs({ mode, onChange }: { mode: FeedMode; onChange: (m: FeedMode) => void }) {
+  const { t: tr } = useT();
   const [xs, setXs] = useState<number[]>([0, 0]);
   const index = TABS.findIndex((t) => t.mode === mode);
   const x = useSharedValue(0);
@@ -174,7 +179,7 @@ function FeedTabs({ mode, onChange }: { mode: FeedMode; onChange: (m: FeedMode) 
             accessibilityState={{ selected: on }}
             style={styles.tabBtn}
           >
-            <Text style={[styles.tabText, on && styles.tabTextOn]}>{t.label}</Text>
+            <Text style={[styles.tabText, on && styles.tabTextOn]} numberOfLines={1}>{tr(t.label)}</Text>
           </Pressable>
         );
       })}

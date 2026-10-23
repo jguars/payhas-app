@@ -9,6 +9,7 @@ import { PressScale } from '@/components/motion/PressScale';
 import { useToast } from '@/components/Toast';
 import { Profile, useFamily } from '@/features/family/FamilyProvider';
 import { ReportReason, useLibrary } from '@/features/library/LibraryProvider';
+import { laneKey, TKey, topicLabel, useT } from '@/i18n';
 import { Constants } from '@/lib/database.types';
 import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
@@ -24,22 +25,23 @@ const rank = (l: Lane) => Constants.public.Enums.lane.indexOf(l);
 /** Mirrors the lane rule of the server gate; the server re-checks on send. */
 const allowedFor = (video: FeedVideo, p: Profile) => rank(video.lane) <= rank(p.lane);
 
-const REPORT_REASONS: { reason: ReportReason; label: string; icon: IconName }[] = [
-  { reason: 'scary', label: "It's scary or upsetting", icon: 'eyeOff' },
-  { reason: 'not_my_age', label: "It's not right for my age", icon: 'shield' },
-  { reason: 'mean', label: 'Someone is being mean', icon: 'flag' },
-  { reason: 'other', label: 'Something else is wrong', icon: 'help' },
+const REPORT_REASONS: { reason: ReportReason; label: TKey; icon: IconName }[] = [
+  { reason: 'scary', label: 'feed.reason.scary', icon: 'eyeOff' },
+  { reason: 'not_my_age', label: 'feed.reason.notMyAge', icon: 'shield' },
+  { reason: 'mean', label: 'feed.reason.mean', icon: 'flag' },
+  { reason: 'other', label: 'feed.reason.other', icon: 'help' },
 ];
 
 type Props = { video: FeedVideo | null; mode: SheetMode; onClose: () => void };
 
 export function VideoSheet({ video, mode, onClose }: Props) {
+  const { t } = useT();
   const [step, setStep] = useState<Step>('main');
   useEffect(() => {
     if (video) setStep('main');
   }, [video]);
 
-  const title = step === 'why' ? 'Why you’re seeing this' : step === 'report' ? 'What’s wrong with it?' : mode === 'share' ? 'Send to' : undefined;
+  const title = step === 'why' ? t('feed.sheet.why') : step === 'report' ? t('feed.sheet.report') : mode === 'share' ? t('feed.sheet.sendTo') : undefined;
 
   return (
     <BottomSheet open={!!video} onClose={onClose} title={title}>
@@ -54,13 +56,14 @@ function Main({ video, mode, onClose, onStep }: { video: FeedVideo; mode: SheetM
   const { profiles, current } = useFamily();
   const { saved, toggleSave, hide, sendToFamily, logExternalShare } = useLibrary();
   const toast = useToast();
+  const { t } = useT();
   const family = profiles.filter((p) => p.id !== current?.id);
   const canShareOut = current?.lane === 'teen' || current?.lane === 'adult';
   const isSaved = saved.has(video.id);
 
   const shareOut = async () => {
     // payhas:// opens the app on the recipient's phone; there's no web player yet.
-    const result = await Share.share({ message: `${video.caption} — on Payhas\npayhas:///?v=${video.id}` });
+    const result = await Share.share({ message: `${t('feed.shareMessage', { caption: video.caption })}\npayhas:///?v=${video.id}` });
     if (result.action === Share.sharedAction) logExternalShare(video.id);
   };
 
@@ -75,7 +78,7 @@ function Main({ video, mode, onClose, onStep }: { video: FeedVideo; mode: SheetM
               ))}
             </ScrollView>
           ) : (
-            <Text style={styles.hint}>Add family profiles to send videos to each other.</Text>
+            <Text style={styles.hint}>{t('feed.noFamily')}</Text>
           )}
           {canShareOut && (
             <View style={styles.outRow}>
@@ -84,7 +87,7 @@ function Main({ video, mode, onClose, onStep }: { video: FeedVideo; mode: SheetM
                 shareOut();
               }} accessibilityRole="button" style={styles.outButton}>
                 <Icon name="send" size={18} color={color.ink} strokeWidth={2.4} />
-                <Text style={styles.outText}>Share to apps</Text>
+                <Text style={styles.outText}>{t('feed.shareToApps')}</Text>
               </PressScale>
             </View>
           )}
@@ -96,29 +99,29 @@ function Main({ video, mode, onClose, onStep }: { video: FeedVideo; mode: SheetM
         <Action
           icon="save"
           filled={isSaved}
-          label={isSaved ? 'Saved' : 'Save'}
+          label={isSaved ? t('feed.saved') : t('feed.save')}
           onPress={() => {
             toggleSave(video.id);
             if (isSaved) fx.tap();
             else fx.save();
-            if (!isSaved) toast({ text: 'Saved', icon: 'save', action: { label: 'View', onPress: () => router.push('/saved') } });
+            if (!isSaved) toast({ text: t('feed.saved'), icon: 'save', action: { label: t('feed.view'), onPress: () => router.push('/saved') } });
           }}
         />
         <Action
           icon="eyeOff"
-          label="Not for me"
+          label={t('feed.notForMe')}
           onPress={() => {
             hide(video.id);
             fx.hide();
             onClose();
-            toast({ text: 'Got it — you’ll see less like this', icon: 'check' });
+            toast({ text: t('feed.hiddenToast'), icon: 'check' });
           }}
         />
-        <Action icon="help" label="Why this?" onPress={() => {
+        <Action icon="help" label={t('feed.whyThis')} onPress={() => {
             fx.tap();
             onStep('why');
           }} />
-        <Action icon="flag" label="Report" tone="warn" onPress={() => {
+        <Action icon="flag" label={t('feed.report')} tone="warn" onPress={() => {
             fx.tap();
             onStep('report');
           }} />
@@ -129,6 +132,7 @@ function Main({ video, mode, onClose, onStep }: { video: FeedVideo; mode: SheetM
 
 /** A family member's avatar; tap to send. Greyed with a lock when the video isn't allowed in their lane. */
 function FamilyTarget({ profile, allowed, onSend }: { profile: Profile; allowed: boolean; onSend: () => Promise<boolean> }) {
+  const { t } = useT();
   const [state, setState] = useState<'idle' | 'sending' | 'sent' | 'refused'>('idle');
   const pop = useSharedValue(1);
   const l = lanes[profile.lane];
@@ -145,7 +149,7 @@ function FamilyTarget({ profile, allowed, onSend }: { profile: Profile; allowed:
   };
 
   return (
-    <Pressable onPress={press} disabled={!allowed} accessibilityRole="button" accessibilityLabel={allowed ? `Send to ${profile.display_name}` : `${profile.display_name} can't watch this one`} style={styles.target}>
+    <Pressable onPress={press} disabled={!allowed} accessibilityRole="button" accessibilityLabel={allowed ? t('feed.sendToName', { name: profile.display_name }) : t('feed.cantWatch', { name: profile.display_name })} style={styles.target}>
       <Animated.View style={[styles.targetAvatar, { backgroundColor: l.color }, !allowed && styles.targetOff, anim]}>
         <Text style={styles.targetLetter}>{profile.display_name[0]?.toUpperCase()}</Text>
         {(state === 'sent' || !allowed) && (
@@ -155,7 +159,7 @@ function FamilyTarget({ profile, allowed, onSend }: { profile: Profile; allowed:
         )}
       </Animated.View>
       <Text style={[styles.targetName, !allowed && { color: color.text3 }]} numberOfLines={1}>
-        {state === 'sent' ? 'Sent' : state === 'refused' ? 'Not allowed' : profile.display_name}
+        {state === 'sent' ? t('feed.sent') : state === 'refused' ? t('feed.notAllowed') : profile.display_name}
       </Text>
     </Pressable>
   );
@@ -177,6 +181,7 @@ function Action({ icon, label, onPress, filled, tone }: { icon: IconName; label:
 function Why({ video, onBack }: { video: FeedVideo; onBack: () => void }) {
   const { current } = useFamily();
   const { following } = useLibrary();
+  const { t } = useT();
   const [picked, setPicked] = useState<{ slug: string; label: string }[]>([]);
 
   useEffect(() => {
@@ -191,10 +196,10 @@ function Why({ video, onBack }: { video: FeedVideo; onBack: () => void }) {
   }, [current]);
 
   const reasons: { icon: IconName; text: string }[] = [];
-  if (following.has(video.creator.name)) reasons.push({ icon: 'check', text: `You follow ${video.creator.name}` });
-  for (const p of picked.filter((p) => video.topics.includes(p.slug))) reasons.push({ icon: 'star', text: `You like ${p.label}` });
-  if (current) reasons.push({ icon: 'shield', text: `Checked and allowed for the ${lanes[current.lane].label} lane` });
-  reasons.push({ icon: 'play', text: `${formatCount(video.views)} views` });
+  if (following.has(video.creator.name)) reasons.push({ icon: 'check', text: t('feed.why.follow', { name: video.creator.name }) });
+  for (const p of picked.filter((p) => video.topics.includes(p.slug))) reasons.push({ icon: 'star', text: t('feed.why.like', { topic: topicLabel(t, p.slug, p.label) }) });
+  if (current) reasons.push({ icon: 'shield', text: t('feed.why.lane', { lane: t(laneKey(current.lane)) }) });
+  reasons.push({ icon: 'play', text: t('feed.views', { count: video.views, n: formatCount(video.views) }) });
 
   return (
     <View style={{ gap: space.md, paddingHorizontal: space.xl }}>
@@ -214,6 +219,7 @@ function Why({ video, onBack }: { video: FeedVideo; onBack: () => void }) {
 function Report({ video, onClose, onBack }: { video: FeedVideo; onClose: () => void; onBack: () => void }) {
   const { report } = useLibrary();
   const toast = useToast();
+  const { t } = useT();
   return (
     <View style={{ gap: space.sm, paddingHorizontal: space.xl }}>
       {REPORT_REASONS.map((r, i) => (
@@ -223,14 +229,14 @@ function Report({ video, onClose, onBack }: { video: FeedVideo; onClose: () => v
               report(video.id, r.reason);
               fx.success();
               onClose();
-              toast({ text: 'Thanks for telling us. A grown-up will check it.', icon: 'check' });
+              toast({ text: t('feed.reportThanks'), icon: 'check' });
             }}
             pressedScale={0.97}
             accessibilityRole="button"
             style={styles.reportRow}
           >
             <Icon name={r.icon} size={20} color={color.text2} />
-            <Text style={styles.reportText}>{r.label}</Text>
+            <Text style={styles.reportText}>{t(r.label)}</Text>
             <Icon name="chevron" size={16} color={color.text3} strokeWidth={2.4} />
           </PressScale>
         </Animated.View>
@@ -241,10 +247,11 @@ function Report({ video, onClose, onBack }: { video: FeedVideo; onClose: () => v
 }
 
 function BackLink({ onPress }: { onPress: () => void }) {
+  const { t } = useT();
   return (
     <Pressable onPress={onPress} hitSlop={10} style={styles.back} accessibilityRole="button">
       <Icon name="back" size={16} color={color.text2} strokeWidth={2.4} />
-      <Text style={styles.backText}>Back</Text>
+      <Text style={styles.backText}>{t('common.back')}</Text>
     </Pressable>
   );
 }
@@ -265,7 +272,7 @@ const styles = StyleSheet.create({
   actions: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: space.xl },
   action: { width: 72, alignItems: 'center', gap: 6 },
   actionIcon: { width: 56, height: 56, borderRadius: 18, backgroundColor: color.surface2, alignItems: 'center', justifyContent: 'center' },
-  actionLabel: { color: color.text, fontFamily: font.semibold, fontSize: 12 },
+  actionLabel: { color: color.text, fontFamily: font.semibold, fontSize: 12, textAlign: 'center' },
   reason: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   reasonIcon: { width: 32, height: 32, borderRadius: 16, backgroundColor: color.surface2, alignItems: 'center', justifyContent: 'center' },
   reasonText: { color: color.text, fontFamily: font.medium, fontSize: 15, flex: 1 },

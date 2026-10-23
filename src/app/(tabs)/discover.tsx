@@ -21,7 +21,8 @@ import { TrendingGrid } from '@/features/discover/TrendingGrid';
 import { matchesQuery, useDiscover } from '@/features/discover/useDiscover';
 import { FeedVideo } from '@/features/feed/data';
 import { useScreenTime } from '@/features/library/useScreenTime';
-import { color, font, lane as lanes, space } from '@/theme/tokens';
+import { laneKey, topicLabel, useT } from '@/i18n';
+import { color, font, space } from '@/theme/tokens';
 
 export default function DiscoverScreen() {
   const insets = useInsets();
@@ -29,6 +30,7 @@ export default function DiscoverScreen() {
   const focused = useIsFocused();
   const { profile, videos, topics, shelf, loading } = useDiscover();
   const { lock } = useScreenTime();
+  const { t, lang } = useT();
   const [query, setQuery] = useState('');
   const [topic, setTopic] = useState<string | null>(null);
 
@@ -42,18 +44,26 @@ export default function DiscoverScreen() {
     transform: [{ scale: interpolate(scrollY.value, [-90, 0], [1.08, 1], 'clamp') }],
   }));
 
+  // Topic labels in the app's language, so searching "hayvan" finds Animals.
+  const labelOf = useMemo(() => {
+    const m = new Map(topics.map((tp) => [tp.slug, topicLabel(t, tp.slug, tp.label)]));
+    return (slug: string) => m.get(slug) ?? topicLabel(t, slug, slug);
+  }, [topics, t]);
   const shown = useMemo(
-    () => videos.filter((v) => matchesQuery(v, query) && (!topic || v.topics.includes(topic))),
-    [videos, query, topic],
+    () => videos.filter((v) => matchesQuery(v, query, labelOf, lang) && (!topic || v.topics.includes(topic))),
+    [videos, query, topic, labelOf, lang],
   );
-  const suggestions = useMemo(() => topics.map((t) => t.label), [topics]);
+  const suggestions = useMemo(() => topics.map((tp) => labelOf(tp.slug)), [topics, labelOf]);
   const filtered = query.trim().length > 0 || topic != null;
 
   if (!profile) return <View style={styles.root} />;
 
-  const l = lanes[profile.lane];
-  const topicLabel = topics.find((t) => t.slug === topic)?.label;
-  const heading = topicLabel ?? (query.trim() ? 'Results' : `Trending in ${l.label}`);
+  const picked = topics.find((tp) => tp.slug === topic);
+  const heading = picked
+    ? labelOf(picked.slug)
+    : query.trim()
+      ? t('discover.results')
+      : t('discover.trendingIn', { lane: t(laneKey(profile.lane)) });
 
   const open = (v: FeedVideo) => router.navigate({ pathname: '/', params: { v: v.id } });
 
@@ -69,7 +79,7 @@ export default function DiscoverScreen() {
       >
         <Enter index={0} style={styles.header}>
           <Animated.Text style={[styles.title, title]} accessibilityRole="header">
-            Discover
+            {t('discover.title')}
           </Animated.Text>
           <LaneChip lane={profile.lane} />
         </Enter>
@@ -91,7 +101,7 @@ export default function DiscoverScreen() {
         )}
 
         <Enter index={3} style={styles.sectionHead}>
-          <Animated.Text key={heading} entering={FadeIn.duration(220)} style={styles.h2}>
+          <Animated.Text key={heading} entering={FadeIn.duration(220)} style={[styles.h2, styles.shrink]} numberOfLines={1}>
             {heading}
           </Animated.Text>
           {filtered && (
@@ -103,7 +113,7 @@ export default function DiscoverScreen() {
                 }}
                 hitSlop={10}
               >
-                <Text style={styles.link}>Clear</Text>
+                <Text style={styles.link}>{t('discover.clear')}</Text>
               </Pressable>
             </Animated.View>
           )}
@@ -113,7 +123,7 @@ export default function DiscoverScreen() {
         {topics.length > 0 && (
           <>
             <Enter index={7}>
-              <Text style={[styles.h2, { marginTop: space.xs }]}>Browse by topic</Text>
+              <Text style={[styles.h2, { marginTop: space.xs }]}>{t('discover.browseByTopic')}</Text>
             </Enter>
             <TopicGrid topics={topics} selected={topic} onSelect={setTopic} baseIndex={8} />
           </>
@@ -131,5 +141,6 @@ const styles = StyleSheet.create({
   title: { color: color.text, fontFamily: font.display, fontSize: 30, letterSpacing: -0.9, transformOrigin: 'left center' },
   sectionHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginTop: space.xs },
   h2: { color: color.text, fontFamily: font.bold, fontSize: 18 },
+  shrink: { flexShrink: 1 },
   link: { color: color.text2, fontFamily: font.semibold, fontSize: 13 },
 });

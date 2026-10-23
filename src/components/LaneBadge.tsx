@@ -1,22 +1,25 @@
 import { Pressable, StyleSheet, Text } from 'react-native';
 
 import { Icon } from '@/components/Icon';
+import { laneKey, useT } from '@/i18n';
 import { font, Lane, lane as lanes } from '@/theme/tokens';
 
 type Props = { lane: Lane; onPress?: () => void };
 
 export function LaneBadge({ lane, onPress }: Props) {
   const l = lanes[lane];
+  const { t } = useT();
+  const name = t(laneKey(lane));
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel={`${l.label} lane, ages ${l.ages}. Switch profile`}
+      accessibilityLabel={t('common.laneBadge', { lane: name, ages: l.ages })}
       hitSlop={6}
       style={[styles.badge, { borderColor: l.color + '99' }]}
     >
       <Icon name="shield" size={14} color={l.color} strokeWidth={2.4} />
-      <Text style={[styles.label, { color: l.color }]}>{l.label}</Text>
+      <Text style={[styles.label, { color: l.color }]}>{name}</Text>
     </Pressable>
   );
 }

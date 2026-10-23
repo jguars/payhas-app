@@ -1,3 +1,4 @@
+import { Lang, localized } from '@/i18n';
 import { supabase } from '@/lib/supabase';
 import type { Database } from '@/lib/database.types';
 import type { Lane } from '@/theme/tokens';
@@ -18,7 +19,14 @@ export type FeedVideo = {
   saves: number;
   shares: number;
   reactions: Record<string, number>;
+  /** Licence credit for imported footage, e.g. "Video: Jane Doe · Pixabay". */
+  credit: string | null;
+  /** Where imported footage came from and under what licence; null for Payhas' own videos. */
+  origin: { name: string; license: string | null } | null;
 };
+
+/** Display names for import sources; uploads, seeds and originals are Payhas' own. */
+const SOURCE_NAMES: Record<string, string> = { pixabay: 'Pixabay', nasa: 'NASA', wikimedia: 'Wikimedia Commons' };
 
 /** Bundled media for the seed clips, keyed by videos.asset_key. */
 const LOCAL_MEDIA: Record<string, { source: number; thumb: number }> = {
@@ -59,14 +67,14 @@ export function mediaFor(row: { asset_key?: string | null; storage_path?: string
 }
 
 /** Server row → what the UI plays. Rows whose media can't be resolved are skipped (null). */
-export function toFeedVideo(row: VideoRow, urls: Record<string, string> = {}): FeedVideo | null {
+export function toFeedVideo(row: VideoRow, urls: Record<string, string> = {}, lang: Lang = 'en'): FeedVideo | null {
   const media = mediaFor(row, urls);
   if (!media) return null;
   return {
     id: row.id,
     ...media,
     creator: { name: row.creator_name, verified: row.creator_verified },
-    caption: row.caption,
+    caption: localized(lang, row.caption, row.caption_i18n),
     lane: row.lane,
     topics: row.topics,
     views: row.view_count,
@@ -74,14 +82,16 @@ export function toFeedVideo(row: VideoRow, urls: Record<string, string> = {}): F
     saves: row.save_count,
     shares: row.share_count,
     reactions: (row.reaction_counts ?? {}) as Record<string, number>,
+    credit: row.attribution ?? null,
+    origin: SOURCE_NAMES[row.source] ? { name: SOURCE_NAMES[row.source], license: row.license ?? null } : null,
   };
 }
 
-/** Rows → playable videos, signing uploaded files first. */
-export async function toFeedVideos(rows: VideoRow[] | null): Promise<FeedVideo[]> {
+/** Rows → playable videos, signing uploaded files first; captions in the app's language. */
+export async function toFeedVideos(rows: VideoRow[] | null, lang: Lang = 'en'): Promise<FeedVideo[]> {
   const list = rows ?? [];
   const urls = await signMedia(list);
-  return list.flatMap((r) => toFeedVideo(r, urls) ?? []);
+  return list.flatMap((r) => toFeedVideo(r, urls, lang) ?? []);
 }
 
 export function formatCount(n: number): string {

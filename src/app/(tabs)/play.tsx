@@ -23,6 +23,7 @@ import { useFamily } from '@/features/family/FamilyProvider';
 import { BUBBLES, MEMORY, useBest } from '@/features/games/shared';
 import { TimesUp } from '@/features/library/TimesUp';
 import { useScreenTime } from '@/features/library/useScreenTime';
+import { useT } from '@/i18n';
 import { color, font, Lane, radius, space } from '@/theme/tokens';
 
 export default function PlayScreen() {
@@ -31,6 +32,7 @@ export default function PlayScreen() {
   const focused = useIsFocused();
   const { current } = useFamily();
   const { lock } = useScreenTime({ games: true });
+  const { t } = useT();
   if (!current) return <View style={styles.root} />;
   const lane = current.lane;
 
@@ -39,15 +41,15 @@ export default function PlayScreen() {
       <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + 14, paddingBottom: barSpace }]} showsVerticalScrollIndicator={false}>
         <Enter index={0}>
           <Text style={styles.title} accessibilityRole="header">
-            Play
+            {t('play.title')}
           </Text>
         </Enter>
         <Enter index={1}>
           <GameCard
-            title="Bubble Pop"
-            sub={BUBBLES[lane].targets ? `Find the right ones · ${BUBBLES[lane].round}s` : 'Pop as many as you like'}
+            title={t('play.bubbles.name')}
+            sub={BUBBLES[lane].targets ? t('play.bubbles.subTargets', { s: BUBBLES[lane].round ?? 0 }) : t('play.bubbles.subFree')}
             tint="#78A6FF"
-            best={<Best game="bubbles" lane={lane} focused={focused} format={(n) => `${n} pts`} />}
+            best={<Best game="bubbles" lane={lane} focused={focused} format={(n) => t('play.ptsShort', { count: n })} />}
             onPress={() => {
               fx.tap();
               router.push('/games/bubbles');
@@ -58,12 +60,12 @@ export default function PlayScreen() {
         </Enter>
         <Enter index={2}>
           <GameCard
-            title="Memory Match"
-            sub={`${MEMORY[lane].pairs} pairs${MEMORY[lane].timed ? ' · against the clock' : ''}`}
+            title={t('play.memory.name')}
+            sub={t(MEMORY[lane].timed ? 'play.memory.subTimed' : 'play.memory.sub', { count: MEMORY[lane].pairs })}
             tint="#FFD25E"
             best={
               lane !== 'little' && (
-                <Best game="memory" lane={lane} focused={focused} format={(n) => (MEMORY[lane].timed ? `${Math.floor(n / 60)}:${String(n % 60).padStart(2, '0')}` : `${n} moves`)} />
+                <Best game="memory" lane={lane} focused={focused} format={(n) => (MEMORY[lane].timed ? `${Math.floor(n / 60)}:${String(n % 60).padStart(2, '0')}` : t('play.moves', { count: n }))} />
               )
             }
             onPress={() => {
@@ -102,8 +104,12 @@ function GameCard({ title, sub, tint, best, onPress, children }: { title: string
       <View style={[styles.stage, { backgroundColor: tint + '1F' }]}>{children}</View>
       <View style={styles.cardFoot}>
         <View style={{ flex: 1, gap: 2 }}>
-          <Text style={styles.cardTitle}>{title}</Text>
-          <Text style={styles.cardSub}>{sub}</Text>
+          <Text style={styles.cardTitle} numberOfLines={1}>
+            {title}
+          </Text>
+          <Text style={styles.cardSub} numberOfLines={2}>
+            {sub}
+          </Text>
         </View>
         {best}
         <View style={[styles.go, { backgroundColor: tint }]}>

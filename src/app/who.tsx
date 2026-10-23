@@ -6,12 +6,14 @@ import { Icon } from '@/components/Icon';
 import { PinPad } from '@/components/PinPad';
 import { SafeScreen } from '@/components/SafeScreen';
 import { Profile, useFamily } from '@/features/family/FamilyProvider';
+import { laneKey, useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
 import { color, font, lane as lanes, space } from '@/theme/tokens';
 
 export default function WhoScreen() {
   const { profiles, hasPin, selectProfile, refresh } = useFamily();
+  const { t } = useT();
   const [pinFor, setPinFor] = useState<Profile | null>(null);
 
   // First run: the parent sets a PIN before anything else.
@@ -20,7 +22,7 @@ export default function WhoScreen() {
       <SafeScreen style={styles.root}>
         <View style={styles.center}>
           <PinPad
-            title="Set a parent PIN"
+            title={t('auth.setPin')}
             onComplete={async (pin) => {
               const { data, error } = await supabase.rpc('set_parent_pin', { p_new_pin: pin });
               if (error) return error.message;
@@ -52,12 +54,12 @@ export default function WhoScreen() {
   return (
     <SafeScreen style={styles.root}>
       <View style={styles.center}>
-        <Text style={styles.title}>Who's watching?</Text>
+        <Text style={styles.title}>{t('auth.whoTitle')}</Text>
         <View style={styles.grid}>
           {profiles.map((p) => {
             const l = lanes[p.lane];
             return (
-              <Pressable key={p.id} onPress={() => pick(p)} accessibilityLabel={`${p.display_name}, ${l.label} lane`} style={styles.tile}>
+              <Pressable key={p.id} onPress={() => pick(p)} accessibilityLabel={t('auth.profileA11y', { name: p.display_name, lane: t(laneKey(p.lane)) })} style={styles.tile}>
                 <View style={[styles.avatar, { backgroundColor: l.color }]}>
                   <Text style={styles.avatarLetter}>{p.display_name[0]?.toUpperCase()}</Text>
                   {p.pin_protected && (
@@ -71,11 +73,11 @@ export default function WhoScreen() {
             );
           })}
           {profiles.length < 6 && (
-            <Pressable onPress={() => router.push('/add-profile')} accessibilityLabel="Add profile" style={styles.tile}>
+            <Pressable onPress={() => router.push('/add-child')} accessibilityLabel={t('auth.addProfile')} style={styles.tile}>
               <View style={[styles.avatar, styles.add]}>
                 <Icon name="plus" size={30} color={color.text2} strokeWidth={2.4} />
               </View>
-              <Text style={[styles.name, { color: color.text3 }]}>Add</Text>
+              <Text style={[styles.name, { color: color.text3 }]}>{t('common.add')}</Text>
             </Pressable>
           )}
         </View>
@@ -83,7 +85,7 @@ export default function WhoScreen() {
       <View style={styles.footer}>
         <Pressable onPress={() => router.push('/parent')} hitSlop={10} style={styles.footerButton} accessibilityRole="button">
           <Icon name="sliders" size={16} color={color.text2} strokeWidth={2.2} />
-          <Text style={[styles.signOutText, { color: color.text2 }]}>Parent dashboard · Sign out</Text>
+          <Text style={[styles.signOutText, { color: color.text2 }]}>{t('auth.dashboardSignOut')}</Text>
         </Pressable>
       </View>
     </SafeScreen>

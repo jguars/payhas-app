@@ -5,6 +5,7 @@ import Animated, { interpolateColor, useAnimatedStyle, useSharedValue, withSeque
 import { Icon } from '@/components/Icon';
 import { PressScale } from '@/components/motion/PressScale';
 import { useLibrary } from '@/features/library/LibraryProvider';
+import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { spring } from '@/theme/motion';
 import { color, font, radius } from '@/theme/tokens';
@@ -12,6 +13,7 @@ import { color, font, radius } from '@/theme/tokens';
 /** Follow ⇄ Following. The fill drains from ember to outline and the label swaps with a little bounce. */
 export function FollowButton({ creator, size = 'md' }: { creator: string; size?: 'sm' | 'md' }) {
   const { following, toggleFollow } = useLibrary();
+  const { t } = useT();
   const on = following.has(creator);
   const p = useSharedValue(on ? 1 : 0);
   const s = useSharedValue(1);
@@ -36,11 +38,11 @@ export function FollowButton({ creator, size = 'md' }: { creator: string; size?:
         toggleFollow(creator);
       }}
       accessibilityRole="button"
-      accessibilityLabel={on ? `Unfollow ${creator}` : `Follow ${creator}`}
+      accessibilityLabel={on ? t('feed.unfollowName', { name: creator }) : t('feed.followName', { name: creator })}
     >
       <Animated.View style={[styles.button, { height: h, paddingHorizontal: size === 'sm' ? 14 : 22 }, anim]}>
         {on && <Icon name="check" size={16} color={color.text} strokeWidth={2.8} />}
-        <Text style={[styles.text, { color: on ? color.text : color.ink, fontSize: size === 'sm' ? 13 : 15 }]}>{on ? 'Following' : 'Follow'}</Text>
+        <Text style={[styles.text, { color: on ? color.text : color.ink, fontSize: size === 'sm' ? 13 : 15 }]} numberOfLines={1}>{on ? t('feed.following') : t('feed.follow')}</Text>
       </Animated.View>
     </PressScale>
   );

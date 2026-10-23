@@ -1,27 +1,36 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Icon } from '@/components/Icon';
 import { Enter } from '@/components/motion/Enter';
 import { PressScale } from '@/components/motion/PressScale';
 import { ScreenHeader } from '@/components/ScreenHeader';
-import { REASON_LABEL, useReviewQueue } from '@/features/creator/useReviewQueue';
+import { useToast } from '@/components/Toast';
+import { reasonLabel, useReviewQueue } from '@/features/creator/useReviewQueue';
 import { mediaFor } from '@/features/feed/data';
+import { laneKey, localized, type T, useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
+import { supabase } from '@/lib/supabase';
 import { useInsets } from '@/lib/useInsets';
-import { color, font, lane as lanes, radius, space } from '@/theme/tokens';
+import { color, font, radius, space } from '@/theme/tokens';
 
 type Tab = 'uploads' | 'reports';
 
-const ago = (iso: string) => {
+const ago = (t: T, iso: string) => {
   const m = Math.max(1, Math.round((Date.now() - new Date(iso).getTime()) / 60000));
-  return m < 60 ? `${m}m ago` : m < 1440 ? `${Math.round(m / 60)}h ago` : `${Math.round(m / 1440)}d ago`;
+  return m < 60
+    ? t('creator.agoMin', { count: m })
+    : m < 1440
+      ? t('creator.agoHour', { count: Math.round(m / 60) })
+      : t('creator.agoDay', { count: Math.round(m / 1440) });
 };
 
 /** Moderator queue: new uploads waiting for a decision, and reported videos. */
 export default function ReviewScreen() {
-  const { uploads, reports, urls, loaded } = useReviewQueue();
+  const { uploads, reports, urls, loaded, reload } = useReviewQueue();
+  const toast = useToast();
+  const { t, lang } = useT();
   const { bottom } = useInsets();
   const [tab, setTab] = useState<Tab>('uploads');
 
@@ -30,25 +39,43 @@ export default function ReviewScreen() {
     router.push({ pathname: '/review-item', params: { id, mode } });
   };
 
+  // For an imported batch already watched in the list: publish everything as suggested.
+  const approveAll = () => {
+    fx.tap();
+    Alert.alert(t('creator.approveAllTitle', { count: uploads.length }), t('creator.approveAllBody'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('creator.approveAll'),
+        onPress: async () => {
+          const { data, error } = await supabase.rpc('approve_videos', { p_ids: uploads.map((u) => u.id) });
+          if (error) return fx.error();
+          fx.success();
+          toast({ text: t('creator.nowLive', { count: Number(data ?? 0) }), icon: 'check' });
+          reload();
+        },
+      },
+    ]);
+  };
+
   return (
     <View style={styles.root}>
-      <ScreenHeader title="Review" />
+      <ScreenHeader title={t('creator.reviewTitle')} />
       <View style={styles.tabs}>
-        {(['uploads', 'reports'] as Tab[]).map((t) => {
-          const on = tab === t;
-          const n = t === 'uploads' ? uploads.length : reports.length;
+        {(['uploads', 'reports'] as Tab[]).map((k) => {
+          const on = tab === k;
+          const n = k === 'uploads' ? uploads.length : reports.length;
           return (
             <Pressable
-              key={t}
+              key={k}
               onPress={() => {
                 if (!on) fx.tab();
-                setTab(t);
+                setTab(k);
               }}
               accessibilityRole="tab"
               accessibilityState={{ selected: on }}
               style={[styles.tab, on && styles.tabOn]}
             >
-              <Text style={[styles.tabText, on && { color: color.ink }]}>{t === 'uploads' ? 'New uploads' : 'Reports'}</Text>
+              <Text style={[styles.tabText, on && { color: color.ink }]}>{k === 'uploads' ? t('creator.newUploads') : t('creator.reports')}</Text>
               {n > 0 && (
                 <View style={[styles.count, on && { backgroundColor: color.ink }]}>
                   <Text style={[styles.countText, on && { color: color.text }]}>{n}</Text>
@@ -65,11 +92,17 @@ export default function ReviewScreen() {
             <View style={styles.emptyIcon}>
               <Icon name="check" size={28} color="#4FE3B0" strokeWidth={2.6} />
             </View>
-            <Text style={styles.emptyTitle}>All clear</Text>
-            <Text style={styles.emptySub}>{tab === 'uploads' ? 'No uploads waiting for review.' : 'No open reports.'}</Text>
+            <Text style={styles.emptyTitle}>{t('creator.allClear')}</Text>
+            <Text style={styles.emptySub}>{tab === 'uploads' ? t('creator.noUploads') : t('creator.noReports')}</Text>
           </Enter>
         )}
 
+        {tab === 'uploads' && uploads.length > 1 && (
+          <PressScale onPress={approveAll} accessibilityRole="button" style={styles.approveAll}>
+            <Icon name="check" size={16} color={color.ink} strokeWidth={2.8} />
+            <Text style={styles.approveAllText}>{t('creator.approveAllButton', { count: uploads.length })}</Text>
+          </PressScale>
+        )}
         {tab === 'uploads' &&
           uploads.map((v, i) => {
             const m = mediaFor(v, urls);
@@ -79,11 +112,16 @@ export default function ReviewScreen() {
                   {m ? <Image source={m.thumb} style={styles.thumb} /> : <View style={styles.thumb} />}
                   <View style={{ flex: 1, gap: 4 }}>
                     <Text style={styles.caption} numberOfLines={2}>
-                      {v.caption}
+                      {localized(lang, v.caption, v.caption_i18n)}
                     </Text>
                     <Text style={styles.meta}>
-                      {v.creator_name} · suggests {lanes[v.lane].label} · {ago(v.created_at)}
+                      {t('creator.suggests', { creator: v.creator_name, lane: t(laneKey(v.lane)), ago: ago(t, v.created_at) })}
                     </Text>
+                    {!!v.attribution && (
+                      <Text style={styles.meta} numberOfLines={1}>
+                        {v.attribution}
+                      </Text>
+                    )}
                   </View>
                   <Icon name="chevron" size={16} color={color.text3} strokeWidth={2.4} />
                 </PressScale>
@@ -101,13 +139,13 @@ export default function ReviewScreen() {
                   {m ? <Image source={m.thumb} style={styles.thumb} /> : <View style={styles.thumb} />}
                   <View style={{ flex: 1, gap: 6 }}>
                     <Text style={styles.caption} numberOfLines={1}>
-                      {r.caption}
+                      {localized(lang, r.caption, r.caption_i18n)}
                     </Text>
                     <View style={styles.reasons}>
                       {reasons.map(([reason, n]) => (
                         <View key={reason} style={styles.reasonPill}>
                           <Text style={styles.reasonText}>
-                            {REASON_LABEL[reason] ?? reason} ×{n}
+                            {reasonLabel(t, reason)} ×{n}
                           </Text>
                         </View>
                       ))}
@@ -145,6 +183,8 @@ const styles = StyleSheet.create({
   reasonText: { color: '#FF8A73', fontFamily: font.semibold, fontSize: 11 },
   flagCount: { flexDirection: 'row', alignItems: 'center', gap: 3 },
   flagText: { color: '#FF8A73', fontFamily: font.mono, fontSize: 13 },
+  approveAll: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space.sm, height: 46, borderRadius: radius.pill, backgroundColor: '#4FE3B0', marginBottom: space.sm },
+  approveAllText: { color: color.ink, fontFamily: font.bold, fontSize: 15 },
   empty: { alignItems: 'center', gap: space.sm, paddingTop: 100 },
   emptyIcon: { width: 64, height: 64, borderRadius: 32, backgroundColor: 'rgba(79,227,176,0.14)', alignItems: 'center', justifyContent: 'center', marginBottom: space.sm },
   emptyTitle: { color: color.text, fontFamily: font.title, fontSize: 20 },

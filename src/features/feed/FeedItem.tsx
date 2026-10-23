@@ -2,13 +2,14 @@ import { useEvent } from 'expo';
 import { router } from 'expo-router';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { memo, useEffect, useRef, useState } from 'react';
-import { GestureResponderEvent, Platform, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { GestureResponderEvent, Image, Platform, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import Animated, { FadeIn, FadeOut, useAnimatedStyle, useSharedValue, withSequence, withSpring, withTiming } from 'react-native-reanimated';
 
 import { Icon } from '@/components/Icon';
 import { Pop } from '@/components/motion/Pop';
 import { useToast } from '@/components/Toast';
 import { useLibrary } from '@/features/library/LibraryProvider';
+import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { spring } from '@/theme/motion';
 import { color, font } from '@/theme/tokens';
@@ -48,8 +49,19 @@ function FeedItemBase({ video, active, height, chromeBottom, onShare, onOptions,
   const progress = player.duration > 0 ? Math.min(1, time.currentTime / player.duration) : 0;
   const { width } = useWindowDimensions();
 
+  // Every video plays whole, exactly as shot, centred over a blurred copy of its poster —
+  // never cropped. A 9:16 clip on a taller phone leaves thin strips that sit behind the top
+  // tabs and the tab bar; a landscape clip sits in the middle. Only a video already the
+  // screen's exact shape (within 3%) fills edge to edge.
+  const loaded = useEvent(player, 'sourceLoad', null);
+  const track = (loaded?.availableVideoTracks ?? player.availableVideoTracks)?.[0]?.size;
+  const videoAspect = track?.width && track?.height ? track.width / track.height : null;
+  const screenAspect = width / height;
+  const fill = videoAspect != null && Math.abs(videoAspect - screenAspect) / screenAspect < 0.03;
+
   const lib = useLibrary();
   const toast = useToast();
+  const { t } = useT();
   const liked = lib.liked.has(video.id);
   const saved = lib.saved.has(video.id);
   const following = lib.following.has(video.creator.name);
@@ -62,6 +74,11 @@ function FeedItemBase({ video, active, height, chromeBottom, onShare, onOptions,
   const [bursts, setBursts] = useState<{ id: number; x: number; y: number }[]>([]);
   const [floaters, setFloaters] = useState<{ id: number; emoji: string }[]>([]);
   const [picking, setPicking] = useState(false);
+  // The caption opens on tap to show all of it, plus credit and source; it closes again when the video changes.
+  const [expanded, setExpanded] = useState(false);
+  useEffect(() => {
+    if (!active) setExpanded(false);
+  }, [active]);
   const seq = useRef(0);
 
   useEffect(() => {
@@ -141,14 +158,28 @@ function FeedItemBase({ video, active, height, chromeBottom, onShare, onOptions,
     lib.toggleSave(video.id);
     if (saved) fx.tap();
     else fx.save();
-    if (!saved) toast({ text: 'Saved', icon: 'save', action: { label: 'View', onPress: () => router.push('/saved') } });
+    if (!saved) toast({ text: t('feed.saved'), icon: 'save', action: { label: t('feed.view'), onPress: () => router.push('/saved') } });
   };
 
   const railBottom = chromeBottom + 74;
 
   return (
     <View style={[styles.root, { height }]}>
-      <VideoView player={player} style={styles.video} contentFit="cover" nativeControls={false} playsInline />
+      {!fill && (
+        <View style={StyleSheet.absoluteFill} pointerEvents="none">
+          <Image source={video.thumb} style={StyleSheet.absoluteFill} resizeMode="cover" blurRadius={28} />
+          <View style={styles.blurDim} />
+        </View>
+      )}
+      <VideoView
+        player={player}
+        style={styles.video}
+        contentFit={fill ? 'cover' : 'contain'}
+        // A TextureView lets the blurred fill show around a fitted video (a SurfaceView paints it black).
+        surfaceType="textureView"
+        nativeControls={false}
+        playsInline
+      />
       <Pressable
         style={StyleSheet.absoluteFill}
         onPress={onTap}
@@ -157,7 +188,7 @@ function FeedItemBase({ video, active, height, chromeBottom, onShare, onOptions,
           onOptions(video);
         }}
         delayLongPress={420}
-        accessibilityLabel={muted ? 'Unmute. Double tap to like, hold for options' : 'Play or pause. Double tap to like, hold for options'}
+        accessibilityLabel={muted ? t('feed.a11y.unmute') : t('feed.a11y.playPause')}
       />
 
       <View pointerEvents="none" style={styles.scrimBottom} />
@@ -165,7 +196,7 @@ function FeedItemBase({ video, active, height, chromeBottom, onShare, onOptions,
       {muted && (
         <View pointerEvents="none" style={styles.mutedHint}>
           <Icon name="muted" size={16} />
-          <Text style={styles.mutedText}>Tap for sound</Text>
+          <Text style={styles.mutedText}>{t('feed.tapForSound')}</Text>
         </View>
       )}
 
@@ -178,7 +209,7 @@ function FeedItemBase({ video, active, height, chromeBottom, onShare, onOptions,
           <Pressable onPress={() => {
             fx.sheet();
             onCreator(video.creator.name);
-          }} accessibilityRole="button" accessibilityLabel={`${video.creator.name}'s videos`} hitSlop={6}>
+          }} accessibilityRole="button" accessibilityLabel={t('feed.creatorVideos', { name: video.creator.name })} hitSlop={6}>
             <View style={styles.avatar}>
               <Text style={styles.avatarLetter}>{video.creator.name[0]}</Text>
             </View>
@@ -190,7 +221,7 @@ function FeedItemBase({ video, active, height, chromeBottom, onShare, onOptions,
             if (liked) fx.unlike();
             else fx.like();
             lib.toggleLike(video.id);
-          }} accessibilityLabel="Like" accessibilityState={{ selected: liked }}>
+          }} accessibilityLabel={t('feed.like')} accessibilityState={{ selected: liked }}>
           <Pop on={liked}>
             <Icon name="heart" size={32} color={liked ? color.ember : color.text} filled={liked} strokeWidth={1.9} />
           </Pop>
@@ -206,7 +237,7 @@ function FeedItemBase({ video, active, height, chromeBottom, onShare, onOptions,
           <Pressable style={styles.action} onPress={() => {
               fx.tap();
               setPicking((p) => !p);
-            }} accessibilityLabel="React" accessibilityState={{ expanded: picking }}>
+            }} accessibilityLabel={t('feed.react')} accessibilityState={{ expanded: picking }}>
             <Pop on={mine.size > 0}>
               <Icon name="smile" size={30} color={mine.size > 0 ? '#FFD25E' : color.text} strokeWidth={1.9} />
             </Pop>
@@ -214,7 +245,7 @@ function FeedItemBase({ video, active, height, chromeBottom, onShare, onOptions,
           </Pressable>
         </View>
 
-        <Pressable style={styles.action} onPress={save} accessibilityLabel="Save" accessibilityState={{ selected: saved }}>
+        <Pressable style={styles.action} onPress={save} accessibilityLabel={t('feed.save')} accessibilityState={{ selected: saved }}>
           <Pop on={saved}>
             <Icon name="save" size={28} color={saved ? '#FFD25E' : color.text} filled={saved} strokeWidth={1.9} />
           </Pop>
@@ -224,7 +255,7 @@ function FeedItemBase({ video, active, height, chromeBottom, onShare, onOptions,
         <Pressable style={styles.action} onPress={() => {
             fx.sheet();
             onShare(video);
-          }} accessibilityLabel="Share">
+          }} accessibilityLabel={t('feed.share')}>
           <Icon name="share" size={28} strokeWidth={1.9} />
           <Text style={styles.count}>{formatCount(video.shares)}</Text>
         </Pressable>
@@ -248,9 +279,32 @@ function FeedItemBase({ video, active, height, chromeBottom, onShare, onOptions,
           <Text style={styles.creator}>{video.creator.name}</Text>
           {video.creator.verified && <Icon name="verified" size={15} color={color.verified} />}
         </Pressable>
-        <Text style={styles.caption} numberOfLines={1}>
-          {video.caption}
-        </Text>
+        <Pressable
+          onPress={() => {
+            fx.tap();
+            setExpanded((e) => !e);
+          }}
+          accessibilityRole="button"
+          accessibilityState={{ expanded }}
+          accessibilityHint={expanded ? t('feed.caption.less') : t('feed.caption.more')}
+          hitSlop={8}
+          style={[styles.captionBox, expanded && styles.captionBoxOpen]}
+        >
+          <Text style={styles.caption} numberOfLines={expanded ? undefined : 1}>
+            {video.caption}
+          </Text>
+          {expanded && (video.credit || video.origin) && (
+            <Animated.View entering={FadeIn.duration(180)} style={styles.captionMore}>
+              {!!video.credit && <Text style={styles.credit}>{video.credit}</Text>}
+              {!!video.origin && (
+                <Text style={styles.credit}>
+                  {t('feed.caption.source', { name: video.origin.name })}
+                  {video.origin.license ? ` · ${video.origin.license}` : ''}
+                </Text>
+              )}
+            </Animated.View>
+          )}
+        </Pressable>
       </View>
 
       <View style={[styles.progressTrack, { bottom: chromeBottom - 8 }]}>
@@ -262,6 +316,7 @@ function FeedItemBase({ video, active, height, chromeBottom, onShare, onOptions,
 
 /** The "+" under the avatar: tap → spins into a green tick, holds, then tucks away. */
 function FollowBadge({ following, onFollow, name }: { following: boolean; onFollow: () => void; name: string }) {
+  const { t } = useT();
   const [phase, setPhase] = useState<'plus' | 'tick' | 'gone'>(following ? 'gone' : 'plus');
   const s = useSharedValue(1);
   const r = useSharedValue(0);
@@ -290,7 +345,7 @@ function FollowBadge({ following, onFollow, name }: { following: boolean; onFoll
   if (phase === 'gone') return null;
   return (
     <Animated.View style={[styles.follow, phase === 'tick' && styles.followDone, anim]}>
-      <Pressable onPress={press} disabled={phase === 'tick'} accessibilityLabel={`Follow ${name}`} hitSlop={10} style={styles.followHit}>
+      <Pressable onPress={press} disabled={phase === 'tick'} accessibilityLabel={t('feed.followName', { name })} hitSlop={10} style={styles.followHit}>
         <Icon name={phase === 'tick' ? 'check' : 'plus'} size={12} color={color.ink} strokeWidth={3.5} />
       </Pressable>
     </Animated.View>
@@ -301,7 +356,8 @@ export const FeedItem = memo(FeedItemBase);
 
 const styles = StyleSheet.create({
   root: { width: '100%', backgroundColor: color.ink, overflow: 'hidden' },
-  video: { position: 'absolute', left: 0, top: 0, width: '100%', height: '100%' },
+  video: { position: 'absolute', left: 0, top: 0, width: '100%', height: '100%', backgroundColor: 'transparent' },
+  blurDim: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(10,10,15,0.45)' },
   scrimBottom: {
     position: 'absolute',
     left: 0,
@@ -346,6 +402,10 @@ const styles = StyleSheet.create({
   creatorRow: { flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start' },
   creator: { color: color.text, fontFamily: font.bold, fontSize: 16 },
   caption: { color: color.text, fontFamily: font.body, fontSize: 15, lineHeight: 21 },
+  credit: { color: 'rgba(244,243,239,0.72)', fontFamily: font.medium, fontSize: 12, lineHeight: 17 },
+  captionBox: { marginHorizontal: -10, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 14 },
+  captionBoxOpen: { backgroundColor: 'rgba(10,10,15,0.55)' },
+  captionMore: { gap: 2, marginTop: 8, paddingTop: 8, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: 'rgba(244,243,239,0.25)' },
   progressTrack: { position: 'absolute', left: 16, right: 16, height: 2, borderRadius: 1, overflow: 'hidden', backgroundColor: 'rgba(244,243,239,0.2)' },
   progressFill: { height: 2, backgroundColor: color.text },
 });

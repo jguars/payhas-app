@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { SafeScreen } from '@/components/SafeScreen';
+import { topicLabel, useT } from '@/i18n';
 import { useFamily } from '@/features/family/FamilyProvider';
 import { Constants, Tables } from '@/lib/database.types';
 import { fx } from '@/lib/feedback';
@@ -14,6 +15,7 @@ const laneRank = (l: Interest['youngest_lane']) => Constants.public.Enums.lane.i
 /** Cold start: the active profile picks a few things it likes before its first feed. */
 export default function InterestsScreen() {
   const { active, refresh, leaveProfile } = useFamily();
+  const { t } = useT();
   const [options, setOptions] = useState<Interest[]>([]);
   const [picked, setPicked] = useState<Set<string>>(new Set());
   const [saving, setSaving] = useState(false);
@@ -55,7 +57,7 @@ export default function InterestsScreen() {
 
   return (
     <SafeScreen style={styles.root}>
-      <Text style={styles.title}>{profile ? `What does ${profile.display_name} like?` : ''}</Text>
+      <Text style={styles.title}>{profile ? t('onboarding.child.interestsTitle', { name: profile.display_name }) : ''}</Text>
       <ScrollView contentContainerStyle={styles.grid}>
         {options.length === 0 && <ActivityIndicator color={color.text2} />}
         {options.map((i) => {
@@ -69,11 +71,13 @@ export default function InterestsScreen() {
               }}
               accessibilityRole="checkbox"
               accessibilityState={{ checked: on }}
-              accessibilityLabel={i.label}
+              accessibilityLabel={topicLabel(t, i.slug, i.label)}
               style={[styles.tile, on && styles.tileOn]}
             >
               <Text style={styles.emoji}>{i.emoji}</Text>
-              <Text style={[styles.label, on && styles.labelOn]}>{i.label}</Text>
+              <Text style={[styles.label, on && styles.labelOn]} numberOfLines={1}>
+                {topicLabel(t, i.slug, i.label)}
+              </Text>
             </Pressable>
           );
         })}
@@ -81,10 +85,10 @@ export default function InterestsScreen() {
       <View style={styles.footer}>
         <Text style={styles.error}>{error ?? ' '}</Text>
         <Pressable onPress={save} disabled={picked.size === 0 || saving} style={[styles.button, (picked.size === 0 || saving) && styles.buttonOff]}>
-          {saving ? <ActivityIndicator color={color.ink} /> : <Text style={styles.buttonText}>Done</Text>}
+          {saving ? <ActivityIndicator color={color.ink} /> : <Text style={styles.buttonText}>{t('common.done')}</Text>}
         </Pressable>
         <Pressable onPress={leaveProfile} hitSlop={10} accessibilityRole="button" style={styles.switch}>
-          <Text style={styles.switchText}>Not {profile?.display_name ?? 'you'}? Switch profile</Text>
+          <Text style={styles.switchText}>{t('onboarding.notYou', { name: profile?.display_name ?? '' })}</Text>
         </Pressable>
       </View>
     </SafeScreen>

@@ -23,11 +23,12 @@ import { ScreenHeader } from '@/components/ScreenHeader';
 import { Segmented } from '@/components/Segmented';
 import { useToast } from '@/components/Toast';
 import { useFamily } from '@/features/family/FamilyProvider';
-import { REASON_LABEL } from '@/features/creator/useReviewQueue';
+import { reasonLabel } from '@/features/creator/useReviewQueue';
 import { mediaFor, signMedia } from '@/features/feed/data';
 import { hourLabel } from '@/features/library/useScreenTime';
 import { disableParentAlerts, enableParentAlerts, storedPushToken } from '@/features/parent/push';
-import { Child, Controls, minutes, presence, RecentRow, useParent } from '@/features/parent/useParent';
+import { ago, Child, Controls, minutes, presence, RecentRow, useParent } from '@/features/parent/useParent';
+import { laneKey, localized, topicLabel, useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { useInsets } from '@/lib/useInsets';
 import { useGoBack } from '@/lib/useGoBack';
@@ -37,7 +38,6 @@ import { color, font, lane as lanes, radius, space } from '@/theme/tokens';
 const GREEN = '#4FE3B0';
 const RED = '#FF8A73';
 const LIMITS: (number | null)[] = [null, 15, 30, 45, 60, 90, 120];
-const DAY_LETTER = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
 /**
  * The parent's remote: one PIN opens 15 minutes of control over every child
@@ -52,14 +52,15 @@ export default function ParentScreen() {
   const { signOut } = useFamily();
   const [selected, setSelected] = useState<string | undefined>(initial);
   const [hiding, setHiding] = useState<RecentRow | null>(null);
+  const { t, lang } = useT();
 
   if (!unlocked) {
     return (
       <View style={styles.root}>
-        <ScreenHeader title="Family" />
+        <ScreenHeader title={t('parent.title')} />
         <View style={styles.pinWrap}>
-          <PinPad title="Parent PIN" onComplete={unlock} onCancel={() => goBack()} />
-          <Text style={styles.pinHint}>Unlocks the dashboard for 15 minutes.</Text>
+          <PinPad title={t('common.parentPin')} onComplete={unlock} onCancel={() => goBack()} />
+          <Text style={styles.pinHint}>{t('parent.pinHint')}</Text>
         </View>
       </View>
     );
@@ -70,7 +71,7 @@ export default function ParentScreen() {
   const done = (ok: boolean, text: string) => {
     if (!ok) {
       fx.error();
-      toast({ text: 'Couldn’t reach Payhas — try again', icon: 'close' });
+      toast({ text: t('parent.networkError'), icon: 'close' });
       return;
     }
     fx.success();
@@ -91,12 +92,12 @@ export default function ParentScreen() {
 
   return (
     <View style={styles.root}>
-      <ScreenHeader title="Family" />
+      <ScreenHeader title={t('parent.title')} />
 
       {children && children.length === 0 && (
         <Enter index={0} style={styles.empty}>
-          <Text style={styles.emptyTitle}>No children’s profiles yet</Text>
-          <Text style={styles.emptySub}>Add a Little, Kids or Teen profile from “Who’s watching?” to manage it here.</Text>
+          <Text style={styles.emptyTitle}>{t('parent.emptyTitle')}</Text>
+          <Text style={styles.emptySub}>{t('parent.emptySub')}</Text>
           <AccountActions onLock={() => { lock(); goBack(); }} onSignOut={() => { lock(); signOut(); }} />
         </Enter>
       )}
@@ -123,7 +124,7 @@ export default function ParentScreen() {
                       <Text style={styles.pickLetter}>{c.display_name[0]?.toUpperCase()}</Text>
                     </View>
                     <Text style={[styles.pickName, on && { color: color.text }]}>{c.display_name}</Text>
-                    {presence(c).live && <LiveDot />}
+                    {presence(c, t).live && <LiveDot />}
                   </Pressable>
                 );
               })}
@@ -136,15 +137,21 @@ export default function ParentScreen() {
             onPause={async () => {
               const next = !child.paused;
               next ? fx.longPress() : fx.tap();
-              done(await setPaused(child, next), next ? `${child.display_name} is paused` : `${child.display_name} can watch again`);
+              done(
+                await setPaused(child, next),
+                t(next ? 'parent.pausedToast' : 'parent.resumedToast', { name: child.display_name }),
+              );
             }}
             onAddTime={async () => {
               fx.tap();
-              done(await addTime(child, 15), `+15 min for ${child.display_name} today`);
+              done(await addTime(child, 15), t('parent.addedTime', { count: 15, name: child.display_name }));
             }}
             onAnswer={async (m) => {
               fx.tap();
-              done(await answer(child, m), m ? `+${m} min for ${child.display_name} today` : `Told ${child.display_name} not today`);
+              done(
+                await answer(child, m),
+                m ? t('parent.addedTime', { count: m, name: child.display_name }) : t('parent.toldNotToday', { name: child.display_name }),
+              );
             }}
           />
 
@@ -153,35 +160,43 @@ export default function ParentScreen() {
           </Enter>
 
           <Enter index={3} style={styles.card}>
-            <Text style={styles.cardTitle}>Rules</Text>
+            <Text style={styles.cardTitle}>{t('parent.rules')}</Text>
             <View style={{ gap: space.sm }}>
-              <Text style={styles.label}>Daily limit</Text>
+              <Text style={styles.label}>{t('parent.dailyLimit')}</Text>
               <Segmented
                 options={LIMITS}
                 value={child.daily_limit_minutes}
-                label={(l) => (l == null ? 'Off' : String(l))}
-                onChange={(l) => change(child, { daily_limit_minutes: l }, l == null ? 'Daily limit off' : `Daily limit ${l} min`)}
+                label={(l) => (l == null ? t('common.off') : String(l))}
+                onChange={(l) => change(child, { daily_limit_minutes: l }, l == null ? t('parent.limitOff') : t('parent.limitSet', { count: l }))}
               />
             </View>
 
             <ToggleRow
-              label="Quiet hours"
-              sub={`No videos or games ${hourLabel(child.bedtime_hour)} – ${hourLabel(child.wake_hour)}`}
+              label={t('parent.quietHours')}
+              sub={t('parent.quietSub', { from: hourLabel(child.bedtime_hour, lang), to: hourLabel(child.wake_hour, lang) })}
               on={child.quiet_hours}
-              onPress={() => change(child, { quiet_hours: !child.quiet_hours }, child.quiet_hours ? 'Quiet hours off' : 'Quiet hours on')}
+              onPress={() => change(child, { quiet_hours: !child.quiet_hours }, child.quiet_hours ? t('parent.quietOff') : t('parent.quietOn'))}
             />
             {child.quiet_hours && (
               <View style={styles.hours}>
-                <HourStepper label="Bedtime" value={child.bedtime_hour} onChange={(h) => change(child, { bedtime_hour: h }, `Bedtime ${hourLabel(h)}`)} />
-                <HourStepper label="Wake up" value={child.wake_hour} onChange={(h) => change(child, { wake_hour: h }, `Wake up ${hourLabel(h)}`)} />
+                <HourStepper
+                  label={t('parent.bedtime')}
+                  value={child.bedtime_hour}
+                  onChange={(h) => change(child, { bedtime_hour: h }, t('parent.bedtimeSet', { time: hourLabel(h, lang) }))}
+                />
+                <HourStepper
+                  label={t('parent.wakeUp')}
+                  value={child.wake_hour}
+                  onChange={(h) => change(child, { wake_hour: h }, t('parent.wakeSet', { time: hourLabel(h, lang) }))}
+                />
               </View>
             )}
 
             <ToggleRow
-              label="Games"
-              sub="Bubble Pop and Memory Match"
+              label={t('parent.games')}
+              sub={t('parent.gamesSub')}
               on={child.games_enabled}
-              onPress={() => change(child, { games_enabled: !child.games_enabled }, child.games_enabled ? 'Games off' : 'Games on')}
+              onPress={() => change(child, { games_enabled: !child.games_enabled }, child.games_enabled ? t('parent.gamesOff') : t('parent.gamesOn'))}
             />
           </Enter>
 
@@ -199,23 +214,23 @@ export default function ParentScreen() {
         </ScrollView>
       )}
 
-      <BottomSheet open={!!hiding} onClose={() => setHiding(null)} title={child ? `Hide from ${child.display_name}?` : ''}>
+      <BottomSheet open={!!hiding} onClose={() => setHiding(null)} title={child ? t('parent.hideTitle', { name: child.display_name }) : ''}>
         <View style={{ gap: space.md, paddingHorizontal: space.xl }}>
           <Text style={styles.sheetCaption} numberOfLines={2}>
-            “{hiding?.caption}”
+            “{hiding ? localized(lang, hiding.caption, hiding.caption_i18n) : ''}”
           </Text>
-          <Text style={styles.sheetSub}>It won’t show up in their feed, search or saved videos again. Other profiles aren’t affected.</Text>
+          <Text style={styles.sheetSub}>{t('parent.hideSub')}</Text>
           <PressScale
             onPress={async () => {
               const v = hiding;
               setHiding(null);
-              if (child && v) done(await hideVideo(child, v.id), 'Hidden');
+              if (child && v) done(await hideVideo(child, v.id), t('parent.hidden'));
             }}
             accessibilityRole="button"
             style={styles.hideButton}
           >
             <Icon name="eyeOff" size={18} color={color.ink} strokeWidth={2.4} />
-            <Text style={styles.hideText}>Hide this video</Text>
+            <Text style={styles.hideText}>{t('parent.hideButton')}</Text>
           </PressScale>
         </View>
       </BottomSheet>
@@ -225,11 +240,12 @@ export default function ParentScreen() {
 
 /** Today at a glance: the ring, live status, and the two remote buttons. */
 function Hero({ child, onPause, onAddTime, onAnswer }: { child: Child; onPause: () => void; onAddTime: () => void; onAnswer: (m: number | null) => void }) {
+  const { t } = useT();
   const L = lanes[child.lane];
   const today = child.week[child.week.length - 1];
   const used = (today?.video_s ?? 0) + (today?.game_s ?? 0);
   const limit = child.daily_limit_minutes == null ? null : child.daily_limit_minutes + child.extra_minutes;
-  const p = presence(child);
+  const p = presence(child, t);
 
   return (
     <Enter index={1} style={[styles.card, styles.hero]}>
@@ -237,8 +253,12 @@ function Hero({ child, onPause, onAddTime, onAnswer }: { child: Child; onPause: 
         <View style={styles.ringWrap}>
           <Ring progress={limit ? used / (limit * 60) : 0} size={112} stroke={9} color={child.paused ? color.verified : limit && used >= limit * 60 ? RED : GREEN} delay={200} />
           <View style={styles.ringLabel}>
-            <Text style={styles.ringValue}>{minutes(used)}</Text>
-            <Text style={styles.ringSub}>{limit ? `of ${limit}m` : 'today'}</Text>
+            <Text style={styles.ringValue} numberOfLines={1} adjustsFontSizeToFit>
+              {minutes(t, used)}
+            </Text>
+            <Text style={styles.ringSub} numberOfLines={1} adjustsFontSizeToFit>
+              {limit ? t('parent.ofLimit', { limit: minutes(t, limit * 60) }) : t('parent.today')}
+            </Text>
           </View>
         </View>
         <View style={{ flex: 1, gap: 6 }}>
@@ -247,14 +267,14 @@ function Hero({ child, onPause, onAddTime, onAnswer }: { child: Child; onPause: 
           </Text>
           <View style={[styles.lanePill, { backgroundColor: L.color }]}>
             <Text style={styles.lanePillText}>
-              {L.label} · {L.ages}
+              {t(laneKey(child.lane))} · {L.ages}
             </Text>
           </View>
           <View style={styles.statusRow}>
             {child.paused ? <Icon name="pause" size={12} color={color.verified} strokeWidth={3} /> : p.live && <LiveDot />}
-            <Text style={[styles.status, child.paused ? { color: color.verified } : p.live && { color: GREEN }]}>{child.paused ? 'Paused' : p.text}</Text>
+            <Text style={[styles.status, child.paused ? { color: color.verified } : p.live && { color: GREEN }]}>{child.paused ? t('parent.paused') : p.text}</Text>
           </View>
-          {child.extra_minutes > 0 && <Text style={styles.extra}>+{child.extra_minutes} min extra today</Text>}
+          {child.extra_minutes > 0 && <Text style={styles.extra}>{t('parent.extraToday', { count: child.extra_minutes })}</Text>}
         </View>
       </View>
 
@@ -263,11 +283,13 @@ function Hero({ child, onPause, onAddTime, onAnswer }: { child: Child; onPause: 
       <View style={styles.actions}>
         <PressScale onPress={onPause} accessibilityRole="button" style={[styles.action, child.paused ? styles.resume : styles.pause]}>
           <Icon name={child.paused ? 'play' : 'pause'} size={18} color={color.ink} strokeWidth={2.8} />
-          <Text style={styles.actionTextInk}>{child.paused ? 'Resume' : 'Pause now'}</Text>
+          <Text style={styles.actionTextInk} numberOfLines={1} adjustsFontSizeToFit>
+            {child.paused ? t('parent.resume') : t('parent.pauseNow')}
+          </Text>
         </PressScale>
         <PressScale onPress={onAddTime} disabled={limit == null} accessibilityRole="button" style={[styles.action, styles.addTime, limit == null && { opacity: 0.4 }]}>
           <Icon name="plus" size={18} color={color.text} strokeWidth={2.6} />
-          <Text style={styles.actionText}>15 min</Text>
+          <Text style={styles.actionText}>{t('common.minutes', { count: 15 })}</Text>
         </PressScale>
       </View>
     </Enter>
@@ -276,23 +298,26 @@ function Hero({ child, onPause, onAddTime, onAnswer }: { child: Child; onPause: 
 
 /** "Hugo is asking for more time": answer right here. */
 function RequestCard({ name, at, onAnswer }: { name: string; at: string; onAnswer: (m: number | null) => void }) {
+  const { t } = useT();
   const mins = Math.max(1, Math.round((Date.now() - new Date(at).getTime()) / 60_000));
   return (
     <Enter index={0} rise={8} style={styles.request}>
       <View style={styles.requestHead}>
         <Icon name="clock" size={18} color="#FFD25E" strokeWidth={2.4} />
         <Text style={styles.requestTitle}>
-          {name} is asking for more time <Text style={styles.requestAgo}>· {mins < 60 ? `${mins}m` : `${Math.round(mins / 60)}h`} ago</Text>
+          {t('parent.asking', { name })} <Text style={styles.requestAgo}>· {ago(t, mins)}</Text>
         </Text>
       </View>
       <View style={styles.requestActions}>
         {[15, 30].map((m) => (
           <PressScale key={m} onPress={() => onAnswer(m)} accessibilityRole="button" style={[styles.requestButton, styles.requestYes]}>
-            <Text style={styles.requestYesText}>+{m} min</Text>
+            <Text style={styles.requestYesText}>+{t('common.minutes', { count: m })}</Text>
           </PressScale>
         ))}
         <PressScale onPress={() => onAnswer(null)} accessibilityRole="button" style={styles.requestButton}>
-          <Text style={styles.requestNoText}>Not today</Text>
+          <Text style={styles.requestNoText} numberOfLines={1} adjustsFontSizeToFit>
+            {t('parent.notToday')}
+          </Text>
         </PressScale>
       </View>
     </Enter>
@@ -301,6 +326,7 @@ function RequestCard({ name, at, onAnswer }: { name: string; at: string; onAnswe
 
 /** Opt this phone in to parent alerts. Pushes go only to phones switched on here. */
 function AlertsCard({ parent, onResult }: { parent: string | null; onResult: (text: string, ok: boolean) => void }) {
+  const { t } = useT();
   const [on, setOn] = useState(() => !!storedPushToken());
   const [busy, setBusy] = useState(false);
 
@@ -311,21 +337,17 @@ function AlertsCard({ parent, onResult }: { parent: string | null; onResult: (te
     if (on) {
       await disableParentAlerts();
       setOn(false);
-      onResult('Alerts off on this phone', true);
+      onResult(t('parent.alertsOffToast'), true);
     } else if (parent) {
       const r = await enableParentAlerts(parent);
       if (r === 'on') {
         setOn(true);
-        onResult('Alerts on for this phone', true);
+        onResult(t('parent.alertsOnToast'), true);
       } else {
         fx.error();
         Alert.alert(
-          'Alerts not turned on',
-          r === 'denied'
-            ? 'Payhas needs permission to send notifications. You can allow it in your phone’s settings.'
-            : r === 'unsupported'
-              ? 'Alerts work on a phone or tablet, not here.'
-              : 'Couldn’t reach Payhas. Try again in a moment.',
+          t('parent.alertsFailTitle'),
+          r === 'denied' ? t('parent.alertsDenied') : r === 'unsupported' ? t('parent.alertsUnsupported') : t('parent.alertsError'),
         );
       }
     }
@@ -339,8 +361,8 @@ function AlertsCard({ parent, onResult }: { parent: string | null; onResult: (te
           <Icon name="inbox" size={18} color={GREEN} strokeWidth={2.2} />
         </View>
         <View style={{ flex: 1, gap: 2 }}>
-          <Text style={styles.label}>Alerts on this phone</Text>
-          <Text style={styles.sub}>Limit reached, a flagged video, or a request for more time. Children never get notifications.</Text>
+          <Text style={styles.label}>{t('parent.alertsLabel')}</Text>
+          <Text style={styles.sub}>{t('parent.alertsSub')}</Text>
         </View>
         <Toggle on={on} tint={GREEN} />
       </Pressable>
@@ -350,6 +372,8 @@ function AlertsCard({ parent, onResult }: { parent: string | null; onResult: (te
 
 /** Seven stacked bars (videos + games), rising one after another. */
 function WeekChart({ child }: { child: Child }) {
+  const { t } = useT();
+  const dayLetter = t('parent.dayLetters').split(',');
   const total = child.week.reduce((n, d) => n + d.video_s + d.game_s, 0);
   const max = Math.max(1, ...child.week.map((d) => d.video_s + d.game_s), (child.daily_limit_minutes ?? 0) * 60);
   const limitY = child.daily_limit_minutes ? (child.daily_limit_minutes * 60) / max : null;
@@ -357,10 +381,8 @@ function WeekChart({ child }: { child: Child }) {
   return (
     <View style={styles.card}>
       <View style={styles.chartHead}>
-        <Text style={styles.cardTitle}>This week</Text>
-        <Text style={styles.chartTotal}>
-          {minutes(total)} · {minutes(total / 7)}/day
-        </Text>
+        <Text style={styles.cardTitle}>{t('parent.thisWeek')}</Text>
+        <Text style={styles.chartTotal}>{t('parent.weekTotal', { total: minutes(t, total), avg: minutes(t, total / 7) })}</Text>
       </View>
       <View style={styles.chart}>
         {limitY != null && <View style={[styles.limitLine, { bottom: 22 + limitY * CHART_H }]} />}
@@ -369,16 +391,16 @@ function WeekChart({ child }: { child: Child }) {
           return (
             <View key={d.day} style={styles.barCol}>
               <Bar index={i} video={d.video_s / max} game={d.game_s / max} today={isToday} />
-              <Text style={[styles.dayLetter, isToday && { color: color.text }]}>{DAY_LETTER[new Date(d.day + 'T12:00:00').getDay()]}</Text>
+              <Text style={[styles.dayLetter, isToday && { color: color.text }]}>{dayLetter[new Date(d.day + 'T12:00:00').getDay()]}</Text>
             </View>
           );
         })}
       </View>
       <View style={styles.legend}>
         <View style={[styles.swatch, { backgroundColor: GREEN }]} />
-        <Text style={styles.legendText}>Videos</Text>
+        <Text style={styles.legendText}>{t('parent.videos')}</Text>
         <View style={[styles.swatch, { backgroundColor: '#FFD25E' }]} />
-        <Text style={styles.legendText}>Games</Text>
+        <Text style={styles.legendText}>{t('parent.games')}</Text>
       </View>
     </View>
   );
@@ -413,6 +435,7 @@ function Bar({ index, video, game, today }: { index: number; video: number; game
 
 /** What the child has been watching: top topics, anything they flagged, recent videos. */
 function Watching({ child, onHide }: { child: Child; onHide: (v: RecentRow) => void }) {
+  const { t, lang } = useT();
   const [urls, setUrls] = useState<Record<string, string>>({});
   const signed = useRef('');
   useEffect(() => {
@@ -422,38 +445,46 @@ function Watching({ child, onHide }: { child: Child; onHide: (v: RecentRow) => v
     signMedia(child.recent).then(setUrls);
   }, [child.recent]);
 
-  const topicTotal = child.topics.reduce((n, t) => n + t.seconds, 0) || 1;
+  const topicTotal = child.topics.reduce((n, x) => n + x.seconds, 0) || 1;
 
   return (
     <View style={styles.card}>
-      <Text style={styles.cardTitle}>What {child.display_name} watched</Text>
+      <Text style={styles.cardTitle}>{t('parent.watched', { name: child.display_name })}</Text>
 
       {child.flags.length > 0 &&
         child.flags.map((f) => (
           <View key={f.video_id + f.at} style={styles.flag}>
             <Icon name="flag" size={14} color={RED} />
             <Text style={styles.flagText} numberOfLines={2}>
-              Flagged “{f.caption}” as {(REASON_LABEL[f.reason] ?? f.reason).toLowerCase()} — it’s hidden and with our moderators.
+              {t('parent.flagged', { caption: localized(lang, f.caption, f.caption_i18n), reason: reasonLabel(t, f.reason).toLowerCase() })}
             </Text>
           </View>
         ))}
 
       {child.topics.length === 0 ? (
-        <Text style={styles.muted}>Nothing watched this week yet.</Text>
+        <Text style={styles.muted}>{t('parent.nothingWatched')}</Text>
       ) : (
         <View style={{ gap: space.sm }}>
-          {child.topics.map((t, i) => (
-            <TopicBar key={t.slug} index={i} emoji={t.emoji} label={t.label} share={t.seconds / topicTotal} time={minutes(t.seconds)} />
+          {child.topics.map((x, i) => (
+            <TopicBar
+              key={x.slug}
+              index={i}
+              emoji={x.emoji}
+              label={topicLabel(t, x.slug, x.label)}
+              share={x.seconds / topicTotal}
+              time={minutes(t, x.seconds)}
+            />
           ))}
         </View>
       )}
 
       {child.recent.length > 0 && (
         <>
-          <Text style={[styles.label, { marginTop: space.sm }]}>Recent videos</Text>
+          <Text style={[styles.label, { marginTop: space.sm }]}>{t('parent.recentVideos')}</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: space.sm }}>
             {child.recent.map((r) => {
               const m = mediaFor(r, urls);
+              const caption = localized(lang, r.caption, r.caption_i18n);
               return (
                 <PressScale
                   key={r.id}
@@ -463,7 +494,7 @@ function Watching({ child, onHide }: { child: Child; onHide: (v: RecentRow) => v
                     onHide(r);
                   }}
                   accessibilityRole="button"
-                  accessibilityLabel={`${r.caption}${r.hidden ? ', hidden' : ''}`}
+                  accessibilityLabel={r.hidden ? t('parent.hiddenA11y', { caption }) : caption}
                   style={styles.recent}
                 >
                   {m ? <Image source={m.thumb} style={[styles.recentThumb, r.hidden && { opacity: 0.3 }]} /> : <View style={styles.recentThumb} />}
@@ -473,13 +504,13 @@ function Watching({ child, onHide }: { child: Child; onHide: (v: RecentRow) => v
                     </View>
                   )}
                   <Text style={styles.recentCaption} numberOfLines={2}>
-                    {r.caption}
+                    {caption}
                   </Text>
                 </PressScale>
               );
             })}
           </ScrollView>
-          <Text style={styles.muted}>Tap a video to hide it from {child.display_name}.</Text>
+          <Text style={styles.muted}>{t('parent.tapToHide', { name: child.display_name })}</Text>
         </>
       )}
     </View>
@@ -531,6 +562,7 @@ function ToggleRow({ label, sub, on, onPress }: { label: string; sub: string; on
 
 /** − 8pm + ; saves 600ms after the last tap so quick taps don't each notify the child. */
 function HourStepper({ label, value, onChange }: { label: string; value: number; onChange: (h: number) => void }) {
+  const { t, lang } = useT();
   const [h, setH] = useState(value);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => setH(value), [value]);
@@ -548,11 +580,11 @@ function HourStepper({ label, value, onChange }: { label: string; value: number;
     <View style={styles.stepper}>
       <Text style={styles.sub}>{label}</Text>
       <View style={styles.stepRow}>
-        <PressScale onPress={() => step(-1)} pressedScale={0.85} accessibilityRole="button" accessibilityLabel={`${label} earlier`} style={styles.stepButton}>
+        <PressScale onPress={() => step(-1)} pressedScale={0.85} accessibilityRole="button" accessibilityLabel={t('parent.earlier', { label })} style={styles.stepButton}>
           <Icon name="minus" size={16} strokeWidth={2.6} />
         </PressScale>
-        <Text style={styles.stepValue}>{hourLabel(h)}</Text>
-        <PressScale onPress={() => step(1)} pressedScale={0.85} accessibilityRole="button" accessibilityLabel={`${label} later`} style={styles.stepButton}>
+        <Text style={styles.stepValue}>{hourLabel(h, lang)}</Text>
+        <PressScale onPress={() => step(1)} pressedScale={0.85} accessibilityRole="button" accessibilityLabel={t('parent.later', { label })} style={styles.stepButton}>
           <Icon name="plus" size={16} strokeWidth={2.6} />
         </PressScale>
       </View>
@@ -578,29 +610,34 @@ function LiveDot() {
 
 /** Leaving the dashboard: lock it, or sign the whole family out (to switch accounts). */
 function AccountActions({ onLock, onSignOut }: { onLock: () => void; onSignOut: () => void }) {
+  const { t } = useT();
   return (
     <View style={styles.accountRow}>
       <PressScale onPress={() => { fx.tap(); onLock(); }} accessibilityRole="button" style={[styles.lockButton, styles.accountButton]}>
         <Icon name="lock" size={16} color={color.text2} strokeWidth={2.2} />
-        <Text style={styles.lockText}>Lock dashboard</Text>
+        <Text style={styles.lockText} numberOfLines={1} adjustsFontSizeToFit>
+          {t('parent.lock')}
+        </Text>
       </PressScale>
       <PressScale
         onPress={() => {
           fx.tap();
-          const title = 'Sign out of Payhas?';
-          const body = 'Everyone on this phone is signed out. You can sign in with another family account.';
+          const title = t('parent.signOutTitle');
+          const body = t('parent.signOutBody');
           // react-native-web's Alert shows nothing, so the browser build confirms natively.
           if (Platform.OS === 'web') return window.confirm(`${title}\n\n${body}`) && onSignOut();
           Alert.alert(title, body, [
-            { text: 'Cancel', style: 'cancel' },
-            { text: 'Sign out', style: 'destructive', onPress: onSignOut },
+            { text: t('common.cancel'), style: 'cancel' },
+            { text: t('parent.signOut'), style: 'destructive', onPress: onSignOut },
           ]);
         }}
         accessibilityRole="button"
         style={[styles.lockButton, styles.accountButton]}
       >
         <Icon name="close" size={16} color={RED} strokeWidth={2.2} />
-        <Text style={[styles.lockText, { color: RED }]}>Sign out</Text>
+        <Text style={[styles.lockText, { color: RED }]} numberOfLines={1} adjustsFontSizeToFit>
+          {t('parent.signOut')}
+        </Text>
       </PressScale>
     </View>
   );

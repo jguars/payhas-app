@@ -4,6 +4,7 @@ import Animated, { interpolateColor, useAnimatedStyle, useSharedValue, withSprin
 
 import { Enter } from '@/components/motion/Enter';
 import { PressScale } from '@/components/motion/PressScale';
+import { topicLabel, useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { spring } from '@/theme/motion';
 import { color, font } from '@/theme/tokens';
@@ -36,6 +37,8 @@ export function TopicGrid({ topics, selected, onSelect, baseIndex = 0 }: Props) 
 }
 
 function TopicTile({ topic, swatch, on, onPress }: { topic: Topic; swatch: string; on: boolean; onPress: () => void }) {
+  const { t } = useT();
+  const label = topicLabel(t, topic.slug, topic.label);
   const sel = useSharedValue(on ? 1 : 0);
   useEffect(() => {
     sel.value = withSpring(on ? 1 : 0, spring.bouncy);
@@ -50,11 +53,11 @@ function TopicTile({ topic, swatch, on, onPress }: { topic: Topic; swatch: strin
   }));
 
   return (
-    <PressScale onPress={onPress} accessibilityRole="button" accessibilityState={{ selected: on }} accessibilityLabel={topic.label}>
+    <PressScale onPress={onPress} accessibilityRole="button" accessibilityState={{ selected: on }} accessibilityLabel={label}>
       <Animated.View style={[styles.tile, tile]}>
         <Animated.View style={[styles.swatch, { backgroundColor: swatch }, dot]} />
         <Text style={styles.label} numberOfLines={1}>
-          {topic.label}
+          {label}
         </Text>
         {topic.count > 0 && <Text style={styles.count}>{topic.count}</Text>}
       </Animated.View>

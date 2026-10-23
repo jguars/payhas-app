@@ -12,6 +12,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import Svg, { Path } from 'react-native-svg';
 
+import { laneKey, useT } from '@/i18n';
 import { spring } from '@/theme/motion';
 import { font, Lane, lane as lanes } from '@/theme/tokens';
 
@@ -24,6 +25,8 @@ const CHECK_LEN = 10;
 /** "Kids lane" — the shield outline draws itself, then the check ticks in. */
 export function LaneChip({ lane, delay = 120 }: { lane: Lane; delay?: number }) {
   const l = lanes[lane];
+  const { t } = useT();
+  const label = t('discover.laneChip', { lane: t(laneKey(lane)) });
   const reduce = useReducedMotion();
   const pop = useSharedValue(reduce ? 1 : 0);
   const shield = useSharedValue(reduce ? 1 : 0);
@@ -41,7 +44,7 @@ export function LaneChip({ lane, delay = 120 }: { lane: Lane; delay?: number }) 
   const checkProps = useAnimatedProps(() => ({ strokeDashoffset: CHECK_LEN * (1 - check.value) }));
 
   return (
-    <Animated.View style={[styles.chip, { borderColor: l.color + '8C' }, chip]} accessibilityLabel={`${l.label} lane`}>
+    <Animated.View style={[styles.chip, { borderColor: l.color + '8C' }, chip]} accessibilityLabel={label}>
       <Svg width={13} height={13} viewBox="0 0 24 24">
         <AnimatedPath
           d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"
@@ -64,7 +67,9 @@ export function LaneChip({ lane, delay = 120 }: { lane: Lane; delay?: number }) 
           animatedProps={checkProps}
         />
       </Svg>
-      <Text style={[styles.label, { color: l.color }]}>{l.label} lane</Text>
+      <Text style={[styles.label, { color: l.color }]} numberOfLines={1}>
+        {label}
+      </Text>
     </Animated.View>
   );
 }

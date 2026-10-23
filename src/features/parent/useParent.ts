@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { deviceTimeZone } from '@/features/library/LibraryProvider';
+import type { T } from '@/i18n';
 import type { Lane } from '@/theme/tokens';
 import { supabase } from '@/lib/supabase';
 
@@ -9,6 +10,7 @@ export type TopicRow = { slug: string; label: string; emoji: string; seconds: nu
 export type RecentRow = {
   id: string;
   caption: string;
+  caption_i18n?: unknown;
   creator_name: string;
   lane: Lane;
   asset_key: string | null;
@@ -18,7 +20,7 @@ export type RecentRow = {
   last_at: string;
   hidden: boolean;
 };
-export type FlagRow = { video_id: string; caption: string; reason: string; at: string };
+export type FlagRow = { video_id: string; caption: string; caption_i18n?: unknown; reason: string; at: string };
 export type Child = {
   id: string;
   display_name: string;
@@ -152,18 +154,31 @@ export function useParent() {
   return { token, unlocked: !!token, children, unlock, lock, reload: load, setControls, setPaused, addTime, answer, hideVideo };
 }
 
-/** "Watching now" if the child's device pinged in the last 2½ minutes. */
-export function presence(c: Child, now = Date.now()) {
-  if (!c.last_seen_at) return { live: false, text: 'Not seen yet' };
-  const ago = now - new Date(c.last_seen_at).getTime();
-  if (ago < 150_000) {
-    return { live: true, text: c.last_activity === 'watching' ? 'Watching now' : c.last_activity === 'playing' ? 'Playing now' : 'In the app now' };
-  }
-  const m = Math.round(ago / 60_000);
-  return { live: false, text: `Last seen ${m < 60 ? `${m}m` : m < 1440 ? `${Math.round(m / 60)}h` : `${Math.round(m / 1440)}d`} ago` };
+/** "5m ago", "2h ago", "3d ago" in the current language. */
+export function ago(t: T, minutes: number) {
+  const m = Math.max(1, minutes);
+  return m < 60
+    ? t('parent.agoMin', { count: m })
+    : m < 1440
+      ? t('parent.agoHour', { count: Math.round(m / 60) })
+      : t('parent.agoDay', { count: Math.round(m / 1440) });
 }
 
-export const minutes = (s: number) => {
+/** "Watching now" if the child's device pinged in the last 2½ minutes. */
+export function presence(c: Child, t: T, now = Date.now()) {
+  if (!c.last_seen_at) return { live: false, text: t('parent.notSeen') };
+  const since = now - new Date(c.last_seen_at).getTime();
+  if (since < 150_000) {
+    return {
+      live: true,
+      text: t(c.last_activity === 'watching' ? 'parent.watchingNow' : c.last_activity === 'playing' ? 'parent.playingNow' : 'parent.inAppNow'),
+    };
+  }
+  return { live: false, text: t('parent.lastSeen', { time: ago(t, Math.round(since / 60_000)) }) };
+}
+
+/** Seconds as "1h 5m" / "45m" (in the current language). */
+export const minutes = (t: T, s: number) => {
   const m = Math.round(s / 60);
-  return m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m}m`;
+  return m >= 60 ? t('parent.durHM', { h: Math.floor(m / 60), m: m % 60 }) : t('parent.durM', { m });
 };

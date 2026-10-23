@@ -18,9 +18,11 @@ import { Icon } from '@/components/Icon';
 import { StatusScrim } from '@/components/StatusScrim';
 import { Enter } from '@/components/motion/Enter';
 import { PressScale } from '@/components/motion/PressScale';
-import { MediaSource } from '@/features/feed/data';
+import { FeedVideo, MediaSource } from '@/features/feed/data';
 import { useFeed } from '@/features/feed/useFeed';
+import { translateInbox } from '@/features/inbox/translateInbox';
 import { InboxItem, useLibrary } from '@/features/library/LibraryProvider';
+import { useT, type T } from '@/i18n';
 import { spring, stagger } from '@/theme/motion';
 import { color, font, space } from '@/theme/tokens';
 
@@ -33,6 +35,7 @@ export default function InboxScreen() {
   const focused = useIsFocused();
   const { inbox, refreshInbox, markInboxRead } = useLibrary();
   const { videos } = useFeed();
+  const { t } = useT();
   const [seen, setSeen] = useState(false);
   const wasFocused = useRef(false);
 
@@ -42,12 +45,12 @@ export default function InboxScreen() {
     if (focused) {
       setSeen(false);
       refreshInbox();
-      const t = setTimeout(() => {
+      const timer = setTimeout(() => {
         setSeen(true);
         markInboxRead();
       }, READ_AFTER_MS);
       wasFocused.current = true;
-      return () => clearTimeout(t);
+      return () => clearTimeout(timer);
     }
     if (wasFocused.current) refreshInbox();
   }, [focused, refreshInbox, markInboxRead]);
@@ -57,7 +60,7 @@ export default function InboxScreen() {
     [inbox],
   );
 
-  const thumbFor = (item: InboxItem) => videos.find((v) => v.id === item.video_id)?.thumb;
+  const videoFor = (item: InboxItem): FeedVideo | undefined => videos.find((v) => v.id === item.video_id);
   const open = (item: InboxItem) => {
     if (item.video_id) router.navigate({ pathname: '/', params: { v: item.video_id } });
   };
@@ -71,7 +74,7 @@ export default function InboxScreen() {
         </Enter>
         {items.map((item) => (
           <Enter key={item.id} index={n++}>
-            <Row item={item} thumb={thumbFor(item)} unread={unread} fading={seen} order={n} onPress={() => open(item)} />
+            <Row item={item} video={videoFor(item)} unread={unread} fading={seen} order={n} onPress={() => open(item)} />
           </Enter>
         ))}
       </View>
@@ -82,15 +85,15 @@ export default function InboxScreen() {
       <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + 14, paddingBottom: barSpace }]} showsVerticalScrollIndicator={false}>
         <Enter index={0}>
           <Text style={styles.title} accessibilityRole="header">
-            Inbox
+            {t('inbox.title')}
           </Text>
         </Enter>
         {inbox.length === 0 ? (
           <Empty />
         ) : (
           <>
-            {section('New', fresh, true)}
-            {section('Earlier', earlier, false)}
+            {section(t('inbox.new'), fresh, true)}
+            {section(t('inbox.earlier'), earlier, false)}
           </>
         )}
       </ScrollView>
@@ -101,35 +104,37 @@ export default function InboxScreen() {
 
 function Row({
   item,
-  thumb,
+  video,
   unread,
   fading,
   order,
   onPress,
 }: {
   item: InboxItem;
-  thumb?: MediaSource;
+  video?: FeedVideo;
   unread: boolean;
   fading: boolean;
   order: number;
   onPress: () => void;
 }) {
+  const { t, lang } = useT();
   const tappable = !!item.video_id;
+  const { title, body } = translateInbox(item, t, lang, video?.caption);
   return (
     <PressScale onPress={onPress} disabled={!tappable} pressedScale={0.98} accessibilityRole={tappable ? 'button' : 'text'} style={styles.row}>
-      <Badge item={item} thumb={thumb} />
+      <Badge item={item} thumb={video?.thumb} />
       <View style={{ flex: 1, gap: 2 }}>
         <Text style={styles.rowTitle} numberOfLines={1}>
-          {item.title}
+          {title}
         </Text>
-        {!!item.body && (
+        {!!body && (
           <Text style={styles.rowBody} numberOfLines={2}>
-            {item.body}
+            {body}
           </Text>
         )}
       </View>
       <View style={styles.rowEnd}>
-        <Text style={styles.time}>{ago(item.created_at)}</Text>
+        <Text style={styles.time}>{ago(item.created_at, t)}</Text>
         {unread && <UnreadDot fading={fading} delay={stagger(order, 70)} />}
       </View>
     </PressScale>
@@ -175,27 +180,28 @@ function UnreadDot({ fading, delay }: { fading: boolean; delay: number }) {
 /** Nothing new: an inbox tray bobbing gently. */
 function Empty() {
   const reduce = useReducedMotion();
-  const t = useSharedValue(0);
+  const { t } = useT();
+  const bob = useSharedValue(0);
   useEffect(() => {
-    if (!reduce) t.value = withRepeat(withTiming(1, { duration: 2200, easing: Easing.inOut(Easing.sin) }), -1, true);
-  }, [reduce, t]);
-  const anim = useAnimatedStyle(() => ({ transform: [{ translateY: -5 + 10 * t.value }] }));
+    if (!reduce) bob.value = withRepeat(withTiming(1, { duration: 2200, easing: Easing.inOut(Easing.sin) }), -1, true);
+  }, [reduce, bob]);
+  const anim = useAnimatedStyle(() => ({ transform: [{ translateY: -5 + 10 * bob.value }] }));
   return (
     <Enter index={1} style={styles.empty}>
       <Animated.View style={anim}>
         <Icon name="inbox" size={44} color={color.text3} strokeWidth={1.6} />
       </Animated.View>
-      <Text style={styles.emptyText}>All caught up</Text>
+      <Text style={styles.emptyText}>{t('inbox.empty')}</Text>
     </Enter>
   );
 }
 
-function ago(iso: string) {
+function ago(iso: string, t: T) {
   const s = Math.max(0, (Date.now() - new Date(iso).getTime()) / 1000);
-  if (s < 60) return 'now';
-  if (s < 3600) return `${Math.floor(s / 60)}m`;
-  if (s < 86400) return `${Math.floor(s / 3600)}h`;
-  return `${Math.floor(s / 86400)}d`;
+  if (s < 60) return t('inbox.now');
+  if (s < 3600) return t('inbox.agoMinutes', { n: Math.floor(s / 60) });
+  if (s < 86400) return t('inbox.agoHours', { n: Math.floor(s / 3600) });
+  return t('inbox.agoDays', { n: Math.floor(s / 86400) });
 }
 
 const styles = StyleSheet.create({

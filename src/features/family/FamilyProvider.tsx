@@ -7,11 +7,15 @@ import { supabase } from '@/lib/supabase';
 
 export type Profile = Tables<'profiles'> & { interestCount: number };
 export type ActiveProfile = { profile: Profile; token: string };
+export type Family = Pick<Tables<'families'>, 'id' | 'language' | 'onboarded_at'>;
 
 type FamilyContext = {
   ready: boolean;
   session: Session | null;
   profiles: Profile[];
+  family: Family | null;
+  /** Signed in, but the family hasn't been through onboarding yet. */
+  needsOnboarding: boolean;
   hasPin: boolean;
   active: ActiveProfile | null;
   /** The active profile's latest row (active.profile is the copy taken when it was opened). */
@@ -47,13 +51,16 @@ export function FamilyProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [hasPin, setHasPin] = useState(false);
+  const [family, setFamily] = useState<Family | null>(null);
   const [active, setActive] = useState<ActiveProfile | null>(null);
 
   const refresh = useCallback(async () => {
-    const [{ data: rows }, { data: pinSet }] = await Promise.all([
+    const [{ data: rows }, { data: pinSet }, { data: fam }] = await Promise.all([
       supabase.from('profiles').select('*, profile_interests(count)').order('created_at'),
       supabase.rpc('has_parent_pin'),
+      supabase.from('families').select('id, language, onboarded_at').maybeSingle(),
     ]);
+    setFamily(fam ?? null);
     const list = (rows ?? []).map(({ profile_interests, ...p }) => ({ ...p, interestCount: profile_interests[0]?.count ?? 0 }));
     setProfiles(list);
     setHasPin(!!pinSet);
@@ -72,6 +79,7 @@ export function FamilyProvider({ children }: { children: ReactNode }) {
       setAuthChecked(true);
       if (!next) {
         setProfiles([]);
+        setFamily(null);
         setActive(null);
         storeActive(null);
       }
@@ -129,10 +137,11 @@ export function FamilyProvider({ children }: { children: ReactNode }) {
 
   const current = (active && profiles.find((p) => p.id === active.profile.id)) ?? active?.profile ?? null;
   const needsInterests = !!current && current.interestCount === 0;
+  const needsOnboarding = !!session && !!family && !family.onboarded_at;
 
   const value = useMemo(
-    () => ({ ready, session, profiles, hasPin, active, current, needsInterests, refresh, selectProfile, leaveProfile, signOut }),
-    [ready, session, profiles, hasPin, active, current, needsInterests, refresh, selectProfile, leaveProfile, signOut],
+    () => ({ ready, session, profiles, family, needsOnboarding, hasPin, active, current, needsInterests, refresh, selectProfile, leaveProfile, signOut }),
+    [ready, session, profiles, family, needsOnboarding, hasPin, active, current, needsInterests, refresh, selectProfile, leaveProfile, signOut],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

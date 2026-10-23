@@ -16,6 +16,7 @@ import { CountUp } from '@/components/motion/CountUp';
 import { Enter } from '@/components/motion/Enter';
 import { PressScale } from '@/components/motion/PressScale';
 import { FeedVideo, formatCount } from '@/features/feed/data';
+import { useT } from '@/i18n';
 import { stagger } from '@/theme/motion';
 import { color, font } from '@/theme/tokens';
 
@@ -26,6 +27,7 @@ type Props = { videos: FeedVideo[]; loading?: boolean; onOpen: (v: FeedVideo) =>
  * Give it a new `key` when the filter changes and the cascade replays.
  */
 export function TrendingGrid({ videos, loading, onOpen, baseIndex = 0 }: Props) {
+  const { t } = useT();
   if (loading) {
     return (
       <View style={styles.grid}>
@@ -39,7 +41,7 @@ export function TrendingGrid({ videos, loading, onOpen, baseIndex = 0 }: Props) 
   if (videos.length === 0) {
     return (
       <Animated.View entering={FadeIn.duration(200)} style={styles.empty}>
-        <Text style={styles.emptyText}>Nothing here yet</Text>
+        <Text style={styles.emptyText}>{t('discover.empty')}</Text>
       </Animated.View>
     );
   }

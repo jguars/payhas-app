@@ -2,6 +2,7 @@ import { Image, ScrollView, StyleSheet, Text, useWindowDimensions, View } from '
 
 import { Icon } from '@/components/Icon';
 import { Enter } from '@/components/motion/Enter';
+import { useT } from '@/i18n';
 import { color, font, radius, space } from '@/theme/tokens';
 
 import { FeedVideo, formatCount } from './data';
@@ -13,16 +14,17 @@ const CARD_W = 220;
 /** Following with nobody followed yet: suggest creators from this lane instead of an empty screen. */
 export function FollowingEmpty({ videos, top }: { videos: FeedVideo[]; top: number }) {
   const { creators } = useCreators();
+  const { t } = useT();
   const { width } = useWindowDimensions();
   const thumbFor = (id: string) => videos.find((v) => v.id === id)?.thumb;
 
   return (
     <View style={[styles.root, { paddingTop: top }]}>
       <Enter index={0}>
-        <Text style={styles.title}>Follow creators you like</Text>
+        <Text style={styles.title}>{t('feed.empty.title')}</Text>
       </Enter>
       <Enter index={1}>
-        <Text style={styles.sub}>Their new videos show up here.</Text>
+        <Text style={styles.sub}>{t('feed.empty.sub')}</Text>
       </Enter>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} snapToInterval={CARD_W + space.md} decelerationRate="fast" contentContainerStyle={[styles.row, { paddingHorizontal: Math.max(space.lg, (width - CARD_W) / 2) }]}>
         {creators.map((c, i) => {
@@ -42,7 +44,7 @@ export function FollowingEmpty({ videos, top }: { videos: FeedVideo[]; top: numb
                   {c.verified && <Icon name="verified" size={14} color={color.verified} />}
                 </View>
                 <Text style={styles.meta}>
-                  {c.video_count} {c.video_count === 1 ? 'video' : 'videos'} · {formatCount(c.follower_count)} followers
+                  {t('feed.videos', { count: c.video_count })} · {t('feed.followers', { count: c.follower_count, n: formatCount(c.follower_count) })}
                 </Text>
                 <FollowButton creator={c.creator_name} />
               </View>

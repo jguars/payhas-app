@@ -50,6 +50,13 @@ Design source: https://claude.ai/artifact/EEnQUr5xZXq3b8utWGQyA4 — Feed Varian
 - [x] Parents opt a phone in from the dashboard; children never get notifications
 - [x] Alerts: limit reached (once a day), video flagged, "Ask for more time" (answered from the dashboard: +15 / +30 / Not today) — needs `20261012090000_push_notifications.sql` applied and `google-services.json` in the app folder
 
+## Phase 5e — Onboarding + languages
+- [x] First launch asks the language (Turkmen, Turkish, Russian, English); switch any time in Me
+- [x] Onboarding: welcome → parent PIN → parent profile → per child: name, birth month (lane computed, not picked), interests, learning-vs-fun, daily limit + bedtime → family summary
+- [x] For You ranked per profile (`get_for_you`): interests, learning mix, followed channels, freshness, recently watched pushed down; pages by exclusion
+- [x] Every screen translated (`src/i18n/strings/*`, typed keys); server inbox notices translated client-side; captions carry `caption_i18n` (`tools/content/apply_captions.py`) — needs `20261015090000_onboarding_i18n.sql` applied
+- [ ] Native-speaker review of Turkmen copy; a Cyrillic-capable display/body font pairing for Russian
+
 ## Phase 6 — Launch readiness
 - [ ] COPPA / GDPR-K / UK Children's Code, store kids-category rules
 - [ ] Analytics, crash reporting, performance budget (first frame < 1s, 60fps swipe)

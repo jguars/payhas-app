@@ -12,6 +12,8 @@ import { PressScale } from '@/components/motion/PressScale';
 import { Ring } from '@/components/motion/Ring';
 import { ScreenHeader } from '@/components/ScreenHeader';
 import { MAX_BYTES, MAX_SECONDS, uploadFile } from '@/features/creator/upload';
+import { REVIEW_ENABLED } from '@/features/creator/useReviewQueue';
+import { laneKey, topicLabel, type TKey, useT } from '@/i18n';
 import { Constants, Tables } from '@/lib/database.types';
 import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
@@ -21,11 +23,12 @@ import { color, font, Lane, lane as lanes, radius, space } from '@/theme/tokens'
 
 type Picked = { uri: string; seconds: number; type: string };
 type Stage = 'form' | 'uploading' | 'done';
-const STEPS = ['Preparing', 'Uploading video', 'Uploading poster', 'Sending for review'];
+const STEPS: TKey[] = ['creator.step.preparing', 'creator.step.video', 'creator.step.poster', REVIEW_ENABLED ? 'creator.step.review' : 'creator.step.publish'];
 const MAX_TOPICS = 3;
 const CAPTION_MAX = 150;
 
 export default function UploadScreen() {
+  const { t } = useT();
   const { bottom } = useInsets();
   const goBack = useGoBack();
   const [picked, setPicked] = useState<Picked | null>(null);
@@ -50,8 +53,8 @@ export default function UploadScreen() {
     if (res.canceled || !res.assets[0]) return;
     const a = res.assets[0];
     const seconds = (a.duration ?? 0) / 1000;
-    if (seconds > MAX_SECONDS + 0.5) return setError(`That one is ${Math.round(seconds)}s — videos can be up to ${MAX_SECONDS}s.`);
-    if (a.fileSize && a.fileSize > MAX_BYTES) return setError('That file is over 50 MB. Try a shorter clip or lower quality.');
+    if (seconds > MAX_SECONDS + 0.5) return setError(t('creator.tooLong', { s: Math.round(seconds), max: MAX_SECONDS }));
+    if (a.fileSize && a.fileSize > MAX_BYTES) return setError(t('creator.tooBig'));
     setPicked({ uri: a.uri, seconds: Math.max(1, seconds), type: a.mimeType ?? 'video/mp4' });
   };
 
@@ -86,7 +89,7 @@ export default function UploadScreen() {
       setStage('done');
     } catch (e) {
       fx.error();
-      setError(e instanceof Error ? e.message : 'Upload failed');
+      setError(e instanceof Error ? e.message : t('creator.uploadFailed'));
       setStage('form');
     }
   };
@@ -101,14 +104,16 @@ export default function UploadScreen() {
             </View>
           </Enter>
           <Enter index={2}>
-            <Text style={styles.doneTitle}>Sent for review</Text>
+            <Text style={styles.doneTitle}>{REVIEW_ENABLED ? t('creator.sentTitle') : t('creator.liveTitle')}</Text>
           </Enter>
           <Enter index={3}>
-            <Text style={styles.doneSub}>A moderator checks every video before children can see it. You’ll hear back in your Inbox.</Text>
+            <Text style={styles.doneSub}>
+              {REVIEW_ENABLED ? t('creator.sentSub') : t('creator.liveSub')}
+            </Text>
           </Enter>
           <Enter index={5} style={styles.doneRow}>
             <PressScale onPress={() => goBack()} accessibilityRole="button" style={[styles.button, styles.secondary]}>
-              <Text style={[styles.buttonText, { color: color.text }]}>Done</Text>
+              <Text style={[styles.buttonText, { color: color.text }]}>{t('common.done')}</Text>
             </PressScale>
             <PressScale
               onPress={() => {
@@ -123,7 +128,7 @@ export default function UploadScreen() {
               accessibilityRole="button"
               style={styles.button}
             >
-              <Text style={styles.buttonText}>Upload another</Text>
+              <Text style={styles.buttonText}>{t('creator.uploadAnother')}</Text>
             </PressScale>
           </Enter>
         </View>
@@ -133,7 +138,7 @@ export default function UploadScreen() {
 
   return (
     <KeyboardAvoidingView style={styles.root} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScreenHeader title="New video" />
+      <ScreenHeader title={t('creator.newVideo')} />
       <ScrollView contentContainerStyle={[styles.content, { paddingBottom: bottom + 110 }]} keyboardShouldPersistTaps="handled">
         {picked ? <Preview picked={picked} onChange={pick} /> : <PickCard onPress={pick} />}
         {error && (
@@ -143,18 +148,18 @@ export default function UploadScreen() {
           </Animated.View>
         )}
 
-        <Field label="Caption" hint={`${caption.length}/${CAPTION_MAX}`}>
+        <Field label={t('creator.caption')} hint={`${caption.length}/${CAPTION_MAX}`}>
           <TextInput
             value={caption}
-            onChangeText={(t) => setCaption(t.slice(0, CAPTION_MAX))}
-            placeholder="What happens in this video?"
+            onChangeText={(v) => setCaption(v.slice(0, CAPTION_MAX))}
+            placeholder={t('creator.captionPlaceholder')}
             placeholderTextColor={color.text3}
             multiline
             style={styles.input}
           />
         </Field>
 
-        <Field label="Topics" hint={`up to ${MAX_TOPICS}`}>
+        <Field label={t('creator.topics')} hint={t('creator.topicsHint', { count: MAX_TOPICS })}>
           <View style={styles.chips}>
             {interests.map((i) => {
               const on = topics.includes(i.slug);
@@ -165,21 +170,21 @@ export default function UploadScreen() {
                   disabled={full}
                   onPress={() => {
                     fx.tab();
-                    setTopics((t) => (on ? t.filter((x) => x !== i.slug) : [...t, i.slug]));
+                    setTopics((list) => (on ? list.filter((x) => x !== i.slug) : [...list, i.slug]));
                   }}
                   accessibilityRole="checkbox"
                   accessibilityState={{ checked: on, disabled: full }}
                   style={[styles.chip, on && styles.chipOn, full && { opacity: 0.35 }]}
                 >
                   <Text style={styles.chipEmoji}>{i.emoji}</Text>
-                  <Text style={[styles.chipText, on && { color: color.ink }]}>{i.label}</Text>
+                  <Text style={[styles.chipText, on && { color: color.ink }]}>{topicLabel(t, i.slug, i.label)}</Text>
                 </Pressable>
               );
             })}
           </View>
         </Field>
 
-        <Field label="Youngest age it suits" hint="a moderator confirms">
+        <Field label={t('creator.youngestAge')} hint={REVIEW_ENABLED ? t('creator.moderatorConfirms') : t('creator.youngerNever')}>
           <View style={styles.lanes}>
             {Constants.public.Enums.lane.map((l) => {
               const L = lanes[l];
@@ -195,7 +200,9 @@ export default function UploadScreen() {
                   accessibilityState={{ selected: on }}
                   style={[styles.lane, { borderColor: on ? L.color : color.line }, on && { backgroundColor: L.color + '22' }]}
                 >
-                  <Text style={[styles.laneLabel, { color: on ? L.color : color.text }]}>{L.label}</Text>
+                  <Text style={[styles.laneLabel, { color: on ? L.color : color.text }]} numberOfLines={1} adjustsFontSizeToFit>
+                    {t(laneKey(l))}
+                  </Text>
                   <Text style={styles.laneAges}>{L.ages}</Text>
                 </Pressable>
               );
@@ -213,16 +220,14 @@ export default function UploadScreen() {
           style={styles.agree}
         >
           <View style={[styles.box, agreed && styles.boxOn]}>{agreed && <Icon name="check" size={14} color={color.ink} strokeWidth={3} />}</View>
-          <Text style={styles.agreeText}>
-            I made this or have the rights to it. It has no ads, no personal details, and nobody is filmed without permission.
-          </Text>
+          <Text style={styles.agreeText}>{t('creator.agree')}</Text>
         </Pressable>
       </ScrollView>
 
       <View style={[styles.footer, { paddingBottom: bottom + space.md }]}>
         <PressScale onPress={submit} disabled={!ready} accessibilityRole="button" style={[styles.submit, !ready && { opacity: 0.4 }]}>
           <Icon name="send" size={18} color={color.ink} strokeWidth={2.4} />
-          <Text style={styles.buttonText}>Send for review</Text>
+          <Text style={styles.buttonText}>{REVIEW_ENABLED ? t('creator.sendForReview') : t('creator.publish')}</Text>
         </PressScale>
       </View>
 
@@ -238,7 +243,7 @@ export default function UploadScreen() {
                 <View style={[styles.stepDot, i < step && styles.stepDone, i === step && styles.stepNow]}>
                   {i < step && <Icon name="check" size={10} color={color.ink} strokeWidth={3.2} />}
                 </View>
-                <Text style={[styles.stepText, i > step && { color: color.text3 }]}>{s}</Text>
+                <Text style={[styles.stepText, i > step && { color: color.text3 }]}>{t(s)}</Text>
               </View>
             ))}
           </View>
@@ -249,18 +254,20 @@ export default function UploadScreen() {
 }
 
 function PickCard({ onPress }: { onPress: () => void }) {
+  const { t } = useT();
   return (
-    <PressScale onPress={onPress} accessibilityRole="button" accessibilityLabel="Choose a video" style={styles.pick}>
+    <PressScale onPress={onPress} accessibilityRole="button" accessibilityLabel={t('creator.chooseVideo')} style={styles.pick}>
       <View style={styles.pickIcon}>
         <Icon name="plus" size={28} color={color.ink} strokeWidth={2.6} />
       </View>
-      <Text style={styles.pickTitle}>Choose a video</Text>
-      <Text style={styles.pickSub}>Up to {MAX_SECONDS} seconds · 50 MB · portrait looks best</Text>
+      <Text style={styles.pickTitle}>{t('creator.chooseVideo')}</Text>
+      <Text style={styles.pickSub}>{t('creator.chooseSub', { max: MAX_SECONDS })}</Text>
     </PressScale>
   );
 }
 
 function Preview({ picked, onChange }: { picked: Picked; onChange: () => void }) {
+  const { t } = useT();
   const player = useVideoPlayer({ uri: picked.uri }, (p) => {
     p.loop = true;
     p.muted = true;
@@ -270,9 +277,9 @@ function Preview({ picked, onChange }: { picked: Picked; onChange: () => void })
     <View style={styles.preview}>
       <VideoView player={player} style={styles.previewVideo} contentFit="cover" nativeControls={false} />
       <View style={styles.previewMeta}>
-        <Text style={styles.previewTime}>{Math.round(picked.seconds)}s</Text>
+        <Text style={styles.previewTime}>{t('creator.seconds', { s: Math.round(picked.seconds) })}</Text>
         <Pressable onPress={onChange} hitSlop={8} style={styles.change}>
-          <Text style={styles.changeText}>Change</Text>
+          <Text style={styles.changeText}>{t('creator.change')}</Text>
         </Pressable>
       </View>
     </View>

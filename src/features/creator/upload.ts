@@ -1,3 +1,4 @@
+import { tNow } from '@/i18n';
 import { supabase } from '@/lib/supabase';
 
 const URL_BASE = process.env.EXPO_PUBLIC_SUPABASE_URL!;
@@ -14,7 +15,7 @@ export const MAX_BYTES = 50 * 1024 * 1024; // the bucket's file_size_limit
 export async function uploadFile(path: string, uri: string, type: string, onProgress?: (fraction: number) => void) {
   const { data } = await supabase.auth.getSession();
   const token = data.session?.access_token;
-  if (!token) throw new Error('Not signed in');
+  if (!token) throw new Error(tNow('creator.notSignedIn'));
 
   const form = new FormData();
   // React Native's FormData accepts a { uri, name, type } file descriptor.
@@ -31,9 +32,9 @@ export async function uploadFile(path: string, uri: string, type: string, onProg
     };
     xhr.onload = () => {
       if (xhr.status >= 200 && xhr.status < 300) resolve();
-      else reject(new Error(parseError(xhr.responseText) ?? `Upload failed (${xhr.status})`));
+      else reject(new Error(parseError(xhr.responseText) ?? tNow('creator.uploadFailedCode', { code: xhr.status })));
     };
-    xhr.onerror = () => reject(new Error('Network error — check your connection and try again'));
+    xhr.onerror = () => reject(new Error(tNow('creator.networkError')));
     xhr.send(form);
   });
 }

@@ -2,12 +2,14 @@ import { useState } from 'react';
 import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { SafeScreen } from '@/components/SafeScreen';
+import { useT } from '@/i18n';
 import { supabase } from '@/lib/supabase';
 import { color, font, radius, space } from '@/theme/tokens';
 
 type Mode = 'signIn' | 'signUp';
 
 export default function SignInScreen() {
+  const { t } = useT();
   const [mode, setMode] = useState<Mode>('signIn');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,11 +23,15 @@ export default function SignInScreen() {
     const { data, error } =
       mode === 'signIn' ? await supabase.auth.signInWithPassword(creds) : await supabase.auth.signUp(creds);
     setBusy(false);
-    if (error) return setMessage(error.message);
+    if (error) {
+      if (error.code === 'invalid_credentials') return setMessage(t('auth.invalidLogin'));
+      if (error.code === 'user_already_exists') return setMessage(t('auth.alreadyRegistered'));
+      return setMessage(error.message);
+    }
     // With email confirmation on, sign-up returns no session until the link is clicked.
     if (mode === 'signUp' && !data.session) {
       setMode('signIn');
-      setMessage('Check your email to confirm, then sign in.');
+      setMessage(t('auth.checkEmail'));
     }
   };
 
@@ -35,11 +41,11 @@ export default function SignInScreen() {
     <SafeScreen style={styles.root}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.body}>
         <Text style={styles.logo}>payhas</Text>
-        <Text style={styles.subtitle}>{mode === 'signIn' ? 'Parent sign in' : 'Create a family account'}</Text>
+        <Text style={styles.subtitle}>{mode === 'signIn' ? t('auth.signInTitle') : t('auth.signUpTitle')}</Text>
 
         <TextInput
           style={styles.input}
-          placeholder="Email"
+          placeholder={t('auth.email')}
           placeholderTextColor={color.text3}
           autoCapitalize="none"
           autoComplete="email"
@@ -49,7 +55,7 @@ export default function SignInScreen() {
         />
         <TextInput
           style={styles.input}
-          placeholder="Password (8+ characters)"
+          placeholder={t('auth.password')}
           placeholderTextColor={color.text3}
           secureTextEntry
           autoComplete={mode === 'signIn' ? 'current-password' : 'new-password'}
@@ -64,12 +70,12 @@ export default function SignInScreen() {
           {busy ? (
             <ActivityIndicator color={color.ink} />
           ) : (
-            <Text style={styles.buttonText}>{mode === 'signIn' ? 'Sign in' : 'Create account'}</Text>
+            <Text style={styles.buttonText}>{mode === 'signIn' ? t('auth.signIn') : t('auth.createAccount')}</Text>
           )}
         </Pressable>
 
         <Pressable onPress={() => setMode(mode === 'signIn' ? 'signUp' : 'signIn')} hitSlop={10}>
-          <Text style={styles.switch}>{mode === 'signIn' ? 'New here? Create an account' : 'Have an account? Sign in'}</Text>
+          <Text style={styles.switch}>{mode === 'signIn' ? t('auth.toSignUp') : t('auth.toSignIn')}</Text>
         </Pressable>
       </KeyboardAvoidingView>
     </SafeScreen>

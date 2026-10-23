@@ -6,6 +6,7 @@ import { Icon } from '@/components/Icon';
 import { Enter } from '@/components/motion/Enter';
 import { PressScale } from '@/components/motion/PressScale';
 import { ScreenHeader } from '@/components/ScreenHeader';
+import { useT } from '@/i18n';
 import { useFamily } from '@/features/family/FamilyProvider';
 import { FeedVideo, formatCount, toFeedVideos } from '@/features/feed/data';
 import { useLibrary } from '@/features/library/LibraryProvider';
@@ -17,6 +18,7 @@ import { color, font, radius, space } from '@/theme/tokens';
 export default function SavedScreen() {
   const { active } = useFamily();
   const { saved } = useLibrary();
+  const { t, lang } = useT();
   const { bottom } = useInsets();
   const [videos, setVideos] = useState<FeedVideo[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -25,10 +27,10 @@ export default function SavedScreen() {
     useCallback(() => {
       if (!active) return;
       supabase.rpc('get_saved', { p_session: active.token }).then(async ({ data }) => {
-        setVideos(await toFeedVideos(data));
+        setVideos(await toFeedVideos(data, lang));
         setLoaded(true);
       });
-    }, [active]),
+    }, [active, lang]),
   );
 
   // Unsaving from the feed while this screen is open removes the tile straight away.
@@ -36,14 +38,14 @@ export default function SavedScreen() {
 
   return (
     <View style={styles.root}>
-      <ScreenHeader title="Saved" />
+      <ScreenHeader title={t('feed.saved.title')} />
       {loaded && shown.length === 0 ? (
         <Enter index={0} style={styles.empty}>
           <View style={styles.emptyIcon}>
             <Icon name="save" size={28} color={color.text2} />
           </View>
-          <Text style={styles.emptyTitle}>Nothing saved yet</Text>
-          <Text style={styles.emptySub}>Tap the bookmark on a video to keep it here.</Text>
+          <Text style={styles.emptyTitle}>{t('feed.saved.emptyTitle')}</Text>
+          <Text style={styles.emptySub}>{t('feed.saved.emptySub')}</Text>
         </Enter>
       ) : (
         <ScrollView contentContainerStyle={[styles.grid, { paddingBottom: bottom + space.xl }]}>

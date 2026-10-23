@@ -3,7 +3,9 @@ import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useReducedMotion, useSharedValue, withDelay, withSpring } from 'react-native-reanimated';
 
+import { BottomSheet } from '@/components/BottomSheet';
 import { Icon, IconName } from '@/components/Icon';
+import { LanguagePicker } from '@/components/LanguagePicker';
 import { CountUp } from '@/components/motion/CountUp';
 import { Enter } from '@/components/motion/Enter';
 import { PressScale } from '@/components/motion/PressScale';
@@ -11,11 +13,13 @@ import { Ring } from '@/components/motion/Ring';
 import { Toggle } from '@/components/motion/Toggle';
 import { StatusScrim } from '@/components/StatusScrim';
 import { useRoles } from '@/features/creator/useRoles';
+import { REVIEW_ENABLED } from '@/features/creator/useReviewQueue';
 import { useFamily } from '@/features/family/FamilyProvider';
 import { useLibrary } from '@/features/library/LibraryProvider';
 import { useScreenTime } from '@/features/library/useScreenTime';
 import { TasteCard } from '@/features/me/TasteCard';
 import { useMe } from '@/features/me/useMe';
+import { laneKey, LANGS, useT } from '@/i18n';
 import { fx, getFeedbackSettings, setFeedbackSettings } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
 import { useInsets, useTabBarSpace } from '@/lib/useInsets';
@@ -33,11 +37,12 @@ export default function MeScreen() {
   const { limitMinutes } = useScreenTime();
   const { data, reload, resetTaste } = useMe();
   const roles = useRoles();
+  const { t } = useT();
   const [waiting, setWaiting] = useState(0);
 
   // Moderators see how much is waiting each time they open Me.
   useEffect(() => {
-    if (!focused || !roles.is_moderator) return;
+    if (!focused || !roles.is_moderator || !REVIEW_ENABLED) return;
     Promise.all([supabase.rpc('get_review_queue'), supabase.rpc('get_report_queue')]).then(([u, r]) =>
       setWaiting((u.data?.length ?? 0) + (r.data?.length ?? 0)),
     );
@@ -69,13 +74,13 @@ export default function MeScreen() {
             </Text>
             <View style={[styles.lanePill, { backgroundColor: l.color }]}>
               <Text style={styles.lanePillText}>
-                {l.label} · {l.ages}
+                {t(laneKey(current.lane))} · {l.ages}
               </Text>
             </View>
           </Enter>
           {!isAdult && (
             <Enter index={2}>
-              <PressScale onPress={openParent} pressedScale={0.9} accessibilityRole="button" accessibilityLabel="Family controls" style={styles.iconButton}>
+              <PressScale onPress={openParent} pressedScale={0.9} accessibilityRole="button" accessibilityLabel={t('me.familyControls')} style={styles.iconButton}>
                 <Icon name="sliders" size={20} />
               </PressScale>
             </Enter>
@@ -83,9 +88,9 @@ export default function MeScreen() {
         </View>
 
         <View style={styles.stats}>
-          <Stat index={3} value={todayMin} format={(n) => `${n}m`} label="Today" />
-          <Stat index={4} value={data?.saved ?? 0} label="Saved" onPress={() => router.push('/saved')} />
-          <Stat index={5} value={data?.following ?? 0} label="Following" onPress={() => router.push('/following')} />
+          <Stat index={3} value={todayMin} format={(n) => t('me.todayValue', { n })} label={t('me.stat.today')} />
+          <Stat index={4} value={data?.saved ?? 0} label={t('me.stat.saved')} onPress={() => router.push('/saved')} />
+          <Stat index={5} value={data?.following ?? 0} label={t('me.stat.following')} onPress={() => router.push('/following')} />
         </View>
 
         <Enter index={6}>
@@ -95,35 +100,33 @@ export default function MeScreen() {
         <Enter index={7} style={styles.list}>
           {!isAdult && (
             <>
-              <Row icon="shield" label="Daily limit" onPress={openParent}>
+              <Row icon="shield" label={t('me.dailyLimit')} onPress={openParent}>
                 {limitMinutes != null ? (
                   <View style={styles.limitValue}>
-                    <Text style={styles.value}>
-                      {todayMin} / {limitMinutes} min
-                    </Text>
+                    <Text style={styles.value}>{t('me.limitValue', { used: todayMin, limit: limitMinutes })}</Text>
                     <Ring progress={todaySeconds / (limitMinutes * 60)} color={GREEN} delay={600} />
                   </View>
                 ) : (
-                  <Text style={styles.value}>Off</Text>
+                  <Text style={styles.value}>{t('common.off')}</Text>
                 )}
               </Row>
-              <Row icon="moon" label="Quiet hours" onPress={openParent}>
+              <Row icon="moon" label={t('me.quietHours')} onPress={openParent}>
                 <Toggle on={current.quiet_hours} tint={GREEN} />
               </Row>
             </>
           )}
           {isAdult && (
-            <Row icon="sliders" label="Family dashboard" onPress={openParent}>
+            <Row icon="sliders" label={t('me.familyDashboard')} onPress={openParent}>
               <Icon name="chevron" size={16} color={color.text3} strokeWidth={2.4} />
             </Row>
           )}
           {isAdult && roles.is_creator && (
-            <Row icon="plus" label="Creator studio" onPress={() => router.push('/studio')}>
+            <Row icon="plus" label={t('me.creatorStudio')} onPress={() => router.push('/studio')}>
               <Icon name="chevron" size={16} color={color.text3} strokeWidth={2.4} />
             </Row>
           )}
-          {isAdult && roles.is_moderator && (
-            <Row icon="shield" label="Review" onPress={() => router.push('/review')}>
+          {isAdult && roles.is_moderator && REVIEW_ENABLED && (
+            <Row icon="shield" label={t('me.review')} onPress={() => router.push('/review')}>
               {waiting > 0 && (
                 <View style={styles.badge}>
                   <Text style={styles.badgeText}>{waiting}</Text>
@@ -132,11 +135,11 @@ export default function MeScreen() {
               <Icon name="chevron" size={16} color={color.text3} strokeWidth={2.4} />
             </Row>
           )}
-          <Row icon="lock" label="Switch profile" onPress={leaveProfile}>
+          <Row icon="lock" label={t('me.switchProfile')} onPress={leaveProfile}>
             <Icon name="chevron" size={16} color={color.text3} strokeWidth={2.4} />
           </Row>
           {/* Children reach Sign out through the parent PIN, so they can't sign the family out. */}
-          <Row icon="close" label="Sign out" onPress={isAdult ? signOut : openParent} last>
+          <Row icon="close" label={t('me.signOut')} onPress={isAdult ? signOut : openParent} last>
             {!isAdult && <Icon name="shield" size={16} color={color.text3} strokeWidth={2.2} />}
             <Icon name="chevron" size={16} color={color.text3} strokeWidth={2.4} />
           </Row>
@@ -154,7 +157,9 @@ export default function MeScreen() {
 
 /** Sounds and vibration for this phone (every profile on it). */
 function DeviceCard() {
+  const { t, lang } = useT();
   const [prefs, setPrefs] = useState(getFeedbackSettings);
+  const [langOpen, setLangOpen] = useState(false);
   const flip = (key: 'sound' | 'haptics') => {
     const next = { ...prefs, [key]: !prefs[key] };
     setFeedbackSettings(next);
@@ -163,12 +168,29 @@ function DeviceCard() {
   };
   return (
     <View style={styles.list}>
-      <Row icon="sound" label="Sounds" onPress={() => flip('sound')}>
+      <Row icon="sound" label={t('me.sounds')} onPress={() => flip('sound')}>
         <Toggle on={prefs.sound} tint={GREEN} />
       </Row>
-      <Row icon="vibrate" label="Vibration" onPress={() => flip('haptics')} last>
+      <Row icon="vibrate" label={t('me.vibration')} onPress={() => flip('haptics')}>
         <Toggle on={prefs.haptics} tint={GREEN} />
       </Row>
+      <Row
+        icon="discover"
+        label={t('common.language')}
+        onPress={() => {
+          fx.tap();
+          setLangOpen(true);
+        }}
+        last
+      >
+        <Text style={styles.value} numberOfLines={1}>
+          {LANGS.find((x) => x.code === lang)?.native}
+        </Text>
+        <Icon name="chevron" size={16} color={color.text3} strokeWidth={2.4} />
+      </Row>
+      <BottomSheet open={langOpen} onClose={() => setLangOpen(false)} title={t('common.language')}>
+        <LanguagePicker onPicked={() => setLangOpen(false)} />
+      </BottomSheet>
     </View>
   );
 }
@@ -218,7 +240,9 @@ function Row({ icon, label, onPress, last, children }: { icon: IconName; label: 
   return (
     <PressScale onPress={onPress} pressedScale={0.98} accessibilityRole="button" accessibilityLabel={label} style={[styles.row, !last && styles.rowBorder]}>
       <Icon name={icon} size={20} color={GREEN} />
-      <Text style={styles.rowLabel}>{label}</Text>
+      <Text style={styles.rowLabel} numberOfLines={1}>
+        {label}
+      </Text>
       {children}
     </PressScale>
   );

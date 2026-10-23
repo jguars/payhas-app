@@ -6,6 +6,7 @@
     "@expo-google-fonts/bricolage-grotesque": "^0.4.1",
     "@expo-google-fonts/figtree": "^0.4.1",
     "@expo-google-fonts/jetbrains-mono": "^0.4.1",
+    "@expo-google-fonts/onest": "^0.4.2",
     "@expo/metro-runtime": "~57.0.16",
     "@supabase/supabase-js": "^2.117.2",
     "expo": "~57.0.27",

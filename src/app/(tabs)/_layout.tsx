@@ -7,6 +7,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withSpring, ZoomIn } from '
 import { Icon, IconName } from '@/components/Icon';
 import { Pop } from '@/components/motion/Pop';
 import { useLibrary } from '@/features/library/LibraryProvider';
+import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { TAB_BAR, useInsets } from '@/lib/useInsets';
 import { spring } from '@/theme/motion';
@@ -40,7 +41,8 @@ const TabButton = forwardRef<View, TabButtonProps>(({ icon, label, isFocused, pr
 // TabTrigger clones props (isFocused, onPress…) onto its child, so pass them through.
 const InboxTabButton = forwardRef<View, PressableProps & { isFocused?: boolean }>((props, ref) => {
   const { unread } = useLibrary();
-  return <TabButton ref={ref} icon="inbox" label={unread ? `Inbox, ${unread} new` : 'Inbox'} badge={unread > 0} {...props} />;
+  const { t } = useT();
+  return <TabButton ref={ref} icon="inbox" label={unread ? t('nav.inboxUnread', { count: unread }) : t('nav.inbox')} badge={unread > 0} {...props} />;
 });
 
 /** The soft pill behind the active icon. Slides between tabs; steps aside for Play, which has its own. */
@@ -67,6 +69,7 @@ function Highlight({ width }: { width: number }) {
 export default function TabsLayout() {
   const { bottom } = useInsets();
   const [width, setWidth] = useState(0);
+  const { t } = useT();
 
   return (
     <Tabs style={styles.root}>
@@ -75,19 +78,19 @@ export default function TabsLayout() {
       <TabList style={[styles.bar, { bottom: bottom + TAB_BAR.gap }]} onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
         <Highlight width={width} />
         <TabTrigger name="index" href="/" asChild>
-          <TabButton icon="home" label="Home" />
+          <TabButton icon="home" label={t('nav.home')} />
         </TabTrigger>
         <TabTrigger name="discover" href="/discover" asChild>
-          <TabButton icon="discover" label="Discover" />
+          <TabButton icon="discover" label={t('nav.discover')} />
         </TabTrigger>
         <TabTrigger name="play" href="/play" asChild>
-          <TabButton icon="game" label="Play" primary />
+          <TabButton icon="game" label={t('nav.play')} primary />
         </TabTrigger>
         <TabTrigger name="inbox" href="/inbox" asChild>
           <InboxTabButton />
         </TabTrigger>
         <TabTrigger name="me" href="/me" asChild>
-          <TabButton icon="me" label="Me" />
+          <TabButton icon="me" label={t('nav.me')} />
         </TabTrigger>
       </TabList>
     </Tabs>

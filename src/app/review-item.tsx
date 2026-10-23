@@ -8,8 +8,9 @@ import { Icon } from '@/components/Icon';
 import { PressScale } from '@/components/motion/PressScale';
 import { ScreenHeader } from '@/components/ScreenHeader';
 import { useToast } from '@/components/Toast';
-import { REASON_LABEL, REJECT_REASONS, useReviewQueue } from '@/features/creator/useReviewQueue';
+import { reasonLabel, REJECT_REASONS, useReviewQueue } from '@/features/creator/useReviewQueue';
 import { MediaSource, mediaFor } from '@/features/feed/data';
+import { laneKey, localized, topicLabel, useT } from '@/i18n';
 import { Constants, Tables } from '@/lib/database.types';
 import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
@@ -26,6 +27,7 @@ export default function ReviewItemScreen() {
   const { uploads, reports, urls, loaded } = useReviewQueue();
   const { bottom } = useInsets();
   const toast = useToast();
+  const { t, lang } = useT();
   const goBack = useGoBack();
   const [interests, setInterests] = useState<Tables<'interests'>[]>([]);
   const [lane, setLane] = useState<Lane | null>(null);
@@ -61,7 +63,7 @@ export default function ReviewItemScreen() {
     const { error } = await supabase.rpc('review_video', { p_video_id: upload.id, p_approve: true, p_lane: lane, p_topics: topics });
     setBusy(false);
     if (error) return fx.error();
-    finish(`Approved for ${lanes[lane].label}`);
+    finish(t('creator.approvedFor', { lane: t(laneKey(lane)) }));
   };
 
   const decide = async (reason: string) => {
@@ -73,7 +75,7 @@ export default function ReviewItemScreen() {
         : await supabase.rpc('resolve_reports', { p_video_id: id, p_remove: true, p_reason: reason });
     setBusy(false);
     if (error) return fx.error();
-    finish(reasonFor === 'reject' ? 'Not approved' : 'Taken down');
+    finish(reasonFor === 'reject' ? t('creator.status.rejected') : t('creator.status.removed'));
   };
 
   const keep = async () => {
@@ -81,29 +83,29 @@ export default function ReviewItemScreen() {
     const { error } = await supabase.rpc('resolve_reports', { p_video_id: id, p_remove: false });
     setBusy(false);
     if (error) return fx.error();
-    finish('Kept — reports closed');
+    finish(t('creator.kept'));
   };
 
   if (loaded && !item) {
     return (
       <View style={styles.root}>
-        <ScreenHeader title="Review" />
-        <Text style={styles.gone}>Already handled.</Text>
+        <ScreenHeader title={t('creator.reviewTitle')} />
+        <Text style={styles.gone}>{t('creator.handled')}</Text>
       </View>
     );
   }
 
   return (
     <View style={styles.root}>
-      <ScreenHeader title={mode === 'reports' ? 'Reported video' : 'New upload'} />
+      <ScreenHeader title={mode === 'reports' ? t('creator.reportedVideo') : t('creator.newUpload')} />
       <ScrollView contentContainerStyle={[styles.content, { paddingBottom: bottom + 120 }]}>
         <View style={styles.playerWrap}>{media && <Player source={media.source} />}</View>
 
         {item && (
           <View style={{ gap: 4 }}>
-            <Text style={styles.caption}>{item.caption}</Text>
+            <Text style={styles.caption}>{localized(lang, item.caption, item.caption_i18n)}</Text>
             <Text style={styles.meta}>
-              {item.creator_name} · rated {lanes[item.lane].label}
+              {t('creator.rated', { creator: item.creator_name, lane: t(laneKey(item.lane)) })}
               {upload?.duration_s ? ` · ${Math.round(upload.duration_s)}s` : ''}
             </Text>
           </View>
@@ -113,9 +115,9 @@ export default function ReviewItemScreen() {
           <View style={styles.reportBox}>
             <Icon name="flag" size={16} color={RED} />
             <Text style={styles.reportText}>
-              {report.report_count} {report.report_count === 1 ? 'report' : 'reports'}:{' '}
+              {t('creator.reportCount', { count: report.report_count })}:{' '}
               {Object.entries((report.reasons ?? {}) as Record<string, number>)
-                .map(([r, n]) => `${REASON_LABEL[r] ?? r} ×${n}`)
+                .map(([r, n]) => `${reasonLabel(t, r)} ×${n}`)
                 .join(', ')}
             </Text>
           </View>
@@ -124,7 +126,7 @@ export default function ReviewItemScreen() {
         {upload && (
           <>
             <View style={{ gap: space.sm }}>
-              <Text style={styles.label}>Youngest lane it’s right for</Text>
+              <Text style={styles.label}>{t('creator.youngestLane')}</Text>
               <View style={styles.lanes}>
                 {Constants.public.Enums.lane.map((l) => {
                   const L = lanes[l];
@@ -140,17 +142,19 @@ export default function ReviewItemScreen() {
                       accessibilityState={{ selected: on }}
                       style={[styles.lane, { borderColor: on ? L.color : color.line }, on && { backgroundColor: L.color + '22' }]}
                     >
-                      <Text style={[styles.laneLabel, { color: on ? L.color : color.text }]}>{L.label}</Text>
+                      <Text style={[styles.laneLabel, { color: on ? L.color : color.text }]} numberOfLines={1} adjustsFontSizeToFit>
+                        {t(laneKey(l))}
+                      </Text>
                       <Text style={styles.laneAges}>{L.ages}</Text>
                     </Pressable>
                   );
                 })}
               </View>
-              <Text style={styles.help}>Little-lane videos are only shown after this human check — be strict.</Text>
+              <Text style={styles.help}>{t('creator.littleHelp')}</Text>
             </View>
 
             <View style={{ gap: space.sm }}>
-              <Text style={styles.label}>Topics</Text>
+              <Text style={styles.label}>{t('creator.topics')}</Text>
               <View style={styles.chips}>
                 {interests.map((i) => {
                   const on = topics.includes(i.slug);
@@ -159,14 +163,14 @@ export default function ReviewItemScreen() {
                       key={i.slug}
                       onPress={() => {
                         fx.tab();
-                        setTopics((t) => (on ? t.filter((x) => x !== i.slug) : [...t, i.slug].slice(-3)));
+                        setTopics((list) => (on ? list.filter((x) => x !== i.slug) : [...list, i.slug].slice(-3)));
                       }}
                       accessibilityRole="checkbox"
                       accessibilityState={{ checked: on }}
                       style={[styles.chip, on && styles.chipOn]}
                     >
                       <Text style={styles.chipEmoji}>{i.emoji}</Text>
-                      <Text style={[styles.chipText, on && { color: color.ink }]}>{i.label}</Text>
+                      <Text style={[styles.chipText, on && { color: color.ink }]}>{topicLabel(t, i.slug, i.label)}</Text>
                     </Pressable>
                   );
                 })}
@@ -179,26 +183,26 @@ export default function ReviewItemScreen() {
       <View style={[styles.footer, { paddingBottom: bottom + space.md }]}>
         {mode === 'reports' ? (
           <>
-            <Decision label="Keep" icon="check" tone="neutral" disabled={busy} onPress={keep} />
-            <Decision label="Take down" icon="eyeOff" tone="bad" disabled={busy} onPress={() => setReasonFor('remove')} />
+            <Decision label={t('creator.keep')} icon="check" tone="neutral" disabled={busy} onPress={keep} />
+            <Decision label={t('creator.takeDown')} icon="eyeOff" tone="bad" disabled={busy} onPress={() => setReasonFor('remove')} />
           </>
         ) : (
           <>
-            <Decision label="Reject" icon="close" tone="bad" disabled={busy} onPress={() => setReasonFor('reject')} />
-            <Decision label="Approve" icon="check" tone="good" disabled={busy || !lane || topics.length === 0} onPress={approve} />
+            <Decision label={t('creator.reject')} icon="close" tone="bad" disabled={busy} onPress={() => setReasonFor('reject')} />
+            <Decision label={t('creator.approve')} icon="check" tone="good" disabled={busy || !lane || topics.length === 0} onPress={approve} />
           </>
         )}
       </View>
 
-      <BottomSheet open={!!reasonFor} onClose={() => setReasonFor(null)} title={reasonFor === 'remove' ? 'Why take it down?' : 'Why not approve?'}>
+      <BottomSheet open={!!reasonFor} onClose={() => setReasonFor(null)} title={reasonFor === 'remove' ? t('creator.whyTakeDown') : t('creator.whyNotApprove')}>
         <View style={{ gap: space.sm, paddingHorizontal: space.xl }}>
           {REJECT_REASONS.map((r) => (
-            <PressScale key={r} onPress={() => decide(r)} pressedScale={0.97} accessibilityRole="button" style={styles.reasonRow}>
-              <Text style={styles.reasonRowText}>{r}</Text>
+            <PressScale key={r.key} onPress={() => decide(r.text)} pressedScale={0.97} accessibilityRole="button" style={styles.reasonRow}>
+              <Text style={styles.reasonRowText}>{t(r.key)}</Text>
               <Icon name="chevron" size={16} color={color.text3} strokeWidth={2.4} />
             </PressScale>
           ))}
-          <Text style={styles.help}>The creator sees this reason in their Inbox.</Text>
+          <Text style={styles.help}>{t('creator.creatorSees')}</Text>
         </View>
       </BottomSheet>
     </View>
@@ -219,7 +223,9 @@ function Decision({ label, icon, tone, disabled, onPress }: { label: string; ico
   return (
     <PressScale onPress={onPress} disabled={disabled} accessibilityRole="button" style={[styles.decision, { backgroundColor: bg }, disabled && { opacity: 0.4 }]}>
       <Icon name={icon} size={18} color={fg} strokeWidth={2.6} />
-      <Text style={[styles.decisionText, { color: fg }]}>{label}</Text>
+      <Text style={[styles.decisionText, { color: fg }]} numberOfLines={1} adjustsFontSizeToFit>
+        {label}
+      </Text>
     </PressScale>
   );
 }

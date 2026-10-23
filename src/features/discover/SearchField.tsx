@@ -13,6 +13,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { Icon } from '@/components/Icon';
+import { useT } from '@/i18n';
 import { spring } from '@/theme/motion';
 import { color, font } from '@/theme/tokens';
 
@@ -24,6 +25,7 @@ type Props = { value: string; onChange: (v: string) => void; suggestions: string
  */
 export function SearchField({ value, onChange, suggestions }: Props) {
   const reduce = useReducedMotion();
+  const { t, lang } = useT();
   const [focused, setFocused] = useState(false);
   const [i, setI] = useState(0);
   const focus = useSharedValue(0);
@@ -60,28 +62,28 @@ export function SearchField({ value, onChange, suggestions }: Props) {
           onChangeText={onChange}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
-          accessibilityLabel="Search"
+          accessibilityLabel={t('discover.search')}
           returnKeyType="search"
           autoCorrect={false}
           style={styles.input}
         />
         {value.length === 0 && (
           <View pointerEvents="none" style={styles.placeholder}>
-            <Animated.Text style={styles.placeholderText}>Search </Animated.Text>
+            <Animated.Text style={styles.placeholderText}>{t('discover.searchPrefix')}</Animated.Text>
             <Animated.Text
               key={word}
               entering={reduce ? undefined : FadeInDown.duration(280)}
               exiting={reduce ? undefined : FadeOutUp.duration(200)}
               style={[styles.placeholderText, styles.placeholderWord]}
             >
-              {word.toLowerCase()}
+              {word.toLocaleLowerCase(lang)}
             </Animated.Text>
           </View>
         )}
       </View>
       {value.length > 0 && (
         <Animated.View entering={FadeIn.duration(150)} exiting={FadeOut.duration(120)}>
-          <Pressable onPress={() => onChange('')} accessibilityLabel="Clear search" hitSlop={12} style={styles.clear}>
+          <Pressable onPress={() => onChange('')} accessibilityLabel={t('discover.clearSearch')} hitSlop={12} style={styles.clear}>
             <Icon name="close" size={14} color={color.ink} strokeWidth={3} />
           </Pressable>
         </Animated.View>

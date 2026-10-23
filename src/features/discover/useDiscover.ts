@@ -54,8 +54,11 @@ export function useDiscover() {
   return { profile, videos, topics, shelf, loading };
 }
 
-export function matchesQuery(v: FeedVideo, q: string) {
-  const needle = q.trim().toLowerCase();
+/** Caption, creator, topic slug or (when given) the topic's label in the app's language. */
+export function matchesQuery(v: FeedVideo, q: string, labelOf?: (slug: string) => string, lang?: string) {
+  const lower = (s: string) => (lang ? s.toLocaleLowerCase(lang) : s.toLowerCase());
+  const needle = lower(q.trim());
   if (!needle) return true;
-  return [v.caption, v.creator.name, ...v.topics].some((s) => s.toLowerCase().includes(needle));
+  const labels = labelOf ? v.topics.map(labelOf) : [];
+  return [v.caption, v.creator.name, ...v.topics, ...labels].some((s) => lower(s).includes(needle));
 }

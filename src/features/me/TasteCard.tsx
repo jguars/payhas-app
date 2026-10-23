@@ -4,6 +4,7 @@ import Animated, { useAnimatedStyle, useReducedMotion, useSharedValue, withDelay
 
 import { CountUp } from '@/components/motion/CountUp';
 import { PressScale } from '@/components/motion/PressScale';
+import { topicLabel, useT } from '@/i18n';
 import { spring, stagger } from '@/theme/motion';
 import { color, font, radius, space } from '@/theme/tokens';
 
@@ -13,21 +14,22 @@ type Props = { taste: TasteRow[]; onReset: () => void; delay?: number };
 
 /** "Your taste": each bar grows from the left in turn, then its percentage counts. */
 export function TasteCard({ taste, onReset, delay = 0 }: Props) {
+  const { t } = useT();
   const rows = tasteRows(taste);
   const empty = rows.every((r) => r.share === 0);
 
   return (
     <View style={styles.card}>
       <View style={styles.head}>
-        <Text style={styles.title}>Your taste</Text>
+        <Text style={[styles.title, { flexShrink: 1 }]} numberOfLines={1}>{t('me.taste.title')}</Text>
         {!empty && (
           <PressScale onPress={onReset} pressedScale={0.92} accessibilityRole="button" style={styles.reset}>
-            <Text style={styles.resetText}>Reset</Text>
+            <Text style={styles.resetText}>{t('me.taste.reset')}</Text>
           </PressScale>
         )}
       </View>
       {empty ? (
-        <Text style={styles.hint}>Watch a little and this fills in.</Text>
+        <Text style={styles.hint}>{t('me.taste.empty')}</Text>
       ) : (
         <View style={{ gap: space.md }}>
           {rows.map((r, i) => (
@@ -40,6 +42,7 @@ export function TasteCard({ taste, onReset, delay = 0 }: Props) {
 }
 
 function Bar({ row, delay }: { row: TasteRow & { exploring: boolean }; delay: number }) {
+  const { t } = useT();
   const reduce = useReducedMotion();
   const pct = Math.round(row.share * 100);
   // A floor so "exploring" topics with no watch time still show a sliver.
@@ -61,8 +64,8 @@ function Bar({ row, delay }: { row: TasteRow & { exploring: boolean }; delay: nu
     <View style={{ gap: 6 }}>
       <View style={styles.rowHead}>
         <Text style={[styles.label, row.exploring && { color: color.text2 }]}>
-          {row.label}
-          {row.exploring && <Text style={styles.exploring}> · exploring</Text>}
+          {topicLabel(t, row.slug, row.label)}
+          {row.exploring && <Text style={styles.exploring}> · {t('me.taste.exploring')}</Text>}
         </Text>
         <CountUp value={pct} format={(n) => `${n}%`} delay={delay + 200} duration={700} style={styles.pct} />
       </View>

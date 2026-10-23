@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import { Platform } from 'react-native';
 
 import { deviceTimeZone } from '@/features/library/LibraryProvider';
+import { tNow } from '@/i18n';
 import { supabase } from '@/lib/supabase';
 
 // The FCM token this phone registered as a parent phone, if it opted in.
@@ -31,8 +32,8 @@ export function storedPushToken(): string | null {
 function ensureChannel() {
   if (Platform.OS !== 'android') return Promise.resolve(null);
   return Notifications.setNotificationChannelAsync('parent', {
-    name: 'Parent alerts',
-    description: 'Limits reached, flagged videos and requests for more time',
+    name: tNow('parent.channelName'),
+    description: tNow('parent.channelDescription'),
     importance: Notifications.AndroidImportance.HIGH,
     lightColor: '#FF5A3C',
   });

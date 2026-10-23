@@ -7,15 +7,17 @@ import { useInsets } from '@/lib/useInsets';
 import { Icon } from '@/components/Icon';
 import { Enter } from '@/components/motion/Enter';
 import { PressScale } from '@/components/motion/PressScale';
+import { useT } from '@/i18n';
 import { color, font, radius, space } from '@/theme/tokens';
 
 /** Top bar shared by the games: close on the left, the game's readouts on the right. */
 export function GameBar({ children }: { children?: ReactNode }) {
   const goBack = useGoBack();
   const insets = useInsets();
+  const { t } = useT();
   return (
     <View style={[styles.bar, { paddingTop: insets.top + 8 }]} pointerEvents="box-none">
-      <PressScale onPress={() => goBack()} pressedScale={0.88} accessibilityRole="button" accessibilityLabel="Close game" style={styles.close}>
+      <PressScale onPress={() => goBack()} pressedScale={0.88} accessibilityRole="button" accessibilityLabel={t('play.closeGame')} style={styles.close}>
         <Icon name="close" size={18} strokeWidth={2.6} />
       </PressScale>
       <View style={styles.readouts}>{children}</View>
@@ -35,6 +37,7 @@ export function Readout({ label, value }: { label: string; value: string }) {
 /** End-of-round card. */
 export function Finish({ title, lines, record, onAgain }: { title: string; lines: string[]; record: boolean; onAgain: () => void }) {
   const goBack = useGoBack();
+  const { t } = useT();
   return (
     <View style={styles.finish}>
       <Enter index={0}>
@@ -43,7 +46,7 @@ export function Finish({ title, lines, record, onAgain }: { title: string; lines
       {record && (
         <Enter index={1} style={styles.record}>
           <Icon name="star" size={16} color={color.ink} filled />
-          <Text style={styles.recordText}>New best</Text>
+          <Text style={styles.recordText}>{t('play.newBest')}</Text>
         </Enter>
       )}
       {lines.map((l, i) => (
@@ -53,10 +56,10 @@ export function Finish({ title, lines, record, onAgain }: { title: string; lines
       ))}
       <Enter index={2 + lines.length} style={{ flexDirection: 'row', gap: space.md, marginTop: space.lg }}>
         <PressScale onPress={() => goBack()} accessibilityRole="button" style={[styles.button, styles.secondary]}>
-          <Text style={[styles.buttonText, { color: color.text }]}>Done</Text>
+          <Text style={[styles.buttonText, { color: color.text }]}>{t('common.done')}</Text>
         </PressScale>
         <PressScale onPress={onAgain} accessibilityRole="button" style={styles.button}>
-          <Text style={styles.buttonText}>Play again</Text>
+          <Text style={styles.buttonText}>{t('play.playAgain')}</Text>
         </PressScale>
       </Enter>
     </View>
