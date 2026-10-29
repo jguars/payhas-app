@@ -52,7 +52,8 @@ export async function enableParentAlerts(parent: string): Promise<AlertsResult> 
     const { error } = await supabase.rpc('register_push_device', {
       p_parent: parent,
       p_token: String(token),
-      p_name: Device.deviceName ?? Device.modelName ?? 'Parent phone',
+      // The phone's name is often its owner's; the server keeps a fixed label instead.
+      p_name: '',
       p_tz: deviceTimeZone(),
     });
     if (error) return 'error';
