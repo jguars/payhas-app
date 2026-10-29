@@ -218,6 +218,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      delete_account: { Args: { p_pin: string }; Returns: boolean }
       delete_profile: {
         Args: { p_pin: string; p_profile_id: string }
         Returns: boolean

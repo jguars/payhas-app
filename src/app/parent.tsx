@@ -33,6 +33,7 @@ import { disableParentAlerts, enableParentAlerts, storedPushToken } from '@/feat
 import { ago, Child, Controls, minutes, presence, RecentRow, useParent } from '@/features/parent/useParent';
 import { laneKey, localized, topicLabel, useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
+import { supabase } from '@/lib/supabase';
 import { useInsets } from '@/lib/useInsets';
 import { useGoBack } from '@/lib/useGoBack';
 import { spring } from '@/theme/motion';
@@ -58,6 +59,7 @@ export default function ParentScreen() {
   const { signOut, profiles } = useFamily();
   const [selected, setSelected] = useState<string | undefined>(initial);
   const [hiding, setHiding] = useState<RecentRow | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const { t, lang } = useT();
 
   if (!unlocked) {
@@ -67,6 +69,28 @@ export default function ParentScreen() {
         <View style={styles.pinWrap}>
           <PinPad title={t('common.parentPin')} onComplete={unlock} onCancel={() => goBack()} />
           <Text style={styles.pinHint}>{t('parent.pinHint')}</Text>
+        </View>
+      </View>
+    );
+  }
+
+  // Deleting the account asks for the PIN again, even inside an open parent session.
+  if (deleting) {
+    const confirmDelete = async (pin: string) => {
+      const { data, error } = await supabase.rpc('delete_account', { p_pin: pin });
+      if (error) return error.message;
+      if (!data) return false;
+      toast({ text: t('parent.deletedToast'), icon: 'check' });
+      lock();
+      await disableParentAlerts().catch(() => {});
+      await signOut();
+      return true;
+    };
+    return (
+      <View style={styles.root}>
+        <ScreenHeader title={t('parent.deleteAccount')} />
+        <View style={styles.pinWrap}>
+          <PinPad title={t('parent.deletePinTitle')} onComplete={confirmDelete} onCancel={() => setDeleting(false)} />
         </View>
       </View>
     );
@@ -106,7 +130,7 @@ export default function ParentScreen() {
         <Enter index={0} style={styles.empty}>
           <Text style={styles.emptyTitle}>{t('parent.emptyTitle')}</Text>
           <Text style={styles.emptySub}>{t('parent.emptySub')}</Text>
-          <AccountActions onLock={() => { lock(); goBack(); }} onSignOut={() => { lock(); signOut(); }} />
+          <AccountActions onLock={() => { lock(); goBack(); }} onSignOut={() => { lock(); signOut(); }} onDelete={() => setDeleting(true)} />
         </Enter>
       )}
 
@@ -182,7 +206,7 @@ export default function ParentScreen() {
           </Enter>
 
           <Enter index={9}>
-            <AccountActions onLock={() => { lock(); goBack(); }} onSignOut={() => { lock(); signOut(); }} />
+            <AccountActions onLock={() => { lock(); goBack(); }} onSignOut={() => { lock(); signOut(); }} onDelete={() => setDeleting(true)} />
           </Enter>
         </ScrollView>
       )}
@@ -788,37 +812,46 @@ function LiveDot() {
   );
 }
 
-/** Leaving the dashboard: lock it, or sign the whole family out (to switch accounts). */
-function AccountActions({ onLock, onSignOut }: { onLock: () => void; onSignOut: () => void }) {
+/** Leaving the dashboard: lock it, sign the whole family out (to switch accounts), or delete the account. */
+function AccountActions({ onLock, onSignOut, onDelete }: { onLock: () => void; onSignOut: () => void; onDelete: () => void }) {
   const { t } = useT();
+  /** Destructive choices confirm first; react-native-web's Alert shows nothing, so the browser build confirms natively. */
+  const confirm = (title: string, body: string, action: string, onYes: () => void) => {
+    fx.tap();
+    if (Platform.OS === 'web') return window.confirm(`${title}\n\n${body}`) && onYes();
+    Alert.alert(title, body, [
+      { text: t('common.cancel'), style: 'cancel' },
+      { text: action, style: 'destructive', onPress: onYes },
+    ]);
+  };
   return (
-    <View style={styles.accountRow}>
-      <PressScale onPress={() => { fx.tap(); onLock(); }} accessibilityRole="button" style={[styles.lockButton, styles.accountButton]}>
-        <Icon name="lock" size={16} color={color.text2} strokeWidth={2.2} />
-        <Text style={styles.lockText} numberOfLines={1} adjustsFontSizeToFit>
-          {t('parent.lock')}
-        </Text>
-      </PressScale>
-      <PressScale
-        onPress={() => {
-          fx.tap();
-          const title = t('parent.signOutTitle');
-          const body = t('parent.signOutBody');
-          // react-native-web's Alert shows nothing, so the browser build confirms natively.
-          if (Platform.OS === 'web') return window.confirm(`${title}\n\n${body}`) && onSignOut();
-          Alert.alert(title, body, [
-            { text: t('common.cancel'), style: 'cancel' },
-            { text: t('parent.signOut'), style: 'destructive', onPress: onSignOut },
-          ]);
-        }}
+    <View>
+      <View style={styles.accountRow}>
+        <PressScale onPress={() => { fx.tap(); onLock(); }} accessibilityRole="button" style={[styles.lockButton, styles.accountButton]}>
+          <Icon name="lock" size={16} color={color.text2} strokeWidth={2.2} />
+          <Text style={styles.lockText} numberOfLines={1} adjustsFontSizeToFit>
+            {t('parent.lock')}
+          </Text>
+        </PressScale>
+        <PressScale
+          onPress={() => confirm(t('parent.signOutTitle'), t('parent.signOutBody'), t('parent.signOut'), onSignOut)}
+          accessibilityRole="button"
+          style={[styles.lockButton, styles.accountButton]}
+        >
+          <Icon name="close" size={16} color={RED} strokeWidth={2.2} />
+          <Text style={[styles.lockText, { color: RED }]} numberOfLines={1} adjustsFontSizeToFit>
+            {t('parent.signOut')}
+          </Text>
+        </PressScale>
+      </View>
+      <Pressable
+        onPress={() => confirm(t('parent.deleteTitle'), t('parent.deleteBody'), t('parent.deleteConfirm'), onDelete)}
         accessibilityRole="button"
-        style={[styles.lockButton, styles.accountButton]}
+        hitSlop={8}
+        style={styles.deleteLink}
       >
-        <Icon name="close" size={16} color={RED} strokeWidth={2.2} />
-        <Text style={[styles.lockText, { color: RED }]} numberOfLines={1} adjustsFontSizeToFit>
-          {t('parent.signOut')}
-        </Text>
-      </PressScale>
+        <Text style={styles.deleteText}>{t('parent.deleteAccount')}</Text>
+      </Pressable>
     </View>
   );
 }
@@ -904,6 +937,8 @@ const styles = StyleSheet.create({
 
   lockButton: { flexDirection: 'row', alignSelf: 'center', alignItems: 'center', gap: space.sm, minHeight: 48, paddingHorizontal: space.lg, marginTop: space.sm },
   lockText: { color: color.text2, fontFamily: font.semibold, fontSize: 14 },
+  deleteLink: { alignSelf: 'center', minHeight: 48, justifyContent: 'center', paddingHorizontal: space.lg, marginTop: space.xs },
+  deleteText: { color: color.text3, fontFamily: font.semibold, fontSize: 13, textDecorationLine: 'underline' },
 
   sheetCaption: { color: color.text, fontFamily: font.bold, fontSize: 16 },
   sheetSub: { color: color.text2, fontFamily: font.medium, fontSize: 14 },
