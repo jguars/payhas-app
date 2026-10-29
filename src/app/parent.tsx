@@ -1,5 +1,5 @@
-import { useLocalSearchParams } from 'expo-router';
-import { ReactNode, useEffect, useRef, useState } from 'react';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, Platform, Pressable, ScrollView, StyleSheet, Text, TextStyle, View } from 'react-native';
 import { Image } from 'expo-image';
 import Animated, {
@@ -31,6 +31,7 @@ import { mediaFor, signMedia } from '@/features/feed/data';
 import { hourLabel, inQuietHours } from '@/features/library/useScreenTime';
 import { disableParentAlerts, enableParentAlerts, storedPushToken } from '@/features/parent/push';
 import { ago, Child, Controls, minutes, presence, RecentRow, useParent } from '@/features/parent/useParent';
+import { planDate } from '@/features/plan/plan';
 import { laneKey, localized, topicLabel, useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
@@ -52,7 +53,7 @@ const LATEST_FOLD = 5;
  */
 export default function ParentScreen() {
   const { child: initial } = useLocalSearchParams<{ child?: string }>();
-  const { token, unlocked, children, unlock, lock, reload, setControls, setPaused, addTime, answer, hideVideo } = useParent();
+  const { token, unlocked, children, plus, unlock, lock, reload, setControls, setPaused, addTime, answer, hideVideo } = useParent();
   const { bottom } = useInsets();
   const toast = useToast();
   const goBack = useGoBack();
@@ -62,6 +63,12 @@ export default function ParentScreen() {
   /** What a confirmed delete is waiting on the PIN for: the whole account, or one child's profile. */
   const [deleting, setDeleting] = useState<'account' | Child | null>(null);
   const { t, lang } = useT();
+  // Back from Payhas Plus: a redeemed code unlocks the history straight away.
+  useFocusEffect(
+    useCallback(() => {
+      if (unlocked) reload();
+    }, [unlocked, reload]),
+  );
 
   if (!unlocked) {
     return (
@@ -142,6 +149,9 @@ export default function ParentScreen() {
         <Enter index={0} style={styles.empty}>
           <Text style={styles.emptyTitle}>{t('parent.emptyTitle')}</Text>
           <Text style={styles.emptySub}>{t('parent.emptySub')}</Text>
+          <View style={{ alignSelf: 'stretch', marginTop: space.lg }}>
+            <PlanCard />
+          </View>
           <AccountActions onLock={() => { lock(); goBack(); }} onSignOut={() => { lock(); signOut(); }} onDelete={() => setDeleting('account')} />
         </Enter>
       )}
@@ -205,13 +215,21 @@ export default function ParentScreen() {
 
           <Rules child={child} change={change} />
 
-          <Enter index={6}>
-            <WeekChart key={child.id} child={child} />
-          </Enter>
+          {plus === false ? (
+            <Enter index={6}>
+              <LockedHistory />
+            </Enter>
+          ) : (
+            <>
+              <Enter index={6}>
+                <WeekChart key={child.id} child={child} />
+              </Enter>
 
-          <Enter index={7} style={styles.section}>
-            <Latest child={child} onHide={setHiding} />
-          </Enter>
+              <Enter index={7} style={styles.section}>
+                <Latest child={child} onHide={setHiding} />
+              </Enter>
+            </>
+          )}
 
           <Pressable
             onPress={() =>
@@ -229,6 +247,10 @@ export default function ParentScreen() {
           >
             <Text style={styles.deleteText}>{t('parent.deleteProfile', { name: child.display_name })}</Text>
           </Pressable>
+
+          <Enter index={8}>
+            <PlanCard />
+          </Enter>
 
           <Enter index={8}>
             <AlertsCard parent={token} onResult={(text, ok) => done(ok, text)} />
@@ -261,6 +283,39 @@ export default function ParentScreen() {
         </View>
       </BottomSheet>
     </View>
+  );
+}
+
+/** The family's plan, one tap from the Plus page. */
+function PlanCard() {
+  const { plan } = useFamily();
+  const { t } = useT();
+  if (!plan) return null;
+  return (
+    <PressScale onPress={() => router.push('/plus')} accessibilityRole="button" style={[styles.card, styles.planCard]}>
+      <IconCircle icon="sparkle" tint={plan.plus ? color.success : color.ember} size={40} />
+      <View style={{ flex: 1, gap: 2 }}>
+        <Text style={styles.label}>{t('plus.title')}</Text>
+        <Text style={styles.sub}>
+          {plan.plus && plan.plus_until ? t('plus.statusPlus', { date: planDate(plan.plus_until) }) : t('plus.dashFree')}
+        </Text>
+      </View>
+      <Text style={styles.planCta}>{t(plan.plus ? 'plus.dashManage' : 'plus.dashCta')}</Text>
+      <Icon name="chevron" size={18} color={color.text3} strokeWidth={2.4} />
+    </PressScale>
+  );
+}
+
+/** Free plan: where the week chart and recent videos would be, one card that says they come with Plus. */
+function LockedHistory() {
+  const { t } = useT();
+  return (
+    <PressScale onPress={() => router.push('/plus')} accessibilityRole="button" style={[styles.card, styles.locked]}>
+      <Icon name="lock" size={22} color={color.text2} strokeWidth={2.2} />
+      <Text style={styles.lockedTitle}>{t('plus.lockedHistoryTitle')}</Text>
+      <Text style={[styles.sub, { textAlign: 'center' }]}>{t('plus.lockedHistorySub')}</Text>
+      <Text style={styles.planCta}>{t('plus.dashCta')}</Text>
+    </PressScale>
   );
 }
 
@@ -904,6 +959,10 @@ const styles = StyleSheet.create({
   pickName: { color: color.text2, fontFamily: font.semibold, fontSize: 14 },
 
   card: { backgroundColor: color.surface1, borderRadius: 24, padding: space.lg, gap: space.md },
+  planCard: { flexDirection: 'row', alignItems: 'center', minHeight: 72 },
+  planCta: { color: color.ember, fontFamily: font.bold, fontSize: 14 },
+  locked: { alignItems: 'center', gap: space.sm, paddingVertical: space.xl, borderWidth: 1.5, borderStyle: 'dashed', borderColor: color.line },
+  lockedTitle: { color: color.text, fontFamily: font.title, fontSize: 18, textAlign: 'center' },
   hero: { gap: space.lg },
   heroTop: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   heroNameRow: { flexDirection: 'row', alignItems: 'center', gap: space.sm },

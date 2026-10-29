@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 
+import { BottomSheet } from '@/components/BottomSheet';
 import { Icon } from '@/components/Icon';
 import { Enter } from '@/components/motion/Enter';
 import { StatusScrim } from '@/components/StatusScrim';
@@ -12,11 +13,12 @@ import { useBest } from '@/features/games/shared';
 import type { GameMeta } from '@/features/games/types';
 import { TimesUp } from '@/features/library/TimesUp';
 import { useScreenTime } from '@/features/library/useScreenTime';
+import { useProfilePlan } from '@/features/plan/usePlan';
 import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { useInsets, useTabBarSpace } from '@/lib/useInsets';
 import { spring } from '@/theme/motion';
-import { color, font, Lane, radius, space } from '@/theme/tokens';
+import { alpha, color, font, Lane, radius, space } from '@/theme/tokens';
 
 const LEDGE = 5;
 const GAP = space.md;
@@ -29,6 +31,8 @@ export default function PlayScreen() {
   const { width } = useWindowDimensions();
   const { current } = useFamily();
   const { lock, todaySeconds, limitMinutes } = useScreenTime({ games: true });
+  const { gameOpen } = useProfilePlan();
+  const [lockedOpen, setLockedOpen] = useState(false);
   const { t } = useT();
   if (!current) return <View style={styles.root} />;
   const lane = current.lane;
@@ -63,7 +67,7 @@ export default function PlayScreen() {
             <View style={styles.grid}>
               {section.games.map((id) => (
                 <Enter key={id} index={order++} style={{ width: tileW }}>
-                  <GameTile meta={GAMES[id].meta} lane={lane} focused={focused} />
+                  <GameTile meta={GAMES[id].meta} lane={lane} focused={focused} locked={!gameOpen(id)} onLocked={() => setLockedOpen(true)} />
                 </Enter>
               ))}
             </View>
@@ -71,6 +75,15 @@ export default function PlayScreen() {
         ))}
       </ScrollView>
       <StatusScrim />
+      {/* Free plan: a locked game says "ask a parent" — never a price, never a way to pay. */}
+      <BottomSheet open={lockedOpen} onClose={() => setLockedOpen(false)} title={t('plus.gameLockedTitle')}>
+        <View style={styles.lockedSheet}>
+          <View style={styles.lockedIcon}>
+            <Icon name="lock" size={34} color={color.text} strokeWidth={2.2} />
+          </View>
+          <Text style={styles.lockedText}>{t('plus.gameLockedSub')}</Text>
+        </View>
+      </BottomSheet>
       {lock && <TimesUp lock={lock} />}
     </View>
   );
@@ -82,7 +95,7 @@ export default function PlayScreen() {
  * into its ledge — there's no separate button, so ten games don't mean ten
  * competing call-to-actions.
  */
-function GameTile({ meta, lane, focused }: { meta: GameMeta; lane: Lane; focused: boolean }) {
+function GameTile({ meta, lane, focused, locked, onLocked }: { meta: GameMeta; lane: Lane; focused: boolean; locked: boolean; onLocked: () => void }) {
   const { t } = useT();
   const press = useSharedValue(0);
   const anim = useAnimatedStyle(() => ({ transform: [{ translateY: press.value * LEDGE }] }));
@@ -93,18 +106,26 @@ function GameTile({ meta, lane, focused }: { meta: GameMeta; lane: Lane; focused
     <Pressable
       onPress={() => {
         fx.tap();
-        router.push(`/games/${meta.id}`);
+        if (locked) onLocked();
+        else router.push(`/games/${meta.id}`);
       }}
       onPressIn={() => (press.value = withSpring(1, spring.snappy))}
       onPressOut={() => (press.value = withSpring(0, spring.bouncy))}
       accessibilityRole="button"
-      accessibilityLabel={`${name}. ${sub}`}
+      accessibilityLabel={locked ? `${name}. ${t('plus.gameLockedTitle')}` : `${name}. ${sub}`}
       style={{ paddingBottom: LEDGE }}
     >
       <View style={[styles.ledge, { backgroundColor: shade(meta.tint) }]} />
       <Animated.View style={[styles.tile, anim]}>
         <View style={[styles.stage, { backgroundColor: meta.tint }]}>
-          <Scene active={focused} />
+          <Scene active={focused && !locked} />
+          {locked && (
+            <View style={styles.lockScrim}>
+              <View style={styles.lockBadge}>
+                <Icon name="lock" size={22} color={color.text} strokeWidth={2.4} />
+              </View>
+            </View>
+          )}
         </View>
         <View style={styles.foot}>
           <Text style={styles.name} numberOfLines={1} maxFontSizeMultiplier={1.3}>
@@ -176,4 +197,9 @@ const styles = StyleSheet.create({
   best: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 },
   stars: { flexDirection: 'row', gap: 1 },
   bestText: { flexShrink: 1, color: color.text, fontFamily: font.mono, fontSize: 12 },
+  lockScrim: { ...StyleSheet.absoluteFill, alignItems: 'center', justifyContent: 'center', backgroundColor: alpha(color.ink, 0.55) },
+  lockBadge: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', backgroundColor: color.surface2 },
+  lockedSheet: { alignItems: 'center', gap: space.md, paddingHorizontal: space.xl, paddingBottom: space.lg },
+  lockedIcon: { width: 72, height: 72, borderRadius: 36, alignItems: 'center', justifyContent: 'center', backgroundColor: color.surface2 },
+  lockedText: { color: color.text2, fontFamily: font.semibold, fontSize: 16, textAlign: 'center' },
 });

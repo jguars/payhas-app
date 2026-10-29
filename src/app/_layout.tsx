@@ -120,6 +120,7 @@ function Routes() {
           dashboard must never be that fallback. */}
       <Stack.Protected guard={langChosen && settled}>
         <Stack.Screen name="parent" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="plus" options={{ animation: 'slide_from_right' }} />
       </Stack.Protected>
     </Stack>
   );

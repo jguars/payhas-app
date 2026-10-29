@@ -49,6 +49,9 @@ const POLL_MS = 20_000;
 let parent: { token: string; expires: number } | null = null;
 const valid = () => (parent && parent.expires > Date.now() ? parent.token : null);
 
+/** The dashboard's open parent session, if any, so a screen opened from it (Payhas Plus) needn't ask for the PIN again. */
+export const currentParentToken = valid;
+
 const expired = (e: { code?: string } | null) => e?.code === '42501';
 
 /** Local midnight — extra time lasts until the end of the child's day. */
@@ -62,6 +65,8 @@ const endOfToday = () => {
 export function useParent() {
   const [token, setToken] = useState(valid);
   const [children, setChildren] = useState<Child[] | null>(null);
+  /** Whether the family is on Plus (the server trims history on Free). Null before the first load. */
+  const [plus, setPlus] = useState<boolean | null>(null);
 
   const lock = useCallback(() => {
     if (parent) supabase.rpc('end_parent_session', { p_parent: parent.token }).then(() => {});
@@ -84,7 +89,11 @@ export function useParent() {
     if (!t) return setToken(null);
     const { data, error } = await supabase.rpc('get_family_dashboard', { p_parent: t, p_tz: deviceTimeZone() });
     if (expired(error)) return lock();
-    if (data) setChildren((data as { profiles: Child[] }).profiles);
+    if (data) {
+      const d = data as { profiles: Child[]; plus?: boolean };
+      setChildren(d.profiles);
+      setPlus(d.plus ?? null);
+    }
   }, [lock]);
 
   // Live status: refetch every 20s while unlocked; the session runs out by itself.
@@ -151,7 +160,7 @@ export function useParent() {
       supabase.rpc('parent_hide_video', { p_parent: t, p_profile_id: c.id, p_video_id: videoId }),
     );
 
-  return { token, unlocked: !!token, children, unlock, lock, reload: load, setControls, setPaused, addTime, answer, hideVideo };
+  return { token, unlocked: !!token, children, plus, unlock, lock, reload: load, setControls, setPaused, addTime, answer, hideVideo };
 }
 
 /** "5m ago", "2h ago", "3d ago" in the current language. */

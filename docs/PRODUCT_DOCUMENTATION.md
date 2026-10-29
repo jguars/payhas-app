@@ -1,6 +1,6 @@
 # Payhas — Product Documentation
 
-Last updated Oct 30, 2026 · Onki Games
+Last updated Oct 29, 2026 · Onki Games
 
 This is the living product document. Tasks are ticked here as they ship; each
 ticked item names the commit or migration that did it.
@@ -102,6 +102,23 @@ Safety lives on the server; the app only reflects it.
 - Every clip carries its source and licence credit.
 - Secrets (service keys, Firebase files) never enter the repository.
 
+## Payhas Plus (business model)
+
+One monthly plan per family: **20 TMT a month**. No trial; a free tier stays free.
+
+| | Free | Plus |
+| --- | --- | --- |
+| Profiles (adults included) | 2 | 3 |
+| Games | Quick play: Bubble Pop, Pop-up Pals, Star Catcher, Echo Lights | All 10 |
+| Videos | 30 a day per profile | No daily cap (the parent's limits still apply) |
+| Parent dashboard | Today | 7-day chart, top topics, recent videos |
+
+- **Safety is never paid.** Daily limits, quiet hours, pause, hiding videos and flagged videos work the same on Free.
+- **Children never see a price.** The Plus page sits behind the parent PIN; a locked game or the end of today's videos tells the child to ask a parent or come back tomorrow.
+- **Limits live on the server.** Profile limit (a trigger on `profiles`), the 30-video cap (the feed functions return nothing past it) and the trimmed dashboard are enforced in the database; the app only reflects them.
+- **Paying:** activation codes now — `PAYH-XXXX-XXXX-XXXX`, sold through shops, banks or operators, entered on the Plus page. Codes are stored hashed, work once, stack (each adds its months after the current end) and lock out after 5 wrong tries an hour. Admins create a batch in the SQL editor with `select * from private.create_plus_codes(100, 1, 'batch-name');`. Local card payment comes later as another source.
+- Families with more profiles than their plan allows keep them; the limit only stops new ones.
+
 ## Design system
 
 The system is **"The Night-Light Playroom"**: a dark, calm room lit only by one warm ember for "do this" and four lane colours for "who and how old". Chrome is quiet at rest and comes alive under touch. The full spec lives in `DESIGN.md`; screen patterns from the Mobbin references are in `DESIGN_V2.md`.
@@ -172,7 +189,7 @@ The core app is built and running on Android and iPhone; content is growing thro
 - [x] Delete one child's profile from the dashboard — `34b71d7`
 - [x] Parental consent before the family's first child profile — `00e8468`, `20261029150000_parental_consent.sql`
 - [x] Block advertising ID, location, camera and microphone on Android — `d85d894`
-- [x] Migration backlog applied to the live database (Oct 30, verified): `push_notifications`, `more_games`, `delete_account`, `retention` (nightly purge scheduled), `push_privacy`
+- [x] Migration backlog applied to the live database (Oct 29, verified): `push_notifications`, `more_games`, `delete_account`, `retention` (nightly purge scheduled), `push_privacy`
 - [ ] Apply `20261029150000_parental_consent.sql` — held until test phones run a build with the consent screen (the database then refuses new child profiles without consent)
 - [ ] Turn on leaked password protection (Supabase → Authentication → Providers → Email)
 - [ ] Remaining privacy review items — deferred for now (the review isn't in the repo; add its list here when it's picked up)
@@ -188,8 +205,8 @@ The core app is built and running on Android and iPhone; content is growing thro
 - [ ] Share sheet
 - [ ] Long-press "Why this?" / "Not for me"
 - [x] Watch-event logging (impression, finish, rewatch, quick skip, share, Not for me, seconds watched)
-- [x] For You v1: ranking learns from logged signals, lane quality, exploration slot, variety, `why_this()` — `20261030090000_for_you_v1.sql`
-- [x] `20261030090000_for_you_v1.sql` applied to the live database (Oct 30; hourly quality refresh scheduled with pg_cron)
+- [x] For You v1: ranking learns from logged signals, lane quality, exploration slot, variety, `why_this()` — `20261029153000_for_you_v1.sql`
+- [x] `20261029153000_for_you_v1.sql` applied to the live database (Oct 29; hourly quality refresh scheduled with pg_cron)
 - [ ] Show "Why this?" chips and taste dials in the app (server side ready: `why_this()`, `private.topic_affinity`)
 - [ ] For You v2: embeddings with pgvector (once the library reaches about 1,000 clips)
 - [ ] Native-speaker review of the Turkmen copy
@@ -202,5 +219,11 @@ The core app is built and running on Android and iPhone; content is growing thro
 - [ ] Firebase setup for Android alerts (`google-services.json` and service-account secret)
 - [ ] YouTube embeds for creator videos (needs a Google Cloud API key)
 - [ ] Creator uploads and the safety classifier pipeline (not built; content is curated only)
-- [ ] Monetisation (not decided)
+- [x] Business model: Payhas Plus, 20 TMT a month per family, 3 profiles; free tier with 2 profiles, 4 games, 30 videos a day, today-only dashboard
+- [x] Plus: database plans, hashed activation codes, server-side limits — `20261029160000_plus.sql`
+- [x] Plus: Payhas Plus page behind the PIN, Plus card and locked history in the dashboard, profile limit in Add and onboarding
+- [x] Plus: locked games and the end-of-day card for children (no prices)
+- [ ] Apply `20261029160000_plus.sql` to the live database (with the app build that shows the new screens)
+- [ ] Local card payment (choose a bank and its online payment API)
+- [ ] Decide where activation codes are sold, and print the first batch
 - [ ] Tablet layouts (iPad support is off until then)

@@ -126,7 +126,8 @@ export function ChildSetup({ progress, onDone, onCancel }: Props) {
     if (!res) return; // PIN cancelled
     if (res.error || !res.data) {
       fx.error();
-      return setError(res.error?.message.includes('6 profiles') ? t('onboarding.error.full') : t('onboarding.error.generic'));
+      const msg = res.error?.message ?? '';
+      return setError(msg.includes('plan_profile_limit') ? t('plus.limitReached') : msg.includes('6 profiles') ? t('onboarding.error.full') : t('onboarding.error.generic'));
     }
     fx.success();
     onDone({ id: res.data, name: nm, lane, limit });

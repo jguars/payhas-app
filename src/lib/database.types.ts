@@ -506,6 +506,9 @@ export type Database = {
         Returns: Database['public']['Functions']['get_feed']['Returns']
       }
       why_this: { Args: { p_session: string; p_video_id: string }; Returns: Json }
+      get_family_plan: { Args: never; Returns: Json }
+      get_profile_plan: { Args: { p_session: string }; Returns: Json }
+      redeem_code: { Args: { p_parent: string; p_code: string }; Returns: Json }
       create_profile: {
         Args: {
           p_parent: string

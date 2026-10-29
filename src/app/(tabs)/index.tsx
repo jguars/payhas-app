@@ -7,6 +7,7 @@ import { Icon } from '@/components/Icon';
 import { LaneBadge } from '@/components/LaneBadge';
 import { useFamily } from '@/features/family/FamilyProvider';
 import { CreatorSheet } from '@/features/feed/CreatorSheet';
+import { DailyDone } from '@/features/feed/DailyDone';
 import { FeedVideo } from '@/features/feed/data';
 import { FeedItem } from '@/features/feed/FeedItem';
 import { FollowingEmpty } from '@/features/feed/FollowingEmpty';
@@ -16,6 +17,7 @@ import { SheetMode, VideoSheet } from '@/features/feed/VideoSheet';
 import { TimesUp } from '@/features/library/TimesUp';
 import { TKey, useT } from '@/i18n';
 import { useScreenTime } from '@/features/library/useScreenTime';
+import { useProfilePlan } from '@/features/plan/usePlan';
 import { fx } from '@/lib/feedback';
 import { useInsets, useTabBarSpace } from '@/lib/useInsets';
 import { alpha, color, font } from '@/theme/tokens';
@@ -41,6 +43,12 @@ export default function FeedScreen() {
   const { active, leaveProfile } = useFamily();
   const forYou = useFeed('forYou');
   const followingFeed = useFeed('following');
+  // Free plan: after today's videos the feeds come back empty; check why when one runs dry.
+  const { plan, reload: reloadPlan } = useProfilePlan();
+  const capReached = plan?.videosLeft === 0;
+  useEffect(() => {
+    if (forYou.done || followingFeed.done) reloadPlan();
+  }, [forYou.done, followingFeed.done, forYou.videos.length, reloadPlan]);
   const { lock } = useScreenTime();
   const pager = useRef<Animated.ScrollView>(null);
   const lists = { forYou: useRef<FlatList>(null), following: useRef<FlatList>(null) };
@@ -111,7 +119,7 @@ export default function FeedScreen() {
   const onOptions = useCallback((video: FeedVideo) => setSheet({ video, mode: 'options' }), []);
   const onCreator = useCallback((name: string) => setCreator(name), []);
 
-  const showEmptyFollowing = !followingFeed.loading && followingFeed.videos.length === 0;
+  const showEmptyFollowing = !followingFeed.loading && followingFeed.videos.length === 0 && !capReached;
 
   return (
     <View style={styles.root} onLayout={onLayout}>
@@ -175,6 +183,8 @@ export default function FeedScreen() {
                     initialNumToRender={m === mode ? 2 : 1}
                     maxToRenderPerBatch={2}
                     nestedScrollEnabled
+                    ListFooterComponent={capReached ? <DailyDone height={height} /> : null}
+                    ListEmptyComponent={capReached ? <DailyDone height={height} /> : null}
                   />
                 )}
               </View>

@@ -3,6 +3,7 @@ import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, 
 import { AppState } from 'react-native';
 
 import type { Tables } from '@/lib/database.types';
+import { fetchFamilyPlan, FamilyPlan } from '@/features/plan/plan';
 import { supabase } from '@/lib/supabase';
 
 export type Profile = Tables<'profiles'> & { interestCount: number };
@@ -17,6 +18,8 @@ type FamilyContext = {
   /** Signed in, but the family hasn't been through onboarding yet. */
   needsOnboarding: boolean;
   hasPin: boolean;
+  /** Free or Plus, and how many profiles the plan allows. Null until loaded or when signed out. */
+  plan: FamilyPlan | null;
   active: ActiveProfile | null;
   /** The active profile's latest row (active.profile is the copy taken when it was opened). */
   current: Profile | null;
@@ -52,15 +55,18 @@ export function FamilyProvider({ children }: { children: ReactNode }) {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [hasPin, setHasPin] = useState(false);
   const [family, setFamily] = useState<Family | null>(null);
+  const [plan, setPlan] = useState<FamilyPlan | null>(null);
   const [active, setActive] = useState<ActiveProfile | null>(null);
 
   const refresh = useCallback(async () => {
-    const [{ data: rows }, { data: pinSet }, { data: fam }] = await Promise.all([
+    const [{ data: rows }, { data: pinSet }, { data: fam }, familyPlan] = await Promise.all([
       supabase.from('profiles').select('*, profile_interests(count)').order('created_at'),
       supabase.rpc('has_parent_pin'),
       supabase.from('families').select('id, language, onboarded_at').maybeSingle(),
+      fetchFamilyPlan(),
     ]);
     setFamily(fam ?? null);
+    setPlan(familyPlan);
     const list = (rows ?? []).map(({ profile_interests, ...p }) => ({ ...p, interestCount: profile_interests[0]?.count ?? 0 }));
     setProfiles(list);
     setHasPin(!!pinSet);
@@ -140,8 +146,8 @@ export function FamilyProvider({ children }: { children: ReactNode }) {
   const needsOnboarding = !!session && !!family && !family.onboarded_at;
 
   const value = useMemo(
-    () => ({ ready, session, profiles, family, needsOnboarding, hasPin, active, current, needsInterests, refresh, selectProfile, leaveProfile, signOut }),
-    [ready, session, profiles, family, needsOnboarding, hasPin, active, current, needsInterests, refresh, selectProfile, leaveProfile, signOut],
+    () => ({ ready, session, profiles, family, needsOnboarding, hasPin, plan, active, current, needsInterests, refresh, selectProfile, leaveProfile, signOut }),
+    [ready, session, profiles, family, needsOnboarding, hasPin, plan, active, current, needsInterests, refresh, selectProfile, leaveProfile, signOut],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

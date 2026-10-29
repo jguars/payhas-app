@@ -18,7 +18,7 @@ const AVATAR = 104;
 const TILE = 132;
 
 export default function WhoScreen() {
-  const { profiles, hasPin, selectProfile, refresh } = useFamily();
+  const { profiles, hasPin, plan, selectProfile, refresh } = useFamily();
   const { t } = useT();
   const [pinFor, setPinFor] = useState<Profile | null>(null);
 
@@ -82,12 +82,13 @@ export default function WhoScreen() {
               </Enter>
             );
           })}
-          {profiles.length < 6 && (
+          {/* At the plan's profile limit on Free, Add opens Payhas Plus (behind the PIN) instead. */}
+          {(profiles.length < (plan?.profile_limit ?? 6) || (plan && !plan.plus)) && (
             <Enter index={profiles.length + 1}>
               <PressScale
                 onPress={() => {
                   fx.tap();
-                  router.push('/add-child');
+                  router.push(plan && profiles.length >= plan.profile_limit ? '/plus' : '/add-child');
                 }}
                 accessibilityRole="button"
                 accessibilityLabel={t('auth.addProfile')}

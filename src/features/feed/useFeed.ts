@@ -84,5 +84,5 @@ export function useFeed(mode: FeedMode = 'forYou') {
     setVideos((cur) => (cur.some((c) => c.id === v.id) ? cur : [v, ...cur]));
   }, []);
 
-  return { videos: videos.filter((v) => !hidden.has(v.id)), loading, reload: load, loadMore, insert };
+  return { videos: videos.filter((v) => !hidden.has(v.id)), loading, done, reload: load, loadMore, insert };
 }

@@ -37,7 +37,7 @@ export default function OnboardingScreen() {
 
 function Flow() {
   const { t, lang } = useT();
-  const { profiles, hasPin, refresh } = useFamily();
+  const { profiles, hasPin, plan, refresh } = useFamily();
   const gate = useParentSession();
   const consent = useParentalConsent();
   const [stage, setStage] = useState<Stage>('welcome');
@@ -178,8 +178,9 @@ function Flow() {
           await refresh(); // onboarded_at set → the router moves on to "Who's watching?"
         },
       }}
-      secondary={profiles.length < 6 ? { label: t('onboarding.review.addChild'), onPress: toChild } : undefined}
+      secondary={profiles.length < (plan?.profile_limit ?? 6) ? { label: t('onboarding.review.addChild'), onPress: toChild } : undefined}
     >
+      {plan && !plan.plus && profiles.length >= plan.profile_limit && <Text style={styles.planNote}>{t('plus.limitReached')}</Text>}
       {profiles.map((p, i) => {
         const L = lanes[p.lane];
         return (
@@ -283,6 +284,7 @@ const styles = StyleSheet.create({
   pinWhy: { color: color.text3, fontFamily: font.medium, fontSize: 13, textAlign: 'center' },
   nameInput: { color: color.text, fontFamily: font.display, fontSize: 32, paddingVertical: space.md, borderBottomWidth: 2, borderBottomColor: color.line },
   error: { color: color.ember, fontFamily: font.semibold, fontSize: 14 },
+  planNote: { color: color.text3, fontFamily: font.medium, fontSize: 13, lineHeight: 18, marginBottom: space.sm },
   member: { flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.md, borderRadius: radius.card, backgroundColor: color.surface1, borderWidth: 2, borderColor: color.line },
   memberName: { color: color.text, fontFamily: font.bold, fontSize: 17 },
   memberMeta: { color: color.text3, fontFamily: font.medium, fontSize: 13 },
