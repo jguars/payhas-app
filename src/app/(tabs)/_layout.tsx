@@ -38,6 +38,7 @@ const TabButton = forwardRef<View, TabButtonProps>(({ kind, label, isFocused, ba
     </View>
   </Pressable>
 ));
+TabButton.displayName = 'TabButton';
 
 // TabTrigger clones props (isFocused, onPress…) onto its child, so pass them through.
 const InboxTabButton = forwardRef<View, PressableProps & { isFocused?: boolean }>((props, ref) => {
@@ -45,6 +46,7 @@ const InboxTabButton = forwardRef<View, PressableProps & { isFocused?: boolean }
   const { t } = useT();
   return <TabButton ref={ref} kind="inbox" label={unread ? t('nav.inboxUnread', { count: unread }) : t('nav.inbox')} badge={unread > 0} {...props} />;
 });
+InboxTabButton.displayName = 'InboxTabButton';
 
 /**
  * The pill behind the active tab. It slides on a spring, stretches like jelly

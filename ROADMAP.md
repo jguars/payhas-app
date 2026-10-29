@@ -6,7 +6,7 @@ Design source: https://claude.ai/artifact/EEnQUr5xZXq3b8utWGQyA4 — Feed Varian
 ## Phase 0 — Foundations
 - [x] Expo app scaffold, TypeScript strict, `@/` path alias
 - [x] Design tokens (`src/theme/tokens.ts`), fonts, icon set
-- [ ] Lint config + CI (typecheck + lint on push)
+- [x] Lint config + CI (typecheck + lint on push, `.github/workflows/ci.yml`)
 
 ## Phase 1 — Core watching experience
 - [x] Tab shell: Home · Discover · Create · Inbox · Me
