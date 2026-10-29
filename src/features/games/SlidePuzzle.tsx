@@ -17,7 +17,7 @@ import { TimesUp } from '@/features/library/TimesUp';
 import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { spring } from '@/theme/motion';
-import { alpha, color, font, Lane, lane as lanes, media, pageFill, radius, space, themedStyles } from '@/theme/tokens';
+import { alpha, color, font, Lane, lane as lanes, media, pageFill, radius, size, space, themedStyles } from '@/theme/tokens';
 
 import { Confetti } from './Confetti';
 import { Finish, GameBar, Readout } from './GameChrome';
@@ -597,6 +597,6 @@ const styles = themedStyles(() => ({
   peekLedge: { position: 'absolute', left: 0, right: 0, bottom: 0, borderRadius: radius.pill, backgroundColor: color.line },
   peek: { flexDirection: 'row', alignItems: 'center', gap: space.sm, minHeight: 52, paddingLeft: 8, paddingRight: 20, paddingVertical: 8, borderRadius: radius.pill, borderWidth: 2, borderColor: color.line, backgroundColor: color.surface1 },
   thumb: { overflow: 'hidden', borderWidth: 2 },
-  peekText: { color: color.text, fontFamily: font.bold, fontSize: 15 },
+  peekText: { color: color.text, fontFamily: font.bold, fontSize: size.body },
   mini: { position: 'absolute', left: 0, top: 0, width: MINI, height: MINI, borderRadius: 7, overflow: 'hidden', borderWidth: 2, borderColor: color.ink, backgroundColor: color.surface2 },
 }));

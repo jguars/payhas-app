@@ -13,7 +13,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import Svg, { Circle, Rect } from 'react-native-svg';
 
-import { alpha, color, font, lane as lanes, media, themedStyles } from '@/theme/tokens';
+import { alpha, color, font, lane as lanes, media, size, themedStyles } from '@/theme/tokens';
 
 import { BUBBLES, MEMORY } from './shared';
 import type { GameMeta } from './types';
@@ -136,7 +136,7 @@ function MiniCard({ face, index, delay, active }: { face: string; index: number;
         <Text style={styles.miniMark}>?</Text>
       </Animated.View>
       <Animated.View style={[styles.miniFace, styles.miniFront, front]}>
-        <Text style={{ fontSize: 22 }}>{face}</Text>
+        <Text style={{ fontSize: size.title }}>{face}</Text>
       </Animated.View>
     </View>
   );
@@ -148,6 +148,6 @@ const styles = themedStyles(() => ({
   miniCard: { width: 36, height: 48 },
   miniFace: { position: 'absolute', left: 0, top: 0, width: '100%', height: '100%', borderRadius: 10, borderWidth: 2, borderColor: color.ink, alignItems: 'center', justifyContent: 'center', backfaceVisibility: 'hidden' },
   miniBack: { backgroundColor: color.surface2 },
-  miniMark: { color: lanes.little.color, fontFamily: font.display, fontSize: 18 },
+  miniMark: { color: lanes.little.color, fontFamily: font.display, fontSize: size.lead },
   miniFront: { backgroundColor: media.text },
 }));

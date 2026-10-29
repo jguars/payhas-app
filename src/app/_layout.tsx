@@ -1,35 +1,28 @@
 import {
   BricolageGrotesque_700Bold,
   BricolageGrotesque_800ExtraBold,
-} from "@expo-google-fonts/bricolage-grotesque";
+} from '@expo-google-fonts/bricolage-grotesque';
 import {
-  Figtree_400Regular,
   Figtree_500Medium,
   Figtree_600SemiBold,
   Figtree_700Bold,
-} from "@expo-google-fonts/figtree";
-import { JetBrainsMono_500Medium } from "@expo-google-fonts/jetbrains-mono";
-import {
-  Onest_400Regular,
-  Onest_500Medium,
-  Onest_600SemiBold,
-  Onest_700Bold,
-  Onest_800ExtraBold,
-} from "@expo-google-fonts/onest";
-import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
-import { View } from "react-native";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+} from '@expo-google-fonts/figtree';
+import { JetBrainsMono_500Medium } from '@expo-google-fonts/jetbrains-mono';
+import { Onest_500Medium, Onest_600SemiBold, Onest_700Bold, Onest_800ExtraBold } from '@expo-google-fonts/onest';
+import { useFonts } from 'expo-font';
+import { Stack } from 'expo-router';
+import { View } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { ToastProvider } from "@/components/Toast";
-import { FamilyProvider, useFamily } from "@/features/family/FamilyProvider";
-import { usePresence } from "@/features/family/usePresence";
-import { I18nProvider, startupLang, useT } from "@/i18n";
-import { useParentAlerts } from "@/features/parent/push";
-import { LibraryProvider } from "@/features/library/LibraryProvider";
-import { initFeedback } from "@/lib/feedback";
-import { ThemeProvider } from "@/theme/ThemeProvider";
-import { color, pageFill } from "@/theme/tokens";
+import { ToastProvider } from '@/components/Toast';
+import { FamilyProvider, useFamily } from '@/features/family/FamilyProvider';
+import { usePresence } from '@/features/family/usePresence';
+import { I18nProvider, startupLang, useT } from '@/i18n';
+import { useParentAlerts } from '@/features/parent/push';
+import { LibraryProvider } from '@/features/library/LibraryProvider';
+import { initFeedback } from '@/lib/feedback';
+import { ThemeProvider } from '@/theme/ThemeProvider';
+import { color, pageFill } from '@/theme/tokens';
 
 // Audio mode + warm players before the first tap.
 initFeedback();
@@ -39,11 +32,10 @@ initFeedback();
 // working unchanged. Chosen at launch; switching to or from Russian applies
 // on the next start (LanguagePicker says so).
 const FONTS =
-  startupLang === "ru"
+  startupLang === 'ru'
     ? {
         BricolageGrotesque_700Bold: Onest_700Bold,
         BricolageGrotesque_800ExtraBold: Onest_800ExtraBold,
-        Figtree_400Regular: Onest_400Regular,
         Figtree_500Medium: Onest_500Medium,
         Figtree_600SemiBold: Onest_600SemiBold,
         Figtree_700Bold: Onest_700Bold,
@@ -52,7 +44,6 @@ const FONTS =
     : {
         BricolageGrotesque_700Bold,
         BricolageGrotesque_800ExtraBold,
-        Figtree_400Regular,
         Figtree_500Medium,
         Figtree_600SemiBold,
         Figtree_700Bold,
@@ -86,8 +77,7 @@ export default function RootLayout() {
  * onboarding. No profile chosen → who's watching. Otherwise → the app.
  */
 function Routes() {
-  const { ready, session, active, needsInterests, needsOnboarding } =
-    useFamily();
+  const { ready, session, active, needsInterests, needsOnboarding } = useFamily();
   const { chosen: langChosen } = useT();
   usePresence();
   useParentAlerts(ready && !!session);
@@ -95,12 +85,7 @@ function Routes() {
   const settled = !!session && !needsOnboarding;
 
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        contentStyle: { backgroundColor: color.bg },
-      }}
-    >
+    <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: color.bg } }}>
       <Stack.Protected guard={!langChosen}>
         <Stack.Screen name="language" />
       </Stack.Protected>
@@ -118,57 +103,25 @@ function Routes() {
       </Stack.Protected>
       <Stack.Protected guard={!!active && !needsInterests}>
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen
-          name="games/[id]"
-          options={{ animation: "fade", gestureEnabled: false }}
-        />
-        <Stack.Screen
-          name="saved"
-          options={{ animation: "slide_from_right" }}
-        />
-        <Stack.Screen
-          name="channel"
-          options={{ animation: "slide_from_right" }}
-        />
-        <Stack.Screen
-          name="following"
-          options={{ animation: "slide_from_right" }}
-        />
-        <Stack.Screen
-          name="studio"
-          options={{ animation: "slide_from_right" }}
-        />
-        <Stack.Screen
-          name="upload"
-          options={{ animation: "slide_from_bottom", gestureEnabled: false }}
-        />
-        <Stack.Screen
-          name="review"
-          options={{ animation: "slide_from_right" }}
-        />
-        <Stack.Screen
-          name="review-item"
-          options={{ animation: "slide_from_right" }}
-        />
+        <Stack.Screen name="games/[id]" options={{ animation: 'fade', gestureEnabled: false }} />
+        <Stack.Screen name="saved" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="channel" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="following" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="studio" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="upload" options={{ animation: 'slide_from_bottom', gestureEnabled: false }} />
+        <Stack.Screen name="review" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="review-item" options={{ animation: 'slide_from_right' }} />
       </Stack.Protected>
       {/* Last on purpose: when the current screen stops being allowed, the router
           falls back to the first allowed one in this list. The PIN-locked
           dashboard must never be that fallback. */}
       <Stack.Protected guard={langChosen && settled}>
-        <Stack.Screen
-          name="parent"
-          options={{ animation: "slide_from_right" }}
-        />
-        <Stack.Screen
-          name="parent-child"
-          options={{ animation: "slide_from_right" }}
-        />
-        <Stack.Screen name="plus" options={{ animation: "slide_from_right" }} />
+        <Stack.Screen name="parent" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="parent-child" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="plus" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="profile-edit" options={{ animation: 'slide_from_right' }} />
         {/* Reachable from Who's watching? and from the parent dashboard inside a profile; the PIN comes first. */}
-        <Stack.Screen
-          name="add-child"
-          options={{ animation: "slide_from_bottom" }}
-        />
+        <Stack.Screen name="add-child" options={{ animation: 'slide_from_bottom' }} />
       </Stack.Protected>
     </Stack>
   );

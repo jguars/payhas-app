@@ -25,7 +25,7 @@ import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { useInsets } from '@/lib/useInsets';
 import { spring } from '@/theme/motion';
-import { alpha, color, font, Lane, lane as lanes, pageFill, radius, space, themedStyles } from '@/theme/tokens';
+import { alpha, color, font, Lane, lane as lanes, pageFill, radius, size, space, themedStyles } from '@/theme/tokens';
 
 import { Confetti } from './Confetti';
 import { Finish, GameBar, Readout } from './GameChrome';
@@ -649,7 +649,7 @@ function Burst({ p }: { p: Pop }) {
       {!reduce && Array.from({ length: n }, (_, i) => <Spark key={i} i={i} n={n} b={b} gold={p.tone === 'gold'} />)}
       {p.tone === 'bad' && !reduce && [0, 1, 2, 3].map((i) => <Raindrop key={i} i={i} b={b} />)}
       {p.label !== '' && (
-        <Animated.Text style={[styles.label, p.tone === 'bad' && { color: color.danger }, p.tone === 'gold' && { color: color.reward, fontSize: 32 }, label]}>
+        <Animated.Text style={[styles.label, p.tone === 'bad' && { color: color.danger }, p.tone === 'gold' && { color: color.reward, fontSize: size.headline }, label]}>
           {p.label}
         </Animated.Text>
       )}
@@ -1007,7 +1007,7 @@ const styles = themedStyles(() => ({
     top: -14,
     textAlign: 'center',
     color: color.reward,
-    fontSize: 22,
+    fontSize: size.title,
   },
   raindrop: {
     position: 'absolute',
@@ -1026,7 +1026,7 @@ const styles = themedStyles(() => ({
     textAlign: 'center',
     color: color.text,
     fontFamily: font.display,
-    fontSize: 26,
+    fontSize: size.heading,
     letterSpacing: -0.5,
   },
   hearts: {
@@ -1057,13 +1057,13 @@ const styles = themedStyles(() => ({
     borderWidth: 1,
     borderColor: color.line,
   },
-  hintText: { color: color.text2, fontFamily: font.semibold, fontSize: 14 },
+  hintText: { color: color.text2, fontFamily: font.semibold, fontSize: size.small },
   hintEmoji: { fontSize: 20 },
   combo: { borderColor: alpha(color.reward, 0.5) },
   comboText: {
     color: color.reward,
     fontFamily: font.display,
-    fontSize: 18,
+    fontSize: size.lead,
     letterSpacing: -0.4,
   },
   progress: {
@@ -1102,7 +1102,7 @@ const styles = themedStyles(() => ({
     width: 12,
     textAlign: 'center',
     color: color.text,
-    fontSize: 12,
+    fontSize: size.caption,
   },
   sceneBasket: { position: 'absolute', left: 0 },
   sceneBody: {

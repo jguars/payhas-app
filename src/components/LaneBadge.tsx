@@ -2,7 +2,7 @@ import { Pressable, Text } from 'react-native';
 
 import { Icon } from '@/components/Icon';
 import { laneKey, useT } from '@/i18n';
-import { alpha, color, font, Lane, lane as lanes, themedStyles } from '@/theme/tokens';
+import { alpha, color, font, Lane, lane as lanes, size, themedStyles } from '@/theme/tokens';
 
 /** `label` overrides the lane name, e.g. "Parent" for the family owner's profile. */
 type Props = { lane: Lane; label?: string; onPress?: () => void };
@@ -37,5 +37,5 @@ const styles = themedStyles(() => ({
     borderRadius: 999,
     backgroundColor: alpha(color.ink, 0.32),
   },
-  label: { fontFamily: font.bold, fontSize: 12, letterSpacing: 0.2 },
+  label: { fontFamily: font.bold, fontSize: size.caption, letterSpacing: 0.2 },
 }));

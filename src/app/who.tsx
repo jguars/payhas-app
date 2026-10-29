@@ -12,7 +12,7 @@ import { Profile, useFamily } from '@/features/family/FamilyProvider';
 import { roleKey, useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
-import { color, font, pageFill, space, themedStyles } from '@/theme/tokens';
+import { color, font, pageFill, size, space, themedStyles } from '@/theme/tokens';
 
 const AVATAR = 104;
 const TILE = 132;
@@ -127,13 +127,13 @@ export default function WhoScreen() {
 const styles = themedStyles(() => ({
   root: { flex: 1, ...pageFill() },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: space.xl, gap: space.xxxl },
-  title: { color: color.text, fontFamily: font.display, fontSize: 30, textAlign: 'center' },
+  title: { color: color.text, fontFamily: font.display, fontSize: size.headline, textAlign: 'center' },
   grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', columnGap: space.xl, rowGap: space.xxl, width: TILE * 2 + space.xl },
   tile: { width: TILE, alignItems: 'center', gap: space.md },
   add: { width: AVATAR, height: AVATAR, borderRadius: AVATAR / 2, backgroundColor: color.surface2, alignItems: 'center', justifyContent: 'center' },
-  name: { color: color.text, fontFamily: font.semibold, fontSize: 16, maxWidth: TILE },
+  name: { color: color.text, fontFamily: font.semibold, fontSize: size.body, maxWidth: TILE },
   addName: { color: color.text2 },
   footer: { flexDirection: 'row', justifyContent: 'center', paddingVertical: space.lg },
   footerButton: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 48, paddingHorizontal: space.md },
-  footerText: { color: color.text3, fontFamily: font.medium, fontSize: 14 },
+  footerText: { color: color.text3, fontFamily: font.medium, fontSize: size.small },
 }));

@@ -6,7 +6,7 @@ import { PressScale } from '@/components/motion/PressScale';
 import { useT } from '@/i18n';
 import { useInsets } from '@/lib/useInsets';
 import { useGoBack } from '@/lib/useGoBack';
-import { color, font, space, themedStyles } from '@/theme/tokens';
+import { color, font, size, space, themedStyles } from '@/theme/tokens';
 
 /** Back chevron + centred title, for screens pushed on top of the tabs. */
 export function ScreenHeader({ title }: { title: string }) {
@@ -29,5 +29,5 @@ export function ScreenHeader({ title }: { title: string }) {
 const styles = themedStyles(() => ({
   bar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: space.md, paddingBottom: space.sm },
   back: { width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
-  title: { color: color.text, fontFamily: font.bold, fontSize: 17 },
+  title: { color: color.text, fontFamily: font.bold, fontSize: size.lead },
 }));

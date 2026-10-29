@@ -14,7 +14,7 @@ import { Constants } from '@/lib/database.types';
 import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
 import { spring } from '@/theme/motion';
-import { color, font, Lane, lane as lanes, radius, space, themedStyles } from '@/theme/tokens';
+import { color, font, Lane, lane as lanes, radius, size, space, themedStyles } from '@/theme/tokens';
 
 import { FeedVideo, formatCount } from './data';
 
@@ -258,26 +258,26 @@ function BackLink({ onPress }: { onPress: () => void }) {
 
 const styles = themedStyles(() => ({
   people: { paddingHorizontal: space.xl, gap: space.lg },
-  hint: { color: color.text3, fontFamily: font.medium, fontSize: 14, textAlign: 'center', paddingHorizontal: space.xl },
+  hint: { color: color.text3, fontFamily: font.medium, fontSize: size.small, textAlign: 'center', paddingHorizontal: space.xl },
   target: { width: 64, alignItems: 'center', gap: 6 },
   targetAvatar: { width: 56, height: 56, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   targetOff: { opacity: 0.35 },
-  targetLetter: { color: color.ink, fontFamily: font.display, fontSize: 24 },
+  targetLetter: { color: color.ink, fontFamily: font.display, fontSize: size.heading },
   targetBadge: { position: 'absolute', right: -4, bottom: -4, width: 22, height: 22, borderRadius: 11, backgroundColor: color.success, borderWidth: 2, borderColor: color.surface1, alignItems: 'center', justifyContent: 'center' },
-  targetName: { color: color.text, fontFamily: font.semibold, fontSize: 12 },
+  targetName: { color: color.text, fontFamily: font.semibold, fontSize: size.caption },
   outRow: { paddingHorizontal: space.xl },
   outButton: { height: 48, borderRadius: radius.pill, backgroundColor: color.inverse, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space.sm },
-  outText: { color: color.onInverse, fontFamily: font.bold, fontSize: 15 },
+  outText: { color: color.onInverse, fontFamily: font.bold, fontSize: size.body },
   divider: { height: 1, backgroundColor: color.line, marginHorizontal: space.xl },
   actions: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: space.xl },
   action: { width: 72, alignItems: 'center', gap: 6 },
   actionIcon: { width: 56, height: 56, borderRadius: 18, backgroundColor: color.surface2, alignItems: 'center', justifyContent: 'center' },
-  actionLabel: { color: color.text, fontFamily: font.semibold, fontSize: 12, textAlign: 'center' },
+  actionLabel: { color: color.text, fontFamily: font.semibold, fontSize: size.caption, textAlign: 'center' },
   reason: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   reasonIcon: { width: 32, height: 32, borderRadius: 16, backgroundColor: color.surface2, alignItems: 'center', justifyContent: 'center' },
-  reasonText: { color: color.text, fontFamily: font.medium, fontSize: 15, flex: 1 },
+  reasonText: { color: color.text, fontFamily: font.medium, fontSize: size.body, flex: 1 },
   reportRow: { flexDirection: 'row', alignItems: 'center', gap: space.md, minHeight: 54, paddingHorizontal: space.lg, borderRadius: 16, backgroundColor: color.surface2 },
-  reportText: { flex: 1, color: color.text, fontFamily: font.semibold, fontSize: 15 },
+  reportText: { flex: 1, color: color.text, fontFamily: font.semibold, fontSize: size.body },
   back: { flexDirection: 'row', alignItems: 'center', alignSelf: 'center', gap: 4, paddingVertical: space.sm },
-  backText: { color: color.text2, fontFamily: font.semibold, fontSize: 14 },
+  backText: { color: color.text2, fontFamily: font.semibold, fontSize: size.small },
 }));

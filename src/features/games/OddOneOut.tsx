@@ -18,7 +18,7 @@ import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { useInsets } from '@/lib/useInsets';
 import { spring } from '@/theme/motion';
-import { alpha, color, font, Lane, lane as lanes, media, pageFill, radius, space, themedStyles } from '@/theme/tokens';
+import { alpha, color, font, Lane, lane as lanes, media, pageFill, radius, size, space, themedStyles } from '@/theme/tokens';
 
 import { Confetti } from './Confetti';
 import { Finish, GameBar, Readout } from './GameChrome';
@@ -510,7 +510,7 @@ const styles = themedStyles(() => ({
   stars: { flexDirection: 'row', gap: 6 },
   star: { fontSize: 26 },
   starOff: { opacity: 0.22 },
-  penalty: { position: 'absolute', right: space.xl + 8, color: color.ember, fontFamily: font.display, fontSize: 24, letterSpacing: -0.5, zIndex: 20 },
+  penalty: { position: 'absolute', right: space.xl + 8, color: color.ember, fontFamily: font.display, fontSize: size.heading, letterSpacing: -0.5, zIndex: 20 },
   miniGrid: { flexDirection: 'row', flexWrap: 'wrap', width: 3 * 28 + 2 * 5, gap: 5 },
   miniCell: { width: 28, height: 28, borderRadius: 8, borderWidth: 2, borderColor: color.ink, backgroundColor: media.text, alignItems: 'center', justifyContent: 'center' },
   miniEmoji: { fontSize: 16 },

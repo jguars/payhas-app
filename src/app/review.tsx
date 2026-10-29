@@ -14,7 +14,7 @@ import { laneKey, localized, type T, useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
 import { useInsets } from '@/lib/useInsets';
-import { alpha, color, font, pageFill, radius, space, themedStyles } from '@/theme/tokens';
+import { alpha, color, font, pageFill, radius, size, space, themedStyles } from '@/theme/tokens';
 
 type Tab = 'uploads' | 'reports';
 
@@ -171,23 +171,23 @@ const styles = themedStyles(() => ({
   tabs: { flexDirection: 'row', gap: space.sm, paddingHorizontal: space.lg, paddingBottom: space.md },
   tab: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 38, paddingHorizontal: 14, borderRadius: radius.pill, backgroundColor: color.surface1 },
   tabOn: { backgroundColor: color.inverse },
-  tabText: { color: color.text, fontFamily: font.semibold, fontSize: 14 },
+  tabText: { color: color.text, fontFamily: font.semibold, fontSize: size.small },
   count: { minWidth: 20, height: 20, paddingHorizontal: 6, borderRadius: 10, backgroundColor: color.ember, alignItems: 'center', justifyContent: 'center' },
-  countText: { color: color.ink, fontFamily: font.bold, fontSize: 11 },
+  countText: { color: color.ink, fontFamily: font.bold, fontSize: size.caption },
   list: { paddingHorizontal: space.lg, gap: space.sm },
   row: { flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.md, borderRadius: 18, backgroundColor: color.surface1 },
   thumb: { width: 56, height: 74, borderRadius: 10, backgroundColor: color.surface2 },
-  caption: { color: color.text, fontFamily: font.semibold, fontSize: 14 },
-  meta: { color: color.text3, fontFamily: font.medium, fontSize: 12 },
+  caption: { color: color.text, fontFamily: font.semibold, fontSize: size.small },
+  meta: { color: color.text3, fontFamily: font.medium, fontSize: size.caption },
   reasons: { flexDirection: 'row', flexWrap: 'wrap', gap: 4 },
   reasonPill: { paddingHorizontal: 8, height: 22, borderRadius: radius.pill, backgroundColor: alpha(color.danger, 0.14), justifyContent: 'center' },
-  reasonText: { color: color.danger, fontFamily: font.semibold, fontSize: 12 },
+  reasonText: { color: color.danger, fontFamily: font.semibold, fontSize: size.caption },
   flagCount: { flexDirection: 'row', alignItems: 'center', gap: 3 },
-  flagText: { color: color.danger, fontFamily: font.mono, fontSize: 13 },
+  flagText: { color: color.danger, fontFamily: font.mono, fontSize: size.small },
   approveAll: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space.sm, height: 46, borderRadius: radius.pill, backgroundColor: color.success, marginBottom: space.sm },
-  approveAllText: { color: color.ink, fontFamily: font.bold, fontSize: 15 },
+  approveAllText: { color: color.ink, fontFamily: font.bold, fontSize: size.body },
   empty: { alignItems: 'center', gap: space.sm, paddingTop: 100 },
   emptyIcon: { width: 64, height: 64, borderRadius: 32, backgroundColor: alpha(color.success, 0.14), alignItems: 'center', justifyContent: 'center', marginBottom: space.sm },
-  emptyTitle: { color: color.text, fontFamily: font.title, fontSize: 20 },
-  emptySub: { color: color.text2, fontFamily: font.medium, fontSize: 14 },
+  emptyTitle: { color: color.text, fontFamily: font.title, fontSize: size.title },
+  emptySub: { color: color.text2, fontFamily: font.medium, fontSize: size.small },
 }));

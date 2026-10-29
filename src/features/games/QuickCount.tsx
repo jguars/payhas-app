@@ -18,7 +18,7 @@ import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { useInsets } from '@/lib/useInsets';
 import { spring } from '@/theme/motion';
-import { alpha, color, font, Lane, lane as lanes, media, pageFill, radius, space, themedStyles } from '@/theme/tokens';
+import { alpha, color, font, Lane, lane as lanes, media, pageFill, radius, size, space, themedStyles } from '@/theme/tokens';
 
 import { Confetti } from './Confetti';
 import { Finish, GameBar, Readout } from './GameChrome';
@@ -761,14 +761,14 @@ const styles = themedStyles(() => ({
   beadStar: { fontSize: 15 },
   flame: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 12, paddingVertical: 4, borderRadius: radius.pill, backgroundColor: alpha(color.ember, 0.16), borderWidth: 1, borderColor: alpha(color.ember, 0.4) },
   flameEmoji: { fontSize: 18 },
-  flameText: { color: color.ember, fontFamily: font.mono, fontSize: 18, fontVariant: ['tabular-nums'] },
+  flameText: { color: color.ember, fontFamily: font.mono, fontSize: size.lead, fontVariant: ['tabular-nums'] },
   ask: { position: 'absolute', left: space.lg, top: space.md, flexDirection: 'row', alignItems: 'center', gap: 6 },
-  askMark: { color: lanes.little.color, fontFamily: font.display, fontSize: 26, letterSpacing: -0.6 },
-  askText: { color: color.text2, fontFamily: font.title, fontSize: 17, letterSpacing: -0.3 },
+  askMark: { color: lanes.little.color, fontFamily: font.display, fontSize: size.heading, letterSpacing: -0.6 },
+  askText: { color: color.text2, fontFamily: font.title, fontSize: size.lead, letterSpacing: -0.3 },
   critter: { position: 'absolute' },
   critterHit: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   badge: { position: 'absolute', right: -4, top: -4, minWidth: 30, height: 30, borderRadius: 15, paddingHorizontal: 6, backgroundColor: color.reward, borderWidth: 2, borderColor: color.ink, alignItems: 'center', justifyContent: 'center' },
-  badgeText: { color: color.ink, fontFamily: font.mono, fontSize: 16 },
+  badgeText: { color: color.ink, fontFamily: font.mono, fontSize: size.body },
   picRow: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   group: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' },
   pic: { width: 42, height: 46, alignItems: 'center', justifyContent: 'center' },
@@ -791,5 +791,5 @@ const styles = themedStyles(() => ({
   miniLedge: { position: 'absolute', left: 0, right: 0, top: 4, bottom: 0, borderRadius: 12, backgroundColor: color.ink },
   miniTile: { flex: 1, borderRadius: 12, borderWidth: 2, borderColor: color.ink, backgroundColor: media.text, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
   miniLit: { backgroundColor: color.ink, alignItems: 'center', justifyContent: 'center' },
-  miniNum: { color: color.ink, fontFamily: font.mono, fontSize: 22 },
+  miniNum: { color: color.ink, fontFamily: font.mono, fontSize: size.title },
 }));

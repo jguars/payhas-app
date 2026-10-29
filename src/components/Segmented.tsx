@@ -4,7 +4,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-na
 
 import { fx } from '@/lib/feedback';
 import { spring } from '@/theme/motion';
-import { color, font, themedStyles } from '@/theme/tokens';
+import { color, font, size, themedStyles } from '@/theme/tokens';
 
 type Props<T> = {
   options: T[];
@@ -57,7 +57,7 @@ const styles = themedStyles(() => ({
   segments: { flexDirection: 'row', minHeight: 48, padding: 4, borderRadius: 14, backgroundColor: color.bg },
   pill: { position: 'absolute', left: 4, top: 4, bottom: 4, borderRadius: 10, backgroundColor: color.surface2, borderWidth: 1, borderColor: color.line },
   seg: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  text: { color: color.text3, fontFamily: font.mono, fontSize: 13 },
-  words: { fontFamily: font.bold, fontSize: 15 },
+  text: { color: color.text3, fontFamily: font.mono, fontSize: size.small },
+  words: { fontFamily: font.bold, fontSize: size.body },
   textOn: { color: color.text },
 }));

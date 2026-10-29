@@ -10,7 +10,7 @@ import { useFamily } from '@/features/family/FamilyProvider';
 import { Constants, Tables } from '@/lib/database.types';
 import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
-import { color, font, lane as lanes, pageFill, radius, space, themedStyles } from '@/theme/tokens';
+import { color, font, lane as lanes, pageFill, radius, size, space, themedStyles } from '@/theme/tokens';
 
 type Interest = Tables<'interests'>;
 const laneRank = (l: Interest['youngest_lane']) => Constants.public.Enums.lane.indexOf(l);
@@ -106,14 +106,14 @@ export default function InterestsScreen() {
 
 const styles = themedStyles(() => ({
   root: { flex: 1, ...pageFill() },
-  title: { color: color.text, fontFamily: font.display, fontSize: 30, lineHeight: 36, letterSpacing: -0.6, textAlign: 'center', paddingHorizontal: space.xl, paddingTop: space.xxl },
-  hint: { color: color.text2, fontFamily: font.medium, fontSize: 15, textAlign: 'center', paddingHorizontal: space.xl, paddingTop: space.sm, paddingBottom: space.xl },
+  title: { color: color.text, fontFamily: font.display, fontSize: size.headline, lineHeight: 39, letterSpacing: -0.6, textAlign: 'center', paddingHorizontal: space.xl, paddingTop: space.xxl },
+  hint: { color: color.text2, fontFamily: font.medium, fontSize: size.body, textAlign: 'center', paddingHorizontal: space.xl, paddingTop: space.sm, paddingBottom: space.xl },
   grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: space.sm, paddingHorizontal: space.lg, paddingBottom: space.xl },
   footer: { paddingHorizontal: space.xl, paddingBottom: space.lg, gap: space.sm },
-  error: { color: color.ember, fontFamily: font.medium, fontSize: 13, textAlign: 'center' },
+  error: { color: color.ember, fontFamily: font.medium, fontSize: size.small, textAlign: 'center' },
   button: { height: 52, borderRadius: radius.pill, backgroundColor: color.ember, alignItems: 'center', justifyContent: 'center' },
   buttonOff: { opacity: 0.4 },
-  buttonText: { color: color.ink, fontFamily: font.bold, fontSize: 16 },
+  buttonText: { color: color.ink, fontFamily: font.bold, fontSize: size.body },
   switch: { alignSelf: 'center', minHeight: 48, justifyContent: 'center' },
-  switchText: { color: color.text2, fontFamily: font.semibold, fontSize: 14 },
+  switchText: { color: color.text2, fontFamily: font.semibold, fontSize: size.small },
 }));

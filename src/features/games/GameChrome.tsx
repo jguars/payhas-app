@@ -8,7 +8,7 @@ import { Icon } from '@/components/Icon';
 import { Enter } from '@/components/motion/Enter';
 import { PressScale } from '@/components/motion/PressScale';
 import { useT } from '@/i18n';
-import { alpha, color, font, radius, space, themedStyles } from '@/theme/tokens';
+import { alpha, color, font, radius, size, space, themedStyles } from '@/theme/tokens';
 
 /** Top bar shared by the games: close on the left, the game's readouts on the right. */
 export function GameBar({ children }: { children?: ReactNode }) {
@@ -71,14 +71,14 @@ const styles = themedStyles(() => ({
   close: { width: 40, height: 40, borderRadius: 20, backgroundColor: alpha(color.surface1, 0.7), alignItems: 'center', justifyContent: 'center' },
   readouts: { flexDirection: 'row', gap: space.sm },
   readout: { minWidth: 64, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 14, backgroundColor: alpha(color.surface1, 0.7), alignItems: 'center' },
-  readoutValue: { color: color.text, fontFamily: font.mono, fontSize: 18, fontVariant: ['tabular-nums'] },
-  readoutLabel: { color: color.text3, fontFamily: font.semibold, fontSize: 12, letterSpacing: 0.6, textTransform: 'uppercase' },
+  readoutValue: { color: color.text, fontFamily: font.mono, fontSize: size.lead, fontVariant: ['tabular-nums'] },
+  readoutLabel: { color: color.text3, fontFamily: font.semibold, fontSize: size.caption, letterSpacing: 0.6, textTransform: 'uppercase' },
   finish: { ...StyleSheet.absoluteFill, alignItems: 'center', justifyContent: 'center', gap: space.sm, backgroundColor: alpha(color.bg, 0.92), padding: space.xl },
-  finishTitle: { color: color.text, fontFamily: font.display, fontSize: 34, letterSpacing: -0.8, textAlign: 'center' },
+  finishTitle: { color: color.text, fontFamily: font.display, fontSize: size.display, letterSpacing: -0.8, textAlign: 'center' },
   record: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: color.reward, paddingHorizontal: 12, paddingVertical: 5, borderRadius: radius.pill },
-  recordText: { color: color.ink, fontFamily: font.bold, fontSize: 13 },
-  finishLine: { color: color.text2, fontFamily: font.medium, fontSize: 16, textAlign: 'center' },
+  recordText: { color: color.ink, fontFamily: font.bold, fontSize: size.small },
+  finishLine: { color: color.text2, fontFamily: font.medium, fontSize: size.body, textAlign: 'center' },
   button: { minHeight: 50, paddingHorizontal: space.xl, borderRadius: radius.pill, backgroundColor: color.ember, justifyContent: 'center' },
   secondary: { backgroundColor: color.surface2 },
-  buttonText: { color: color.ink, fontFamily: font.bold, fontSize: 16 },
+  buttonText: { color: color.ink, fontFamily: font.bold, fontSize: size.body },
 }));

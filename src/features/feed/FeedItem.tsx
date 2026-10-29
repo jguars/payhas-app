@@ -14,7 +14,7 @@ import { useLibrary } from '@/features/library/LibraryProvider';
 import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { spring } from '@/theme/motion';
-import { alpha, color, font, lane as lanes, media, radius, themedStyles } from '@/theme/tokens';
+import { alpha, color, font, lane as lanes, media, radius, size, themedStyles } from '@/theme/tokens';
 
 import { FeedVideo, formatCount } from './data';
 import { HeartBurst } from './HeartBurst';
@@ -459,10 +459,10 @@ const styles = themedStyles(() => ({
     borderRadius: radius.pill,
     backgroundColor: alpha(color.ink, 0.55),
   },
-  mutedText: { color: media.text, fontFamily: font.semibold, fontSize: 13 },
+  mutedText: { color: media.text, fontFamily: font.semibold, fontSize: size.small },
   rail: { position: 'absolute', right: RAIL_RIGHT, alignItems: 'center', gap: 14 },
   action: { minWidth: 48, minHeight: 48, alignItems: 'center', justifyContent: 'center', gap: 3 },
-  count: { color: media.text, fontFamily: font.mono, fontSize: 12, ...SHADOW },
+  count: { color: media.text, fontFamily: font.mono, fontSize: size.caption, ...SHADOW },
   meta: { position: 'absolute', left: META_LEFT, right: 76, gap: 8 },
   creatorRow: { flexDirection: 'row', alignItems: 'center', gap: 10, alignSelf: 'flex-start' },
   discWrap: { width: DISC + 4, height: DISC + 4, alignItems: 'center', justifyContent: 'center' },
@@ -476,14 +476,14 @@ const styles = themedStyles(() => ({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  discLetter: { color: media.text, fontFamily: font.title, fontSize: 15 },
+  discLetter: { color: media.text, fontFamily: font.title, fontSize: size.body },
   creatorName: { flexDirection: 'row', alignItems: 'center', gap: 5, flexShrink: 1 },
-  creator: { color: media.text, fontFamily: font.bold, fontSize: 15, flexShrink: 1, ...SHADOW },
+  creator: { color: media.text, fontFamily: font.bold, fontSize: size.body, flexShrink: 1, ...SHADOW },
   follow: { position: 'absolute', right: -3, bottom: -3, width: 18, height: 18, borderRadius: 9, borderWidth: 1.5, borderColor: color.ink, backgroundColor: color.ember },
   followDone: { backgroundColor: lanes.kids.color },
   followHit: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  caption: { color: media.text, fontFamily: font.body, fontSize: 14, lineHeight: 20, ...SHADOW },
-  credit: { color: alpha(media.text, 0.72), fontFamily: font.medium, fontSize: 12, lineHeight: 17 },
+  caption: { color: media.text, fontFamily: font.medium, fontSize: size.small, lineHeight: 20, ...SHADOW },
+  credit: { color: alpha(media.text, 0.72), fontFamily: font.medium, fontSize: size.caption, lineHeight: 17 },
   captionBox: { marginHorizontal: -10, marginVertical: -4, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 14 },
   captionBoxOpen: { backgroundColor: alpha(color.ink, 0.55), marginVertical: 0, paddingVertical: 8 },
   captionMore: { gap: 2, marginTop: 8, paddingTop: 8, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: alpha(media.text, 0.25) },
@@ -502,7 +502,7 @@ const styles = themedStyles(() => ({
   pillOn: { borderColor: color.ember, backgroundColor: alpha(color.ember, 0.22) },
   pillMore: { gap: 2, paddingHorizontal: 9 },
   pillEmoji: { fontSize: 15 },
-  pillCount: { color: media.text, fontFamily: font.mono, fontSize: 12 },
+  pillCount: { color: media.text, fontFamily: font.mono, fontSize: size.caption },
   reactionBar: { position: 'absolute', left: META_LEFT - 6 },
   progressTrack: { position: 'absolute', left: 16, right: 16, height: 2, borderRadius: 1, overflow: 'hidden', backgroundColor: alpha(media.text, 0.2) },
   progressFill: { height: 2, backgroundColor: media.text },

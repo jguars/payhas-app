@@ -12,7 +12,7 @@ import { laneKey, TKey, topicLabel, useT } from '@/i18n';
 import { Constants, Tables } from '@/lib/database.types';
 import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
-import { color, font, Lane, lane as lanes, radius, space, themedStyles } from '@/theme/tokens';
+import { color, font, Lane, lane as lanes, radius, size, space, themedStyles } from '@/theme/tokens';
 
 import { useParentSession, withParent } from './ParentSession';
 import { Step } from './Step';
@@ -359,24 +359,24 @@ function HourStepper({ label, value, onChange, lang }: { label: string; value: n
 }
 
 const styles = themedStyles(() => ({
-  nameInput: { color: color.text, fontFamily: font.display, fontSize: 32, paddingVertical: space.md, borderBottomWidth: 2, borderBottomColor: color.line },
-  label: { color: color.text2, fontFamily: font.semibold, fontSize: 14, marginTop: space.sm },
+  nameInput: { color: color.text, fontFamily: font.display, fontSize: size.headline, paddingVertical: space.md, borderBottomWidth: 2, borderBottomColor: color.line },
+  label: { color: color.text2, fontFamily: font.semibold, fontSize: size.small, marginTop: space.sm },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
   laneCard: { flexDirection: 'row', alignItems: 'flex-start', gap: space.md, padding: space.lg, borderRadius: radius.card, borderWidth: 1.5, backgroundColor: color.surface1, marginTop: space.sm },
   laneDot: { width: 12, height: 12, borderRadius: 6, marginTop: 5 },
-  laneText: { color: color.text, fontFamily: font.semibold, fontSize: 15, lineHeight: 21 },
-  laneAbout: { color: color.text2, fontFamily: font.medium, fontSize: 13, lineHeight: 18 },
+  laneText: { color: color.text, fontFamily: font.semibold, fontSize: size.body, lineHeight: 21 },
+  laneAbout: { color: color.text2, fontFamily: font.medium, fontSize: size.small, lineHeight: 18 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
   ledge: { position: 'absolute', left: 0, right: 0, top: LEDGE, bottom: 0, borderRadius: radius.card },
   option: { flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.lg, borderRadius: radius.card, backgroundColor: color.surface1, borderWidth: 2, borderColor: color.line },
   optionIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: color.surface2, alignItems: 'center', justifyContent: 'center' },
-  optionTitle: { color: color.text, fontFamily: font.bold, fontSize: 16 },
-  optionHint: { color: color.text3, fontFamily: font.medium, fontSize: 13, lineHeight: 18 },
+  optionTitle: { color: color.text, fontFamily: font.bold, fontSize: size.body },
+  optionHint: { color: color.text3, fontFamily: font.medium, fontSize: size.small, lineHeight: 18 },
   toggleRow: { flexDirection: 'row', alignItems: 'center', gap: space.md, marginTop: space.md },
   hours: { flexDirection: 'row', gap: space.sm },
   stepper: { flex: 1, padding: space.md, borderRadius: 16, backgroundColor: color.surface1, gap: 6 },
   stepRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   stepButton: { width: 36, height: 36, borderRadius: 18, backgroundColor: color.surface2, alignItems: 'center', justifyContent: 'center' },
-  stepValue: { color: color.text, fontFamily: font.mono, fontSize: 17 },
-  error: { color: color.ember, fontFamily: font.semibold, fontSize: 14 },
+  stepValue: { color: color.text, fontFamily: font.mono, fontSize: size.lead },
+  error: { color: color.ember, fontFamily: font.semibold, fontSize: size.small },
 }));

@@ -16,7 +16,7 @@ import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
 import { useInsets } from '@/lib/useInsets';
 import { useGoBack } from '@/lib/useGoBack';
-import { alpha, color, font, Lane, lane as lanes, pageFill, radius, space, themedStyles } from '@/theme/tokens';
+import { alpha, color, font, Lane, lane as lanes, pageFill, radius, size, space, themedStyles } from '@/theme/tokens';
 
 
 /** One item from the queue: watch it, set lane + topics, then decide. */
@@ -233,25 +233,25 @@ const styles = themedStyles(() => ({
   content: { paddingHorizontal: space.lg, gap: space.xl },
   playerWrap: { height: 420, borderRadius: radius.card, overflow: 'hidden', backgroundColor: color.black },
   player: { width: '100%', height: '100%' },
-  caption: { color: color.text, fontFamily: font.bold, fontSize: 17 },
-  meta: { color: color.text3, fontFamily: font.medium, fontSize: 13 },
+  caption: { color: color.text, fontFamily: font.bold, fontSize: size.lead },
+  meta: { color: color.text3, fontFamily: font.medium, fontSize: size.small },
   reportBox: { flexDirection: 'row', gap: space.sm, alignItems: 'center', padding: space.md, borderRadius: 14, backgroundColor: alpha(color.danger, 0.1) },
-  reportText: { flex: 1, color: color.danger, fontFamily: font.semibold, fontSize: 13 },
-  label: { color: color.text, fontFamily: font.bold, fontSize: 15 },
-  help: { color: color.text3, fontFamily: font.medium, fontSize: 12 },
+  reportText: { flex: 1, color: color.danger, fontFamily: font.semibold, fontSize: size.small },
+  label: { color: color.text, fontFamily: font.bold, fontSize: size.body },
+  help: { color: color.text3, fontFamily: font.medium, fontSize: size.caption },
   lanes: { flexDirection: 'row', gap: space.sm },
   lane: { flex: 1, paddingVertical: space.md, borderRadius: 14, borderWidth: 1.5, alignItems: 'center', gap: 2 },
-  laneLabel: { fontFamily: font.bold, fontSize: 14 },
-  laneAges: { color: color.text3, fontFamily: font.medium, fontSize: 12 },
+  laneLabel: { fontFamily: font.bold, fontSize: size.small },
+  laneAges: { color: color.text3, fontFamily: font.medium, fontSize: size.caption },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
   chip: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 36, paddingHorizontal: 12, borderRadius: radius.pill, backgroundColor: color.surface1, borderWidth: 1, borderColor: color.line },
   chipOn: { backgroundColor: color.inverse, borderColor: color.inverse },
   chipEmoji: { fontSize: 15 },
-  chipText: { color: color.text, fontFamily: font.semibold, fontSize: 13 },
+  chipText: { color: color.text, fontFamily: font.semibold, fontSize: size.small },
   footer: { position: 'absolute', left: 0, right: 0, bottom: 0, flexDirection: 'row', gap: space.md, paddingHorizontal: space.lg, paddingTop: space.md, backgroundColor: color.bg, borderTopWidth: 1, borderTopColor: color.surface2 },
   decision: { flex: 1, height: 54, borderRadius: radius.pill, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space.sm },
-  decisionText: { fontFamily: font.bold, fontSize: 16 },
+  decisionText: { fontFamily: font.bold, fontSize: size.body },
   reasonRow: { flexDirection: 'row', alignItems: 'center', gap: space.md, minHeight: 54, paddingHorizontal: space.lg, borderRadius: 16, backgroundColor: color.surface2 },
-  reasonRowText: { flex: 1, color: color.text, fontFamily: font.semibold, fontSize: 15 },
-  gone: { color: color.text2, fontFamily: font.medium, fontSize: 15, textAlign: 'center', marginTop: 120 },
+  reasonRowText: { flex: 1, color: color.text, fontFamily: font.semibold, fontSize: size.body },
+  gone: { color: color.text2, fontFamily: font.medium, fontSize: size.body, textAlign: 'center', marginTop: 120 },
 }));

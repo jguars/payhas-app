@@ -29,7 +29,7 @@ import { FeedVideo } from '@/features/feed/data';
 import { openVideo } from '@/features/feed/openVideo';
 import { useScreenTime } from '@/features/library/useScreenTime';
 import { laneKey, topicLabel, useT } from '@/i18n';
-import { color, font, pageFill, space, themedStyles } from '@/theme/tokens';
+import { color, font, pageFill, size, space, themedStyles } from '@/theme/tokens';
 
 type Tab = 'forYou' | 'channels' | 'topics';
 const TABS: Tab[] = ['forYou', 'channels', 'topics'];
@@ -181,10 +181,10 @@ const styles = themedStyles(() => ({
   root: { flex: 1, ...pageFill() },
   content: { paddingHorizontal: space.lg, paddingBottom: space.xxxl, gap: space.xl },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: -space.sm },
-  title: { color: color.text, fontFamily: font.display, fontSize: 34, letterSpacing: -1, transformOrigin: 'left center' },
+  title: { color: color.text, fontFamily: font.display, fontSize: size.display, letterSpacing: -1, transformOrigin: 'left center' },
   block: { gap: space.md },
   sectionHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: -space.sm },
-  h2: { color: color.text, fontFamily: font.title, fontSize: 20, letterSpacing: -0.3 },
+  h2: { color: color.text, fontFamily: font.title, fontSize: size.title, letterSpacing: -0.3 },
   shrink: { flexShrink: 1 },
-  link: { color: color.text2, fontFamily: font.semibold, fontSize: 13 },
+  link: { color: color.text2, fontFamily: font.semibold, fontSize: size.small },
 }));

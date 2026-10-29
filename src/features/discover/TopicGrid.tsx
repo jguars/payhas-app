@@ -8,7 +8,7 @@ import { TopicIcon } from '@/components/ui/TopicIcon';
 import { topicLabel, useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { spring } from '@/theme/motion';
-import { color, font, lane, themedStyles } from '@/theme/tokens';
+import { color, font, lane, size, themedStyles } from '@/theme/tokens';
 
 import type { Topic } from './useDiscover';
 
@@ -79,7 +79,7 @@ const styles = themedStyles(() => ({
   tile: { height: 104, borderRadius: 18, overflow: 'hidden', padding: 14, justifyContent: 'flex-end' },
   icon: { position: 'absolute', right: 8, top: 8 },
   foot: { flexDirection: 'row', alignItems: 'baseline', gap: 8 },
-  label: { flexShrink: 1, color: color.text, fontFamily: font.title, fontSize: 17, letterSpacing: -0.2 },
-  count: { fontFamily: font.mono, fontSize: 12 },
+  label: { flexShrink: 1, color: color.text, fontFamily: font.title, fontSize: size.lead, letterSpacing: -0.2 },
+  count: { fontFamily: font.mono, fontSize: size.caption },
   ring: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, borderRadius: 18, borderWidth: 2 },
 }));

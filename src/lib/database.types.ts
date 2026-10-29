@@ -511,6 +511,7 @@ export type Database = {
       get_profile_plan: { Args: { p_session: string }; Returns: Json }
       redeem_code: { Args: { p_parent: string; p_code: string }; Returns: Json }
       simulate_plus: { Args: { p_parent: string; p_key: string; p_on: boolean }; Returns: Json }
+      update_profile: { Args: { p_parent: string; p_profile_id: string; p_name: string; p_avatar: string; p_birth_month?: string | null }; Returns: Json }
       simulate_card_payment: { Args: { p_parent: string; p_bank: string }; Returns: Json }
       create_profile: {
         Args: {

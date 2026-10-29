@@ -27,7 +27,7 @@ import { InboxItem, useLibrary } from '@/features/library/LibraryProvider';
 import { useT, type T, type TKey } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { spring, stagger } from '@/theme/motion';
-import { color, font, lane, pageFill, space, themedStyles } from '@/theme/tokens';
+import { color, font, lane, pageFill, size, space, themedStyles } from '@/theme/tokens';
 
 /** How long new items keep their dots on screen before they're marked read. */
 const READ_AFTER_MS = 1400;
@@ -286,23 +286,23 @@ function ago(iso: string, t: T) {
 const styles = themedStyles(() => ({
   root: { flex: 1, ...pageFill() },
   content: { paddingHorizontal: space.lg, paddingBottom: space.xxxl, gap: space.xl },
-  title: { color: color.text, fontFamily: font.display, fontSize: 34, letterSpacing: -1 },
-  h2: { color: color.text2, fontFamily: font.semibold, fontSize: 13, letterSpacing: 0.4, textTransform: 'uppercase' },
+  title: { color: color.text, fontFamily: font.display, fontSize: size.display, letterSpacing: -1 },
+  h2: { color: color.text2, fontFamily: font.semibold, fontSize: size.small, letterSpacing: 0.4, textTransform: 'uppercase' },
   catRow: { flexDirection: 'row', alignItems: 'center', gap: space.md, minHeight: 64, paddingVertical: space.sm, paddingHorizontal: space.sm, marginHorizontal: -space.sm, borderRadius: 18 },
   catWash: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, borderRadius: 18, backgroundColor: color.surface1 },
-  catLabel: { flex: 1, color: color.text, fontFamily: font.bold, fontSize: 16 },
+  catLabel: { flex: 1, color: color.text, fontFamily: font.bold, fontSize: size.body },
   count: { minWidth: 26, height: 22, paddingHorizontal: 7, borderRadius: 11, alignItems: 'center', justifyContent: 'center', backgroundColor: color.surface2 },
-  countText: { color: color.text2, fontFamily: font.mono, fontSize: 12 },
+  countText: { color: color.text2, fontFamily: font.mono, fontSize: size.caption },
   card: { flexDirection: 'row', alignItems: 'flex-start', gap: space.md, padding: space.lg, borderRadius: 20 },
   cardBody: { flex: 1, gap: 4 },
-  cardTitle: { color: color.text, fontFamily: font.bold, fontSize: 15, lineHeight: 20 },
-  cardText: { color: color.text2, fontFamily: font.body, fontSize: 13, lineHeight: 18 },
+  cardTitle: { color: color.text, fontFamily: font.bold, fontSize: size.body, lineHeight: 20 },
+  cardText: { color: color.text2, fontFamily: font.medium, fontSize: size.small, lineHeight: 18 },
   meta: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 2 },
-  time: { color: color.text3, fontFamily: font.mono, fontSize: 12 },
+  time: { color: color.text3, fontFamily: font.mono, fontSize: size.caption },
   dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: color.ember },
   watch: { alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 34, paddingHorizontal: 14, marginTop: 6, borderRadius: 999, backgroundColor: color.ember },
-  watchText: { color: color.ink, fontFamily: font.bold, fontSize: 13 },
+  watchText: { color: color.ink, fontFamily: font.bold, fontSize: size.small },
   thumb: { width: 64, height: 86, borderRadius: 12, backgroundColor: color.surface2 },
   empty: { alignItems: 'center', gap: space.md, paddingTop: 120 },
-  emptyText: { color: color.text3, fontFamily: font.medium, fontSize: 15 },
+  emptyText: { color: color.text3, fontFamily: font.medium, fontSize: size.body },
 }));

@@ -3,7 +3,7 @@ import { Pressable, Text, View } from 'react-native';
 
 import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
-import { color, font, space, themedStyles } from '@/theme/tokens';
+import { color, font, size, space, themedStyles } from '@/theme/tokens';
 
 type Props = {
   title: string;
@@ -80,16 +80,16 @@ export function PinPad({ title, onComplete, onCancel }: Props) {
 
 const styles = themedStyles(() => ({
   root: { alignItems: 'center', gap: space.lg },
-  title: { color: color.text, fontFamily: font.title, fontSize: 22 },
+  title: { color: color.text, fontFamily: font.title, fontSize: size.title },
   dots: { flexDirection: 'row', gap: space.lg },
   dot: { width: 14, height: 14, borderRadius: 7, borderWidth: 2, borderColor: color.text3 },
   dotOn: { backgroundColor: color.text, borderColor: color.text },
-  error: { color: color.ember, fontFamily: font.semibold, fontSize: 14 },
+  error: { color: color.ember, fontFamily: font.semibold, fontSize: size.small },
   grid: { width: 264, flexDirection: 'row', flexWrap: 'wrap', gap: 12, justifyContent: 'center' },
   key: { width: 76, height: 64, borderRadius: 20, backgroundColor: color.surface1, alignItems: 'center', justifyContent: 'center' },
   keyEmpty: { backgroundColor: 'transparent' },
   keyPressed: { backgroundColor: color.surface2 },
-  keyText: { color: color.text, fontFamily: font.semibold, fontSize: 24 },
+  keyText: { color: color.text, fontFamily: font.semibold, fontSize: size.heading },
   cancel: { paddingVertical: space.sm },
-  cancelText: { color: color.text2, fontFamily: font.semibold, fontSize: 15 },
+  cancelText: { color: color.text2, fontFamily: font.semibold, fontSize: size.body },
 }));

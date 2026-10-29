@@ -8,7 +8,7 @@ import { PressScale } from '@/components/motion/PressScale';
 import { useLibrary } from '@/features/library/LibraryProvider';
 import { T, topicLabel, useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
-import { alpha, color, font, radius, space, themedStyles } from '@/theme/tokens';
+import { alpha, color, font, radius, size, space, themedStyles } from '@/theme/tokens';
 
 import { ChannelAvatar } from './ChannelAvatar';
 import type { ChannelHub } from './useChannels';
@@ -130,21 +130,21 @@ export function FollowButton({ name, big }: { name: string; big?: boolean }) {
 
 const styles = themedStyles(() => ({
   head: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
-  h2: { color: color.text, fontFamily: font.title, fontSize: 20, letterSpacing: -0.3 },
-  count: { color: color.text3, fontFamily: font.mono, fontSize: 13 },
+  h2: { color: color.text, fontFamily: font.title, fontSize: size.title, letterSpacing: -0.3 },
+  count: { color: color.text3, fontFamily: font.mono, fontSize: size.small },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: GAP },
   featured: { borderRadius: 26, borderWidth: 1.5, overflow: 'hidden' },
   featuredHead: { flexDirection: 'row', alignItems: 'center', gap: 14, padding: 18, paddingBottom: 14 },
-  featuredName: { color: color.text, fontFamily: font.display, fontSize: 24, letterSpacing: -0.6 },
-  meta: { color: color.text2, fontFamily: font.semibold, fontSize: 13, lineHeight: 18 },
+  featuredName: { color: color.text, fontFamily: font.display, fontSize: size.heading, letterSpacing: -0.6 },
+  meta: { color: color.text2, fontFamily: font.semibold, fontSize: size.small, lineHeight: 18 },
   posters: { flexDirection: 'row', gap: 6, paddingHorizontal: 12, paddingBottom: 12 },
   poster: { flex: 1, height: 150, borderRadius: 14, backgroundColor: color.surface2 },
   tile: { borderRadius: radius.card, padding: 16, gap: 10, minHeight: 156 },
   tileTop: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' },
-  tileName: { color: color.text, fontFamily: font.title, fontSize: 17, letterSpacing: -0.3 },
+  tileName: { color: color.text, fontFamily: font.title, fontSize: size.lead, letterSpacing: -0.3 },
   followBig: { minHeight: 44, paddingHorizontal: 18, borderRadius: radius.pill, backgroundColor: color.ember, alignItems: 'center', justifyContent: 'center' },
   followBigOn: { backgroundColor: alpha(color.text, 0.12) },
-  followBigText: { color: color.ink, fontFamily: font.bold, fontSize: 15 },
+  followBigText: { color: color.ink, fontFamily: font.bold, fontSize: size.body },
   followDot: { width: 32, height: 32, borderRadius: 16, backgroundColor: alpha(color.text, 0.12), alignItems: 'center', justifyContent: 'center' },
   followDotOn: { backgroundColor: color.inverse },
 }));

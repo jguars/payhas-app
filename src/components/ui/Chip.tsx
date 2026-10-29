@@ -3,7 +3,7 @@ import { Pressable, Text, View } from 'react-native';
 
 import { Icon, IconName } from '@/components/Icon';
 import { fx } from '@/lib/feedback';
-import { color, font, themedStyles } from '@/theme/tokens';
+import { color, font, size as type, themedStyles } from '@/theme/tokens';
 
 type Props = {
   label: string;
@@ -50,7 +50,7 @@ export function Chip({ label, selected, onPress, emoji, icon, tint = color.text,
           >
             {!!emoji && <Text style={styles.emoji}>{emoji}</Text>}
             {!!icon && <Icon name={icon} size={16} color={selected ? color.ink : color.text} strokeWidth={2.4} />}
-            <Text style={[styles.label, size === 'lg' && { fontSize: 16 }, selected && { color: color.ink }]} numberOfLines={1} maxFontSizeMultiplier={1.4}>
+            <Text style={[styles.label, size === 'lg' && { fontSize: type.body }, selected && { color: color.ink }]} numberOfLines={1} maxFontSizeMultiplier={1.4}>
               {label}
             </Text>
             {right}
@@ -75,5 +75,5 @@ const styles = themedStyles(() => ({
   ledge: { position: 'absolute', left: 0, right: 0, borderRadius: 16 },
   chip: { flexDirection: 'row', alignItems: 'center', gap: 8, borderRadius: 16, borderWidth: 2, borderColor: color.line, backgroundColor: color.surface1 },
   emoji: { fontSize: 18 },
-  label: { color: color.text, fontFamily: font.bold, fontSize: 15 },
+  label: { color: color.text, fontFamily: font.bold, fontSize: type.body },
 }));

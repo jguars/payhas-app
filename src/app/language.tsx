@@ -3,7 +3,7 @@ import { ScrollView, Text, View } from 'react-native';
 import { LanguagePicker } from '@/components/LanguagePicker';
 import { Enter } from '@/components/motion/Enter';
 import { useInsets } from '@/lib/useInsets';
-import { color, font, lane as lanes, pageFill, space, themedStyles } from '@/theme/tokens';
+import { color, font, lane as lanes, pageFill, size, space, themedStyles } from '@/theme/tokens';
 
 /**
  * The very first screen on a new phone, before sign-in: the language, asked
@@ -38,6 +38,6 @@ const styles = themedStyles(() => ({
   content: { paddingHorizontal: space.xl, gap: space.md },
   lanesRow: { flexDirection: 'row', gap: 6, marginBottom: space.md },
   laneBar: { width: 36, height: 10, borderRadius: 5 },
-  brand: { color: color.text, fontFamily: font.display, fontSize: 44, letterSpacing: -1.2 },
-  ask: { color: color.text2, fontFamily: font.medium, fontSize: 15, lineHeight: 22 },
+  brand: { color: color.text, fontFamily: font.display, fontSize: size.hero, letterSpacing: -1.2 },
+  ask: { color: color.text2, fontFamily: font.medium, fontSize: size.body, lineHeight: 22 },
 }));

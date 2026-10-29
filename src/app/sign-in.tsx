@@ -4,7 +4,7 @@ import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, Text, Tex
 import { SafeScreen } from '@/components/SafeScreen';
 import { useT } from '@/i18n';
 import { supabase } from '@/lib/supabase';
-import { color, font, pageFill, radius, space, themedStyles } from '@/theme/tokens';
+import { color, font, pageFill, radius, size, space, themedStyles } from '@/theme/tokens';
 
 type Mode = 'signIn' | 'signUp';
 
@@ -85,8 +85,8 @@ export default function SignInScreen() {
 const styles = themedStyles(() => ({
   root: { flex: 1, ...pageFill() },
   body: { flex: 1, justifyContent: 'center', paddingHorizontal: space.xl, gap: space.md },
-  logo: { color: color.text, fontFamily: font.display, fontSize: 44, textAlign: 'center' },
-  subtitle: { color: color.text2, fontFamily: font.medium, fontSize: 16, textAlign: 'center', marginBottom: space.xl },
+  logo: { color: color.text, fontFamily: font.display, fontSize: size.hero, textAlign: 'center' },
+  subtitle: { color: color.text2, fontFamily: font.medium, fontSize: size.body, textAlign: 'center', marginBottom: space.xl },
   input: {
     height: 52,
     borderRadius: radius.chip,
@@ -96,11 +96,11 @@ const styles = themedStyles(() => ({
     paddingHorizontal: space.lg,
     color: color.text,
     fontFamily: font.medium,
-    fontSize: 16,
+    fontSize: size.body,
   },
-  message: { color: color.text2, fontFamily: font.medium, fontSize: 14, textAlign: 'center' },
+  message: { color: color.text2, fontFamily: font.medium, fontSize: size.small, textAlign: 'center' },
   button: { height: 52, borderRadius: radius.pill, backgroundColor: color.ember, alignItems: 'center', justifyContent: 'center' },
   buttonOff: { opacity: 0.4 },
-  buttonText: { color: color.ink, fontFamily: font.bold, fontSize: 16 },
-  switch: { color: color.text2, fontFamily: font.semibold, fontSize: 14, textAlign: 'center', marginTop: space.sm },
+  buttonText: { color: color.ink, fontFamily: font.bold, fontSize: size.body },
+  switch: { color: color.text2, fontFamily: font.semibold, fontSize: size.small, textAlign: 'center', marginTop: space.sm },
 }));

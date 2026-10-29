@@ -4,8 +4,9 @@ import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } fr
 
 import { useT } from '@/i18n';
 import { useInsets } from '@/lib/useInsets';
+import { dismissKeyboard } from '@/theme/ThemeProvider';
 import { spring } from '@/theme/motion';
-import { alpha, color, font, space, themedStyles } from '@/theme/tokens';
+import { alpha, color, font, size, space, themedStyles } from '@/theme/tokens';
 
 const TRAVEL = 700;
 
@@ -40,7 +41,8 @@ export function BottomSheet({ open, onClose, title, children }: Props) {
       <Animated.View style={[styles.backdrop, backdrop]}>
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityLabel={t('common.close')} />
       </Animated.View>
-      <Animated.View style={[styles.sheet, { paddingBottom: bottom + space.lg }, sheet]}>
+      {/* Sheets open in their own layer, so they close the keyboard on empty taps themselves. */}
+      <Animated.View style={[styles.sheet, { paddingBottom: bottom + space.lg }, sheet]} onStartShouldSetResponder={dismissKeyboard}>
         <View style={styles.grabber} />
         {title && <Text style={styles.title}>{title}</Text>}
         {children}
@@ -63,5 +65,5 @@ const styles = themedStyles(() => ({
     gap: space.lg,
   },
   grabber: { alignSelf: 'center', width: 36, height: 4, borderRadius: 2, backgroundColor: color.line },
-  title: { color: color.text, fontFamily: font.bold, fontSize: 16, textAlign: 'center', marginTop: -space.xs },
+  title: { color: color.text, fontFamily: font.bold, fontSize: size.body, textAlign: 'center', marginTop: -space.xs },
 }));

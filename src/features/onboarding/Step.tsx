@@ -9,7 +9,7 @@ import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { useInsets } from '@/lib/useInsets';
 import { spring } from '@/theme/motion';
-import { color, font, pageFill, radius, space, themedStyles } from '@/theme/tokens';
+import { color, font, pageFill, radius, size, space, themedStyles } from '@/theme/tokens';
 
 type Props = {
   /** 0–1 across the whole flow; the bar slides to it. */
@@ -114,11 +114,11 @@ const styles = themedStyles(() => ({
   track: { flex: 1, height: 6, borderRadius: 3, backgroundColor: color.surface2, overflow: 'hidden' },
   fill: { height: 6, width: '100%', borderRadius: 3, backgroundColor: color.ember },
   content: { paddingHorizontal: space.xl, paddingTop: space.xl, paddingBottom: space.xxl, gap: space.md },
-  title: { color: color.text, fontFamily: font.display, fontSize: 30, lineHeight: 36, letterSpacing: -0.6 },
-  hint: { color: color.text2, fontFamily: font.medium, fontSize: 15, lineHeight: 21, marginBottom: space.sm },
+  title: { color: color.text, fontFamily: font.display, fontSize: size.headline, lineHeight: 39, letterSpacing: -0.6 },
+  hint: { color: color.text2, fontFamily: font.medium, fontSize: size.body, lineHeight: 21, marginBottom: space.sm },
   footer: { paddingHorizontal: space.xl, paddingTop: space.md, gap: space.sm },
   button: { minHeight: 56, paddingVertical: space.sm, paddingHorizontal: space.lg, borderRadius: radius.pill, backgroundColor: color.ember, alignItems: 'center', justifyContent: 'center' },
-  buttonText: { color: color.ink, fontFamily: font.bold, fontSize: 17 },
+  buttonText: { color: color.ink, fontFamily: font.bold, fontSize: size.lead },
   secondary: { height: 48, alignItems: 'center', justifyContent: 'center' },
-  secondaryText: { color: color.text2, fontFamily: font.semibold, fontSize: 15 },
+  secondaryText: { color: color.text2, fontFamily: font.semibold, fontSize: size.body },
 }));

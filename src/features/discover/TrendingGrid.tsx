@@ -19,7 +19,7 @@ import { PressScale } from '@/components/motion/PressScale';
 import { FeedVideo, formatCount } from '@/features/feed/data';
 import { useT } from '@/i18n';
 import { stagger } from '@/theme/motion';
-import { color, font, media, themedStyles } from '@/theme/tokens';
+import { color, font, media, size, themedStyles } from '@/theme/tokens';
 
 type Props = { videos: FeedVideo[]; loading?: boolean; onOpen: (v: FeedVideo) => void; baseIndex?: number };
 
@@ -97,7 +97,7 @@ const styles = themedStyles(() => ({
     experimental_backgroundImage: 'linear-gradient(0deg, rgba(10,10,15,0.7), rgba(10,10,15,0))',
   },
   views: { position: 'absolute', left: 8, bottom: 8, flexDirection: 'row', alignItems: 'center', gap: 4 },
-  viewsText: { color: media.text, fontFamily: font.mono, fontSize: 12 },
+  viewsText: { color: media.text, fontFamily: font.mono, fontSize: size.caption },
   empty: { height: 120, borderRadius: 16, borderWidth: 1, borderColor: color.line, borderStyle: 'dashed', alignItems: 'center', justifyContent: 'center' },
-  emptyText: { color: color.text3, fontFamily: font.medium, fontSize: 14 },
+  emptyText: { color: color.text3, fontFamily: font.medium, fontSize: size.small },
 }));

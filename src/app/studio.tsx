@@ -14,7 +14,7 @@ import { laneKey, localized, type TKey, useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
 import { useInsets } from '@/lib/useInsets';
-import { alpha, color, font, pageFill, radius, space, themedStyles } from '@/theme/tokens';
+import { alpha, color, font, pageFill, radius, size, space, themedStyles } from '@/theme/tokens';
 
 const STATUS: Record<string, { label: TKey; tint: string; icon: IconName }> = {
   pending: { label: 'creator.status.pending', tint: color.warning, icon: 'clock' },
@@ -125,16 +125,16 @@ const styles = themedStyles(() => ({
   content: { paddingHorizontal: space.lg, gap: space.sm },
   upload: { flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.lg, borderRadius: radius.card, backgroundColor: color.ember, marginBottom: space.md },
   uploadIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: alpha(color.ink, 0.15), alignItems: 'center', justifyContent: 'center' },
-  uploadTitle: { color: color.ink, fontFamily: font.bold, fontSize: 17 },
-  uploadSub: { color: alpha(color.ink, 0.7), fontFamily: font.medium, fontSize: 12 },
-  empty: { color: color.text3, fontFamily: font.medium, fontSize: 14, textAlign: 'center', marginTop: space.xl },
+  uploadTitle: { color: color.ink, fontFamily: font.bold, fontSize: size.lead },
+  uploadSub: { color: alpha(color.ink, 0.7), fontFamily: font.medium, fontSize: size.caption },
+  empty: { color: color.text3, fontFamily: font.medium, fontSize: size.small, textAlign: 'center', marginTop: space.xl },
   row: {},
   rowInner: { flexDirection: 'row', gap: space.md, padding: space.md, borderRadius: 18, backgroundColor: color.surface1 },
   thumb: { width: 60, height: 80, borderRadius: 10, backgroundColor: color.surface2 },
-  caption: { color: color.text, fontFamily: font.semibold, fontSize: 14 },
+  caption: { color: color.text, fontFamily: font.semibold, fontSize: size.small },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' },
   pill: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, height: 22, borderRadius: radius.pill },
-  pillText: { fontFamily: font.bold, fontSize: 12 },
-  meta: { color: color.text3, fontFamily: font.medium, fontSize: 12 },
-  reason: { color: color.text2, fontFamily: font.medium, fontSize: 12 },
+  pillText: { fontFamily: font.bold, fontSize: size.caption },
+  meta: { color: color.text3, fontFamily: font.medium, fontSize: size.caption },
+  reason: { color: color.text2, fontFamily: font.medium, fontSize: size.caption },
 }));

@@ -12,7 +12,7 @@ import { useCreators } from '@/features/feed/useCreators';
 import { useLibrary } from '@/features/library/LibraryProvider';
 import { useT } from '@/i18n';
 import { useInsets } from '@/lib/useInsets';
-import { color, font, pageFill, space, themedStyles } from '@/theme/tokens';
+import { color, font, pageFill, size, space, themedStyles } from '@/theme/tokens';
 
 /**
  * Creators this profile follows. Unfollowing keeps the row (with "Follow")
@@ -69,12 +69,12 @@ const styles = themedStyles(() => ({
   root: { flex: 1, ...pageFill() },
   row: { flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.md, borderRadius: 18, backgroundColor: color.surface1 },
   avatar: { width: 48, height: 48, borderRadius: 24, backgroundColor: color.surface2, borderWidth: 2, borderColor: color.text, alignItems: 'center', justifyContent: 'center' },
-  avatarLetter: { color: color.text, fontFamily: font.display, fontSize: 20 },
+  avatarLetter: { color: color.text, fontFamily: font.display, fontSize: size.title },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  name: { color: color.text, fontFamily: font.bold, fontSize: 15, flexShrink: 1 },
-  meta: { color: color.text2, fontFamily: font.medium, fontSize: 12 },
+  name: { color: color.text, fontFamily: font.bold, fontSize: size.body, flexShrink: 1 },
+  meta: { color: color.text2, fontFamily: font.medium, fontSize: size.caption },
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.lg, paddingBottom: 80 },
-  emptyTitle: { color: color.text, fontFamily: font.title, fontSize: 20 },
+  emptyTitle: { color: color.text, fontFamily: font.title, fontSize: size.title },
   emptyButton: { minHeight: 48, paddingHorizontal: space.xl, borderRadius: 999, backgroundColor: color.ember, justifyContent: 'center' },
-  emptyButtonText: { color: color.ink, fontFamily: font.bold, fontSize: 15 },
+  emptyButtonText: { color: color.ink, fontFamily: font.bold, fontSize: size.body },
 }));

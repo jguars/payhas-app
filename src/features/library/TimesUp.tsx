@@ -20,7 +20,7 @@ import { useFamily } from '@/features/family/FamilyProvider';
 import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
-import { color, font, radius, space, themedStyles } from '@/theme/tokens';
+import { color, font, radius, size, space, themedStyles } from '@/theme/tokens';
 
 import { hourLabel, Lock } from './useScreenTime';
 
@@ -228,14 +228,14 @@ const styles = themedStyles(() => ({
   root: { ...StyleSheet.absoluteFill, backgroundColor: color.bg, alignItems: 'center', justifyContent: 'center', gap: space.md, padding: space.xl },
   art: { width: 220, height: 160, alignItems: 'center', justifyContent: 'center', marginBottom: space.lg },
   star: { position: 'absolute', backgroundColor: color.text, left: '50%', top: '50%' },
-  title: { color: color.text, fontFamily: font.display, fontSize: 28, textAlign: 'center', letterSpacing: -0.6 },
-  body: { color: color.text2, fontFamily: font.medium, fontSize: 16, textAlign: 'center' },
+  title: { color: color.text, fontFamily: font.display, fontSize: size.heading, textAlign: 'center', letterSpacing: -0.6 },
+  body: { color: color.text2, fontFamily: font.medium, fontSize: size.body, textAlign: 'center' },
   ask: { minHeight: 48, paddingHorizontal: space.xxl, borderRadius: radius.pill, backgroundColor: color.reward, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space.sm, marginTop: space.lg },
-  askText: { color: color.ink, fontFamily: font.bold, fontSize: 15 },
+  askText: { color: color.ink, fontFamily: font.bold, fontSize: size.body },
   askState: { flexDirection: 'row', alignItems: 'center', gap: space.sm, marginTop: space.lg, height: 48 },
-  askNote: { color: color.text2, fontFamily: font.semibold, fontSize: 14 },
+  askNote: { color: color.text2, fontFamily: font.semibold, fontSize: size.small },
   breath: { width: 6, height: 6, borderRadius: 3, backgroundColor: color.reward },
   button: { marginTop: space.xl, minHeight: 48, paddingHorizontal: space.xxl, borderRadius: radius.pill, backgroundColor: color.surface2, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space.sm },
   big: { minHeight: 64, paddingHorizontal: space.xl },
-  buttonText: { color: color.text, fontFamily: font.bold, fontSize: 15 },
+  buttonText: { color: color.text, fontFamily: font.bold, fontSize: size.body },
 }));

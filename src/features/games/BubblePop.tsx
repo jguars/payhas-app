@@ -18,7 +18,7 @@ import { TimesUp } from '@/features/library/TimesUp';
 import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { spring } from '@/theme/motion';
-import { alpha, color, font, Lane, pageFill, radius, space, themedStyles } from '@/theme/tokens';
+import { alpha, color, font, Lane, pageFill, radius, size, space, themedStyles } from '@/theme/tokens';
 
 import { Confetti } from './Confetti';
 import { Finish, GameBar, Readout } from './GameChrome';
@@ -265,10 +265,10 @@ const styles = themedStyles(() => ({
   bubble: { flex: 1, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: alpha(color.text, 0.45) },
   shine: { position: 'absolute', top: '16%', left: '20%', backgroundColor: alpha(color.white, 0.55), transform: [{ rotate: '-30deg' }] },
   ring: { position: 'absolute', top: 0, borderWidth: 3, borderColor: alpha(color.text, 0.8) },
-  label: { position: 'absolute', top: 0, textAlign: 'center', color: color.text, fontFamily: font.display, fontSize: 22 },
+  label: { position: 'absolute', top: 0, textAlign: 'center', color: color.text, fontFamily: font.display, fontSize: size.title },
   targetWrap: { position: 'absolute', left: 0, right: 0, top: 110, alignItems: 'center' },
   target: { flexDirection: 'row', alignItems: 'center', gap: space.sm, paddingHorizontal: 16, paddingVertical: 8, borderRadius: radius.pill, backgroundColor: alpha(color.surface1, 0.8), borderWidth: 1, borderColor: color.line },
-  targetText: { color: color.text2, fontFamily: font.semibold, fontSize: 15 },
+  targetText: { color: color.text2, fontFamily: font.semibold, fontSize: size.body },
   targetEmoji: { fontSize: 28 },
-  mult: { color: color.ember, fontFamily: font.display, fontSize: 18 },
+  mult: { color: color.ember, fontFamily: font.display, fontSize: size.lead },
 }));

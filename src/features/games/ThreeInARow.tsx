@@ -21,7 +21,7 @@ import { TimesUp } from '@/features/library/TimesUp';
 import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { spring } from '@/theme/motion';
-import { alpha, color, font, Lane, lane as lanes, pageFill, radius, space, themedStyles } from '@/theme/tokens';
+import { alpha, color, font, Lane, lane as lanes, pageFill, radius, size, space, themedStyles } from '@/theme/tokens';
 
 import { Confetti } from './Confetti';
 import { Finish, GameBar, Readout } from './GameChrome';
@@ -624,7 +624,7 @@ function SceneMark({ emoji }: { emoji: string }) {
     if (!reduce) s.value = withSpring(1, spring.bouncy);
   }, [reduce, s]);
   const anim = useAnimatedStyle(() => ({ transform: [{ scale: s.value }, { rotate: `${(1 - s.value) * -25}deg` }] }));
-  return <Animated.Text style={[{ fontSize: 18 }, anim]}>{emoji}</Animated.Text>;
+  return <Animated.Text style={[{ fontSize: size.lead }, anim]}>{emoji}</Animated.Text>;
 }
 
 export const threeInARowMeta: GameMeta = {
@@ -644,12 +644,12 @@ export const threeInARowMeta: GameMeta = {
 const styles = themedStyles(() => ({
   root: { flex: 1, ...pageFill(), alignItems: 'center', justifyContent: 'center' },
   scoreboard: { flexDirection: 'row', alignItems: 'center', gap: space.lg },
-  score: { color: color.text, fontFamily: font.mono, fontSize: 28, fontVariant: ['tabular-nums'], minWidth: 72, textAlign: 'center' },
+  score: { color: color.text, fontFamily: font.mono, fontSize: size.heading, fontVariant: ['tabular-nums'], minWidth: 72, textAlign: 'center' },
   plate: { alignItems: 'center', gap: 6, width: 96 },
   disc: { width: 60, height: 60, borderRadius: 30, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: color.line, backgroundColor: color.surface1 },
   discLedge: { position: 'absolute', left: 0, top: 4, width: 60, height: 60, borderRadius: 30 },
   discEmoji: { fontSize: 32 },
-  plateName: { color: color.text2, fontFamily: font.semibold, fontSize: 13 },
+  plateName: { color: color.text2, fontFamily: font.semibold, fontSize: size.small },
   pips: { flexDirection: 'row', gap: 5, height: 12, alignItems: 'center' },
   pip: { width: 12, height: 12, borderRadius: 6, backgroundColor: color.surface2, borderWidth: 1, borderColor: color.line, alignItems: 'center', justifyContent: 'center' },
   pipFill: { width: 12, height: 12, borderRadius: 6, backgroundColor: color.reward },
@@ -661,7 +661,7 @@ const styles = themedStyles(() => ({
   banner: { flexDirection: 'row', alignItems: 'center', gap: space.sm, paddingHorizontal: 18, paddingVertical: 10, borderRadius: radius.pill, backgroundColor: color.surface1, borderWidth: 1, borderColor: color.line },
   bannerWin: { backgroundColor: color.reward, borderColor: color.reward },
   bannerEmoji: { fontSize: 20 },
-  bannerText: { color: color.text, fontFamily: font.title, fontSize: 18, letterSpacing: -0.3 },
+  bannerText: { color: color.text, fontFamily: font.title, fontSize: size.lead, letterSpacing: -0.3 },
   sizes: { flexDirection: 'row', gap: space.sm },
   sceneCell: { position: 'absolute', width: SC, height: SC, borderRadius: 9, borderWidth: 2, borderColor: color.ink, backgroundColor: alpha(color.white, 0.5), alignItems: 'center', justifyContent: 'center' },
 }));

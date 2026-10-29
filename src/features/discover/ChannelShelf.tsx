@@ -6,7 +6,7 @@ import { PressScale } from '@/components/motion/PressScale';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { FeedVideo } from '@/features/feed/data';
 import { useT } from '@/i18n';
-import { color, font, space, themedStyles } from '@/theme/tokens';
+import { color, font, size, space, themedStyles } from '@/theme/tokens';
 
 import type { Channel } from './useDiscover';
 
@@ -46,5 +46,5 @@ const styles = themedStyles(() => ({
   item: { width: 124, gap: 8 },
   poster: { width: 124, height: 172, borderRadius: 14, overflow: 'hidden', backgroundColor: color.surface1 },
   fill: { position: 'absolute', left: 0, top: 0, width: '100%', height: '100%' },
-  caption: { color: color.text2, fontFamily: font.semibold, fontSize: 13, lineHeight: 17 },
+  caption: { color: color.text2, fontFamily: font.semibold, fontSize: size.small, lineHeight: 18 },
 }));

@@ -5,7 +5,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } fr
 import { Icon, IconName } from '@/components/Icon';
 import { TAB_BAR, useInsets } from '@/lib/useInsets';
 import { spring } from '@/theme/motion';
-import { color, font, radius, space, themedStyles } from '@/theme/tokens';
+import { color, font, radius, size, space, themedStyles } from '@/theme/tokens';
 
 type ToastSpec = { text: string; icon?: IconName; action?: { label: string; onPress: () => void } };
 const Ctx = createContext<(t: ToastSpec) => void>(() => {});
@@ -92,6 +92,6 @@ const styles = themedStyles(() => ({
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 6 },
   },
-  text: { color: color.onInverse, fontFamily: font.semibold, fontSize: 14, flexShrink: 1 },
-  action: { color: color.ember, fontFamily: font.bold, fontSize: 14, marginLeft: space.xs },
+  text: { color: color.onInverse, fontFamily: font.semibold, fontSize: size.small, flexShrink: 1 },
+  action: { color: color.ember, fontFamily: font.bold, fontSize: size.small, marginLeft: space.xs },
 }));

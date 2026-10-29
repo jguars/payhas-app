@@ -4,6 +4,12 @@ import { defineStrings } from '../define';
 export default defineStrings(
   {
     title: 'Family',
+    editProfile: 'Edit profile',
+    nameLabel: 'Name',
+    avatarLabel: 'Avatar',
+    birthLabel: 'Birth month',
+    laneMove: "{name} moves to {lane} ({ages}). Interests that don't fit are removed.",
+    savedToast: '{name} saved',
     familySub: 'Tap someone to see their day and change their rules.',
     yourFamily: 'Your family',
     needsYou: 'Needs you',
@@ -122,6 +128,12 @@ export default defineStrings(
   {
     tk: {
       title: 'Maşgala',
+      editProfile: 'Profili üýtget',
+      nameLabel: 'Ady',
+      avatarLabel: 'Awatar',
+      birthLabel: 'Doglan aýy',
+      laneMove: '{name} {lane} ({ages}) toparyna geçýär. Laýyk gelmeýän gyzyklanmalar aýrylýar.',
+      savedToast: '{name} ýatda saklandy',
       familySub: 'Biriniň gününi görmek we düzgünlerini üýtgetmek üçin basyň.',
       yourFamily: 'Maşgalaňyz',
       needsYou: 'Jogabyňyza garaşýar',
@@ -230,6 +242,12 @@ export default defineStrings(
     },
     tr: {
       title: 'Aile',
+      editProfile: 'Profili düzenle',
+      nameLabel: 'Ad',
+      avatarLabel: 'Avatar',
+      birthLabel: 'Doğum ayı',
+      laneMove: '{name} {lane} ({ages}) grubuna geçiyor. Uymayan ilgi alanları kaldırılır.',
+      savedToast: '{name} kaydedildi',
       familySub: 'Gününü görmek ve kurallarını değiştirmek için birine dokunun.',
       yourFamily: 'Aileniz',
       needsYou: 'Yanıtınızı bekliyor',
@@ -338,6 +356,12 @@ export default defineStrings(
     },
     ru: {
       title: 'Семья',
+      editProfile: 'Изменить профиль',
+      nameLabel: 'Имя',
+      avatarLabel: 'Аватар',
+      birthLabel: 'Месяц рождения',
+      laneMove: '{name} переходит в группу «{lane}» ({ages}). Неподходящие интересы будут удалены.',
+      savedToast: '{name}: сохранено',
       familySub: 'Нажмите на человека, чтобы увидеть его день и изменить правила.',
       yourFamily: 'Ваша семья',
       needsYou: 'Ждёт вашего ответа',

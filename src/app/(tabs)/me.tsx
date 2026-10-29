@@ -42,7 +42,7 @@ import { fx, getFeedbackSettings, setFeedbackSettings } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
 import { useInsets, useTabBarSpace } from '@/lib/useInsets';
 import { spring } from '@/theme/motion';
-import { alpha, color, font, lane as lanes, pageFill, radius, space, themedStyles } from '@/theme/tokens';
+import { alpha, color, font, lane as lanes, pageFill, radius, size, space, themedStyles } from '@/theme/tokens';
 import { useTheme } from '@/theme/ThemeProvider';
 
 /** The "on" colour for toggles and rule icons; read when drawn so it follows the theme. */
@@ -241,6 +241,9 @@ export default function MeScreen() {
         {/* Settings */}
         <Enter index={4}>
           <Group title={t('me.group.family')}>
+            <Row icon="me" tint={color.ember} label={t('parent.editProfile')} onPress={() => router.push({ pathname: '/profile-edit', params: { id: current.id } })}>
+              {chevron}
+            </Row>
             {!isAdult && (
               <>
                 <Row icon="clock" tint={green()} label={t('me.dailyLimit')} onPress={openParent}>
@@ -588,16 +591,16 @@ const styles = themedStyles(() => ({
   ringWrap: { width: RING, height: RING, alignItems: 'center', justifyContent: 'center' },
   ringStatic: { flex: 1, borderRadius: RING / 2, borderWidth: 2 },
   heroText: { alignItems: 'center', gap: space.md, maxWidth: '100%' },
-  name: { color: color.text, fontFamily: font.display, fontSize: 34, letterSpacing: -1, textAlign: 'center' },
+  name: { color: color.text, fontFamily: font.display, fontSize: size.display, letterSpacing: -1, textAlign: 'center' },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: space.md, flexWrap: 'wrap', justifyContent: 'center' },
   laneChip: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, minHeight: 28, borderRadius: radius.pill, borderWidth: 1 },
   laneDot: { width: 7, height: 7, borderRadius: 4 },
-  laneChipText: { fontFamily: font.bold, fontSize: 12, letterSpacing: 0.2 },
-  joined: { color: color.text3, fontFamily: font.medium, fontSize: 13 },
+  laneChipText: { fontFamily: font.bold, fontSize: size.caption, letterSpacing: 0.2 },
+  joined: { color: color.text3, fontFamily: font.medium, fontSize: size.small },
   parentSees: { flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.lg, borderRadius: radius.card, backgroundColor: color.surface1 },
   parentSeesText: { flex: 1, gap: 2 },
-  parentSeesTitle: { color: color.text, fontFamily: font.semibold, fontSize: 14 },
-  parentSeesBody: { color: color.text2, fontFamily: font.medium, fontSize: 13, lineHeight: 18 },
+  parentSeesTitle: { color: color.text, fontFamily: font.semibold, fontSize: size.small },
+  parentSeesBody: { color: color.text2, fontFamily: font.medium, fontSize: size.small, lineHeight: 18 },
 
   stats: {
     flexDirection: 'row',
@@ -611,39 +614,39 @@ const styles = themedStyles(() => ({
   statCol: { flex: 1 },
   stat: { alignItems: 'center', justifyContent: 'center', gap: 3, minHeight: 72, paddingHorizontal: 4 },
   statDivider: { width: StyleSheet.hairlineWidth, height: 40, backgroundColor: alpha(color.text, 0.16) },
-  statValue: { color: color.text, fontFamily: font.mono, fontSize: 26, letterSpacing: -0.5 },
+  statValue: { color: color.text, fontFamily: font.mono, fontSize: size.heading, letterSpacing: -0.5 },
   statLabelRow: { flexDirection: 'row', alignItems: 'center', gap: 2 },
-  statLabel: { color: color.text2, fontFamily: font.semibold, fontSize: 12, letterSpacing: 0.3 },
-  statSub: { color: color.text3, fontFamily: font.medium, fontSize: 12 },
+  statLabel: { color: color.text2, fontFamily: font.semibold, fontSize: size.caption, letterSpacing: 0.3 },
+  statSub: { color: color.text3, fontFamily: font.medium, fontSize: size.caption },
 
   tabs: { flexDirection: 'row', height: 46, padding: 4, borderRadius: 16, backgroundColor: color.surface1 },
   tabPill: { position: 'absolute', left: 4, top: 4, bottom: 4, borderRadius: 12, backgroundColor: color.surface2, borderWidth: StyleSheet.hairlineWidth, borderColor: alpha(color.text, 0.14) },
   tab: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  tabText: { color: color.text3, fontFamily: font.semibold, fontSize: 14 },
+  tabText: { color: color.text3, fontFamily: font.semibold, fontSize: size.small },
   tabTextOn: { color: color.text },
 
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: GRID_GAP },
   poster: { borderRadius: 14, overflow: 'hidden', backgroundColor: color.surface1 },
   posterMeta: { position: 'absolute', left: 8, bottom: 7, flexDirection: 'row', alignItems: 'center', gap: 4 },
-  posterViews: { color: color.white, fontFamily: font.bold, fontSize: 12 },
+  posterViews: { color: color.white, fontFamily: font.bold, fontSize: size.caption },
   seeAll: { flexDirection: 'row', alignSelf: 'center', alignItems: 'center', gap: 4, minHeight: 48, paddingHorizontal: space.xl, borderRadius: radius.pill, backgroundColor: color.surface1 },
-  seeAllText: { color: color.text, fontFamily: font.semibold, fontSize: 14 },
+  seeAllText: { color: color.text, fontFamily: font.semibold, fontSize: size.small },
   empty: { alignItems: 'center', gap: space.md, paddingVertical: space.xxl, borderRadius: 24, backgroundColor: color.surface1 },
   emptyIcon: { width: 48, height: 48, borderRadius: 24, backgroundColor: color.surface2, alignItems: 'center', justifyContent: 'center' },
-  emptyText: { color: color.text3, fontFamily: font.medium, fontSize: 14, textAlign: 'center', paddingHorizontal: space.xl },
+  emptyText: { color: color.text3, fontFamily: font.medium, fontSize: size.small, textAlign: 'center', paddingHorizontal: space.xl },
 
-  groupTitle: { color: color.text3, fontFamily: font.bold, fontSize: 12, letterSpacing: 1.2, textTransform: 'uppercase', paddingHorizontal: 6 },
+  groupTitle: { color: color.text3, fontFamily: font.bold, fontSize: size.caption, letterSpacing: 1.2, textTransform: 'uppercase', paddingHorizontal: 6 },
   card: { backgroundColor: color.surface1, borderRadius: 22, paddingLeft: 14, overflow: 'hidden' },
   row: { flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 56 },
   tile: { width: 32, height: 32, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
   rowBody: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8, alignSelf: 'stretch', paddingRight: 14 },
   rowBorder: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: alpha(color.text, 0.1) },
-  rowLabel: { flex: 1, color: color.text, fontFamily: font.semibold, fontSize: 15 },
-  value: { color: color.text2, fontFamily: font.medium, fontSize: 14 },
+  rowLabel: { flex: 1, color: color.text, fontFamily: font.semibold, fontSize: size.body },
+  value: { color: color.text2, fontFamily: font.medium, fontSize: size.small },
   badge: { minWidth: 22, height: 22, paddingHorizontal: 6, borderRadius: 11, backgroundColor: color.ember, alignItems: 'center', justifyContent: 'center' },
-  badgeText: { color: color.ink, fontFamily: font.bold, fontSize: 12 },
+  badgeText: { color: color.ink, fontFamily: font.bold, fontSize: size.caption },
 
-  footer: { color: color.text3, fontFamily: font.medium, fontSize: 12, textAlign: 'center', opacity: 0.7 },
+  footer: { color: color.text3, fontFamily: font.medium, fontSize: size.caption, textAlign: 'center', opacity: 0.7 },
 
   compact: {
     position: 'absolute',
@@ -658,6 +661,6 @@ const styles = themedStyles(() => ({
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: color.line,
   },
-  themeHint: { color: color.text3, fontFamily: font.medium, fontSize: 13, lineHeight: 18, textAlign: 'center' },
-  compactName: { color: color.text, fontFamily: font.bold, fontSize: 16, maxWidth: 220 },
+  themeHint: { color: color.text3, fontFamily: font.medium, fontSize: size.small, lineHeight: 18, textAlign: 'center' },
+  compactName: { color: color.text, fontFamily: font.bold, fontSize: size.body, maxWidth: 220 },
 }));

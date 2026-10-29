@@ -18,7 +18,7 @@ import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
 import { useGoBack } from '@/lib/useGoBack';
 import { useInsets } from '@/lib/useInsets';
-import { color, font, pageFill, space, themedStyles } from '@/theme/tokens';
+import { color, font, pageFill, size, space, themedStyles } from '@/theme/tokens';
 
 /**
  * Family: the parent's dashboard home, behind the PIN (15 minutes). Laid out
@@ -159,6 +159,7 @@ export default function FamilyScreen() {
                 leading={<Avatar name={p.display_name} avatar={p.avatar} lane={p.lane} size={44} />}
                 label={p.is_parent ? t('parent.you', { name: p.display_name }) : p.display_name}
                 sub={t(roleKey(p))}
+                onPress={() => router.push({ pathname: '/profile-edit', params: { id: p.id } })}
               />
             ))}
             {children == null
@@ -303,19 +304,19 @@ function AlertsRow({ parent, first, onResult }: { parent: string | null; first: 
 const styles = themedStyles(() => ({
   root: { flex: 1, ...pageFill() },
   pinWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.lg, paddingBottom: 80 },
-  pinHint: { color: color.text3, fontFamily: font.medium, fontSize: 13 },
+  pinHint: { color: color.text3, fontFamily: font.medium, fontSize: size.small },
   content: { paddingHorizontal: space.lg, gap: space.xl },
-  title: { color: color.text, fontFamily: font.display, fontSize: 34, letterSpacing: -0.8 },
-  subtitle: { color: color.text2, fontFamily: font.medium, fontSize: 15, lineHeight: 21 },
-  groupTitle: { color: color.text2, fontFamily: font.bold, fontSize: 13, letterSpacing: 0.3, paddingHorizontal: space.xs },
+  title: { color: color.text, fontFamily: font.display, fontSize: size.display, letterSpacing: -0.8 },
+  subtitle: { color: color.text2, fontFamily: font.medium, fontSize: size.body, lineHeight: 21 },
+  groupTitle: { color: color.text2, fontFamily: font.bold, fontSize: size.small, letterSpacing: 0.3, paddingHorizontal: space.xs },
   group: { backgroundColor: color.surface1, borderRadius: 24, overflow: 'hidden' },
   rowLine: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: color.line },
   skeleton: { height: 72, marginHorizontal: space.lg, opacity: 0.4 },
-  status: { color: color.text3, fontFamily: font.medium, fontSize: 13 },
+  status: { color: color.text3, fontFamily: font.medium, fontSize: size.small },
   today: { alignItems: 'flex-end', gap: 6, minWidth: 72 },
-  todayText: { color: color.text2, fontFamily: font.mono, fontSize: 13 },
+  todayText: { color: color.text2, fontFamily: font.mono, fontSize: size.small },
   liveBadge: { position: 'absolute', right: -2, bottom: -2, width: 16, height: 16, borderRadius: 8, alignItems: 'center', justifyContent: 'center', backgroundColor: color.surface1 },
   addCircle: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', backgroundColor: color.surface2 },
   deleteLink: { alignSelf: 'center', minHeight: 48, justifyContent: 'center', paddingHorizontal: space.lg },
-  deleteText: { color: color.text3, fontFamily: font.semibold, fontSize: 13, textDecorationLine: 'underline' },
+  deleteText: { color: color.text3, fontFamily: font.semibold, fontSize: size.small, textDecorationLine: 'underline' },
 }));

@@ -18,7 +18,7 @@ import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { useInsets, useTabBarSpace } from '@/lib/useInsets';
 import { spring } from '@/theme/motion';
-import { alpha, color, font, Lane, pageFill, radius, space, themedStyles } from '@/theme/tokens';
+import { alpha, color, font, Lane, pageFill, radius, size, space, themedStyles } from '@/theme/tokens';
 
 const LEDGE = 5;
 const GAP = space.md;
@@ -180,26 +180,26 @@ const styles = themedStyles(() => ({
   root: { flex: 1, ...pageFill() },
   content: { paddingHorizontal: space.lg, gap: space.xl, alignSelf: 'center', width: '100%', maxWidth: 560 },
   head: { gap: space.sm },
-  title: { color: color.text, fontFamily: font.display, fontSize: 30, letterSpacing: -0.9 },
+  title: { color: color.text, fontFamily: font.display, fontSize: size.headline, letterSpacing: -0.9 },
   meta: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   today: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  todayText: { color: color.text2, fontFamily: font.mono, fontSize: 13 },
-  count: { color: color.text3, fontFamily: font.medium, fontSize: 13 },
+  todayText: { color: color.text2, fontFamily: font.mono, fontSize: size.small },
+  count: { color: color.text3, fontFamily: font.medium, fontSize: size.small },
   section: { gap: space.md },
-  sectionTitle: { color: color.text, fontFamily: font.title, fontSize: 20, letterSpacing: -0.3 },
+  sectionTitle: { color: color.text, fontFamily: font.title, fontSize: size.title, letterSpacing: -0.3 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: GAP },
   ledge: { position: 'absolute', left: 0, right: 0, top: LEDGE, bottom: 0, borderRadius: radius.card },
   tile: { borderRadius: radius.card, borderWidth: 2, borderColor: color.ink, backgroundColor: color.surface1, overflow: 'hidden' },
   stage: { height: STAGE_H, overflow: 'hidden', alignItems: 'center', justifyContent: 'center', borderBottomWidth: 2, borderBottomColor: color.ink },
   foot: { padding: 12, gap: 3, minHeight: 92 },
-  name: { color: color.text, fontFamily: font.title, fontSize: 17, letterSpacing: -0.3 },
-  sub: { color: color.text2, fontFamily: font.medium, fontSize: 12, lineHeight: 16 },
+  name: { color: color.text, fontFamily: font.title, fontSize: size.lead, letterSpacing: -0.3 },
+  sub: { color: color.text2, fontFamily: font.medium, fontSize: size.caption, lineHeight: 16 },
   best: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 },
   stars: { flexDirection: 'row', gap: 1 },
-  bestText: { flexShrink: 1, color: color.text, fontFamily: font.mono, fontSize: 12 },
+  bestText: { flexShrink: 1, color: color.text, fontFamily: font.mono, fontSize: size.caption },
   lockScrim: { ...StyleSheet.absoluteFill, alignItems: 'center', justifyContent: 'center', backgroundColor: alpha(color.ink, 0.55) },
   lockBadge: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', backgroundColor: color.surface2 },
   lockedSheet: { alignItems: 'center', gap: space.md, paddingHorizontal: space.xl, paddingBottom: space.lg },
   lockedIcon: { width: 72, height: 72, borderRadius: 36, alignItems: 'center', justifyContent: 'center', backgroundColor: color.surface2 },
-  lockedText: { color: color.text2, fontFamily: font.semibold, fontSize: 16, textAlign: 'center' },
+  lockedText: { color: color.text2, fontFamily: font.semibold, fontSize: size.body, textAlign: 'center' },
 }));

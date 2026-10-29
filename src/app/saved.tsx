@@ -14,7 +14,7 @@ import { openVideo } from '@/features/feed/openVideo';
 import { useLibrary } from '@/features/library/LibraryProvider';
 import { supabase } from '@/lib/supabase';
 import { useInsets } from '@/lib/useInsets';
-import { color, font, pageFill, radius, space, themedStyles } from '@/theme/tokens';
+import { color, font, pageFill, radius, size, space, themedStyles } from '@/theme/tokens';
 
 /** Everything this profile saved, newest first — a three-up poster grid like any saved collection. */
 export default function SavedScreen() {
@@ -75,9 +75,9 @@ const styles = themedStyles(() => ({
   tile: { aspectRatio: 3 / 4, borderRadius: radius.chip / 2, overflow: 'hidden', backgroundColor: color.surface1 },
   fill: { position: 'absolute', left: 0, top: 0, width: '100%', height: '100%' },
   views: { position: 'absolute', left: 6, bottom: 6, flexDirection: 'row', alignItems: 'center', gap: 3 },
-  viewsText: { color: color.text, fontFamily: font.mono, fontSize: 12 },
+  viewsText: { color: color.text, fontFamily: font.mono, fontSize: size.caption },
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.sm, paddingHorizontal: space.xxl, paddingBottom: 80 },
   emptyIcon: { width: 64, height: 64, borderRadius: 32, backgroundColor: color.surface1, alignItems: 'center', justifyContent: 'center', marginBottom: space.sm },
-  emptyTitle: { color: color.text, fontFamily: font.title, fontSize: 20 },
-  emptySub: { color: color.text2, fontFamily: font.medium, fontSize: 14, textAlign: 'center' },
+  emptyTitle: { color: color.text, fontFamily: font.title, fontSize: size.title },
+  emptySub: { color: color.text2, fontFamily: font.medium, fontSize: size.small, textAlign: 'center' },
 }));

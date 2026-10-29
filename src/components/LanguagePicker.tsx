@@ -5,7 +5,7 @@ import { Enter } from '@/components/motion/Enter';
 import { Lang, LANGS, startupLang, translate, useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
-import { color, font, radius, space, themedStyles } from '@/theme/tokens';
+import { color, font, radius, size, space, themedStyles } from '@/theme/tokens';
 
 /**
  * The four languages, each written in itself. Picking one switches the whole
@@ -68,8 +68,8 @@ const styles = themedStyles(() => ({
   ledge: { position: 'absolute', left: 0, right: 0, top: LEDGE, bottom: 0, borderRadius: radius.card, backgroundColor: color.line },
   row: { flexDirection: 'row', alignItems: 'center', minHeight: 64, paddingHorizontal: space.lg, borderRadius: radius.card, backgroundColor: color.surface1, borderWidth: 2, borderColor: color.line },
   rowOn: { borderColor: color.ember },
-  native: { color: color.text, fontFamily: font.title, fontSize: 20 },
-  english: { color: color.text3, fontFamily: font.medium, fontSize: 13 },
+  native: { color: color.text, fontFamily: font.title, fontSize: size.title },
+  english: { color: color.text3, fontFamily: font.medium, fontSize: size.small },
   check: { width: 26, height: 26, borderRadius: 13, borderWidth: 2, borderColor: color.line, alignItems: 'center', justifyContent: 'center' },
   checkOn: { backgroundColor: color.ember, borderColor: color.ember },
 }));

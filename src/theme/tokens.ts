@@ -226,12 +226,21 @@ export function themedStyles<T extends StyleSheet.NamedStyles<T>>(make: () => T 
 export const font = {
   display: 'BricolageGrotesque_800ExtraBold',
   title: 'BricolageGrotesque_700Bold',
-  body: 'Figtree_400Regular',
   medium: 'Figtree_500Medium',
   semibold: 'Figtree_600SemiBold',
   bold: 'Figtree_700Bold',
   mono: 'JetBrainsMono_500Medium',
 } as const;
+
+/**
+ * The type scale — every text size in the app is one of these nine.
+ *   caption 12 · small 14 · body 16 · lead 18 · title 22 · heading 26 ·
+ *   headline 30 · display 36 · hero 44
+ * Bricolage (font.display / font.title) for headings and big numbers, Figtree
+ * (medium / semibold / bold) for everything read or tapped, Mono for times,
+ * counts and codes. Sizes inside game pieces scale with the board instead.
+ */
+export const size = { caption: 12, small: 14, body: 16, lead: 18, title: 22, heading: 26, headline: 30, display: 36, hero: 44 } as const;
 
 export const space = { xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32, xxxl: 48 } as const;
 

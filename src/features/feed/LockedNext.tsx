@@ -8,7 +8,7 @@ import { PressScale } from '@/components/motion/PressScale';
 import { useFamily } from '@/features/family/FamilyProvider';
 import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
-import { alpha, color, font, media, radius, space, themedStyles } from '@/theme/tokens';
+import { alpha, color, font, media, radius, size, space, themedStyles } from '@/theme/tokens';
 
 import type { MediaSource } from './data';
 
@@ -69,10 +69,10 @@ const styles = themedStyles(() => ({
   scrim: { ...StyleSheet.absoluteFill, backgroundColor: alpha(color.ink, 0.6) },
   body: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.md, paddingHorizontal: space.xl },
   lock: { width: 96, height: 96, borderRadius: 48, alignItems: 'center', justifyContent: 'center', backgroundColor: alpha(media.text, 0.12), marginBottom: space.sm },
-  title: { color: media.text, fontFamily: font.display, fontSize: 26, letterSpacing: -0.6, textAlign: 'center' },
-  sub: { color: media.text2, fontFamily: font.medium, fontSize: 15, lineHeight: 21, textAlign: 'center' },
+  title: { color: media.text, fontFamily: font.display, fontSize: size.heading, letterSpacing: -0.6, textAlign: 'center' },
+  sub: { color: media.text2, fontFamily: font.medium, fontSize: size.body, lineHeight: 21, textAlign: 'center' },
   unlock: { flexDirection: 'row', alignItems: 'center', gap: space.sm, height: 56, paddingHorizontal: space.xl, marginTop: space.md, borderRadius: radius.pill, backgroundColor: color.ember },
-  unlockText: { color: color.ink, fontFamily: font.bold, fontSize: 17 },
+  unlockText: { color: color.ink, fontFamily: font.bold, fontSize: size.lead },
   play: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 48, paddingHorizontal: space.lg },
-  playText: { color: media.text2, fontFamily: font.semibold, fontSize: 15 },
+  playText: { color: media.text2, fontFamily: font.semibold, fontSize: size.body },
 }));

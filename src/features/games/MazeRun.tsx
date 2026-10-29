@@ -18,7 +18,7 @@ import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { useInsets } from '@/lib/useInsets';
 import { spring } from '@/theme/motion';
-import { alpha, color, Lane, lane as lanes, pageFill, radius, space, themedStyles } from '@/theme/tokens';
+import { alpha, color, Lane, lane as lanes, pageFill, radius, size, space, themedStyles } from '@/theme/tokens';
 
 import { Confetti } from './Confetti';
 import { Finish, GameBar, Readout } from './GameChrome';
@@ -571,10 +571,10 @@ function MazeScene({ active }: { active: boolean }) {
               <Path d={SCENE_WALLS} stroke={color.ink} strokeWidth={5} strokeLinecap="round" strokeLinejoin="round" fill="none" />
             </Svg>
             <View style={[styles.sceneCell, { left: 4 * SCENE_CELL, top: 2 * SCENE_CELL }]}>
-              <Text style={{ fontSize: 19 }}>{HOME}</Text>
+              <Text style={{ fontSize: size.lead }}>{HOME}</Text>
             </View>
             <Animated.View style={[styles.sceneCell, fox]}>
-              <Text style={{ fontSize: 19 }}>🦊</Text>
+              <Text style={{ fontSize: size.lead }}>🦊</Text>
             </Animated.View>
           </View>
         </View>

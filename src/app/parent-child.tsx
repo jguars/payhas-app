@@ -32,7 +32,7 @@ import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
 import { useGoBack } from '@/lib/useGoBack';
 import { useInsets } from '@/lib/useInsets';
-import { color, font, lane as lanes, pageFill, radius, space, themedStyles } from '@/theme/tokens';
+import { color, font, lane as lanes, pageFill, radius, size, space, themedStyles } from '@/theme/tokens';
 
 const LIMITS: (number | null)[] = [null, 15, 30, 45, 60, 90, 120];
 
@@ -147,6 +147,10 @@ export default function ChildScreen() {
                 {t(laneKey(child.lane))} · {L.ages}
               </Text>
             </View>
+            <PressScale onPress={() => router.push({ pathname: '/profile-edit', params: { id: child.id } })} accessibilityRole="button" style={styles.editPill}>
+              <Icon name="me" size={14} color={color.text} strokeWidth={2.4} />
+              <Text style={styles.editText}>{t('parent.editProfile')}</Text>
+            </PressScale>
             <View style={styles.statusRow}>
               {child.paused ? <Icon name="pause" size={12} color={color.verified} strokeWidth={3} /> : p.live && <LiveDot />}
               <Text style={[styles.status, child.paused ? { color: color.verified } : p.live && { color: color.success }]} numberOfLines={1}>
@@ -302,18 +306,20 @@ const styles = themedStyles(() => ({
   pinWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.lg, paddingBottom: 80 },
   content: { paddingHorizontal: space.lg, gap: space.xl },
   hero: { alignItems: 'center', gap: space.sm },
-  name: { color: color.text, fontFamily: font.display, fontSize: 30, letterSpacing: -0.7, marginTop: space.xs },
+  name: { color: color.text, fontFamily: font.display, fontSize: size.headline, letterSpacing: -0.7, marginTop: space.xs },
   heroMeta: { alignItems: 'center', gap: space.sm },
   lanePill: { paddingHorizontal: 10, paddingVertical: 3, borderRadius: radius.pill },
-  lanePillText: { color: color.ink, fontFamily: font.bold, fontSize: 12 },
+  lanePillText: { color: color.ink, fontFamily: font.bold, fontSize: size.caption },
   statusRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  status: { color: color.text3, fontFamily: font.semibold, fontSize: 13 },
+  editPill: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 36, paddingHorizontal: 14, borderRadius: radius.pill, backgroundColor: color.surface1, borderWidth: 1, borderColor: color.line },
+  editText: { color: color.text, fontFamily: font.semibold, fontSize: size.small },
+  status: { color: color.text3, fontFamily: font.semibold, fontSize: size.small },
   sheet: { gap: space.md, paddingHorizontal: space.xl, paddingBottom: space.md },
-  sheetCaption: { color: color.text, fontFamily: font.bold, fontSize: 16 },
-  sheetSub: { color: color.text2, fontFamily: font.medium, fontSize: 14 },
+  sheetCaption: { color: color.text, fontFamily: font.bold, fontSize: size.body },
+  sheetSub: { color: color.text2, fontFamily: font.medium, fontSize: size.small },
   hours: { flexDirection: 'row', gap: space.sm },
   hideButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space.sm, height: 52, borderRadius: radius.pill, backgroundColor: color.ember, marginTop: space.sm },
-  hideText: { color: color.ink, fontFamily: font.bold, fontSize: 16 },
+  hideText: { color: color.ink, fontFamily: font.bold, fontSize: size.body },
   deleteLink: { alignSelf: 'center', minHeight: 48, justifyContent: 'center', paddingHorizontal: space.lg },
-  deleteText: { color: color.text3, fontFamily: font.semibold, fontSize: 13, textDecorationLine: 'underline' },
+  deleteText: { color: color.text3, fontFamily: font.semibold, fontSize: size.small, textDecorationLine: 'underline' },
 }));

@@ -131,7 +131,7 @@ The system is **"The Night-Light Playroom"**: a dark, calm room lit only by one 
 | Action colour | Ember #FF5A3C, one call to action per screen, always ink text on it |
 | Lane colours | Little #FFD25E, Kids #4FE3B0, Teen #78A6FF, Adult #C3A2FF — identity only, never decoration |
 | Status colours | Success, warning, danger, info, reward tokens; kept to parent, creator and system surfaces |
-| Type | Bricolage Grotesque for headings (tight tracking), Figtree for UI, JetBrains Mono for numbers; Onest for Cyrillic |
+| Type | Three families, six faces, nothing else: Bricolage Grotesque 800/700 (display, titles), Figtree 500/600/700 (UI), JetBrains Mono 500 (numbers, codes); Onest stands in for all of them in Russian. One size scale, `size.*`: 12 caption · 14 small · 16 body · 18 lead · 22 title · 26 heading · 30 headline · 36 display · 44 hero. No other font sizes except computed ones in games and avatars |
 | Shape | Chips 12–16, cards 20, video 28, buttons and tab bar as pills |
 | Depth | Tonal layering; a hard "ledge" under tactile controls; real shadows only on the floating tab bar and toasts |
 | Motion | Spring presets (snappy, smooth, bouncy), 45 ms stagger, respects reduce-motion |
@@ -192,7 +192,7 @@ The core app is built and running on Android and iPhone; content is growing thro
 - [x] Parental consent before the family's first child profile — `00e8468`, `20261029150000_parental_consent.sql`
 - [x] Block advertising ID, location, camera and microphone on Android — `d85d894`
 - [x] Migration backlog applied to the live database (Oct 29, verified): `push_notifications`, `more_games`, `delete_account`, `retention` (nightly purge scheduled), `push_privacy`
-- [ ] Apply `20261029150000_parental_consent.sql` — held until test phones run a build with the consent screen (the database then refuses new child profiles without consent)
+- [x] `20261029150000_parental_consent.sql` applied to the live database (Oct 29) — adding a child now asks for consent first
 - [ ] Turn on leaked password protection (Supabase → Authentication → Providers → Email)
 - [ ] Remaining privacy review items — deferred for now (the review isn't in the repo; add its list here when it's picked up)
 - [ ] Store kids-category requirements (App Store Kids, Google Play Families)
@@ -232,3 +232,8 @@ The core app is built and running on Android and iPhone; content is growing thro
 - [ ] Turn test mode off before launch
 - [ ] Decide where activation codes are sold, and print the first batch
 - [ ] Tablet layouts (iPad support is off until then)
+- [x] Edit a profile: name, avatar and a child's birth month (moves lane), behind the PIN — from Me, the dashboard and a child's page
+- [ ] Apply `20261029190000_update_profile.sql` to the live database
+- [x] Tapping outside the keyboard closes it, on every screen and sheet
+- [x] Type audit: 3 families / 7 faces / 22 sizes → 3 families / 6 faces / 9-step scale
+- [x] Payhas Plus page redesigned: price hero, Your plan (profile slots, active until), Free vs Plus with checks, card payment as the one call to action, folded activation-code row

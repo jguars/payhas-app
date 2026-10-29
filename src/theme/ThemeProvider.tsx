@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as SystemUI from 'expo-system-ui';
 import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { View } from 'react-native';
+import { Keyboard, View } from 'react-native';
 
 import { applyTheme, color, theme as startTheme, ThemeName } from './tokens';
 
@@ -48,11 +48,18 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   return (
     <ThemeCtx.Provider value={value}>
       <StatusBar style={color.scheme === 'light' ? 'dark' : 'light'} />
-      <View key={name} style={{ flex: 1, backgroundColor: color.bg }}>
+      {/* A tap that nothing else takes (empty space, text, cards) closes the keyboard, on every screen. */}
+      <View key={name} style={{ flex: 1, backgroundColor: color.bg }} onStartShouldSetResponder={dismissKeyboard}>
         {children}
       </View>
     </ThemeCtx.Provider>
   );
+}
+
+/** Closes the keyboard and declines the touch, so taps on empty space still reach whatever would have had them. */
+export function dismissKeyboard() {
+  if (Keyboard.isVisible()) Keyboard.dismiss();
+  return false;
 }
 
 export function useTheme() {

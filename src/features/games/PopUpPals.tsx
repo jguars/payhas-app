@@ -22,7 +22,7 @@ import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { useInsets } from '@/lib/useInsets';
 import { spring, stagger } from '@/theme/motion';
-import { alpha, color, font, Lane, lane as lanes, pageFill, radius, space, themedStyles } from '@/theme/tokens';
+import { alpha, color, font, Lane, lane as lanes, pageFill, radius, size, space, themedStyles } from '@/theme/tokens';
 
 import { Confetti } from './Confetti';
 import { Finish, GameBar, Readout } from './GameChrome';
@@ -801,7 +801,7 @@ const styles = themedStyles(() => ({
     top: -14,
     textAlign: 'center',
     color: color.reward,
-    fontSize: 22,
+    fontSize: size.title,
   },
   label: {
     position: 'absolute',
@@ -811,7 +811,7 @@ const styles = themedStyles(() => ({
     textAlign: 'center',
     color: color.text,
     fontFamily: font.display,
-    fontSize: 26,
+    fontSize: size.heading,
     letterSpacing: -0.5,
   },
   hintWrap: { position: 'absolute', left: 0, right: 0, alignItems: 'center' },
@@ -827,13 +827,13 @@ const styles = themedStyles(() => ({
     borderWidth: 1,
     borderColor: color.line,
   },
-  hintText: { color: color.text2, fontFamily: font.semibold, fontSize: 14 },
+  hintText: { color: color.text2, fontFamily: font.semibold, fontSize: size.small },
   hintEmoji: { fontSize: 20 },
   combo: { borderColor: alpha(color.reward, 0.5) },
   comboText: {
     color: color.reward,
     fontFamily: font.display,
-    fontSize: 18,
+    fontSize: size.lead,
     letterSpacing: -0.4,
   },
   progress: {
@@ -872,6 +872,6 @@ const styles = themedStyles(() => ({
     width: 24,
     textAlign: 'center',
     color: color.white,
-    fontSize: 22,
+    fontSize: size.title,
   },
 }));

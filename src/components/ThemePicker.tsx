@@ -5,7 +5,7 @@ import { PressScale } from '@/components/motion/PressScale';
 import { TKey, useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { useTheme } from '@/theme/ThemeProvider';
-import { color, font, previewOf, radius, space, themedStyles, ThemeName, THEMES } from '@/theme/tokens';
+import { color, font, previewOf, radius, size, space, themedStyles, ThemeName, THEMES } from '@/theme/tokens';
 
 const LABEL: Record<ThemeName, TKey> = { dark: 'me.themeDark', navy: 'me.themeNavy', light: 'me.themeLight' };
 
@@ -74,5 +74,5 @@ const styles = themedStyles(() => ({
   dot: { width: 8, height: 8, borderRadius: 4 },
   button: { height: 14, borderRadius: radius.pill, marginTop: 'auto' },
   labelRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4, minHeight: 20 },
-  label: { color: color.text2, fontFamily: font.bold, fontSize: 13 },
+  label: { color: color.text2, fontFamily: font.bold, fontSize: size.small },
 }));

@@ -17,7 +17,7 @@ import { laneKey, LANGS, TKey, useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
 import { useInsets } from '@/lib/useInsets';
-import { color, font, lane as lanes, pageFill, radius, space, themedStyles } from '@/theme/tokens';
+import { color, font, lane as lanes, pageFill, radius, size, space, themedStyles } from '@/theme/tokens';
 
 type Stage = 'welcome' | 'pin' | 'pinConfirm' | 'you' | 'consent' | 'child' | 'family';
 
@@ -281,25 +281,25 @@ function Welcome({ onStart }: { onStart: () => void }) {
 
 const styles = themedStyles(() => ({
   pinWrap: { alignItems: 'center', gap: space.lg, paddingTop: space.xl },
-  pinWhy: { color: color.text3, fontFamily: font.medium, fontSize: 13, textAlign: 'center' },
-  nameInput: { color: color.text, fontFamily: font.display, fontSize: 32, paddingVertical: space.md, borderBottomWidth: 2, borderBottomColor: color.line },
-  error: { color: color.ember, fontFamily: font.semibold, fontSize: 14 },
-  planNote: { color: color.text3, fontFamily: font.medium, fontSize: 13, lineHeight: 18, marginBottom: space.sm },
+  pinWhy: { color: color.text3, fontFamily: font.medium, fontSize: size.small, textAlign: 'center' },
+  nameInput: { color: color.text, fontFamily: font.display, fontSize: size.headline, paddingVertical: space.md, borderBottomWidth: 2, borderBottomColor: color.line },
+  error: { color: color.ember, fontFamily: font.semibold, fontSize: size.small },
+  planNote: { color: color.text3, fontFamily: font.medium, fontSize: size.small, lineHeight: 18, marginBottom: space.sm },
   member: { flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.md, borderRadius: radius.card, backgroundColor: color.surface1, borderWidth: 2, borderColor: color.line },
-  memberName: { color: color.text, fontFamily: font.bold, fontSize: 17 },
-  memberMeta: { color: color.text3, fontFamily: font.medium, fontSize: 13 },
+  memberName: { color: color.text, fontFamily: font.bold, fontSize: size.lead },
+  memberMeta: { color: color.text3, fontFamily: font.medium, fontSize: size.small },
   welcome: { flex: 1, ...pageFill(), paddingHorizontal: space.xl },
   welcomeTop: { flexDirection: 'row', justifyContent: 'flex-end' },
   langChip: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 36, paddingHorizontal: 14, borderRadius: radius.pill, backgroundColor: color.surface1, borderWidth: 1, borderColor: color.line },
-  langChipText: { color: color.text, fontFamily: font.semibold, fontSize: 14 },
+  langChipText: { color: color.text, fontFamily: font.semibold, fontSize: size.small },
   welcomeBody: { flex: 1, justifyContent: 'center', gap: space.md },
   lanesRow: { flexDirection: 'row', gap: 6, marginBottom: space.lg },
   laneBar: { width: 36, height: 10, borderRadius: 5 },
-  welcomeTitle: { color: color.text, fontFamily: font.display, fontSize: 38, lineHeight: 44, letterSpacing: -1 },
-  welcomeSub: { color: color.text2, fontFamily: font.medium, fontSize: 17, lineHeight: 24 },
+  welcomeTitle: { color: color.text, fontFamily: font.display, fontSize: size.display, lineHeight: 47, letterSpacing: -1 },
+  welcomeSub: { color: color.text2, fontFamily: font.medium, fontSize: size.lead, lineHeight: 24 },
   point: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   pointIcon: { width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
-  pointText: { flex: 1, color: color.text, fontFamily: font.semibold, fontSize: 15, lineHeight: 21 },
+  pointText: { flex: 1, color: color.text, fontFamily: font.semibold, fontSize: size.body, lineHeight: 21 },
   start: { height: 58, borderRadius: radius.pill, backgroundColor: color.ember, alignItems: 'center', justifyContent: 'center' },
-  startText: { color: color.ink, fontFamily: font.bold, fontSize: 17 },
+  startText: { color: color.ink, fontFamily: font.bold, fontSize: size.lead },
 }));

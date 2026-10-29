@@ -20,7 +20,7 @@ import { useScreenTime } from '@/features/library/useScreenTime';
 import { useProfilePlan } from '@/features/plan/usePlan';
 import { fx } from '@/lib/feedback';
 import { useInsets, useTabBarSpace } from '@/lib/useInsets';
-import { alpha, color, font, media, themedStyles } from '@/theme/tokens';
+import { alpha, color, font, media, size, themedStyles } from '@/theme/tokens';
 
 const UNDERLINE = 14;
 
@@ -293,7 +293,7 @@ const styles = themedStyles(() => ({
   sideRight: { justifyContent: 'flex-end' },
   tabs: { flexDirection: 'row', gap: 18 },
   tabBtn: { alignItems: 'center', minHeight: 48, justifyContent: 'center' },
-  tabText: { color: alpha(media.text, 0.55), fontFamily: font.semibold, fontSize: 15, textShadowColor: alpha(color.black, 0.35), textShadowRadius: 4 },
+  tabText: { color: alpha(media.text, 0.55), fontFamily: font.semibold, fontSize: size.body, textShadowColor: alpha(color.black, 0.35), textShadowRadius: 4 },
   tabTextOn: { color: media.text, fontFamily: font.bold },
   underline: { position: 'absolute', left: 0, bottom: 6, width: UNDERLINE, height: 2, borderRadius: 2, backgroundColor: media.text },
   search: { width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
