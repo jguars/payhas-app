@@ -4,12 +4,13 @@ import { Icon } from '@/components/Icon';
 import { laneKey, useT } from '@/i18n';
 import { alpha, color, font, Lane, lane as lanes } from '@/theme/tokens';
 
-type Props = { lane: Lane; onPress?: () => void };
+/** `label` overrides the lane name, e.g. "Parent" for the family owner's profile. */
+type Props = { lane: Lane; label?: string; onPress?: () => void };
 
-export function LaneBadge({ lane, onPress }: Props) {
+export function LaneBadge({ lane, label, onPress }: Props) {
   const l = lanes[lane];
   const { t } = useT();
-  const name = t(laneKey(lane));
+  const name = label ?? t(laneKey(lane));
   return (
     <Pressable
       onPress={onPress}

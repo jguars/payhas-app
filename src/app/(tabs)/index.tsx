@@ -15,7 +15,7 @@ import { takeOpened } from '@/features/feed/openVideo';
 import { FeedMode, useFeed } from '@/features/feed/useFeed';
 import { SheetMode, VideoSheet } from '@/features/feed/VideoSheet';
 import { TimesUp } from '@/features/library/TimesUp';
-import { TKey, useT } from '@/i18n';
+import { roleKey, TKey, useT } from '@/i18n';
 import { useScreenTime } from '@/features/library/useScreenTime';
 import { useProfilePlan } from '@/features/plan/usePlan';
 import { fx } from '@/lib/feedback';
@@ -199,7 +199,7 @@ export default function FeedScreen() {
       <View pointerEvents="box-none" style={[styles.top, { paddingTop: insets.top + 4 }]}>
         <View pointerEvents="none" style={styles.scrimTop} />
         <View style={styles.side} pointerEvents="box-none">
-          {active && <LaneBadge lane={active.profile.lane} onPress={leaveProfile} />}
+          {active && <LaneBadge lane={active.profile.lane} label={t(roleKey(active.profile))} onPress={leaveProfile} />}
         </View>
         <FeedTabs mode={mode} onChange={(m) => goTo(m)} scrollX={scrollX} pageWidth={width} />
         <View style={[styles.side, styles.sideRight]} pointerEvents="box-none">

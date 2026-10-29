@@ -26,6 +26,8 @@ export default defineStrings(
     'lane.kids': 'Kids',
     'lane.teen': 'Teen',
     'lane.adult': 'Adult',
+    /** The family owner's own profile: shown instead of the Adult lane wherever a person is named. */
+    'role.parent': 'Parent',
     // Topics (interests), by slug
     'topic.animals': 'Animals',
     'topic.rhymes': 'Rhymes',
@@ -75,6 +77,7 @@ export default defineStrings(
       'lane.kids': 'Çagalar',
       'lane.teen': 'Ýetginjek',
       'lane.adult': 'Uly',
+      'role.parent': 'Ene-ata',
       'topic.animals': 'Haýwanlar',
       'topic.rhymes': 'Goşgular',
       'topic.stories': 'Ertekiler',
@@ -121,6 +124,7 @@ export default defineStrings(
       'lane.kids': 'Çocuk',
       'lane.teen': 'Genç',
       'lane.adult': 'Yetişkin',
+      'role.parent': 'Ebeveyn',
       'topic.animals': 'Hayvanlar',
       'topic.rhymes': 'Tekerlemeler',
       'topic.stories': 'Hikâyeler',
@@ -167,6 +171,7 @@ export default defineStrings(
       'lane.kids': 'Дети',
       'lane.teen': 'Подростки',
       'lane.adult': 'Взрослые',
+      'role.parent': 'Родитель',
       'topic.animals': 'Животные',
       'topic.rhymes': 'Стишки',
       'topic.stories': 'Сказки',

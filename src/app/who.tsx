@@ -9,7 +9,7 @@ import { PinPad } from '@/components/PinPad';
 import { SafeScreen } from '@/components/SafeScreen';
 import { Avatar } from '@/components/ui/Avatar';
 import { Profile, useFamily } from '@/features/family/FamilyProvider';
-import { laneKey, useT } from '@/i18n';
+import { roleKey, useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
 import { color, font, space } from '@/theme/tokens';
@@ -65,7 +65,7 @@ export default function WhoScreen() {
         </Enter>
         <View style={styles.grid}>
           {profiles.map((p, i) => {
-            const laneName = t(laneKey(p.lane));
+            const laneName = t(roleKey(p));
             return (
               <Enter key={p.id} index={i + 1}>
                 <PressScale

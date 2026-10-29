@@ -121,6 +121,7 @@ export type Database = {
           birth_month: string | null
           language: string | null
           learning_mix: number
+          is_parent: boolean
         }
         Insert: {
           avatar?: string

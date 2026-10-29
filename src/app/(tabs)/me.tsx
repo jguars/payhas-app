@@ -36,7 +36,7 @@ import { useLibrary } from '@/features/library/LibraryProvider';
 import { useScreenTime } from '@/features/library/useScreenTime';
 import { TasteCard } from '@/features/me/TasteCard';
 import { useMe, useSavedPreview } from '@/features/me/useMe';
-import { laneKey, LANGS, TKey, useT } from '@/i18n';
+import { laneKey, LANGS, roleKey, TKey, useT } from '@/i18n';
 import { fx, getFeedbackSettings, setFeedbackSettings } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
 import { useInsets, useTabBarSpace } from '@/lib/useInsets';
@@ -156,7 +156,7 @@ export default function MeScreen() {
               <View style={[styles.laneChip, { backgroundColor: l.color + '24', borderColor: l.color + '55' }]}>
                 <View style={[styles.laneDot, { backgroundColor: l.color }]} />
                 <Text style={[styles.laneChipText, { color: l.color }]}>
-                  {t(laneKey(current.lane))} · {l.ages}
+                  {current.is_parent ? t(roleKey(current)) : `${t(laneKey(current.lane))} · ${l.ages}`}
                 </Text>
               </View>
               <Text style={styles.joined} numberOfLines={1}>

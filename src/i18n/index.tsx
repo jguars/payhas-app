@@ -95,6 +95,9 @@ export function useT() {
 /** Lane name in the current language ("Kids" / "Çagalar" / …). */
 export const laneKey = (lane: Lane) => `common.lane.${lane}` as TKey;
 
+/** What to call a person: "Parent" for the family owner's own profile, otherwise their lane ("Kids", "Adult"…). */
+export const roleKey = (p: { lane: Lane; is_parent?: boolean | null }) => (p.is_parent ? 'common.role.parent' : laneKey(p.lane)) as TKey;
+
 /** A topic's label by slug, falling back to the database label for slugs we don't know yet. */
 export function topicLabel(t: T, slug: string, fallback: string) {
   const key = `common.topic.${slug}` as TKey;
