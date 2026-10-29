@@ -1,0 +1,64 @@
+# A test APK for the phone, built on every push to a branch listed below (or
+# by hand from the Actions tab). It lands as a pre-release named after the
+# branch — open its download link in the phone's browser to install.
+#
+# Signed with the debug key that Expo's generated project uses for release
+# builds, so it can't update an app installed from a locally signed build:
+# uninstall that first. Built for arm64 phones only, to keep the build quick.
+name: Android test APK
+
+on:
+  push:
+    branches: [plus]
+  workflow_dispatch:
+
+concurrency:
+  group: android-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - run: npm ci --no-audit --no-fund
+
+      # Only public client settings (the publishable key); see .env.example.
+      - run: cp .env.example .env
+
+      # Native folders aren't committed (Continuous Native Generation).
+      - run: npx expo prebuild --platform android --no-install
+
+      - name: Build release APK
+        working-directory: android
+        run: ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a --no-daemon
+
+      - name: Publish as a pre-release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          tag="android-test-${BRANCH//\//-}"
+          apk="payhas-${BRANCH//\//-}-test.apk"
+          cp android/app/build/outputs/apk/release/app-release.apk "$apk"
+          gh release delete "$tag" --yes --cleanup-tag 2>/dev/null || true
+          gh release create "$tag" "$apk" --prerelease --target "$GITHUB_SHA" \
+            --title "Android test build: $BRANCH" \
+            --notes "Test APK from \`$BRANCH\` at ${GITHUB_SHA::7}. Open the .apk link below on the phone to install. Not for the stores."
