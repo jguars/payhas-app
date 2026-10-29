@@ -13,7 +13,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import Svg, { Circle, Rect } from 'react-native-svg';
 
-import { alpha, color, font, lane as lanes } from '@/theme/tokens';
+import { alpha, color, font, lane as lanes, media, themedStyles } from '@/theme/tokens';
 
 import { BUBBLES, MEMORY } from './shared';
 import type { GameMeta } from './types';
@@ -142,12 +142,12 @@ function MiniCard({ face, index, delay, active }: { face: string; index: number;
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   bubble: { position: 'absolute', top: 0, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: color.ink, backgroundColor: alpha(color.white, 0.45) },
   miniGrid: { flexDirection: 'row', gap: 8 },
   miniCard: { width: 36, height: 48 },
   miniFace: { position: 'absolute', left: 0, top: 0, width: '100%', height: '100%', borderRadius: 10, borderWidth: 2, borderColor: color.ink, alignItems: 'center', justifyContent: 'center', backfaceVisibility: 'hidden' },
   miniBack: { backgroundColor: color.surface2 },
   miniMark: { color: lanes.little.color, fontFamily: font.display, fontSize: 18 },
-  miniFront: { backgroundColor: color.text },
-});
+  miniFront: { backgroundColor: media.text },
+}));

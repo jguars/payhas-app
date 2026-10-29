@@ -1,11 +1,11 @@
 import { createContext, ReactNode, useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { AccessibilityInfo, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { AccessibilityInfo, Platform, Pressable, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 
 import { Icon, IconName } from '@/components/Icon';
 import { TAB_BAR, useInsets } from '@/lib/useInsets';
 import { spring } from '@/theme/motion';
-import { color, font, radius, space } from '@/theme/tokens';
+import { color, font, radius, space, themedStyles } from '@/theme/tokens';
 
 type ToastSpec = { text: string; icon?: IconName; action?: { label: string; onPress: () => void } };
 const Ctx = createContext<(t: ToastSpec) => void>(() => {});
@@ -50,7 +50,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       {toast && (
         <Animated.View pointerEvents="box-none" style={[styles.wrap, { bottom: bottom + TAB_BAR.gap + TAB_BAR.height + 12 }, anim]}>
           <View style={styles.toast} accessibilityLiveRegion="polite">
-            {toast.icon && <Icon name={toast.icon} size={18} color={color.text} strokeWidth={2.4} />}
+            {toast.icon && <Icon name={toast.icon} size={18} color={color.onInverse} strokeWidth={2.4} />}
             <Text style={styles.text} numberOfLines={2} maxFontSizeMultiplier={1.4}>
               {toast.text}
             </Text>
@@ -75,7 +75,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
 export const useToast = () => useContext(Ctx);
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   wrap: { position: 'absolute', left: TAB_BAR.side, right: TAB_BAR.side, alignItems: 'center' },
   toast: {
     flexDirection: 'row',
@@ -85,13 +85,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     height: 46,
     borderRadius: radius.pill,
-    backgroundColor: color.text,
+    backgroundColor: color.inverse,
     elevation: 10,
     shadowColor: color.black,
     shadowOpacity: 0.35,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 6 },
   },
-  text: { color: color.ink, fontFamily: font.semibold, fontSize: 14, flexShrink: 1 },
+  text: { color: color.onInverse, fontFamily: font.semibold, fontSize: 14, flexShrink: 1 },
   action: { color: color.ember, fontFamily: font.bold, fontSize: 14, marginLeft: space.xs },
-});
+}));

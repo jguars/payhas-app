@@ -1,6 +1,6 @@
 import { router, useIsFocused, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { FlatList, LayoutChangeEvent, Pressable, StyleSheet, Text, View, ViewToken } from 'react-native';
+import { FlatList, LayoutChangeEvent, Pressable, Text, View, ViewToken } from 'react-native';
 import Animated, { interpolate, SharedValue, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 
 import { Icon } from '@/components/Icon';
@@ -20,7 +20,7 @@ import { useScreenTime } from '@/features/library/useScreenTime';
 import { useProfilePlan } from '@/features/plan/usePlan';
 import { fx } from '@/lib/feedback';
 import { useInsets, useTabBarSpace } from '@/lib/useInsets';
-import { alpha, color, font } from '@/theme/tokens';
+import { alpha, color, font, media, themedStyles } from '@/theme/tokens';
 
 const UNDERLINE = 14;
 
@@ -204,7 +204,7 @@ export default function FeedScreen() {
         <FeedTabs mode={mode} onChange={(m) => goTo(m)} scrollX={scrollX} pageWidth={width} />
         <View style={[styles.side, styles.sideRight]} pointerEvents="box-none">
           <Pressable onPress={() => router.navigate('/discover')} accessibilityRole="button" accessibilityLabel={t('feed.search')} style={styles.search} hitSlop={8}>
-            <Icon name="search" size={22} color={alpha(color.text, 0.85)} strokeWidth={2} />
+            <Icon name="search" size={22} color={alpha(media.text, 0.85)} strokeWidth={2} />
           </Pressable>
         </View>
       </View>
@@ -268,7 +268,7 @@ function FeedTabs({ mode, onChange, scrollX, pageWidth }: { mode: FeedMode; onCh
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   root: { flex: 1, backgroundColor: color.ink },
   top: {
     position: 'absolute',
@@ -293,8 +293,8 @@ const styles = StyleSheet.create({
   sideRight: { justifyContent: 'flex-end' },
   tabs: { flexDirection: 'row', gap: 18 },
   tabBtn: { alignItems: 'center', minHeight: 48, justifyContent: 'center' },
-  tabText: { color: alpha(color.text, 0.55), fontFamily: font.semibold, fontSize: 15, textShadowColor: alpha(color.black, 0.35), textShadowRadius: 4 },
-  tabTextOn: { color: color.text, fontFamily: font.bold },
-  underline: { position: 'absolute', left: 0, bottom: 6, width: UNDERLINE, height: 2, borderRadius: 2, backgroundColor: color.text },
+  tabText: { color: alpha(media.text, 0.55), fontFamily: font.semibold, fontSize: 15, textShadowColor: alpha(color.black, 0.35), textShadowRadius: 4 },
+  tabTextOn: { color: media.text, fontFamily: font.bold },
+  underline: { position: 'absolute', left: 0, bottom: 6, width: UNDERLINE, height: 2, borderRadius: 2, backgroundColor: media.text },
   search: { width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
-});
+}));

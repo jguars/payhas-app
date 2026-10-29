@@ -18,7 +18,7 @@ import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { useInsets } from '@/lib/useInsets';
 import { spring } from '@/theme/motion';
-import { alpha, color, font, Lane, lane as lanes, radius, space } from '@/theme/tokens';
+import { alpha, color, font, Lane, lane as lanes, media, pageFill, radius, space, themedStyles } from '@/theme/tokens';
 
 import { Confetti } from './Confetti';
 import { Finish, GameBar, Readout } from './GameChrome';
@@ -653,7 +653,6 @@ function shade(hex: string) {
 
 // ── Play-tab card ────────────────────────────────────────────────────────────
 
-const TINT = lanes.teen.color;
 const SCENE_W = 170;
 const SCENE_H = 110;
 
@@ -667,7 +666,9 @@ export const quickCountMeta: GameMeta = {
     if (lane === 'teen') return t('count.subTeen', { count: n });
     return t('count.subAdult', { count: n });
   },
-  tint: TINT,
+  get tint() {
+    return lanes.teen.color;
+  },
   Scene: CountScene,
   best: {
     format: (n, lane) => {
@@ -741,15 +742,15 @@ function MiniTile({ value, index, active }: { value: number; index: number; acti
       <Animated.View style={[styles.miniTile, face]}>
         <Text style={styles.miniNum}>{value}</Text>
         <Animated.View style={[StyleSheet.absoluteFill, styles.miniLit, lit]}>
-          <Text style={[styles.miniNum, { color: TINT }]}>{value}</Text>
+          <Text style={[styles.miniNum, { color: lanes.teen.color }]}>{value}</Text>
         </Animated.View>
       </Animated.View>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: color.ink },
+const styles = themedStyles(() => ({
+  root: { flex: 1, ...pageFill() },
   body: { flex: 1, paddingHorizontal: space.lg, gap: space.lg },
   meta: { alignItems: 'center', gap: space.sm, minHeight: 64 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.lg, padding: space.lg },
@@ -788,7 +789,7 @@ const styles = StyleSheet.create({
   miniChick: { position: 'absolute', top: 6, fontSize: 30 },
   miniTileWrap: { position: 'absolute', top: 56, width: 42, height: 46, paddingBottom: 4 },
   miniLedge: { position: 'absolute', left: 0, right: 0, top: 4, bottom: 0, borderRadius: 12, backgroundColor: color.ink },
-  miniTile: { flex: 1, borderRadius: 12, borderWidth: 2, borderColor: color.ink, backgroundColor: color.text, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
+  miniTile: { flex: 1, borderRadius: 12, borderWidth: 2, borderColor: color.ink, backgroundColor: media.text, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
   miniLit: { backgroundColor: color.ink, alignItems: 'center', justifyContent: 'center' },
   miniNum: { color: color.ink, fontFamily: font.mono, fontSize: 22 },
-});
+}));

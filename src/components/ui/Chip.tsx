@@ -1,9 +1,9 @@
 import { ReactNode } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
 import { Icon, IconName } from '@/components/Icon';
 import { fx } from '@/lib/feedback';
-import { color, font } from '@/theme/tokens';
+import { color, font, themedStyles } from '@/theme/tokens';
 
 type Props = {
   label: string;
@@ -71,9 +71,9 @@ function shade(hex: string) {
   return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   ledge: { position: 'absolute', left: 0, right: 0, borderRadius: 16 },
   chip: { flexDirection: 'row', alignItems: 'center', gap: 8, borderRadius: 16, borderWidth: 2, borderColor: color.line, backgroundColor: color.surface1 },
   emoji: { fontSize: 18 },
   label: { color: color.text, fontFamily: font.bold, fontSize: 15 },
-});
+}));

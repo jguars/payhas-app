@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
 import { Image } from 'expo-image';
 
 import { Icon } from '@/components/Icon';
@@ -14,7 +14,7 @@ import { laneKey, localized, type T, useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
 import { useInsets } from '@/lib/useInsets';
-import { alpha, color, font, radius, space } from '@/theme/tokens';
+import { alpha, color, font, pageFill, radius, space, themedStyles } from '@/theme/tokens';
 
 type Tab = 'uploads' | 'reports';
 
@@ -76,7 +76,7 @@ export default function ReviewScreen() {
               accessibilityState={{ selected: on }}
               style={[styles.tab, on && styles.tabOn]}
             >
-              <Text style={[styles.tabText, on && { color: color.ink }]}>{k === 'uploads' ? t('creator.newUploads') : t('creator.reports')}</Text>
+              <Text style={[styles.tabText, on && { color: color.onInverse }]}>{k === 'uploads' ? t('creator.newUploads') : t('creator.reports')}</Text>
               {n > 0 && (
                 <View style={[styles.count, on && { backgroundColor: color.ink }]}>
                   <Text style={[styles.countText, on && { color: color.text }]}>{n}</Text>
@@ -91,7 +91,7 @@ export default function ReviewScreen() {
         {loaded && (tab === 'uploads' ? uploads.length : reports.length) === 0 && (
           <Enter index={0} style={styles.empty}>
             <View style={styles.emptyIcon}>
-              <Icon name="check" size={28} color="#4FE3B0" strokeWidth={2.6} />
+              <Icon name="check" size={28} color={color.success} strokeWidth={2.6} />
             </View>
             <Text style={styles.emptyTitle}>{t('creator.allClear')}</Text>
             <Text style={styles.emptySub}>{tab === 'uploads' ? t('creator.noUploads') : t('creator.noReports')}</Text>
@@ -153,7 +153,7 @@ export default function ReviewScreen() {
                     </View>
                   </View>
                   <View style={styles.flagCount}>
-                    <Icon name="flag" size={12} color="#FF8A73" />
+                    <Icon name="flag" size={12} color={color.danger} />
                     <Text style={styles.flagText}>{r.report_count}</Text>
                   </View>
                 </PressScale>
@@ -166,11 +166,11 @@ export default function ReviewScreen() {
 }
 
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: color.ink },
+const styles = themedStyles(() => ({
+  root: { flex: 1, ...pageFill() },
   tabs: { flexDirection: 'row', gap: space.sm, paddingHorizontal: space.lg, paddingBottom: space.md },
   tab: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 38, paddingHorizontal: 14, borderRadius: radius.pill, backgroundColor: color.surface1 },
-  tabOn: { backgroundColor: color.text },
+  tabOn: { backgroundColor: color.inverse },
   tabText: { color: color.text, fontFamily: font.semibold, fontSize: 14 },
   count: { minWidth: 20, height: 20, paddingHorizontal: 6, borderRadius: 10, backgroundColor: color.ember, alignItems: 'center', justifyContent: 'center' },
   countText: { color: color.ink, fontFamily: font.bold, fontSize: 11 },
@@ -190,4 +190,4 @@ const styles = StyleSheet.create({
   emptyIcon: { width: 64, height: 64, borderRadius: 32, backgroundColor: alpha(color.success, 0.14), alignItems: 'center', justifyContent: 'center', marginBottom: space.sm },
   emptyTitle: { color: color.text, fontFamily: font.title, fontSize: 20 },
   emptySub: { color: color.text2, fontFamily: font.medium, fontSize: 14 },
-});
+}));

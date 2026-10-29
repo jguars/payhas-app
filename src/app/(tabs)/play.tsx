@@ -18,7 +18,7 @@ import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { useInsets, useTabBarSpace } from '@/lib/useInsets';
 import { spring } from '@/theme/motion';
-import { alpha, color, font, Lane, radius, space } from '@/theme/tokens';
+import { alpha, color, font, Lane, pageFill, radius, space, themedStyles } from '@/theme/tokens';
 
 const LEDGE = 5;
 const GAP = space.md;
@@ -176,8 +176,8 @@ function shade(hex: string) {
   return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: color.ink },
+const styles = themedStyles(() => ({
+  root: { flex: 1, ...pageFill() },
   content: { paddingHorizontal: space.lg, gap: space.xl, alignSelf: 'center', width: '100%', maxWidth: 560 },
   head: { gap: space.sm },
   title: { color: color.text, fontFamily: font.display, fontSize: 30, letterSpacing: -0.9 },
@@ -202,4 +202,4 @@ const styles = StyleSheet.create({
   lockedSheet: { alignItems: 'center', gap: space.md, paddingHorizontal: space.xl, paddingBottom: space.lg },
   lockedIcon: { width: 72, height: 72, borderRadius: 36, alignItems: 'center', justifyContent: 'center', backgroundColor: color.surface2 },
   lockedText: { color: color.text2, fontFamily: font.semibold, fontSize: 16, textAlign: 'center' },
-});
+}));

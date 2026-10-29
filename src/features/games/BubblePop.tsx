@@ -18,13 +18,14 @@ import { TimesUp } from '@/features/library/TimesUp';
 import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { spring } from '@/theme/motion';
-import { alpha, color, font, Lane, radius, space } from '@/theme/tokens';
+import { alpha, color, font, Lane, pageFill, radius, space, themedStyles } from '@/theme/tokens';
 
 import { Confetti } from './Confetti';
 import { Finish, GameBar, Readout } from './GameChrome';
 import { BUBBLES, CRITTERS, shuffle, useBest, useGameSession } from './shared';
 
-const TINTS = ['rgba(120,166,255,0.22)', alpha(color.success, 0.2), alpha(color.reward, 0.2), 'rgba(195,162,255,0.22)', alpha(color.ember, 0.2)];
+/** Read per bubble, so they follow the theme. */
+const tints = () => ['rgba(120,166,255,0.22)', alpha(color.success, 0.2), alpha(color.reward, 0.2), 'rgba(195,162,255,0.22)', alpha(color.ember, 0.2)];
 const POOL_SIZE = 5; // critters in play at once for target rounds
 const TARGET_EVERY = 5; // correct pops before the target changes
 
@@ -61,7 +62,7 @@ export function BubblePop({ lane, onAgain }: { lane: Lane; onAgain: () => void }
         x: 8 + Math.random() * Math.max(1, size.w - s - 16),
         size: s,
         symbol,
-        tint: TINTS[Math.floor(Math.random() * TINTS.length)],
+        tint: tints()[Math.floor(Math.random() * 5)],
         rise: cfg.rise * (0.85 + Math.random() * 0.3),
         phase: Math.random() * Math.PI * 2,
         sway: 10 + Math.random() * 14,
@@ -258,8 +259,8 @@ function Orb({ tint, size, x, y, dur }: { tint: string; size: number; x: number;
   return <Animated.View style={[{ position: 'absolute', left: x, top: y, width: size, height: size, borderRadius: size / 2, backgroundColor: tint }, anim]} />;
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: color.ink, overflow: 'hidden' },
+const styles = themedStyles(() => ({
+  root: { flex: 1, ...pageFill(), overflow: 'hidden' },
   bubbleWrap: { position: 'absolute', top: 0 },
   bubble: { flex: 1, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: alpha(color.text, 0.45) },
   shine: { position: 'absolute', top: '16%', left: '20%', backgroundColor: alpha(color.white, 0.55), transform: [{ rotate: '-30deg' }] },
@@ -270,4 +271,4 @@ const styles = StyleSheet.create({
   targetText: { color: color.text2, fontFamily: font.semibold, fontSize: 15 },
   targetEmoji: { fontSize: 28 },
   mult: { color: color.ember, fontFamily: font.display, fontSize: 18 },
-});
+}));

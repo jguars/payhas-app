@@ -9,7 +9,7 @@ import { ScreenHeader } from '@/components/ScreenHeader';
 import { useToast } from '@/components/Toast';
 import { Avatar } from '@/components/ui/Avatar';
 import { useFamily } from '@/features/family/FamilyProvider';
-import { confirmDestructive, Group, GREEN, LiveDot, MiniMeter, RED, RequestCard, Row, RowIcon } from '@/features/parent/parts';
+import { confirmDestructive, Group, LiveDot, MiniMeter, RequestCard, Row, RowIcon } from '@/features/parent/parts';
 import { disableParentAlerts, enableParentAlerts, storedPushToken } from '@/features/parent/push';
 import { Child, minutes, presence, useParent } from '@/features/parent/useParent';
 import { planDate } from '@/features/plan/plan';
@@ -18,7 +18,7 @@ import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
 import { useGoBack } from '@/lib/useGoBack';
 import { useInsets } from '@/lib/useInsets';
-import { color, font, space } from '@/theme/tokens';
+import { color, font, pageFill, space, themedStyles } from '@/theme/tokens';
 
 /**
  * Family: the parent's dashboard home, behind the PIN (15 minutes). Laid out
@@ -139,7 +139,7 @@ export default function FamilyScreen() {
                   <Row
                     key={c.id + flag.at}
                     first={i === 0}
-                    leading={<RowIcon icon="flag" tint={RED} />}
+                    leading={<RowIcon icon="flag" tint={color.danger} />}
                     label={t('parent.flaggedRow', { name: c.display_name })}
                     sub={localized(lang, flag.caption, flag.caption_i18n)}
                     onPress={() => openChild(c)}
@@ -200,7 +200,7 @@ export default function FamilyScreen() {
               chevron={false}
             />
             <Row
-              leading={<RowIcon icon="close" tint={RED} />}
+              leading={<RowIcon icon="close" tint={color.danger} />}
               label={t('parent.signOut')}
               danger
               chevron={false}
@@ -252,7 +252,7 @@ function ChildRow({ child, avatar, first, onPress }: { child: Child; avatar: str
       }
       label={child.display_name}
       sub={
-        <Text style={[styles.status, child.paused ? { color: color.verified } : p.live && { color: GREEN }]} numberOfLines={1}>
+        <Text style={[styles.status, child.paused ? { color: color.verified } : p.live && { color: color.success }]} numberOfLines={1}>
           {t(roleKey(child))} · {status}
         </Text>
       }
@@ -297,11 +297,11 @@ function AlertsRow({ parent, first, onResult }: { parent: string | null; first: 
     setBusy(false);
   };
 
-  return <Row first={first} leading={<RowIcon icon="inbox" tint={GREEN} />} label={t('parent.alertsLabel')} sub={t('parent.alertsSub')} toggle={on} onPress={flip} />;
+  return <Row first={first} leading={<RowIcon icon="inbox" tint={color.success} />} label={t('parent.alertsLabel')} sub={t('parent.alertsSub')} toggle={on} onPress={flip} />;
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: color.ink },
+const styles = themedStyles(() => ({
+  root: { flex: 1, ...pageFill() },
   pinWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.lg, paddingBottom: 80 },
   pinHint: { color: color.text3, fontFamily: font.medium, fontSize: 13 },
   content: { paddingHorizontal: space.lg, gap: space.xl },
@@ -318,4 +318,4 @@ const styles = StyleSheet.create({
   addCircle: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center', backgroundColor: color.surface2 },
   deleteLink: { alignSelf: 'center', minHeight: 48, justifyContent: 'center', paddingHorizontal: space.lg },
   deleteText: { color: color.text3, fontFamily: font.semibold, fontSize: 13, textDecorationLine: 'underline' },
-});
+}));

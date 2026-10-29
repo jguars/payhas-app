@@ -1,5 +1,5 @@
 import { ReactNode, useEffect } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 
 import { Icon } from '@/components/Icon';
@@ -9,7 +9,7 @@ import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { useInsets } from '@/lib/useInsets';
 import { spring } from '@/theme/motion';
-import { color, font, radius, space } from '@/theme/tokens';
+import { color, font, pageFill, radius, space, themedStyles } from '@/theme/tokens';
 
 type Props = {
   /** 0–1 across the whole flow; the bar slides to it. */
@@ -107,8 +107,8 @@ export function Step({ progress, title, hint, onBack, action, secondary, childre
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: color.ink },
+const styles = themedStyles(() => ({
+  root: { flex: 1, ...pageFill() },
   top: { flexDirection: 'row', alignItems: 'center', gap: space.md, paddingHorizontal: space.md },
   back: { width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
   track: { flex: 1, height: 6, borderRadius: 3, backgroundColor: color.surface2, overflow: 'hidden' },
@@ -121,4 +121,4 @@ const styles = StyleSheet.create({
   buttonText: { color: color.ink, fontFamily: font.bold, fontSize: 17 },
   secondary: { height: 48, alignItems: 'center', justifyContent: 'center' },
   secondaryText: { color: color.text2, fontFamily: font.semibold, fontSize: 15 },
-});
+}));

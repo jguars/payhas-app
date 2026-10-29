@@ -1,7 +1,7 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import { BottomSheet } from '@/components/BottomSheet';
 import { Icon } from '@/components/Icon';
@@ -16,10 +16,8 @@ import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
 import { useInsets } from '@/lib/useInsets';
 import { useGoBack } from '@/lib/useGoBack';
-import { alpha, color, font, Lane, lane as lanes, radius, space } from '@/theme/tokens';
+import { alpha, color, font, Lane, lane as lanes, pageFill, radius, space, themedStyles } from '@/theme/tokens';
 
-const GREEN = color.success;
-const RED = color.danger;
 
 /** One item from the queue: watch it, set lane + topics, then decide. */
 export default function ReviewItemScreen() {
@@ -113,7 +111,7 @@ export default function ReviewItemScreen() {
 
         {report && (
           <View style={styles.reportBox}>
-            <Icon name="flag" size={16} color={RED} />
+            <Icon name="flag" size={16} color={color.danger} />
             <Text style={styles.reportText}>
               {t('creator.reportCount', { count: report.report_count })}:{' '}
               {Object.entries((report.reasons ?? {}) as Record<string, number>)
@@ -170,7 +168,7 @@ export default function ReviewItemScreen() {
                       style={[styles.chip, on && styles.chipOn]}
                     >
                       <Text style={styles.chipEmoji}>{i.emoji}</Text>
-                      <Text style={[styles.chipText, on && { color: color.ink }]}>{topicLabel(t, i.slug, i.label)}</Text>
+                      <Text style={[styles.chipText, on && { color: color.onInverse }]}>{topicLabel(t, i.slug, i.label)}</Text>
                     </Pressable>
                   );
                 })}
@@ -218,8 +216,8 @@ function Player({ source }: { source: MediaSource }) {
 }
 
 function Decision({ label, icon, tone, disabled, onPress }: { label: string; icon: 'check' | 'close' | 'eyeOff'; tone: 'good' | 'bad' | 'neutral'; disabled?: boolean; onPress: () => void }) {
-  const bg = tone === 'good' ? GREEN : tone === 'bad' ? alpha(color.danger, 0.14) : color.surface2;
-  const fg = tone === 'good' ? color.ink : tone === 'bad' ? RED : color.text;
+  const bg = tone === 'good' ? color.success : tone === 'bad' ? alpha(color.danger, 0.14) : color.surface2;
+  const fg = tone === 'good' ? color.ink : tone === 'bad' ? color.danger : color.text;
   return (
     <PressScale onPress={onPress} disabled={disabled} accessibilityRole="button" style={[styles.decision, { backgroundColor: bg }, disabled && { opacity: 0.4 }]}>
       <Icon name={icon} size={18} color={fg} strokeWidth={2.6} />
@@ -230,15 +228,15 @@ function Decision({ label, icon, tone, disabled, onPress }: { label: string; ico
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: color.ink },
+const styles = themedStyles(() => ({
+  root: { flex: 1, ...pageFill() },
   content: { paddingHorizontal: space.lg, gap: space.xl },
   playerWrap: { height: 420, borderRadius: radius.card, overflow: 'hidden', backgroundColor: color.black },
   player: { width: '100%', height: '100%' },
   caption: { color: color.text, fontFamily: font.bold, fontSize: 17 },
   meta: { color: color.text3, fontFamily: font.medium, fontSize: 13 },
   reportBox: { flexDirection: 'row', gap: space.sm, alignItems: 'center', padding: space.md, borderRadius: 14, backgroundColor: alpha(color.danger, 0.1) },
-  reportText: { flex: 1, color: RED, fontFamily: font.semibold, fontSize: 13 },
+  reportText: { flex: 1, color: color.danger, fontFamily: font.semibold, fontSize: 13 },
   label: { color: color.text, fontFamily: font.bold, fontSize: 15 },
   help: { color: color.text3, fontFamily: font.medium, fontSize: 12 },
   lanes: { flexDirection: 'row', gap: space.sm },
@@ -247,13 +245,13 @@ const styles = StyleSheet.create({
   laneAges: { color: color.text3, fontFamily: font.medium, fontSize: 12 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
   chip: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 36, paddingHorizontal: 12, borderRadius: radius.pill, backgroundColor: color.surface1, borderWidth: 1, borderColor: color.line },
-  chipOn: { backgroundColor: color.text, borderColor: color.text },
+  chipOn: { backgroundColor: color.inverse, borderColor: color.inverse },
   chipEmoji: { fontSize: 15 },
   chipText: { color: color.text, fontFamily: font.semibold, fontSize: 13 },
-  footer: { position: 'absolute', left: 0, right: 0, bottom: 0, flexDirection: 'row', gap: space.md, paddingHorizontal: space.lg, paddingTop: space.md, backgroundColor: color.ink, borderTopWidth: 1, borderTopColor: color.surface2 },
+  footer: { position: 'absolute', left: 0, right: 0, bottom: 0, flexDirection: 'row', gap: space.md, paddingHorizontal: space.lg, paddingTop: space.md, backgroundColor: color.bg, borderTopWidth: 1, borderTopColor: color.surface2 },
   decision: { flex: 1, height: 54, borderRadius: radius.pill, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space.sm },
   decisionText: { fontFamily: font.bold, fontSize: 16 },
   reasonRow: { flexDirection: 'row', alignItems: 'center', gap: space.md, minHeight: 54, paddingHorizontal: space.lg, borderRadius: 16, backgroundColor: color.surface2 },
   reasonRowText: { flex: 1, color: color.text, fontFamily: font.semibold, fontSize: 15 },
   gone: { color: color.text2, fontFamily: font.medium, fontSize: 15, textAlign: 'center', marginTop: 120 },
-});
+}));

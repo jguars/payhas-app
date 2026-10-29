@@ -16,7 +16,7 @@ import { openVideo } from '@/features/feed/openVideo';
 import { topicLabel, useT } from '@/i18n';
 import { supabase } from '@/lib/supabase';
 import { useInsets } from '@/lib/useInsets';
-import { color, font, radius, space } from '@/theme/tokens';
+import { color, font, pageFill, radius, space, themedStyles } from '@/theme/tokens';
 
 /** One channel: who it is, a Follow button, and every video this lane may watch, newest first. */
 export default function ChannelScreen() {
@@ -79,8 +79,8 @@ export default function ChannelScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: color.ink },
+const styles = themedStyles(() => ({
+  root: { flex: 1, ...pageFill() },
   hero: { alignItems: 'center', gap: space.sm, paddingHorizontal: space.xl },
   name: { color: color.text, fontFamily: font.display, fontSize: 28, letterSpacing: -0.8, textAlign: 'center', marginTop: space.sm },
   meta: { color: color.text2, fontFamily: font.semibold, fontSize: 14, textAlign: 'center', marginBottom: space.sm },
@@ -89,4 +89,4 @@ const styles = StyleSheet.create({
   tile: { aspectRatio: 3 / 4, borderRadius: radius.chip, overflow: 'hidden', backgroundColor: color.surface1 },
   views: { position: 'absolute', left: 8, bottom: 6, flexDirection: 'row', alignItems: 'center', gap: 4 },
   viewsText: { color: color.white, fontFamily: font.mono, fontSize: 12 },
-});
+}));

@@ -21,7 +21,7 @@ import { TimesUp } from '@/features/library/TimesUp';
 import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { spring } from '@/theme/motion';
-import { alpha, color, font, Lane, lane as lanes, radius, space } from '@/theme/tokens';
+import { alpha, color, font, Lane, lane as lanes, pageFill, radius, space, themedStyles } from '@/theme/tokens';
 
 import { Confetti } from './Confetti';
 import { Finish, GameBar, Readout } from './GameChrome';
@@ -641,8 +641,8 @@ export const threeInARowMeta: GameMeta = {
   },
 };
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: color.ink, alignItems: 'center', justifyContent: 'center' },
+const styles = themedStyles(() => ({
+  root: { flex: 1, ...pageFill(), alignItems: 'center', justifyContent: 'center' },
   scoreboard: { flexDirection: 'row', alignItems: 'center', gap: space.lg },
   score: { color: color.text, fontFamily: font.mono, fontSize: 28, fontVariant: ['tabular-nums'], minWidth: 72, textAlign: 'center' },
   plate: { alignItems: 'center', gap: 6, width: 96 },
@@ -664,4 +664,4 @@ const styles = StyleSheet.create({
   bannerText: { color: color.text, fontFamily: font.title, fontSize: 18, letterSpacing: -0.3 },
   sizes: { flexDirection: 'row', gap: space.sm },
   sceneCell: { position: 'absolute', width: SC, height: SC, borderRadius: 9, borderWidth: 2, borderColor: color.ink, backgroundColor: alpha(color.white, 0.5), alignItems: 'center', justifyContent: 'center' },
-});
+}));

@@ -34,13 +34,14 @@ const LOOKS: Record<string, ChannelLook> = {
   'Payhas Kitchen': { sticker: 'cooking', tint: lanes.kids.color },
   'Payhas Music': { sticker: 'music', tint: lanes.adult.color },
 };
-const ROTATION = [lanes.kids.color, lanes.teen.color, lanes.little.color, lanes.adult.color];
+/** Read when used, so the tints follow the theme. */
+const rotation = () => [lanes.kids.color, lanes.teen.color, lanes.little.color, lanes.adult.color];
 
 export function channelLook(name: string, topics: string[] = []): ChannelLook {
   if (LOOKS[name]) return LOOKS[name];
   let h = 0;
   for (const ch of name) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
-  return { sticker: topics[0] ?? 'play', tint: ROTATION[h % ROTATION.length] };
+  return { sticker: topics[0] ?? 'play', tint: rotation()[h % 4] };
 }
 
 /**

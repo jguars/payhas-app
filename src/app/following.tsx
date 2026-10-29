@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useRef } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 
 import { Icon } from '@/components/Icon';
 import { Enter } from '@/components/motion/Enter';
@@ -12,7 +12,7 @@ import { useCreators } from '@/features/feed/useCreators';
 import { useLibrary } from '@/features/library/LibraryProvider';
 import { useT } from '@/i18n';
 import { useInsets } from '@/lib/useInsets';
-import { color, font, space } from '@/theme/tokens';
+import { color, font, pageFill, space, themedStyles } from '@/theme/tokens';
 
 /**
  * Creators this profile follows. Unfollowing keeps the row (with "Follow")
@@ -65,8 +65,8 @@ export default function FollowingScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: color.ink },
+const styles = themedStyles(() => ({
+  root: { flex: 1, ...pageFill() },
   row: { flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.md, borderRadius: 18, backgroundColor: color.surface1 },
   avatar: { width: 48, height: 48, borderRadius: 24, backgroundColor: color.surface2, borderWidth: 2, borderColor: color.text, alignItems: 'center', justifyContent: 'center' },
   avatarLetter: { color: color.text, fontFamily: font.display, fontSize: 20 },
@@ -77,4 +77,4 @@ const styles = StyleSheet.create({
   emptyTitle: { color: color.text, fontFamily: font.title, fontSize: 20 },
   emptyButton: { minHeight: 48, paddingHorizontal: space.xl, borderRadius: 999, backgroundColor: color.ember, justifyContent: 'center' },
   emptyButtonText: { color: color.ink, fontFamily: font.bold, fontSize: 15 },
-});
+}));

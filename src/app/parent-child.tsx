@@ -1,6 +1,6 @@
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import { BottomSheet } from '@/components/BottomSheet';
 import { Icon } from '@/components/Icon';
@@ -16,7 +16,6 @@ import { hourLabel, inQuietHours } from '@/features/library/useScreenTime';
 import {
   confirmDestructive,
   Group,
-  GREEN,
   HourStepper,
   Latest,
   LiveDot,
@@ -26,7 +25,6 @@ import {
   RowIcon,
   TodayCard,
   WeekChart,
-  YELLOW,
 } from '@/features/parent/parts';
 import { Controls, minutes, presence, RecentRow, useParent } from '@/features/parent/useParent';
 import { laneKey, localized, useT } from '@/i18n';
@@ -34,7 +32,7 @@ import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
 import { useGoBack } from '@/lib/useGoBack';
 import { useInsets } from '@/lib/useInsets';
-import { color, font, lane as lanes, radius, space } from '@/theme/tokens';
+import { color, font, lane as lanes, pageFill, radius, space, themedStyles } from '@/theme/tokens';
 
 const LIMITS: (number | null)[] = [null, 15, 30, 45, 60, 90, 120];
 
@@ -151,7 +149,7 @@ export default function ChildScreen() {
             </View>
             <View style={styles.statusRow}>
               {child.paused ? <Icon name="pause" size={12} color={color.verified} strokeWidth={3} /> : p.live && <LiveDot />}
-              <Text style={[styles.status, child.paused ? { color: color.verified } : p.live && { color: GREEN }]} numberOfLines={1}>
+              <Text style={[styles.status, child.paused ? { color: color.verified } : p.live && { color: color.success }]} numberOfLines={1}>
                 {child.paused ? t('parent.paused') : p.text}
               </Text>
             </View>
@@ -203,7 +201,7 @@ export default function ChildScreen() {
               onPress={() => setSheet('quiet')}
             />
             <Row
-              leading={<RowIcon icon="game" tint={YELLOW} />}
+              leading={<RowIcon icon="game" tint={color.warning} />}
               label={t('parent.games')}
               sub={t('parent.gamesSub')}
               toggle={child.games_enabled}
@@ -299,8 +297,8 @@ export default function ChildScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: color.ink },
+const styles = themedStyles(() => ({
+  root: { flex: 1, ...pageFill() },
   pinWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.lg, paddingBottom: 80 },
   content: { paddingHorizontal: space.lg, gap: space.xl },
   hero: { alignItems: 'center', gap: space.sm },
@@ -318,4 +316,4 @@ const styles = StyleSheet.create({
   hideText: { color: color.ink, fontFamily: font.bold, fontSize: 16 },
   deleteLink: { alignSelf: 'center', minHeight: 48, justifyContent: 'center', paddingHorizontal: space.lg },
   deleteText: { color: color.text3, fontFamily: font.semibold, fontSize: 13, textDecorationLine: 'underline' },
-});
+}));

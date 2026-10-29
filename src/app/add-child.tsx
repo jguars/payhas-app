@@ -6,7 +6,7 @@ import { ChildSetup } from '@/features/onboarding/ChildSetup';
 import { ConsentStep, useParentalConsent } from '@/features/onboarding/Consent';
 import { ParentSessionProvider, useParentSession } from '@/features/onboarding/ParentSession';
 import { useGoBack } from '@/lib/useGoBack';
-import { color } from '@/theme/tokens';
+import { pageFill } from '@/theme/tokens';
 
 /** "Add" on Who's watching: the parent PIN, the parental notice if not yet agreed, then the same child setup as onboarding. */
 export default function AddChildScreen() {
@@ -29,7 +29,7 @@ function AddChild() {
     gate.ensure().then((token) => (token ? setUnlocked(true) : goBack()));
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (!unlocked || consent.given === null) return <View style={{ flex: 1, backgroundColor: color.ink }} />;
+  if (!unlocked || consent.given === null) return <View style={{ flex: 1, ...pageFill() }} />;
   if (!consent.given) return <ConsentStep progress={0} onBack={goBack} onAgreed={() => consent.setGiven(true)} />;
   return (
     <ChildSetup

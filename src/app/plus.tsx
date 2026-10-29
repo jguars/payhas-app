@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ScrollView, Text, TextInput, View } from 'react-native';
 
 import { BottomSheet } from '@/components/BottomSheet';
 import { Icon } from '@/components/Icon';
@@ -16,7 +16,7 @@ import { TKey, useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { useInsets } from '@/lib/useInsets';
 import { useGoBack } from '@/lib/useGoBack';
-import { alpha, color, font, lane as lanes, radius, space } from '@/theme/tokens';
+import { alpha, color, font, lane as lanes, pageFill, radius, space, themedStyles } from '@/theme/tokens';
 
 /** Free vs Plus, row by row. Values are plain numbers or string keys. */
 const ROWS: { label: TKey; free: string | TKey; plus: string | TKey }[] = [
@@ -262,8 +262,8 @@ function Plus() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: color.ink },
+const styles = themedStyles(() => ({
+  root: { flex: 1, ...pageFill() },
   content: { paddingHorizontal: space.lg, gap: space.md },
   hero: { alignItems: 'center', gap: space.sm, paddingVertical: space.lg },
   lanesRow: { flexDirection: 'row', gap: 6, marginBottom: space.sm },
@@ -299,7 +299,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     minHeight: 56,
     borderRadius: 16,
-    backgroundColor: color.ink,
+    backgroundColor: color.bg,
     borderWidth: 1.5,
     borderColor: color.line,
   },
@@ -316,4 +316,4 @@ const styles = StyleSheet.create({
   testButtonText: { color: color.text, fontFamily: font.bold, fontSize: 15 },
   soon: { paddingHorizontal: 10, minHeight: 26, justifyContent: 'center', borderRadius: radius.pill, backgroundColor: color.surface2 },
   soonText: { color: color.text2, fontFamily: font.bold, fontSize: 12 },
-});
+}));

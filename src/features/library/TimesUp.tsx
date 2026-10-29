@@ -20,7 +20,7 @@ import { useFamily } from '@/features/family/FamilyProvider';
 import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
-import { color, font, radius, space } from '@/theme/tokens';
+import { color, font, radius, space, themedStyles } from '@/theme/tokens';
 
 import { hourLabel, Lock } from './useScreenTime';
 
@@ -224,8 +224,8 @@ function Hourglass() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { ...StyleSheet.absoluteFill, backgroundColor: color.ink, alignItems: 'center', justifyContent: 'center', gap: space.md, padding: space.xl },
+const styles = themedStyles(() => ({
+  root: { ...StyleSheet.absoluteFill, backgroundColor: color.bg, alignItems: 'center', justifyContent: 'center', gap: space.md, padding: space.xl },
   art: { width: 220, height: 160, alignItems: 'center', justifyContent: 'center', marginBottom: space.lg },
   star: { position: 'absolute', backgroundColor: color.text, left: '50%', top: '50%' },
   title: { color: color.text, fontFamily: font.display, fontSize: 28, textAlign: 'center', letterSpacing: -0.6 },
@@ -238,4 +238,4 @@ const styles = StyleSheet.create({
   button: { marginTop: space.xl, minHeight: 48, paddingHorizontal: space.xxl, borderRadius: radius.pill, backgroundColor: color.surface2, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space.sm },
   big: { minHeight: 64, paddingHorizontal: space.xl },
   buttonText: { color: color.text, fontFamily: font.bold, fontSize: 15 },
-});
+}));

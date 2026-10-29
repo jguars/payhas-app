@@ -14,7 +14,7 @@ import { useLibrary } from '@/features/library/LibraryProvider';
 import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { spring } from '@/theme/motion';
-import { alpha, color, font, lane as lanes, radius } from '@/theme/tokens';
+import { alpha, color, font, lane as lanes, media, radius, themedStyles } from '@/theme/tokens';
 
 import { FeedVideo, formatCount } from './data';
 import { HeartBurst } from './HeartBurst';
@@ -230,14 +230,14 @@ function FeedItemBase({ video, active, height, chromeBottom, onShare, onOptions,
             lib.toggleLike(video.id);
           }} accessibilityLabel={t('feed.like')} accessibilityState={{ selected: liked }}>
           <Pop on={liked}>
-            <Icon name="heart" size={30} color={liked ? color.ember : color.text} filled={liked} strokeWidth={1.8} />
+            <Icon name="heart" size={30} color={liked ? color.ember : media.text} filled={liked} strokeWidth={1.8} />
           </Pop>
           <Text style={styles.count}>{formatCount(likeCount)}</Text>
         </Pressable>
 
         <Pressable style={styles.action} onPress={save} accessibilityLabel={t('feed.save')} accessibilityState={{ selected: saved }}>
           <Pop on={saved}>
-            <Icon name="save" size={27} color={saved ? lanes.little.color : color.text} filled={saved} strokeWidth={1.8} />
+            <Icon name="save" size={27} color={saved ? lanes.little.color : media.text} filled={saved} strokeWidth={1.8} />
           </Pop>
           <Text style={styles.count}>{formatCount(video.saves + lib.saveDelta(video.id))}</Text>
         </Pressable>
@@ -435,7 +435,7 @@ export const FeedItem = memo(FeedItemBase);
 
 const SHADOW = { textShadowColor: alpha(color.black, 0.45), textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 4 } as const;
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   root: { width: '100%', backgroundColor: color.ink, overflow: 'hidden' },
   video: { position: 'absolute', left: 0, top: 0, width: '100%', height: '100%', backgroundColor: 'transparent' },
   blurDim: { ...StyleSheet.absoluteFill, backgroundColor: alpha(color.ink, 0.45) },
@@ -459,10 +459,10 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     backgroundColor: alpha(color.ink, 0.55),
   },
-  mutedText: { color: color.text, fontFamily: font.semibold, fontSize: 13 },
+  mutedText: { color: media.text, fontFamily: font.semibold, fontSize: 13 },
   rail: { position: 'absolute', right: RAIL_RIGHT, alignItems: 'center', gap: 14 },
   action: { minWidth: 48, minHeight: 48, alignItems: 'center', justifyContent: 'center', gap: 3 },
-  count: { color: color.text, fontFamily: font.mono, fontSize: 12, ...SHADOW },
+  count: { color: media.text, fontFamily: font.mono, fontSize: 12, ...SHADOW },
   meta: { position: 'absolute', left: META_LEFT, right: 76, gap: 8 },
   creatorRow: { flexDirection: 'row', alignItems: 'center', gap: 10, alignSelf: 'flex-start' },
   discWrap: { width: DISC + 4, height: DISC + 4, alignItems: 'center', justifyContent: 'center' },
@@ -471,22 +471,22 @@ const styles = StyleSheet.create({
     height: DISC,
     borderRadius: DISC / 2,
     borderWidth: 1.5,
-    borderColor: alpha(color.text, 0.9),
-    backgroundColor: color.surface2,
+    borderColor: alpha(media.text, 0.9),
+    backgroundColor: media.surface2,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  discLetter: { color: color.text, fontFamily: font.title, fontSize: 15 },
+  discLetter: { color: media.text, fontFamily: font.title, fontSize: 15 },
   creatorName: { flexDirection: 'row', alignItems: 'center', gap: 5, flexShrink: 1 },
-  creator: { color: color.text, fontFamily: font.bold, fontSize: 15, flexShrink: 1, ...SHADOW },
+  creator: { color: media.text, fontFamily: font.bold, fontSize: 15, flexShrink: 1, ...SHADOW },
   follow: { position: 'absolute', right: -3, bottom: -3, width: 18, height: 18, borderRadius: 9, borderWidth: 1.5, borderColor: color.ink, backgroundColor: color.ember },
   followDone: { backgroundColor: lanes.kids.color },
   followHit: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  caption: { color: color.text, fontFamily: font.body, fontSize: 14, lineHeight: 20, ...SHADOW },
-  credit: { color: alpha(color.text, 0.72), fontFamily: font.medium, fontSize: 12, lineHeight: 17 },
+  caption: { color: media.text, fontFamily: font.body, fontSize: 14, lineHeight: 20, ...SHADOW },
+  credit: { color: alpha(media.text, 0.72), fontFamily: font.medium, fontSize: 12, lineHeight: 17 },
   captionBox: { marginHorizontal: -10, marginVertical: -4, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 14 },
   captionBoxOpen: { backgroundColor: alpha(color.ink, 0.55), marginVertical: 0, paddingVertical: 8 },
-  captionMore: { gap: 2, marginTop: 8, paddingTop: 8, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: alpha(color.text, 0.25) },
+  captionMore: { gap: 2, marginTop: 8, paddingTop: 8, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: alpha(media.text, 0.25) },
   pills: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2 },
   pill: {
     height: PILL_H,
@@ -496,14 +496,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: radius.pill,
     borderWidth: 1,
-    borderColor: alpha(color.text, 0.18),
+    borderColor: alpha(media.text, 0.18),
     backgroundColor: alpha(color.ink, 0.38),
   },
   pillOn: { borderColor: color.ember, backgroundColor: alpha(color.ember, 0.22) },
   pillMore: { gap: 2, paddingHorizontal: 9 },
   pillEmoji: { fontSize: 15 },
-  pillCount: { color: color.text, fontFamily: font.mono, fontSize: 12 },
+  pillCount: { color: media.text, fontFamily: font.mono, fontSize: 12 },
   reactionBar: { position: 'absolute', left: META_LEFT - 6 },
-  progressTrack: { position: 'absolute', left: 16, right: 16, height: 2, borderRadius: 1, overflow: 'hidden', backgroundColor: alpha(color.text, 0.2) },
-  progressFill: { height: 2, backgroundColor: color.text },
-});
+  progressTrack: { position: 'absolute', left: 16, right: 16, height: 2, borderRadius: 1, overflow: 'hidden', backgroundColor: alpha(media.text, 0.2) },
+  progressFill: { height: 2, backgroundColor: media.text },
+}));

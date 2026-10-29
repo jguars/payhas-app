@@ -1,12 +1,12 @@
 import { router } from 'expo-router';
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
 import { Icon } from '@/components/Icon';
 import { PressScale } from '@/components/motion/PressScale';
 import { useT } from '@/i18n';
 import { useInsets } from '@/lib/useInsets';
 import { useGoBack } from '@/lib/useGoBack';
-import { color, font, space } from '@/theme/tokens';
+import { color, font, space, themedStyles } from '@/theme/tokens';
 
 /** Back chevron + centred title, for screens pushed on top of the tabs. */
 export function ScreenHeader({ title }: { title: string }) {
@@ -26,8 +26,8 @@ export function ScreenHeader({ title }: { title: string }) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   bar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: space.md, paddingBottom: space.sm },
   back: { width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
   title: { color: color.text, fontFamily: font.bold, fontSize: 17 },
-});
+}));

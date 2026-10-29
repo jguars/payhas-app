@@ -1,12 +1,12 @@
 import { useEffect } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useReducedMotion, useSharedValue, withDelay, withSpring, withTiming } from 'react-native-reanimated';
 
 import { CountUp } from '@/components/motion/CountUp';
 import { PressScale } from '@/components/motion/PressScale';
 import { topicLabel, useT } from '@/i18n';
 import { spring, stagger } from '@/theme/motion';
-import { color, font, radius, space } from '@/theme/tokens';
+import { color, font, radius, space, themedStyles } from '@/theme/tokens';
 
 import { tasteRows, TasteRow } from './useMe';
 
@@ -76,7 +76,7 @@ function Bar({ row, delay }: { row: TasteRow & { exploring: boolean }; delay: nu
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   card: { backgroundColor: color.surface1, borderRadius: 24, padding: 18, gap: 14 },
   head: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', minHeight: 32 },
   title: { color: color.text, fontFamily: font.title, fontSize: 19 },
@@ -89,4 +89,4 @@ const styles = StyleSheet.create({
   pct: { color: color.text2, fontFamily: font.mono, fontSize: 12 },
   track: { height: 6, borderRadius: radius.pill, backgroundColor: color.line, overflow: 'hidden' },
   fill: { height: 6, width: '100%', borderRadius: radius.pill, transformOrigin: 'left' },
-});
+}));

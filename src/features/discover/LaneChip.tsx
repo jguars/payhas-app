@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { StyleSheet, Text } from 'react-native';
+import { Text } from 'react-native';
 import Animated, {
   useAnimatedProps,
   useAnimatedStyle,
@@ -14,7 +14,7 @@ import Svg, { Path } from 'react-native-svg';
 
 import { laneKey, useT } from '@/i18n';
 import { spring } from '@/theme/motion';
-import { font, Lane, lane as lanes } from '@/theme/tokens';
+import { font, Lane, lane as lanes, themedStyles } from '@/theme/tokens';
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
@@ -74,7 +74,7 @@ export function LaneChip({ lane, delay = 120 }: { lane: Lane; delay?: number }) 
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   chip: { flexDirection: 'row', alignItems: 'center', gap: 5, height: 28, paddingLeft: 7, paddingRight: 10, borderRadius: 999, borderWidth: 1 },
   label: { fontFamily: font.bold, fontSize: 12 },
-});
+}));

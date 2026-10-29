@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Linking, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Linking, Pressable, Text, View } from 'react-native';
 
 import { Icon, IconName } from '@/components/Icon';
 import { Enter } from '@/components/motion/Enter';
 import { TKey, useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
-import { color, font, space } from '@/theme/tokens';
+import { color, font, space, themedStyles } from '@/theme/tokens';
 
 import { useParentSession, withParent } from './ParentSession';
 import { Step } from './Step';
@@ -88,11 +88,11 @@ export function ConsentStep({ progress, onBack, onAgreed }: { progress: number; 
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   point: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   pointIcon: { width: 40, height: 40, borderRadius: 13, alignItems: 'center', justifyContent: 'center' },
   pointText: { flex: 1, color: color.text, fontFamily: font.medium, fontSize: 14, lineHeight: 20 },
   policy: { alignSelf: 'flex-start', minHeight: 48, justifyContent: 'center' },
   policyText: { color: color.text2, fontFamily: font.semibold, fontSize: 14, textDecorationLine: 'underline' },
   error: { color: color.ember, fontFamily: font.semibold, fontSize: 14 },
-});
+}));

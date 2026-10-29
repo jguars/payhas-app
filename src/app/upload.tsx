@@ -19,7 +19,7 @@ import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
 import { useInsets } from '@/lib/useInsets';
 import { useGoBack } from '@/lib/useGoBack';
-import { alpha, color, font, Lane, lane as lanes, radius, space } from '@/theme/tokens';
+import { alpha, color, font, Lane, lane as lanes, pageFill, radius, space, themedStyles } from '@/theme/tokens';
 
 type Picked = { uri: string; seconds: number; type: string };
 type Stage = 'form' | 'uploading' | 'done';
@@ -143,7 +143,7 @@ export default function UploadScreen() {
         {picked ? <Preview picked={picked} onChange={pick} /> : <PickCard onPress={pick} />}
         {error && (
           <Animated.View entering={FadeIn.duration(160)} style={styles.error}>
-            <Icon name="help" size={16} color="#FF8A73" />
+            <Icon name="help" size={16} color={color.danger} />
             <Text style={styles.errorText}>{error}</Text>
           </Animated.View>
         )}
@@ -177,7 +177,7 @@ export default function UploadScreen() {
                   style={[styles.chip, on && styles.chipOn, full && { opacity: 0.35 }]}
                 >
                   <Text style={styles.chipEmoji}>{i.emoji}</Text>
-                  <Text style={[styles.chipText, on && { color: color.ink }]}>{topicLabel(t, i.slug, i.label)}</Text>
+                  <Text style={[styles.chipText, on && { color: color.onInverse }]}>{topicLabel(t, i.slug, i.label)}</Text>
                 </Pressable>
               );
             })}
@@ -298,8 +298,8 @@ function Field({ label, hint, children }: { label: string; hint?: string; childr
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: color.ink },
+const styles = themedStyles(() => ({
+  root: { flex: 1, ...pageFill() },
   content: { paddingHorizontal: space.lg, gap: space.xl },
   pick: { height: 220, borderRadius: radius.card + 4, borderWidth: 1.5, borderStyle: 'dashed', borderColor: color.line, backgroundColor: color.surface1, alignItems: 'center', justifyContent: 'center', gap: space.sm },
   pickIcon: { width: 56, height: 56, borderRadius: 28, backgroundColor: color.ember, alignItems: 'center', justifyContent: 'center', marginBottom: space.xs },
@@ -319,7 +319,7 @@ const styles = StyleSheet.create({
   input: { minHeight: 84, borderRadius: 14, backgroundColor: color.surface1, borderWidth: 1, borderColor: color.line, padding: space.md, color: color.text, fontFamily: font.medium, fontSize: 15, textAlignVertical: 'top' },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
   chip: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 38, paddingHorizontal: 12, borderRadius: radius.pill, backgroundColor: color.surface1, borderWidth: 1, borderColor: color.line },
-  chipOn: { backgroundColor: color.text, borderColor: color.text },
+  chipOn: { backgroundColor: color.inverse, borderColor: color.inverse },
   chipEmoji: { fontSize: 16 },
   chipText: { color: color.text, fontFamily: font.semibold, fontSize: 13 },
   lanes: { flexDirection: 'row', gap: space.sm },
@@ -330,12 +330,12 @@ const styles = StyleSheet.create({
   box: { width: 24, height: 24, borderRadius: 7, borderWidth: 1.5, borderColor: color.text3, alignItems: 'center', justifyContent: 'center', marginTop: 1 },
   boxOn: { backgroundColor: color.success, borderColor: color.success },
   agreeText: { flex: 1, color: color.text2, fontFamily: font.medium, fontSize: 13, lineHeight: 19 },
-  footer: { position: 'absolute', left: 0, right: 0, bottom: 0, paddingHorizontal: space.lg, paddingTop: space.md, backgroundColor: color.ink, borderTopWidth: 1, borderTopColor: color.surface2 },
+  footer: { position: 'absolute', left: 0, right: 0, bottom: 0, paddingHorizontal: space.lg, paddingTop: space.md, backgroundColor: color.bg, borderTopWidth: 1, borderTopColor: color.surface2 },
   submit: { height: 54, borderRadius: radius.pill, backgroundColor: color.ember, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space.sm },
   button: { minHeight: 50, paddingHorizontal: space.xl, borderRadius: radius.pill, backgroundColor: color.ember, justifyContent: 'center' },
   secondary: { backgroundColor: color.surface2 },
   buttonText: { color: color.ink, fontFamily: font.bold, fontSize: 16 },
-  overlay: { ...StyleSheet.absoluteFill, backgroundColor: alpha(color.ink, 0.88), alignItems: 'center', justifyContent: 'center' },
+  overlay: { ...StyleSheet.absoluteFill, backgroundColor: alpha(color.bg, 0.92), alignItems: 'center', justifyContent: 'center' },
   progressCard: { width: 280, padding: space.xl, borderRadius: radius.card + 4, backgroundColor: color.surface1, gap: space.md },
   ringWrap: { alignSelf: 'center', alignItems: 'center', justifyContent: 'center', marginBottom: space.sm },
   pct: { position: 'absolute', color: color.text, fontFamily: font.mono, fontSize: 18 },
@@ -349,4 +349,4 @@ const styles = StyleSheet.create({
   doneTitle: { color: color.text, fontFamily: font.display, fontSize: 28, letterSpacing: -0.5 },
   doneSub: { color: color.text2, fontFamily: font.medium, fontSize: 15, textAlign: 'center', lineHeight: 21 },
   doneRow: { flexDirection: 'row', gap: space.md, marginTop: space.lg },
-});
+}));

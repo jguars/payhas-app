@@ -1,7 +1,7 @@
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 
 import { useInsets } from '@/lib/useInsets';
-import { color } from '@/theme/tokens';
+import { alpha, color, themedStyles } from '@/theme/tokens';
 
 /**
  * A fade behind the transparent status bar, so scrolled content dissolves
@@ -12,12 +12,12 @@ export function StatusScrim() {
   return <View pointerEvents="none" style={[styles.scrim, { height: top + 18 }]} />;
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   scrim: {
     position: 'absolute',
     left: 0,
     right: 0,
     top: 0,
-    experimental_backgroundImage: `linear-gradient(180deg, ${color.ink} 0%, ${color.ink} 62%, rgba(10,10,15,0) 100%)`,
+    experimental_backgroundImage: `linear-gradient(180deg, ${color.bgTop} 0%, ${color.bgTop} 62%, ${alpha(color.bgTop, 0)} 100%)`,
   },
-});
+}));

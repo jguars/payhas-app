@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import { Image } from 'expo-image';
 
 import { Enter } from '@/components/motion/Enter';
@@ -6,7 +6,7 @@ import { PressScale } from '@/components/motion/PressScale';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { FeedVideo } from '@/features/feed/data';
 import { useT } from '@/i18n';
-import { color, font, space } from '@/theme/tokens';
+import { color, font, space, themedStyles } from '@/theme/tokens';
 
 import type { Channel } from './useDiscover';
 
@@ -39,7 +39,7 @@ export function ChannelShelf({ channel, onOpen, onSeeAll, index = 0 }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   wrap: { gap: space.md },
   bleed: { marginHorizontal: -space.lg },
   row: { paddingHorizontal: space.lg, gap: 10 },
@@ -47,4 +47,4 @@ const styles = StyleSheet.create({
   poster: { width: 124, height: 172, borderRadius: 14, overflow: 'hidden', backgroundColor: color.surface1 },
   fill: { position: 'absolute', left: 0, top: 0, width: '100%', height: '100%' },
   caption: { color: color.text2, fontFamily: font.semibold, fontSize: 13, lineHeight: 17 },
-});
+}));

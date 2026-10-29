@@ -1,6 +1,6 @@
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import { Image } from 'expo-image';
 
 import { Icon } from '@/components/Icon';
@@ -14,7 +14,7 @@ import { openVideo } from '@/features/feed/openVideo';
 import { useLibrary } from '@/features/library/LibraryProvider';
 import { supabase } from '@/lib/supabase';
 import { useInsets } from '@/lib/useInsets';
-import { color, font, radius, space } from '@/theme/tokens';
+import { color, font, pageFill, radius, space, themedStyles } from '@/theme/tokens';
 
 /** Everything this profile saved, newest first — a three-up poster grid like any saved collection. */
 export default function SavedScreen() {
@@ -68,8 +68,8 @@ export default function SavedScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: color.ink },
+const styles = themedStyles(() => ({
+  root: { flex: 1, ...pageFill() },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 3, paddingHorizontal: 3 },
   cell: { width: '32.9%' },
   tile: { aspectRatio: 3 / 4, borderRadius: radius.chip / 2, overflow: 'hidden', backgroundColor: color.surface1 },
@@ -80,4 +80,4 @@ const styles = StyleSheet.create({
   emptyIcon: { width: 64, height: 64, borderRadius: 32, backgroundColor: color.surface1, alignItems: 'center', justifyContent: 'center', marginBottom: space.sm },
   emptyTitle: { color: color.text, fontFamily: font.title, fontSize: 20 },
   emptySub: { color: color.text2, fontFamily: font.medium, fontSize: 14, textAlign: 'center' },
-});
+}));

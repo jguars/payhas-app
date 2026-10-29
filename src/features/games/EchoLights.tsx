@@ -18,7 +18,7 @@ import { TimesUp } from '@/features/library/TimesUp';
 import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { spring } from '@/theme/motion';
-import { alpha, color, Lane, lane as lanes, radius, space } from '@/theme/tokens';
+import { alpha, color, Lane, lane as lanes, pageFill, radius, space, themedStyles } from '@/theme/tokens';
 
 import { Confetti } from './Confetti';
 import { Finish, GameBar, Readout } from './GameChrome';
@@ -489,8 +489,8 @@ export const echoLightsMeta: GameMeta = {
   },
 };
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: color.ink, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
+const styles = themedStyles(() => ({
+  root: { flex: 1, ...pageFill(), alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
   stack: { alignItems: 'center', gap: space.lg, marginTop: 56 },
   ambient: { width: 420, height: 420, borderRadius: 210, backgroundColor: alpha(lanes.adult.color, 0.07) },
   badge: { width: 84, height: 84, borderRadius: 42, borderWidth: 2, alignItems: 'center', justifyContent: 'center' },
@@ -501,9 +501,9 @@ const styles = StyleSheet.create({
   ledge: { position: 'absolute', left: 0, top: LEDGE },
   pad: { alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: color.ink, overflow: 'hidden' },
   glint: { position: 'absolute', backgroundColor: alpha(color.white, 0.45), transform: [{ rotate: '-18deg' }] },
-  console: { flexDirection: 'row', flexWrap: 'wrap', width: 100, gap: 8, padding: 8, borderRadius: radius.card, backgroundColor: color.ink, borderWidth: 2, borderColor: color.ink },
+  console: { flexDirection: 'row', flexWrap: 'wrap', width: 100, gap: 8, padding: 8, borderRadius: radius.card, backgroundColor: color.bg, borderWidth: 2, borderColor: color.ink },
   miniCell: { width: 36, height: 36 },
   miniHalo: { position: 'absolute', left: 0, top: 0, width: 36, height: 36, borderRadius: 10 },
   miniPad: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
   miniCritter: { fontSize: 18 },
-});
+}));

@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { Text, TextInput, View } from 'react-native';
 
 import { Icon } from '@/components/Icon';
 import { PressScale } from '@/components/motion/PressScale';
 import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
-import { color, font, radius, space } from '@/theme/tokens';
+import { color, font, radius, space, themedStyles } from '@/theme/tokens';
 
 import { Bank, BANKS, payByCard, planDate } from './plan';
 
@@ -179,15 +179,15 @@ export function CardPayment({
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   root: { gap: space.md },
   title: { color: color.text, fontFamily: font.title, fontSize: 18 },
   label: { color: color.text2, fontFamily: font.semibold, fontSize: 13 },
   banks: { flexDirection: 'row', gap: space.sm },
-  bank: { flex: 1, minHeight: 48, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6, borderRadius: radius.chip, borderWidth: 1.5, borderColor: color.line, backgroundColor: color.ink },
+  bank: { flex: 1, minHeight: 48, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6, borderRadius: radius.chip, borderWidth: 1.5, borderColor: color.line, backgroundColor: color.bg },
   bankOn: { borderColor: color.ember, backgroundColor: color.surface2 },
   bankText: { color: color.text2, fontFamily: font.bold, fontSize: 13 },
-  input: { color: color.text, fontFamily: font.semibold, fontSize: 16, minHeight: 52, paddingHorizontal: space.md, borderRadius: 14, backgroundColor: color.ink, borderWidth: 1.5, borderColor: color.line },
+  input: { color: color.text, fontFamily: font.semibold, fontSize: 16, minHeight: 52, paddingHorizontal: space.md, borderRadius: 14, backgroundColor: color.bg, borderWidth: 1.5, borderColor: color.line },
   mono: { fontFamily: font.mono, letterSpacing: 1 },
   pair: { flexDirection: 'row', gap: space.sm },
   sample: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, minHeight: 48, borderRadius: radius.pill, backgroundColor: color.surface2 },
@@ -197,4 +197,4 @@ const styles = StyleSheet.create({
   payOff: { opacity: 0.4 },
   payText: { color: color.ink, fontFamily: font.bold, fontSize: 16 },
   note: { color: color.text3, fontFamily: font.medium, fontSize: 12, lineHeight: 17, textAlign: 'center' },
-});
+}));

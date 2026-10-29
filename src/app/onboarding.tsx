@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { StyleSheet, Text, TextInput, View } from 'react-native';
+import { Text, TextInput, View } from 'react-native';
 
 import { BottomSheet } from '@/components/BottomSheet';
 import { Icon, IconName } from '@/components/Icon';
@@ -17,7 +17,7 @@ import { laneKey, LANGS, TKey, useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
 import { useInsets } from '@/lib/useInsets';
-import { color, font, lane as lanes, radius, space } from '@/theme/tokens';
+import { color, font, lane as lanes, pageFill, radius, space, themedStyles } from '@/theme/tokens';
 
 type Stage = 'welcome' | 'pin' | 'pinConfirm' | 'you' | 'consent' | 'child' | 'family';
 
@@ -279,7 +279,7 @@ function Welcome({ onStart }: { onStart: () => void }) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   pinWrap: { alignItems: 'center', gap: space.lg, paddingTop: space.xl },
   pinWhy: { color: color.text3, fontFamily: font.medium, fontSize: 13, textAlign: 'center' },
   nameInput: { color: color.text, fontFamily: font.display, fontSize: 32, paddingVertical: space.md, borderBottomWidth: 2, borderBottomColor: color.line },
@@ -288,7 +288,7 @@ const styles = StyleSheet.create({
   member: { flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.md, borderRadius: radius.card, backgroundColor: color.surface1, borderWidth: 2, borderColor: color.line },
   memberName: { color: color.text, fontFamily: font.bold, fontSize: 17 },
   memberMeta: { color: color.text3, fontFamily: font.medium, fontSize: 13 },
-  welcome: { flex: 1, backgroundColor: color.ink, paddingHorizontal: space.xl },
+  welcome: { flex: 1, ...pageFill(), paddingHorizontal: space.xl },
   welcomeTop: { flexDirection: 'row', justifyContent: 'flex-end' },
   langChip: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 36, paddingHorizontal: 14, borderRadius: radius.pill, backgroundColor: color.surface1, borderWidth: 1, borderColor: color.line },
   langChipText: { color: color.text, fontFamily: font.semibold, fontSize: 14 },
@@ -302,4 +302,4 @@ const styles = StyleSheet.create({
   pointText: { flex: 1, color: color.text, fontFamily: font.semibold, fontSize: 15, lineHeight: 21 },
   start: { height: 58, borderRadius: radius.pill, backgroundColor: color.ember, alignItems: 'center', justifyContent: 'center' },
   startText: { color: color.ink, fontFamily: font.bold, fontSize: 17 },
-});
+}));

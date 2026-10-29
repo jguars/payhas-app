@@ -1,7 +1,7 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
 import { Icon } from '@/components/Icon';
-import { color, font, space } from '@/theme/tokens';
+import { color, font, space, themedStyles } from '@/theme/tokens';
 
 /** Shelf / section title with an optional quiet "See all ›" (after Hulu and Epidemic Sound). */
 export function SectionHeader({ title, subtitle, action, onAction }: { title: string; subtitle?: string; action?: string; onAction?: () => void }) {
@@ -23,10 +23,10 @@ export function SectionHeader({ title, subtitle, action, onAction }: { title: st
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   row: { flexDirection: 'row', alignItems: 'flex-end', gap: space.md },
   title: { color: color.text, fontFamily: font.title, fontSize: 20, letterSpacing: -0.3 },
   subtitle: { color: color.text3, fontFamily: font.medium, fontSize: 13 },
   action: { flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 2, minHeight: 48, minWidth: 48 },
   actionText: { color: color.text2, fontFamily: font.semibold, fontSize: 13 },
-});
+}));

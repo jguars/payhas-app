@@ -17,7 +17,7 @@ import { TimesUp } from '@/features/library/TimesUp';
 import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { spring } from '@/theme/motion';
-import { alpha, color, font, Lane, lane as lanes, radius, space } from '@/theme/tokens';
+import { alpha, color, font, Lane, lane as lanes, media, pageFill, radius, space, themedStyles } from '@/theme/tokens';
 
 import { Confetti } from './Confetti';
 import { Finish, GameBar, Readout } from './GameChrome';
@@ -470,7 +470,7 @@ function Picture({ px, kind, tint, happy }: { px: number; kind: Kind; tint: stri
       <Ellipse cx={73} cy={63} rx={5.5} ry={3.5} fill={alpha(color.danger, 0.6)} />
 
       {/* muzzle */}
-      <Ellipse cx={50} cy={65} rx={12.5} ry={9} fill={color.text} stroke={ink} strokeWidth={2.6} />
+      <Ellipse cx={50} cy={65} rx={12.5} ry={9} fill={media.text} stroke={ink} strokeWidth={2.6} />
       <Ellipse cx={50} cy={61} rx={4.6} ry={3.2} fill={ink} />
       {happy ? (
         <Path d="M43.5 66 Q50 76 56.5 66 Z" fill={ink} stroke={ink} strokeWidth={2} strokeLinejoin="round" />
@@ -586,8 +586,8 @@ export const slidePuzzleMeta: GameMeta = {
   },
 };
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: color.ink, alignItems: 'center', justifyContent: 'center' },
+const styles = themedStyles(() => ({
+  root: { flex: 1, ...pageFill(), alignItems: 'center', justifyContent: 'center' },
   tile: { position: 'absolute', left: 0, top: 0 },
   ledge: { position: 'absolute', left: 0 },
   face: { overflow: 'hidden', backgroundColor: color.surface2 },
@@ -599,4 +599,4 @@ const styles = StyleSheet.create({
   thumb: { overflow: 'hidden', borderWidth: 2 },
   peekText: { color: color.text, fontFamily: font.bold, fontSize: 15 },
   mini: { position: 'absolute', left: 0, top: 0, width: MINI, height: MINI, borderRadius: 7, overflow: 'hidden', borderWidth: 2, borderColor: color.ink, backgroundColor: color.surface2 },
-});
+}));

@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, Share, Text, View } from 'react-native';
 import Animated, { FadeIn, useAnimatedStyle, useSharedValue, withSequence, withSpring, withTiming } from 'react-native-reanimated';
 
 import { BottomSheet } from '@/components/BottomSheet';
@@ -14,7 +14,7 @@ import { Constants } from '@/lib/database.types';
 import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
 import { spring } from '@/theme/motion';
-import { color, font, Lane, lane as lanes, radius, space } from '@/theme/tokens';
+import { color, font, Lane, lane as lanes, radius, space, themedStyles } from '@/theme/tokens';
 
 import { FeedVideo, formatCount } from './data';
 
@@ -86,7 +86,7 @@ function Main({ video, mode, onClose, onStep }: { video: FeedVideo; mode: SheetM
                 fx.tap();
                 shareOut();
               }} accessibilityRole="button" style={styles.outButton}>
-                <Icon name="send" size={18} color={color.ink} strokeWidth={2.4} />
+                <Icon name="send" size={18} color={color.onInverse} strokeWidth={2.4} />
                 <Text style={styles.outText}>{t('feed.shareToApps')}</Text>
               </PressScale>
             </View>
@@ -256,7 +256,7 @@ function BackLink({ onPress }: { onPress: () => void }) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   people: { paddingHorizontal: space.xl, gap: space.lg },
   hint: { color: color.text3, fontFamily: font.medium, fontSize: 14, textAlign: 'center', paddingHorizontal: space.xl },
   target: { width: 64, alignItems: 'center', gap: 6 },
@@ -266,8 +266,8 @@ const styles = StyleSheet.create({
   targetBadge: { position: 'absolute', right: -4, bottom: -4, width: 22, height: 22, borderRadius: 11, backgroundColor: color.success, borderWidth: 2, borderColor: color.surface1, alignItems: 'center', justifyContent: 'center' },
   targetName: { color: color.text, fontFamily: font.semibold, fontSize: 12 },
   outRow: { paddingHorizontal: space.xl },
-  outButton: { height: 48, borderRadius: radius.pill, backgroundColor: color.text, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space.sm },
-  outText: { color: color.ink, fontFamily: font.bold, fontSize: 15 },
+  outButton: { height: 48, borderRadius: radius.pill, backgroundColor: color.inverse, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space.sm },
+  outText: { color: color.onInverse, fontFamily: font.bold, fontSize: 15 },
   divider: { height: 1, backgroundColor: color.line, marginHorizontal: space.xl },
   actions: { flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: space.xl },
   action: { width: 72, alignItems: 'center', gap: 6 },
@@ -280,4 +280,4 @@ const styles = StyleSheet.create({
   reportText: { flex: 1, color: color.text, fontFamily: font.semibold, fontSize: 15 },
   back: { flexDirection: 'row', alignItems: 'center', alignSelf: 'center', gap: 4, paddingVertical: space.sm },
   backText: { color: color.text2, fontFamily: font.semibold, fontSize: 14 },
-});
+}));

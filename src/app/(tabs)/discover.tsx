@@ -1,6 +1,6 @@
 import { useIsFocused } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import Animated, {
   FadeIn,
   FadeOut,
@@ -29,7 +29,7 @@ import { FeedVideo } from '@/features/feed/data';
 import { openVideo } from '@/features/feed/openVideo';
 import { useScreenTime } from '@/features/library/useScreenTime';
 import { laneKey, topicLabel, useT } from '@/i18n';
-import { color, font, space } from '@/theme/tokens';
+import { color, font, pageFill, space, themedStyles } from '@/theme/tokens';
 
 type Tab = 'forYou' | 'channels' | 'topics';
 const TABS: Tab[] = ['forYou', 'channels', 'topics'];
@@ -177,8 +177,8 @@ export default function DiscoverScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: color.ink },
+const styles = themedStyles(() => ({
+  root: { flex: 1, ...pageFill() },
   content: { paddingHorizontal: space.lg, paddingBottom: space.xxxl, gap: space.xl },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: -space.sm },
   title: { color: color.text, fontFamily: font.display, fontSize: 34, letterSpacing: -1, transformOrigin: 'left center' },
@@ -187,4 +187,4 @@ const styles = StyleSheet.create({
   h2: { color: color.text, fontFamily: font.title, fontSize: 20, letterSpacing: -0.3 },
   shrink: { flexShrink: 1 },
   link: { color: color.text2, fontFamily: font.semibold, fontSize: 13 },
-});
+}));

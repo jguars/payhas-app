@@ -1,6 +1,6 @@
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { useEffect } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { Image } from 'expo-image';
 import Animated, {
   Easing,
@@ -19,7 +19,7 @@ import { Icon } from '@/components/Icon';
 import { PressScale } from '@/components/motion/PressScale';
 import { FeedVideo } from '@/features/feed/data';
 import { topicLabel, useT } from '@/i18n';
-import { alpha, color, font, radius } from '@/theme/tokens';
+import { alpha, color, font, media, radius, themedStyles } from '@/theme/tokens';
 
 import type { Topic } from './useDiscover';
 
@@ -161,7 +161,7 @@ function PlayPill({ count, onPress }: { count: number; onPress: () => void }) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   // Explicit size: react-native-web lays images out at natural size under absoluteFill alone.
   fill: { position: 'absolute', left: 0, top: 0, width: '100%', height: '100%' },
   card: { height: HEIGHT, borderRadius: 24, overflow: 'hidden', backgroundColor: color.surface1, borderWidth: 1, borderColor: color.line },
@@ -189,12 +189,12 @@ const styles = StyleSheet.create({
   },
   kickerText: { flexShrink: 1, color: color.ember, fontFamily: font.bold, fontSize: 12, letterSpacing: 0.7 },
   copy: { position: 'absolute', left: 20, right: 20, bottom: 20, alignItems: 'center', gap: 10 },
-  title: { color: color.text, fontFamily: font.title, fontSize: 26, lineHeight: 30, letterSpacing: -0.4, textAlign: 'center' },
-  tags: { color: color.text2, fontFamily: font.semibold, fontSize: 14 },
+  title: { color: media.text, fontFamily: font.title, fontSize: 26, lineHeight: 30, letterSpacing: -0.4, textAlign: 'center' },
+  tags: { color: media.text2, fontFamily: font.semibold, fontSize: 14 },
   eq: { flexDirection: 'row', alignItems: 'flex-end', gap: 2, height: 11 },
   bar: { width: 3, height: 11, borderRadius: 1.5, backgroundColor: color.ember, transformOrigin: 'bottom' },
   pillWrap: { marginTop: 4, alignSelf: 'stretch' },
   ring: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, borderRadius: radius.pill, backgroundColor: color.ember },
-  pill: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, height: 50, borderRadius: radius.pill, backgroundColor: color.text },
+  pill: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, height: 50, borderRadius: radius.pill, backgroundColor: media.text },
   pillText: { color: color.ink, fontFamily: font.bold, fontSize: 16 },
-});
+}));

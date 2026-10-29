@@ -8,7 +8,7 @@ import { PressScale } from '@/components/motion/PressScale';
 import { useFamily } from '@/features/family/FamilyProvider';
 import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
-import { alpha, color, font, radius, space } from '@/theme/tokens';
+import { alpha, color, font, media, radius, space, themedStyles } from '@/theme/tokens';
 
 import type { MediaSource } from './data';
 
@@ -29,7 +29,7 @@ export function LockedNext({ height, poster }: { height: number; poster?: MediaS
       <View style={styles.body}>
         <Enter index={0}>
           <View style={styles.lock}>
-            <Icon name="lock" size={40} color={color.text} strokeWidth={2.2} />
+            <Icon name="lock" size={40} color={media.text} strokeWidth={2.2} />
           </View>
         </Enter>
         <Enter index={1}>
@@ -54,7 +54,7 @@ export function LockedNext({ height, poster }: { height: number; poster?: MediaS
         {gamesOn && (
           <Enter index={4}>
             <Pressable onPress={() => router.navigate('/play')} accessibilityRole="button" hitSlop={8} style={styles.play}>
-              <Icon name="game" size={18} color={color.text2} strokeWidth={2.2} />
+              <Icon name="game" size={18} color={media.text2} strokeWidth={2.2} />
               <Text style={styles.playText}>{t('nav.play')}</Text>
             </Pressable>
           </Enter>
@@ -64,15 +64,15 @@ export function LockedNext({ height, poster }: { height: number; poster?: MediaS
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   root: { backgroundColor: color.ink, overflow: 'hidden' },
   scrim: { ...StyleSheet.absoluteFill, backgroundColor: alpha(color.ink, 0.6) },
   body: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.md, paddingHorizontal: space.xl },
-  lock: { width: 96, height: 96, borderRadius: 48, alignItems: 'center', justifyContent: 'center', backgroundColor: alpha(color.text, 0.12), marginBottom: space.sm },
-  title: { color: color.text, fontFamily: font.display, fontSize: 26, letterSpacing: -0.6, textAlign: 'center' },
-  sub: { color: color.text2, fontFamily: font.medium, fontSize: 15, lineHeight: 21, textAlign: 'center' },
+  lock: { width: 96, height: 96, borderRadius: 48, alignItems: 'center', justifyContent: 'center', backgroundColor: alpha(media.text, 0.12), marginBottom: space.sm },
+  title: { color: media.text, fontFamily: font.display, fontSize: 26, letterSpacing: -0.6, textAlign: 'center' },
+  sub: { color: media.text2, fontFamily: font.medium, fontSize: 15, lineHeight: 21, textAlign: 'center' },
   unlock: { flexDirection: 'row', alignItems: 'center', gap: space.sm, height: 56, paddingHorizontal: space.xl, marginTop: space.md, borderRadius: radius.pill, backgroundColor: color.ember },
   unlockText: { color: color.ink, fontFamily: font.bold, fontSize: 17 },
   play: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 48, paddingHorizontal: space.lg },
-  playText: { color: color.text2, fontFamily: font.semibold, fontSize: 15 },
-});
+  playText: { color: media.text2, fontFamily: font.semibold, fontSize: 15 },
+}));

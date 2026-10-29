@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 
 import { Enter } from '@/components/motion/Enter';
 import { PressScale } from '@/components/motion/PressScale';
@@ -10,7 +10,7 @@ import { useFamily } from '@/features/family/FamilyProvider';
 import { Constants, Tables } from '@/lib/database.types';
 import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
-import { color, font, lane as lanes, radius, space } from '@/theme/tokens';
+import { color, font, lane as lanes, pageFill, radius, space, themedStyles } from '@/theme/tokens';
 
 type Interest = Tables<'interests'>;
 const laneRank = (l: Interest['youngest_lane']) => Constants.public.Enums.lane.indexOf(l);
@@ -104,8 +104,8 @@ export default function InterestsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: color.ink },
+const styles = themedStyles(() => ({
+  root: { flex: 1, ...pageFill() },
   title: { color: color.text, fontFamily: font.display, fontSize: 30, lineHeight: 36, letterSpacing: -0.6, textAlign: 'center', paddingHorizontal: space.xl, paddingTop: space.xxl },
   hint: { color: color.text2, fontFamily: font.medium, fontSize: 15, textAlign: 'center', paddingHorizontal: space.xl, paddingTop: space.sm, paddingBottom: space.xl },
   grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: space.sm, paddingHorizontal: space.lg, paddingBottom: space.xl },
@@ -116,4 +116,4 @@ const styles = StyleSheet.create({
   buttonText: { color: color.ink, fontFamily: font.bold, fontSize: 16 },
   switch: { alignSelf: 'center', minHeight: 48, justifyContent: 'center' },
   switchText: { color: color.text2, fontFamily: font.semibold, fontSize: 14 },
-});
+}));

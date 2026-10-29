@@ -1,9 +1,9 @@
 import { useEffect, useMemo } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withDelay, withSequence, withSpring, withTiming } from 'react-native-reanimated';
 
 import { Icon } from '@/components/Icon';
-import { color } from '@/theme/tokens';
+import { color, themedStyles } from '@/theme/tokens';
 
 const SIZE = 96;
 
@@ -51,7 +51,7 @@ function Spark({ angle }: { angle: number }) {
   return <Animated.View style={[styles.spark, anim]} />;
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   at: { position: 'absolute', width: SIZE, height: SIZE, alignItems: 'center', justifyContent: 'center' },
   spark: { position: 'absolute', width: 10, height: 10, borderRadius: 5, backgroundColor: color.reward },
-});
+}));

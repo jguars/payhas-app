@@ -4,7 +4,7 @@ import Animated, { Easing, useAnimatedStyle, useReducedMotion, useSharedValue, w
 
 import { REACTIONS } from '@/features/library/LibraryProvider';
 import { spring } from '@/theme/motion';
-import { alpha, color, radius } from '@/theme/tokens';
+import { alpha, media, radius, themedStyles } from '@/theme/tokens';
 
 type Props = { mine: Set<string>; onPick: (emoji: string) => void };
 
@@ -66,9 +66,9 @@ function Floater({ emoji, x, y, dx, delay, size }: { emoji: string; x: number; y
   );
 }
 
-const styles = StyleSheet.create({
-  bar: { flexDirection: 'row', gap: 4, padding: 6, borderRadius: radius.pill, backgroundColor: alpha(color.surface1, 0.9), borderWidth: 1, borderColor: alpha(color.text, 0.14) },
+const styles = themedStyles(() => ({
+  bar: { flexDirection: 'row', gap: 4, padding: 6, borderRadius: radius.pill, backgroundColor: alpha(media.surface1, 0.9), borderWidth: 1, borderColor: alpha(media.text, 0.14) },
   choice: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
-  choiceOn: { backgroundColor: color.surface2 },
+  choiceOn: { backgroundColor: media.surface2 },
   emoji: { fontSize: 28 },
-});
+}));

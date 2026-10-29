@@ -22,7 +22,7 @@ import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { useInsets } from '@/lib/useInsets';
 import { spring, stagger } from '@/theme/motion';
-import { alpha, color, font, Lane, lane as lanes, radius, space } from '@/theme/tokens';
+import { alpha, color, font, Lane, lane as lanes, pageFill, radius, space, themedStyles } from '@/theme/tokens';
 
 import { Confetti } from './Confetti';
 import { Finish, GameBar, Readout } from './GameChrome';
@@ -762,8 +762,8 @@ export const popUpPalsMeta: GameMeta = {
   },
 };
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: color.ink, overflow: 'hidden' },
+const styles = themedStyles(() => ({
+  root: { flex: 1, ...pageFill(), overflow: 'hidden' },
   gardenWrap: { position: 'absolute', left: 0, right: 0, alignItems: 'center' },
   ledge: {
     position: 'absolute',
@@ -874,4 +874,4 @@ const styles = StyleSheet.create({
     color: color.white,
     fontSize: 22,
   },
-});
+}));

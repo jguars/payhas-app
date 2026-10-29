@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
 import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
-import { color, font, space } from '@/theme/tokens';
+import { color, font, space, themedStyles } from '@/theme/tokens';
 
 type Props = {
   title: string;
@@ -78,7 +78,7 @@ export function PinPad({ title, onComplete, onCancel }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   root: { alignItems: 'center', gap: space.lg },
   title: { color: color.text, fontFamily: font.title, fontSize: 22 },
   dots: { flexDirection: 'row', gap: space.lg },
@@ -92,4 +92,4 @@ const styles = StyleSheet.create({
   keyText: { color: color.text, fontFamily: font.semibold, fontSize: 24 },
   cancel: { paddingVertical: space.sm },
   cancelText: { color: color.text2, fontFamily: font.semibold, fontSize: 15 },
-});
+}));

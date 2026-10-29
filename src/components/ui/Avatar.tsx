@@ -1,8 +1,8 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import Svg, { Circle, Ellipse, Path } from 'react-native-svg';
 
 import { Icon } from '@/components/Icon';
-import { color, font, Lane, lane as lanes } from '@/theme/tokens';
+import { color, font, Lane, lane as lanes, themedStyles } from '@/theme/tokens';
 
 export const AVATARS = ['cat', 'bear', 'bunny', 'fox', 'owl', 'panda'] as const;
 export type AvatarKey = (typeof AVATARS)[number];
@@ -150,9 +150,9 @@ function Face({ kind }: { kind: AvatarKey }) {
   }
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   ribbon: { position: 'absolute', left: 0, right: 0, alignItems: 'center' },
   ribbonInner: { borderRadius: 7, borderWidth: 2, borderColor: color.ink, paddingHorizontal: 7, paddingVertical: 1, transform: [{ rotate: '-4deg' }] },
   ribbonText: { color: color.ink, fontFamily: font.bold, letterSpacing: 0.4 },
-  lock: { position: 'absolute', right: -2, bottom: -2, backgroundColor: color.surface2, borderWidth: 2, borderColor: color.ink, alignItems: 'center', justifyContent: 'center' },
-});
+  lock: { position: 'absolute', right: -2, bottom: -2, backgroundColor: color.surface2, borderWidth: 2, borderColor: color.bg, alignItems: 'center', justifyContent: 'center' },
+}));

@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { StyleSheet, Text } from 'react-native';
+import { Text } from 'react-native';
 import Animated, { interpolateColor, useAnimatedStyle, useSharedValue, withSequence, withSpring, withTiming } from 'react-native-reanimated';
 
 import { Icon } from '@/components/Icon';
@@ -8,7 +8,7 @@ import { useLibrary } from '@/features/library/LibraryProvider';
 import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { spring } from '@/theme/motion';
-import { alpha, color, font, radius } from '@/theme/tokens';
+import { alpha, color, font, radius, themedStyles } from '@/theme/tokens';
 
 /** Worklets can't call plain JS helpers like `alpha()` on the UI thread, so resolve colours up here. */
 const CLEAR = alpha(color.black, 0);
@@ -51,7 +51,7 @@ export function FollowButton({ creator, size = 'md' }: { creator: string; size?:
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   button: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, borderRadius: radius.pill, borderWidth: 1.5 },
   text: { fontFamily: font.bold },
-});
+}));

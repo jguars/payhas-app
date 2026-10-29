@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { Pressable, TextInput, View } from 'react-native';
 import Animated, {
   FadeIn,
   FadeInDown,
@@ -14,7 +14,7 @@ import Animated, {
 import { Icon } from '@/components/Icon';
 import { useT } from '@/i18n';
 import { spring } from '@/theme/motion';
-import { alpha, color, font } from '@/theme/tokens';
+import { alpha, color, font, themedStyles } from '@/theme/tokens';
 
 type Props = { value: string; onChange: (v: string) => void; suggestions: string[] };
 
@@ -90,7 +90,7 @@ export function SearchField({ value, onChange, suggestions }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   box: { flexDirection: 'row', alignItems: 'center', gap: 12, height: 56, paddingHorizontal: 20, borderRadius: 28, borderWidth: 1, borderColor: color.line, backgroundColor: color.surface1 },
   ring: { position: 'absolute', left: -1, right: -1, top: -1, bottom: -1, borderRadius: 28, borderWidth: 1.5, borderColor: alpha(color.ember, 0.7), backgroundColor: color.surface2 },
   field: { flex: 1, height: '100%', justifyContent: 'center' },
@@ -99,4 +99,4 @@ const styles = StyleSheet.create({
   placeholderText: { color: color.text3, fontFamily: font.medium, fontSize: 16 },
   placeholderWord: { color: color.text2 },
   clear: { width: 24, height: 24, borderRadius: 12, backgroundColor: color.text3, alignItems: 'center', justifyContent: 'center' },
-});
+}));

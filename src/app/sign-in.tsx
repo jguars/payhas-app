@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from 'react-native';
 
 import { SafeScreen } from '@/components/SafeScreen';
 import { useT } from '@/i18n';
 import { supabase } from '@/lib/supabase';
-import { color, font, radius, space } from '@/theme/tokens';
+import { color, font, pageFill, radius, space, themedStyles } from '@/theme/tokens';
 
 type Mode = 'signIn' | 'signUp';
 
@@ -82,8 +82,8 @@ export default function SignInScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: color.ink },
+const styles = themedStyles(() => ({
+  root: { flex: 1, ...pageFill() },
   body: { flex: 1, justifyContent: 'center', paddingHorizontal: space.xl, gap: space.md },
   logo: { color: color.text, fontFamily: font.display, fontSize: 44, textAlign: 'center' },
   subtitle: { color: color.text2, fontFamily: font.medium, fontSize: 16, textAlign: 'center', marginBottom: space.xl },
@@ -103,4 +103,4 @@ const styles = StyleSheet.create({
   buttonOff: { opacity: 0.4 },
   buttonText: { color: color.ink, fontFamily: font.bold, fontSize: 16 },
   switch: { color: color.text2, fontFamily: font.semibold, fontSize: 14, textAlign: 'center', marginTop: space.sm },
-});
+}));

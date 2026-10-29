@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, Text, TextInput, View } from 'react-native';
 
 import { Icon, IconName } from '@/components/Icon';
 import { PressScale } from '@/components/motion/PressScale';
@@ -12,7 +12,7 @@ import { laneKey, TKey, topicLabel, useT } from '@/i18n';
 import { Constants, Tables } from '@/lib/database.types';
 import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
-import { color, font, Lane, lane as lanes, radius, space } from '@/theme/tokens';
+import { color, font, Lane, lane as lanes, radius, space, themedStyles } from '@/theme/tokens';
 
 import { useParentSession, withParent } from './ParentSession';
 import { Step } from './Step';
@@ -358,7 +358,7 @@ function HourStepper({ label, value, onChange, lang }: { label: string; value: n
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   nameInput: { color: color.text, fontFamily: font.display, fontSize: 32, paddingVertical: space.md, borderBottomWidth: 2, borderBottomColor: color.line },
   label: { color: color.text2, fontFamily: font.semibold, fontSize: 14, marginTop: space.sm },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
@@ -379,4 +379,4 @@ const styles = StyleSheet.create({
   stepButton: { width: 36, height: 36, borderRadius: 18, backgroundColor: color.surface2, alignItems: 'center', justifyContent: 'center' },
   stepValue: { color: color.text, fontFamily: font.mono, fontSize: 17 },
   error: { color: color.ember, fontFamily: font.semibold, fontSize: 14 },
-});
+}));

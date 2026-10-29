@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
-import { StyleSheet } from 'react-native';
+
 import Animated, { interpolateColor, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 
 import { spring } from '@/theme/motion';
-import { color } from '@/theme/tokens';
+import { color, themedStyles } from '@/theme/tokens';
 
 /** A switch whose knob springs across and stretches a little mid-travel. Display only. */
 export function Toggle({ on, tint = color.success }: { on: boolean; tint?: string }) {
@@ -27,7 +27,7 @@ export function Toggle({ on, tint = color.success }: { on: boolean; tint?: strin
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   track: { width: 48, height: 30, borderRadius: 15, padding: 3 },
   knob: { width: 24, height: 24, borderRadius: 12, backgroundColor: color.ink },
-});
+}));

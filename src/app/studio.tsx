@@ -1,6 +1,6 @@
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import { Image } from 'expo-image';
 
 import { Icon, IconName } from '@/components/Icon';
@@ -14,7 +14,7 @@ import { laneKey, localized, type TKey, useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
 import { useInsets } from '@/lib/useInsets';
-import { alpha, color, font, radius, space } from '@/theme/tokens';
+import { alpha, color, font, pageFill, radius, space, themedStyles } from '@/theme/tokens';
 
 const STATUS: Record<string, { label: TKey; tint: string; icon: IconName }> = {
   pending: { label: 'creator.status.pending', tint: color.warning, icon: 'clock' },
@@ -120,8 +120,8 @@ export default function StudioScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: color.ink },
+const styles = themedStyles(() => ({
+  root: { flex: 1, ...pageFill() },
   content: { paddingHorizontal: space.lg, gap: space.sm },
   upload: { flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.lg, borderRadius: radius.card, backgroundColor: color.ember, marginBottom: space.md },
   uploadIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: alpha(color.ink, 0.15), alignItems: 'center', justifyContent: 'center' },
@@ -137,4 +137,4 @@ const styles = StyleSheet.create({
   pillText: { fontFamily: font.bold, fontSize: 12 },
   meta: { color: color.text3, fontFamily: font.medium, fontSize: 12 },
   reason: { color: color.text2, fontFamily: font.medium, fontSize: 12 },
-});
+}));

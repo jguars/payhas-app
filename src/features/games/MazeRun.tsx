@@ -18,7 +18,7 @@ import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { useInsets } from '@/lib/useInsets';
 import { spring } from '@/theme/motion';
-import { alpha, color, Lane, lane as lanes, radius, space } from '@/theme/tokens';
+import { alpha, color, Lane, lane as lanes, pageFill, radius, space, themedStyles } from '@/theme/tokens';
 
 import { Confetti } from './Confetti';
 import { Finish, GameBar, Readout } from './GameChrome';
@@ -465,7 +465,6 @@ function Arrow({ dir, onMove }: { dir: Dir; onMove: (d: Dir) => void }) {
 
 // ── Play-tab card ────────────────────────────────────────────────────────────
 
-const TINT = lanes.adult.color;
 const SCENE_COLS = 5;
 const SCENE_ROWS = 3;
 const SCENE_CELL = 30;
@@ -504,7 +503,9 @@ export const mazeRunMeta: GameMeta = {
     if (stars) return t('maze.subStars', { n });
     return t(clock ? 'maze.subTimed' : 'maze.sub', { n });
   },
-  tint: TINT,
+  get tint() {
+    return lanes.adult.color;
+  },
   Scene: MazeScene,
   best: {
     format: (n) => fmt(n),
@@ -582,8 +583,8 @@ function MazeScene({ active }: { active: boolean }) {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: color.ink },
+const styles = themedStyles(() => ({
+  root: { flex: 1, ...pageFill() },
   body: { flex: 1, alignItems: 'center', justifyContent: 'space-evenly', paddingHorizontal: space.lg },
   boardWrap: { alignItems: 'center', justifyContent: 'center', borderRadius: radius.video, backgroundColor: color.surface1, borderWidth: 2, borderColor: color.line },
   critter: { position: 'absolute', left: 0, top: 0, alignItems: 'center', justifyContent: 'center' },
@@ -595,4 +596,4 @@ const styles = StyleSheet.create({
   arrow: { width: PAD_BTN, height: PAD_BTN, borderRadius: 20, borderWidth: 2, borderColor: color.line, backgroundColor: color.surface1, alignItems: 'center', justifyContent: 'center' },
   sceneCenter: { alignItems: 'center', justifyContent: 'center' },
   sceneCell: { position: 'absolute', left: 0, top: 0, width: SCENE_CELL, height: SCENE_CELL, alignItems: 'center', justifyContent: 'center' },
-});
+}));

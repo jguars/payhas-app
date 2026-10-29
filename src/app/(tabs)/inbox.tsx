@@ -1,6 +1,6 @@
 import { router, useIsFocused } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, Text, View } from 'react-native';
 import { Image } from 'expo-image';
 import Animated, {
   Easing,
@@ -27,7 +27,7 @@ import { InboxItem, useLibrary } from '@/features/library/LibraryProvider';
 import { useT, type T, type TKey } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { spring, stagger } from '@/theme/motion';
-import { color, font, lane, space } from '@/theme/tokens';
+import { color, font, lane, pageFill, space, themedStyles } from '@/theme/tokens';
 
 /** How long new items keep their dots on screen before they're marked read. */
 const READ_AFTER_MS = 1400;
@@ -283,8 +283,8 @@ function ago(iso: string, t: T) {
   return t('inbox.agoDays', { n: Math.floor(s / 86400) });
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: color.ink },
+const styles = themedStyles(() => ({
+  root: { flex: 1, ...pageFill() },
   content: { paddingHorizontal: space.lg, paddingBottom: space.xxxl, gap: space.xl },
   title: { color: color.text, fontFamily: font.display, fontSize: 34, letterSpacing: -1 },
   h2: { color: color.text2, fontFamily: font.semibold, fontSize: 13, letterSpacing: 0.4, textTransform: 'uppercase' },
@@ -305,4 +305,4 @@ const styles = StyleSheet.create({
   thumb: { width: 64, height: 86, borderRadius: 12, backgroundColor: color.surface2 },
   empty: { alignItems: 'center', gap: space.md, paddingTop: 120 },
   emptyText: { color: color.text3, fontFamily: font.medium, fontSize: 15 },
-});
+}));

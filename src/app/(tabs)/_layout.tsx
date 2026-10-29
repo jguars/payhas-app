@@ -1,7 +1,7 @@
 import { usePathname } from 'expo-router';
 import { TabList, TabSlot, TabTrigger, Tabs } from 'expo-router/ui';
 import { forwardRef, useEffect, useState } from 'react';
-import { Pressable, PressableProps, StyleSheet, View } from 'react-native';
+import { Pressable, PressableProps, View } from 'react-native';
 import Animated, {
   interpolateColor,
   useAnimatedStyle,
@@ -19,11 +19,12 @@ import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { TAB_BAR, useInsets } from '@/lib/useInsets';
 import { spring } from '@/theme/motion';
-import { alpha, color, lane } from '@/theme/tokens';
+import { alpha, color, lane, pageFill, themedStyles } from '@/theme/tokens';
 
 const ROUTES = ['/', '/discover', '/play', '/inbox', '/me'];
 /** Each tab owns a colour from the palette; the pill blends between them as it slides. */
-const TAB_COLORS = [color.ember, lane.teen.color, lane.kids.color, lane.little.color, lane.adult.color];
+/** One colour per tab, read when drawn so they follow the theme. */
+const tabColors = () => [color.ember, lane.teen.color, lane.kids.color, lane.little.color, lane.adult.color];
 const PILL_W = 54;
 const PILL_H = 42;
 
@@ -34,7 +35,7 @@ const TabButton = forwardRef<View, TabButtonProps>(({ kind, label, isFocused, ba
   <Pressable ref={ref} accessibilityRole="tab" accessibilityLabel={label} accessibilityState={{ selected: !!isFocused }} {...rest} onPressIn={() => !isFocused && fx.tab()} style={styles.tab}>
     <View>
       <NavIcon kind={kind} active={!!isFocused} />
-      {badge && <Animated.View entering={ZoomIn.springify().damping(spring.bouncy.damping)} style={[styles.badge, isFocused && { borderColor: TAB_COLORS[3] }]} />}
+      {badge && <Animated.View entering={ZoomIn.springify().damping(spring.bouncy.damping)} style={[styles.badge, isFocused && { borderColor: lane.little.color }]} />}
     </View>
   </Pressable>
 ));
@@ -75,8 +76,9 @@ function Highlight({ width }: { width: number }) {
     }
   }, [index, reduce, x, sx, sy]);
 
+  const colors = tabColors();
   const anim = useAnimatedStyle(() => ({
-    backgroundColor: interpolateColor(x.value, [0, 1, 2, 3, 4], TAB_COLORS),
+    backgroundColor: interpolateColor(x.value, [0, 1, 2, 3, 4], colors),
     transform: [{ translateX: x.value * slot + (slot - PILL_W) / 2 }, { scaleX: sx.value }, { scaleY: sy.value }],
   }));
   if (width === 0) return null;
@@ -114,8 +116,8 @@ export default function TabsLayout() {
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: color.ink },
+const styles = themedStyles(() => ({
+  root: { flex: 1, ...pageFill() },
   bar: {
     position: 'absolute',
     left: TAB_BAR.side,
@@ -144,4 +146,4 @@ const styles = StyleSheet.create({
     borderRadius: 16,
   },
   badge: { position: 'absolute', top: -2, right: -3, width: 10, height: 10, borderRadius: 5, backgroundColor: color.ember, borderWidth: 2, borderColor: color.surface1 },
-});
+}));

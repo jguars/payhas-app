@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { Image } from 'expo-image';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
@@ -6,7 +6,7 @@ import { BottomSheet } from '@/components/BottomSheet';
 import { Icon } from '@/components/Icon';
 import { PressScale } from '@/components/motion/PressScale';
 import { useT } from '@/i18n';
-import { color, font, radius, space } from '@/theme/tokens';
+import { color, font, radius, space, themedStyles } from '@/theme/tokens';
 
 import { FeedVideo, formatCount } from './data';
 import { FollowButton } from './FollowButton';
@@ -61,7 +61,7 @@ export function CreatorSheet({ name, videos, onClose, onOpenVideo }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   body: { paddingHorizontal: space.xl, gap: 18 },
   head: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   avatar: { width: 64, height: 64, borderRadius: 32, backgroundColor: color.surface2, borderWidth: 2, borderColor: color.text, alignItems: 'center', justifyContent: 'center' },
@@ -75,4 +75,4 @@ const styles = StyleSheet.create({
   fill: { position: 'absolute', left: 0, top: 0, width: '100%', height: '100%' },
   views: { position: 'absolute', left: 6, bottom: 6, flexDirection: 'row', alignItems: 'center', gap: 3 },
   viewsText: { color: color.text, fontFamily: font.mono, fontSize: 12 },
-});
+}));

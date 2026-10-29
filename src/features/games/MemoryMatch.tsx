@@ -15,7 +15,7 @@ import { TimesUp } from '@/features/library/TimesUp';
 import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { spring } from '@/theme/motion';
-import { color, font, Lane, space } from '@/theme/tokens';
+import { color, font, Lane, media, pageFill, space, themedStyles } from '@/theme/tokens';
 
 import { Confetti } from './Confetti';
 import { Finish, GameBar, Readout } from './GameChrome';
@@ -242,14 +242,14 @@ function CardView({ card, index, w, h, x, y, fromX, fromY, faceUp, matched, miss
   );
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: color.ink, alignItems: 'center', justifyContent: 'center' },
+const styles = themedStyles(() => ({
+  root: { flex: 1, ...pageFill(), alignItems: 'center', justifyContent: 'center' },
   grid: { position: 'relative' },
   card: { position: 'absolute', left: 0, top: 0 },
   face: { position: 'absolute', left: 0, top: 0, width: '100%', height: '100%', borderRadius: 16, alignItems: 'center', justifyContent: 'center', backfaceVisibility: 'hidden' },
   back: { backgroundColor: color.surface2, borderWidth: 1, borderColor: color.line },
   backMark: { backgroundColor: color.ember, opacity: 0.85, transform: [{ rotate: '45deg' }] },
-  front: { backgroundColor: color.text, borderWidth: 2, borderColor: color.text },
+  front: { backgroundColor: media.text, borderWidth: 2, borderColor: media.text },
   matched: { borderColor: color.success, backgroundColor: color.successSoft },
-});
+}));
 

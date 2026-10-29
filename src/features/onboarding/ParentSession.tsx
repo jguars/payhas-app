@@ -1,10 +1,10 @@
 import { createContext, ReactNode, useCallback, useContext, useMemo, useRef, useState } from 'react';
-import { Modal, StyleSheet, View } from 'react-native';
+import { Modal, View } from 'react-native';
 
 import { PinPad } from '@/components/PinPad';
 import { useT } from '@/i18n';
 import { supabase } from '@/lib/supabase';
-import { color } from '@/theme/tokens';
+import { pageFill, themedStyles } from '@/theme/tokens';
 
 /** The server's parent session lasts 15 minutes; renew a little early. */
 const LIFETIME_MS = 14 * 60_000;
@@ -96,6 +96,6 @@ export async function withParent<R extends { error: { code?: string } | null }>(
   return res;
 }
 
-const styles = StyleSheet.create({
-  backdrop: { flex: 1, backgroundColor: color.ink, alignItems: 'center', justifyContent: 'center' },
-});
+const styles = themedStyles(() => ({
+  backdrop: { flex: 1, ...pageFill(), alignItems: 'center', justifyContent: 'center' },
+}));

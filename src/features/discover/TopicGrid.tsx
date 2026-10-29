@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 
 import { Enter } from '@/components/motion/Enter';
@@ -8,11 +8,12 @@ import { TopicIcon } from '@/components/ui/TopicIcon';
 import { topicLabel, useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { spring } from '@/theme/motion';
-import { color, font, lane } from '@/theme/tokens';
+import { color, font, lane, themedStyles } from '@/theme/tokens';
 
 import type { Topic } from './useDiscover';
 
-const SWATCHES = [color.ember, lane.kids.color, lane.teen.color, lane.little.color, lane.adult.color];
+/** Read when drawn, so the swatches follow the theme. */
+const swatches = () => [color.ember, lane.kids.color, lane.teen.color, lane.little.color, lane.adult.color];
 
 type Props = { topics: Topic[]; selected: string | null; onSelect: (slug: string | null) => void; baseIndex?: number };
 
@@ -28,7 +29,7 @@ export function TopicGrid({ topics, selected, onSelect, baseIndex = 0 }: Props) 
         <Enter key={t.slug} index={baseIndex + Math.min(i, 8)} style={styles.cell}>
           <TopicTile
             topic={t}
-            swatch={SWATCHES[i % SWATCHES.length]}
+            swatch={swatches()[i % 5]}
             on={selected === t.slug}
             onPress={() => {
               fx.tab();
@@ -72,7 +73,7 @@ function TopicTile({ topic, swatch, on, onPress }: { topic: Topic; swatch: strin
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   cell: { width: '48.5%' },
   tile: { height: 104, borderRadius: 18, overflow: 'hidden', padding: 14, justifyContent: 'flex-end' },
@@ -81,4 +82,4 @@ const styles = StyleSheet.create({
   label: { flexShrink: 1, color: color.text, fontFamily: font.title, fontSize: 17, letterSpacing: -0.2 },
   count: { fontFamily: font.mono, fontSize: 12 },
   ring: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, borderRadius: 18, borderWidth: 2 },
-});
+}));

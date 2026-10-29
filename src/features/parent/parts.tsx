@@ -26,7 +26,7 @@ import { ago, Child, minutes, RecentRow } from '@/features/parent/useParent';
 import { localized, topicLabel, useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { spring } from '@/theme/motion';
-import { alpha, color, font, lane as lanes, radius, space } from '@/theme/tokens';
+import { alpha, color, font, lane as lanes, pageFill, radius, space, themedStyles } from '@/theme/tokens';
 
 /**
  * Pieces of the parent dashboard shared by the Family screen (parent.tsx) and
@@ -35,9 +35,6 @@ import { alpha, color, font, lane as lanes, radius, space } from '@/theme/tokens
  * list of people, one big number, and settings as grouped rows.
  */
 
-export const GREEN = color.success;
-export const YELLOW = color.warning;
-export const RED = color.danger;
 /** Latest rows shown before "See all". */
 const LATEST_FOLD = 5;
 
@@ -64,7 +61,7 @@ export function RequestCard({ name, at, onAnswer }: { name: string; at: string; 
   return (
     <Enter index={0} rise={8} style={styles.request}>
       <View style={styles.requestHead}>
-        <IconCircle icon="clock" tint={YELLOW} size={32} />
+        <IconCircle icon="clock" tint={color.warning} size={32} />
         <Text style={styles.requestTitle}>
           {t('parent.asking', { name })} <Text style={styles.requestAgo}>· {ago(t, mins)}</Text>
         </Text>
@@ -115,9 +112,9 @@ export function WeekChart({ child }: { child: Child }) {
         })}
       </View>
       <View style={styles.legend}>
-        <View style={[styles.swatch, { backgroundColor: GREEN }]} />
+        <View style={[styles.swatch, { backgroundColor: color.success }]} />
         <Text style={styles.legendText}>{t('parent.videos')}</Text>
-        <View style={[styles.swatch, { backgroundColor: YELLOW }]} />
+        <View style={[styles.swatch, { backgroundColor: color.warning }]} />
         <Text style={styles.legendText}>{t('parent.games')}</Text>
       </View>
     </View>
@@ -142,8 +139,8 @@ export function Bar({ index, video, game, today }: { index: number; video: numbe
           <View style={{ flex: 1, backgroundColor: color.line }} />
         ) : (
           <>
-            <View style={{ flex: game, backgroundColor: YELLOW }} />
-            <View style={{ flex: video, backgroundColor: GREEN }} />
+            <View style={{ flex: game, backgroundColor: color.warning }} />
+            <View style={{ flex: video, backgroundColor: color.success }} />
           </>
         )}
       </Animated.View>
@@ -219,7 +216,7 @@ export function Latest({ child, onHide }: { child: Child; onHide: (v: RecentRow)
               return (
                 <Enter key={it.key} index={i} rise={8}>
                   <View style={[styles.latestRow, styles.latestFlag]}>
-                    <IconCircle icon="flag" tint={RED} size={40} />
+                    <IconCircle icon="flag" tint={color.danger} size={40} />
                     <View style={styles.latestBody}>
                       <Rich text={t('parent.latestFlagged')} values={{ name, what: it.what }} bold={['name', 'what']} style={styles.latestText} lines={2} />
                       <Text style={styles.latestSub} numberOfLines={2}>
@@ -234,7 +231,7 @@ export function Latest({ child, onHide }: { child: Child; onHide: (v: RecentRow)
               return (
                 <Enter key={it.key} index={i} rise={8}>
                   <View style={styles.latestRow}>
-                    <IconCircle icon="sparkle" tint={GREEN} size={40} />
+                    <IconCircle icon="sparkle" tint={color.success} size={40} />
                     <View style={styles.latestBody}>
                       <Rich text={t('parent.latestWatched')} values={{ name, what: it.what, time: minutes(t, it.seconds) }} bold={['name', 'what']} style={styles.latestText} lines={2} />
                       <Text style={styles.latestSub}>{t('parent.thisWeek')}</Text>
@@ -399,7 +396,7 @@ export function Row({
     <>
       {leading}
       <View style={{ flex: 1, gap: 2 }}>
-        <Text style={[styles.rowLabel, danger && { color: RED }]} numberOfLines={1}>
+        <Text style={[styles.rowLabel, danger && { color: color.danger }]} numberOfLines={1}>
           {label}
         </Text>
         {typeof sub === 'string' ? (
@@ -417,7 +414,7 @@ export function Row({
       ) : (
         value
       )}
-      {toggle != null && <Toggle on={toggle} tint={GREEN} />}
+      {toggle != null && <Toggle on={toggle} tint={color.success} />}
       {chevron && <Icon name="chevron" size={18} color={color.text3} strokeWidth={2.4} />}
     </>
   );
@@ -469,14 +466,14 @@ export function TodayCard({ child, onPause, onAddTime }: { child: Child; onPause
       <View style={{ gap: space.sm }}>
         <Text style={styles.overline}>{t('parent.watchTime')}</Text>
         <View style={styles.bigRow}>
-          <Text style={[styles.bigValue, reached && { color: RED }]} numberOfLines={1}>
+          <Text style={[styles.bigValue, reached && { color: color.danger }]} numberOfLines={1}>
             {minutes(t, used)}
           </Text>
           <Text style={styles.bigOf} numberOfLines={1}>
             {limit ? t('parent.ofLimit', { limit: minutes(t, limit * 60) }) : t('parent.noLimit')}
           </Text>
         </View>
-        {limit != null && <Meter progress={used / (limit * 60)} tint={child.paused ? color.verified : reached ? RED : color.ember} />}
+        {limit != null && <Meter progress={used / (limit * 60)} tint={child.paused ? color.verified : reached ? color.danger : color.ember} />}
         {child.extra_minutes > 0 && <Text style={styles.extra}>{t('parent.extraToday', { count: child.extra_minutes })}</Text>}
       </View>
       <View style={styles.actions}>
@@ -500,7 +497,7 @@ export function MiniMeter({ progress }: { progress: number }) {
   const p = Math.min(1, Math.max(0, progress));
   return (
     <View style={styles.miniTrack}>
-      <View style={[styles.miniFill, { width: `${Math.max(4, p * 100)}%`, backgroundColor: p >= 1 ? RED : color.ember }]} />
+      <View style={[styles.miniFill, { width: `${Math.max(4, p * 100)}%`, backgroundColor: p >= 1 ? color.danger : color.ember }]} />
     </View>
   );
 }
@@ -514,7 +511,7 @@ export function RowIcon({ icon, tint }: { icon: IconName; tint: string }) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   groupTitle: { color: color.text2, fontFamily: font.bold, fontSize: 13, letterSpacing: 0.3, paddingHorizontal: space.xs },
   group: { backgroundColor: color.surface1, borderRadius: 24, overflow: 'hidden' },
   groupFooter: { color: color.text3, fontFamily: font.medium, fontSize: 12, lineHeight: 17, paddingHorizontal: space.xs },
@@ -529,7 +526,7 @@ const styles = StyleSheet.create({
 
   accountRow: { flexDirection: 'row', gap: space.sm },
   accountButton: { flex: 1, justifyContent: 'center', borderRadius: radius.pill, backgroundColor: color.surface1 },
-  root: { flex: 1, backgroundColor: color.ink },
+  root: { flex: 1, ...pageFill() },
   pinWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.lg, paddingBottom: 80 },
   pinHint: { color: color.text3, fontFamily: font.medium, fontSize: 13 },
   content: { paddingHorizontal: space.lg, gap: space.md },
@@ -562,11 +559,11 @@ const styles = StyleSheet.create({
   weekValue: { color: color.text, fontFamily: font.mono, fontSize: 28, letterSpacing: -0.6 },
   meterTrack: { height: 8, borderRadius: 4, backgroundColor: color.surface2, overflow: 'hidden' },
   meterFill: { height: 8, width: '100%', borderRadius: 4 },
-  extra: { color: YELLOW, fontFamily: font.semibold, fontSize: 12 },
+  extra: { color: color.warning, fontFamily: font.semibold, fontSize: 12 },
   actions: { flexDirection: 'row', gap: space.sm },
   action: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space.sm, height: 52, borderRadius: radius.pill },
   pause: { flex: 1.4, backgroundColor: color.ember },
-  resume: { flex: 1.4, backgroundColor: GREEN },
+  resume: { flex: 1.4, backgroundColor: color.success },
   addTime: { flex: 1, backgroundColor: color.surface2 },
   actionTextInk: { color: color.ink, fontFamily: font.bold, fontSize: 16 },
   actionText: { color: color.text, fontFamily: font.bold, fontSize: 16 },
@@ -583,7 +580,7 @@ const styles = StyleSheet.create({
   statusChipText: { fontFamily: font.bold, fontSize: 12 },
 
   chart: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', paddingTop: space.sm },
-  limitLine: { position: 'absolute', left: 0, right: 0, height: 1, borderTopWidth: 1, borderStyle: 'dashed', borderColor: RED, opacity: 0.6 },
+  limitLine: { position: 'absolute', left: 0, right: 0, height: 1, borderTopWidth: 1, borderStyle: 'dashed', borderColor: color.danger, opacity: 0.6 },
   barCol: { flex: 1, alignItems: 'center', gap: 6 },
   bar: { width: 22, borderRadius: 8, overflow: 'hidden' },
   dayLetter: { color: color.text3, fontFamily: font.mono, fontSize: 12, height: 16 },
@@ -596,7 +593,7 @@ const styles = StyleSheet.create({
   muted: { color: color.text3, fontFamily: font.medium, fontSize: 13 },
   toggleRow: { flexDirection: 'row', alignItems: 'center', gap: space.md, paddingVertical: 2 },
   hours: { flexDirection: 'row', gap: space.sm },
-  stepper: { flex: 1, padding: space.md, borderRadius: 16, backgroundColor: color.ink, gap: 6 },
+  stepper: { flex: 1, padding: space.md, borderRadius: 16, backgroundColor: color.bg, gap: 6 },
   stepRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   stepButton: { width: 34, height: 34, borderRadius: 17, backgroundColor: color.surface2, alignItems: 'center', justifyContent: 'center' },
   stepValue: { color: color.text, fontFamily: font.mono, fontSize: 17 },
@@ -625,10 +622,10 @@ const styles = StyleSheet.create({
   requestAgo: { color: color.text3, fontFamily: font.medium },
   requestActions: { flexDirection: 'row', gap: space.sm },
   requestButton: { flex: 1, minHeight: 48, borderRadius: radius.pill, backgroundColor: color.surface2, alignItems: 'center', justifyContent: 'center' },
-  requestYes: { backgroundColor: YELLOW },
+  requestYes: { backgroundColor: color.warning },
   requestYesText: { color: color.ink, fontFamily: font.bold, fontSize: 14 },
   requestNoText: { color: color.text, fontFamily: font.semibold, fontSize: 14 },
   liveDot: { width: 10, height: 10, alignItems: 'center', justifyContent: 'center' },
-  liveHalo: { position: 'absolute', width: 10, height: 10, borderRadius: 5, backgroundColor: GREEN },
-  liveCore: { width: 8, height: 8, borderRadius: 4, backgroundColor: GREEN },
-});
+  liveHalo: { position: 'absolute', width: 10, height: 10, borderRadius: 5, backgroundColor: color.success },
+  liveCore: { width: 8, height: 8, borderRadius: 4, backgroundColor: color.success },
+}));

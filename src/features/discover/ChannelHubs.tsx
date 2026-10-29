@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { Image } from 'expo-image';
-import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Pressable, Text, useWindowDimensions, View } from 'react-native';
 
 import { Icon } from '@/components/Icon';
 import { Enter } from '@/components/motion/Enter';
@@ -8,7 +8,7 @@ import { PressScale } from '@/components/motion/PressScale';
 import { useLibrary } from '@/features/library/LibraryProvider';
 import { T, topicLabel, useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
-import { alpha, color, font, radius, space } from '@/theme/tokens';
+import { alpha, color, font, radius, space, themedStyles } from '@/theme/tokens';
 
 import { ChannelAvatar } from './ChannelAvatar';
 import type { ChannelHub } from './useChannels';
@@ -123,12 +123,12 @@ export function FollowButton({ name, big }: { name: string; big?: boolean }) {
   }
   return (
     <Pressable onPress={press} hitSlop={8} accessibilityRole="button" accessibilityLabel={label} accessibilityState={{ selected: on }} style={[styles.followDot, on && styles.followDotOn]}>
-      <Icon name={on ? 'check' : 'plus'} size={16} color={on ? color.ink : color.text} strokeWidth={2.6} />
+      <Icon name={on ? 'check' : 'plus'} size={16} color={on ? color.onInverse : color.text} strokeWidth={2.6} />
     </Pressable>
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   head: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
   h2: { color: color.text, fontFamily: font.title, fontSize: 20, letterSpacing: -0.3 },
   count: { color: color.text3, fontFamily: font.mono, fontSize: 13 },
@@ -146,5 +146,5 @@ const styles = StyleSheet.create({
   followBigOn: { backgroundColor: alpha(color.text, 0.12) },
   followBigText: { color: color.ink, fontFamily: font.bold, fontSize: 15 },
   followDot: { width: 32, height: 32, borderRadius: 16, backgroundColor: alpha(color.text, 0.12), alignItems: 'center', justifyContent: 'center' },
-  followDotOn: { backgroundColor: color.text },
-});
+  followDotOn: { backgroundColor: color.inverse },
+}));

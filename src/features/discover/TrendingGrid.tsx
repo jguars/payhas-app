@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { Image } from 'expo-image';
 import Animated, {
   Easing,
@@ -19,7 +19,7 @@ import { PressScale } from '@/components/motion/PressScale';
 import { FeedVideo, formatCount } from '@/features/feed/data';
 import { useT } from '@/i18n';
 import { stagger } from '@/theme/motion';
-import { color, font } from '@/theme/tokens';
+import { color, font, media, themedStyles } from '@/theme/tokens';
 
 type Props = { videos: FeedVideo[]; loading?: boolean; onOpen: (v: FeedVideo) => void; baseIndex?: number };
 
@@ -56,7 +56,7 @@ export function TrendingGrid({ videos, loading, onOpen, baseIndex = 0 }: Props) 
               <Image source={v.thumb} cachePolicy="memory-disk" recyclingKey={v.id} style={styles.fill} contentFit="cover" />
               <View pointerEvents="none" style={styles.scrim} />
               <View style={styles.views}>
-                <Icon name="play" size={10} color={color.text} />
+                <Icon name="play" size={10} color={media.text} />
                 <CountUp value={v.views} format={formatCount} delay={stagger(baseIndex + i) + 380} style={styles.viewsText} />
               </View>
             </PressScale>
@@ -82,7 +82,7 @@ function Shimmer({ index }: { index: number }) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   // Explicit size: react-native-web lays images out at natural size under absoluteFill alone.
   fill: { position: 'absolute', left: 0, top: 0, width: '100%', height: '100%' },
   grid: { flexDirection: 'row', gap: 8 },
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
     experimental_backgroundImage: 'linear-gradient(0deg, rgba(10,10,15,0.7), rgba(10,10,15,0))',
   },
   views: { position: 'absolute', left: 8, bottom: 8, flexDirection: 'row', alignItems: 'center', gap: 4 },
-  viewsText: { color: color.text, fontFamily: font.mono, fontSize: 12 },
+  viewsText: { color: media.text, fontFamily: font.mono, fontSize: 12 },
   empty: { height: 120, borderRadius: 16, borderWidth: 1, borderColor: color.line, borderStyle: 'dashed', alignItems: 'center', justifyContent: 'center' },
   emptyText: { color: color.text3, fontFamily: font.medium, fontSize: 14 },
-});
+}));

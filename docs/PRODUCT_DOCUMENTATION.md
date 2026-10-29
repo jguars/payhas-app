@@ -127,7 +127,7 @@ The system is **"The Night-Light Playroom"**: a dark, calm room lit only by one 
 
 | Element | Spec |
 | --- | --- |
-| Ground and surfaces | Ink #0A0A0F, Night Surface #14141B, Raised Surface #1D1D26, Hairline #2A2A35. No light theme. |
+| Themes | Three, picked on Me → Theme and kept on the phone; the whole app redraws. **Dark** (default): Ink #0A0A0F, surfaces #14141B / #1D1D26, hairline #2A2A35. **Navy**: a premium deep blue, page gradient #1A2858 → #0A1026, surfaces #17224A / #212E5B. **Light**: calm and low-glare, soft grey-blue #E9ECF1 (never pure white), surfaces #F5F7FA / #DDE2EA, dark text #1B1E26; status and lane colours deepened so they read as text. The Home video feed stays dark in every theme (video room); ink stays dark on bright fills. Tokens: `color.bg` (page), `pageFill()` (page with gradient), `inverse`/`onInverse` (toasts, selected chips), `media` (text over video). |
 | Action colour | Ember #FF5A3C, one call to action per screen, always ink text on it |
 | Lane colours | Little #FFD25E, Kids #4FE3B0, Teen #78A6FF, Adult #C3A2FF — identity only, never decoration |
 | Status colours | Success, warning, danger, info, reward tokens; kept to parent, creator and system surfaces |

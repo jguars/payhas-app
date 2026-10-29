@@ -1,11 +1,11 @@
-import { Alert, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Platform, Pressable, Text, View } from 'react-native';
 
 import { Icon } from '@/components/Icon';
 import { Enter } from '@/components/motion/Enter';
 import { Lang, LANGS, startupLang, translate, useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
-import { color, font, radius, space } from '@/theme/tokens';
+import { color, font, radius, space, themedStyles } from '@/theme/tokens';
 
 /**
  * The four languages, each written in itself. Picking one switches the whole
@@ -63,7 +63,7 @@ export function LanguagePicker({ onPicked, firstRun }: { onPicked?: (l: Lang) =>
 const LEDGE = 4;
 const EMBER_EDGE = color.emberEdge;
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   list: { gap: space.sm },
   ledge: { position: 'absolute', left: 0, right: 0, top: LEDGE, bottom: 0, borderRadius: radius.card, backgroundColor: color.line },
   row: { flexDirection: 'row', alignItems: 'center', minHeight: 64, paddingHorizontal: space.lg, borderRadius: radius.card, backgroundColor: color.surface1, borderWidth: 2, borderColor: color.line },
@@ -72,4 +72,4 @@ const styles = StyleSheet.create({
   english: { color: color.text3, fontFamily: font.medium, fontSize: 13 },
   check: { width: 26, height: 26, borderRadius: 13, borderWidth: 2, borderColor: color.line, alignItems: 'center', justifyContent: 'center' },
   checkOn: { backgroundColor: color.ember, borderColor: color.ember },
-});
+}));

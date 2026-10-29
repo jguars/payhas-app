@@ -1,10 +1,10 @@
-import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { ScrollView, Text, useWindowDimensions, View } from 'react-native';
 import { Image } from 'expo-image';
 
 import { Icon } from '@/components/Icon';
 import { Enter } from '@/components/motion/Enter';
 import { useT } from '@/i18n';
-import { color, font, radius, space } from '@/theme/tokens';
+import { color, font, media, radius, space, themedStyles } from '@/theme/tokens';
 
 import { FeedVideo, formatCount } from './data';
 import { FollowButton } from './FollowButton';
@@ -57,18 +57,18 @@ export function FollowingEmpty({ videos, top }: { videos: FeedVideo[]; top: numb
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   root: { flex: 1, backgroundColor: color.ink, justifyContent: 'center', gap: space.sm },
-  title: { color: color.text, fontFamily: font.display, fontSize: 26, textAlign: 'center', letterSpacing: -0.5 },
-  sub: { color: color.text2, fontFamily: font.medium, fontSize: 15, textAlign: 'center', marginBottom: space.xl },
+  title: { color: media.text, fontFamily: font.display, fontSize: 26, textAlign: 'center', letterSpacing: -0.5 },
+  sub: { color: media.text2, fontFamily: font.medium, fontSize: 15, textAlign: 'center', marginBottom: space.xl },
   row: { gap: space.md },
-  card: { width: CARD_W, height: 330, borderRadius: radius.card + 4, overflow: 'hidden', backgroundColor: color.surface1 },
+  card: { width: CARD_W, height: 330, borderRadius: radius.card + 4, overflow: 'hidden', backgroundColor: media.surface1 },
   poster: { position: 'absolute', left: 0, top: 0, width: '100%', height: '100%' },
   scrim: { position: 'absolute', left: 0, right: 0, bottom: 0, height: '75%', experimental_backgroundImage: 'linear-gradient(0deg, rgba(10,10,15,0.95) 35%, rgba(10,10,15,0))' },
   cardBody: { position: 'absolute', left: 0, right: 0, bottom: 0, padding: space.lg, alignItems: 'center', gap: 6 },
-  avatar: { width: 56, height: 56, borderRadius: 28, backgroundColor: color.surface2, borderWidth: 2, borderColor: color.text, alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
-  avatarLetter: { color: color.text, fontFamily: font.display, fontSize: 22 },
+  avatar: { width: 56, height: 56, borderRadius: 28, backgroundColor: media.surface2, borderWidth: 2, borderColor: media.text, alignItems: 'center', justifyContent: 'center', marginBottom: 4 },
+  avatarLetter: { color: media.text, fontFamily: font.display, fontSize: 22 },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  name: { color: color.text, fontFamily: font.bold, fontSize: 16, flexShrink: 1 },
-  meta: { color: color.text2, fontFamily: font.medium, fontSize: 12, marginBottom: space.sm },
-});
+  name: { color: media.text, fontFamily: font.bold, fontSize: 16, flexShrink: 1 },
+  meta: { color: media.text2, fontFamily: font.medium, fontSize: 12, marginBottom: space.sm },
+}));

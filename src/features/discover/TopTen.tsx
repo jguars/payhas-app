@@ -1,11 +1,11 @@
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { Image } from 'expo-image';
 import Svg, { Text as SvgText } from 'react-native-svg';
 
 import { Enter } from '@/components/motion/Enter';
 import { PressScale } from '@/components/motion/PressScale';
 import { FeedVideo } from '@/features/feed/data';
-import { color, font, space } from '@/theme/tokens';
+import { color, font, space, themedStyles } from '@/theme/tokens';
 
 const POSTER_W = 108;
 const POSTER_H = 156;
@@ -59,11 +59,11 @@ export function TopTen({ videos, onOpen, baseIndex = 0 }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themedStyles(() => ({
   // The row runs to the screen edges; the screen's own padding moves inside it.
   bleed: { marginHorizontal: -space.lg },
   row: { paddingHorizontal: space.lg, gap: 6 },
   num: { position: 'absolute', left: 0, top: 0 },
   poster: { position: 'absolute', top: 0, width: POSTER_W, height: POSTER_H, borderRadius: 14, overflow: 'hidden', backgroundColor: color.surface1 },
   fill: { position: 'absolute', left: 0, top: 0, width: '100%', height: '100%' },
-});
+}));
