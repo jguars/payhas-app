@@ -18,7 +18,6 @@ import urllib.request
 
 APP = pathlib.Path(__file__).resolve().parents[2]
 BUCKET = 'payhas-media'
-PUBLIC = 'https://pub-592e6ab7d542491f89e627a41d432993.r2.dev'
 WRANGLER = os.environ.get('WRANGLER', 'wrangler')
 
 
@@ -34,6 +33,8 @@ def env():
 E = env()
 SB = E['EXPO_PUBLIC_SUPABASE_URL'].rstrip('/')
 KEY = E['SUPABASE_SECRET_KEY']
+# Same address the app reads; r2.dev (rate-limited) only when it's unset.
+PUBLIC = (E.get('EXPO_PUBLIC_MEDIA_URL') or 'https://pub-592e6ab7d542491f89e627a41d432993.r2.dev').rstrip('/')
 
 
 def sb(path, body=None):

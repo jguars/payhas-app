@@ -47,8 +47,12 @@ const LOCAL_MEDIA: Record<string, { source: number; thumb: number }> = {
 /** Signed links live an hour; a feed session is far shorter, and every fetch re-signs. */
 const SIGNED_FOR_S = 60 * 60;
 
-/** The public Cloudflare R2 bucket (`payhas-media`) that holds curated imports. */
-const R2_PUBLIC = 'https://pub-592e6ab7d542491f89e627a41d432993.r2.dev';
+/**
+ * The public Cloudflare R2 bucket (`payhas-media`) that holds curated imports.
+ * Set EXPO_PUBLIC_MEDIA_URL to its custom domain; r2.dev is rate-limited and
+ * only the fallback.
+ */
+const R2_PUBLIC = (process.env.EXPO_PUBLIC_MEDIA_URL || 'https://pub-592e6ab7d542491f89e627a41d432993.r2.dev').replace(/\/+$/, '');
 const R2_PREFIX = 'r2:';
 
 /**
