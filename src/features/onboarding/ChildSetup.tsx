@@ -3,8 +3,10 @@ import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { Icon, IconName } from '@/components/Icon';
 import { PressScale } from '@/components/motion/PressScale';
+import { Enter } from '@/components/motion/Enter';
 import { Toggle } from '@/components/motion/Toggle';
 import { Segmented } from '@/components/Segmented';
+import { Chip } from '@/components/ui/Chip';
 import { hourLabel } from '@/features/library/useScreenTime';
 import { laneKey, TKey, topicLabel, useT } from '@/i18n';
 import { Constants, Tables } from '@/lib/database.types';
@@ -167,21 +169,26 @@ export function ChildSetup({ progress, onDone, onCancel }: Props) {
         <Text style={styles.label}>{t('onboarding.child.year')}</Text>
         <View style={styles.grid}>
           {years.map((y) => (
-            <Chip key={y} label={String(y)} on={year === y} onPress={() => setYear(y)} />
+            <Chip key={y} label={String(y)} selected={year === y} accessibilityRole="radio" onPress={() => setYear(y)} />
           ))}
         </View>
         <Text style={styles.label}>{t('onboarding.child.month')}</Text>
         <View style={styles.grid}>
           {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => {
             const future = year === now.getFullYear() && m > now.getMonth() + 1;
-            return <Chip key={m} label={t(`onboarding.m${m}` as TKey)} on={month === m} disabled={future} onPress={() => setMonth(m)} />;
+            return (
+              <Chip key={m} label={t(`onboarding.m${m}` as TKey)} selected={month === m} disabled={future} accessibilityRole="radio" onPress={() => setMonth(m)} />
+            );
           })}
         </View>
         {lane && (
-          <View style={[styles.laneCard, { borderColor: lanes[lane].color }]}>
+          <Enter key={lane} rise={8} style={[styles.laneCard, { borderColor: lanes[lane].color }]}>
             <View style={[styles.laneDot, { backgroundColor: lanes[lane].color }]} />
-            <Text style={styles.laneText}>{t('onboarding.child.laneResult', { name: nm, lane: t(laneKey(lane)), ages: lanes[lane].ages })}</Text>
-          </View>
+            <View style={{ flex: 1, gap: 4 }}>
+              <Text style={styles.laneText}>{t('onboarding.child.laneResult', { name: nm, lane: t(laneKey(lane)), ages: lanes[lane].ages })}</Text>
+              <Text style={styles.laneAbout}>{t(`onboarding.laneAbout.${lane}` as TKey)}</Text>
+            </View>
+          </Enter>
         )}
       </Step>
     );
@@ -198,27 +205,26 @@ export function ChildSetup({ progress, onDone, onCancel }: Props) {
         action={{ label: t('common.continue'), onPress: () => go(1), disabled: picked.size === 0 }}
       >
         <View style={styles.chips}>
-          {options.map((i) => {
+          {options.map((i, n) => {
             const on = picked.has(i.slug);
             return (
-              <Pressable
-                key={i.slug}
-                onPress={() => {
-                  fx.toggle(!on);
-                  setPicked((cur) => {
-                    const next = new Set(cur);
-                    if (on) next.delete(i.slug);
-                    else next.add(i.slug);
-                    return next;
-                  });
-                }}
-                accessibilityRole="checkbox"
-                accessibilityState={{ checked: on }}
-                style={[styles.topic, on && styles.topicOn]}
-              >
-                <Text style={styles.topicEmoji}>{i.emoji}</Text>
-                <Text style={[styles.topicText, on && { color: color.ink }]}>{topicLabel(t, i.slug, i.label)}</Text>
-              </Pressable>
+              <Enter key={i.slug} index={n} rise={8}>
+                <Chip
+                  label={topicLabel(t, i.slug, i.label)}
+                  emoji={i.emoji}
+                  selected={on}
+                  tint={lane ? lanes[lane].color : undefined}
+                  size="lg"
+                  onPress={() =>
+                    setPicked((cur) => {
+                      const next = new Set(cur);
+                      if (on) next.delete(i.slug);
+                      else next.add(i.slug);
+                      return next;
+                    })
+                  }
+                />
+              </Enter>
             );
           })}
         </View>
@@ -235,30 +241,20 @@ export function ChildSetup({ progress, onDone, onCancel }: Props) {
         title={t('onboarding.child.mixTitle', { name: nm })}
         action={{ label: t('common.continue'), onPress: () => go(1) }}
       >
-        {MIX.map((m) => {
-          const on = mix === m.value;
-          return (
-            <PressScale
-              key={m.value}
-              onPress={() => {
-                fx.tab();
-                setMix(m.value);
-              }}
-              pressedScale={0.98}
-              accessibilityRole="radio"
-              accessibilityState={{ selected: on }}
-              style={[styles.option, on && styles.optionOn]}
-            >
-              <View style={[styles.optionIcon, on && { backgroundColor: color.ember }]}>
-                <Icon name={m.icon} size={20} color={on ? color.ink : color.text} strokeWidth={2.2} />
-              </View>
-              <View style={{ flex: 1, gap: 2 }}>
-                <Text style={styles.optionTitle}>{t(m.label)}</Text>
-                <Text style={styles.optionHint}>{t(m.hint)}</Text>
-              </View>
-            </PressScale>
-          );
-        })}
+        {MIX.map((m) => (
+          <LedgeCard
+            key={m.value}
+            selected={mix === m.value}
+            tint={lane ? lanes[lane].color : color.text}
+            icon={m.icon}
+            title={t(m.label)}
+            hint={t(m.hint)}
+            onPress={() => {
+              fx.tab();
+              setMix(m.value);
+            }}
+          />
+        ))}
       </Step>
     );
   }
@@ -302,21 +298,42 @@ export function ChildSetup({ progress, onDone, onCancel }: Props) {
   );
 }
 
-function Chip({ label, on, disabled, onPress }: { label: string; on: boolean; disabled?: boolean; onPress: () => void }) {
+/**
+ * A chunky outlined choice card with the same hard ledge as `Chip`: it
+ * presses down into the ledge, and fills with the lane colour when chosen.
+ */
+function LedgeCard({ selected, tint, icon, title, hint, onPress }: { selected: boolean; tint: string; icon: IconName; title: string; hint: string; onPress: () => void }) {
+  const edge = shade(tint);
   return (
-    <Pressable
-      onPress={() => {
-        fx.tab();
-        onPress();
-      }}
-      disabled={disabled}
-      accessibilityRole="radio"
-      accessibilityState={{ selected: on, disabled }}
-      style={[styles.chip, on && styles.chipOn, disabled && { opacity: 0.3 }]}
-    >
-      <Text style={[styles.chipText, on && { color: color.ink }]}>{label}</Text>
+    <Pressable onPress={onPress} accessibilityRole="radio" accessibilityState={{ selected }} accessibilityLabel={`${title}. ${hint}`}>
+      {({ pressed }) => (
+        <View style={{ paddingBottom: LEDGE }}>
+          <View style={[styles.ledge, { backgroundColor: selected ? edge : color.line }]} />
+          <View style={[styles.option, selected && { backgroundColor: tint, borderColor: edge }, { transform: [{ translateY: pressed ? LEDGE : 0 }] }]}>
+            <View style={[styles.optionIcon, selected && { backgroundColor: color.ink }]}>
+              <Icon name={icon} size={20} color={selected ? tint : color.text} strokeWidth={2.2} />
+            </View>
+            <View style={{ flex: 1, gap: 2 }}>
+              <Text style={[styles.optionTitle, selected && { color: color.ink }]}>{title}</Text>
+              <Text style={[styles.optionHint, selected && { color: color.ink, opacity: 0.75 }]}>{hint}</Text>
+            </View>
+          </View>
+        </View>
+      )}
     </Pressable>
   );
+}
+
+const LEDGE = 4;
+
+/** The darker edge of a fill, as `Chip` draws it. */
+function shade(hex: string) {
+  const n = parseInt(hex.slice(1), 16);
+  const k = 0.62;
+  const r = Math.round(((n >> 16) & 255) * k);
+  const g = Math.round(((n >> 8) & 255) * k);
+  const b = Math.round((n & 255) * k);
+  return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
 }
 
 function HourStepper({ label, value, onChange, lang }: { label: string; value: number; onChange: (h: number) => void; lang: Parameters<typeof hourLabel>[1] }) {
@@ -328,11 +345,11 @@ function HourStepper({ label, value, onChange, lang }: { label: string; value: n
     <View style={styles.stepper}>
       <Text style={styles.optionHint}>{label}</Text>
       <View style={styles.stepRow}>
-        <PressScale onPress={() => step(-1)} pressedScale={0.85} accessibilityRole="button" accessibilityLabel={`${label} −1`} style={styles.stepButton}>
+        <PressScale onPress={() => step(-1)} pressedScale={0.85} hitSlop={6} accessibilityRole="button" accessibilityLabel={`${label} −1`} style={styles.stepButton}>
           <Icon name="minus" size={16} strokeWidth={2.6} />
         </PressScale>
         <Text style={styles.stepValue}>{hourLabel(value, lang)}</Text>
-        <PressScale onPress={() => step(1)} pressedScale={0.85} accessibilityRole="button" accessibilityLabel={`${label} +1`} style={styles.stepButton}>
+        <PressScale onPress={() => step(1)} pressedScale={0.85} hitSlop={6} accessibilityRole="button" accessibilityLabel={`${label} +1`} style={styles.stepButton}>
           <Icon name="plus" size={16} strokeWidth={2.6} />
         </PressScale>
       </View>
@@ -344,19 +361,13 @@ const styles = StyleSheet.create({
   nameInput: { color: color.text, fontFamily: font.display, fontSize: 32, paddingVertical: space.md, borderBottomWidth: 2, borderBottomColor: color.line },
   label: { color: color.text2, fontFamily: font.semibold, fontSize: 14, marginTop: space.sm },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
-  chip: { minWidth: 64, height: 44, paddingHorizontal: space.md, borderRadius: 14, backgroundColor: color.surface1, borderWidth: 1, borderColor: color.line, alignItems: 'center', justifyContent: 'center' },
-  chipOn: { backgroundColor: color.text, borderColor: color.text },
-  chipText: { color: color.text, fontFamily: font.semibold, fontSize: 15 },
-  laneCard: { flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.lg, borderRadius: radius.card, borderWidth: 1.5, backgroundColor: color.surface1, marginTop: space.sm },
-  laneDot: { width: 12, height: 12, borderRadius: 6 },
-  laneText: { flex: 1, color: color.text, fontFamily: font.semibold, fontSize: 15, lineHeight: 21 },
+  laneCard: { flexDirection: 'row', alignItems: 'flex-start', gap: space.md, padding: space.lg, borderRadius: radius.card, borderWidth: 1.5, backgroundColor: color.surface1, marginTop: space.sm },
+  laneDot: { width: 12, height: 12, borderRadius: 6, marginTop: 5 },
+  laneText: { color: color.text, fontFamily: font.semibold, fontSize: 15, lineHeight: 21 },
+  laneAbout: { color: color.text2, fontFamily: font.medium, fontSize: 13, lineHeight: 18 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
-  topic: { flexDirection: 'row', alignItems: 'center', gap: 8, height: 48, paddingHorizontal: space.lg, borderRadius: radius.pill, backgroundColor: color.surface1, borderWidth: 1, borderColor: color.line },
-  topicOn: { backgroundColor: color.text, borderColor: color.text },
-  topicEmoji: { fontSize: 18 },
-  topicText: { color: color.text, fontFamily: font.semibold, fontSize: 15 },
-  option: { flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.lg, borderRadius: radius.card, backgroundColor: color.surface1, borderWidth: 1.5, borderColor: color.surface1 },
-  optionOn: { borderColor: color.ember },
+  ledge: { position: 'absolute', left: 0, right: 0, top: LEDGE, bottom: 0, borderRadius: radius.card },
+  option: { flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.lg, borderRadius: radius.card, backgroundColor: color.surface1, borderWidth: 2, borderColor: color.line },
   optionIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: color.surface2, alignItems: 'center', justifyContent: 'center' },
   optionTitle: { color: color.text, fontFamily: font.bold, fontSize: 16 },
   optionHint: { color: color.text3, fontFamily: font.medium, fontSize: 13, lineHeight: 18 },

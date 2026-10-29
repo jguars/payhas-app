@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { Enter } from '@/components/motion/Enter';
+import { PressScale } from '@/components/motion/PressScale';
 import { SafeScreen } from '@/components/SafeScreen';
+import { Chip } from '@/components/ui/Chip';
 import { topicLabel, useT } from '@/i18n';
 import { useFamily } from '@/features/family/FamilyProvider';
 import { Constants, Tables } from '@/lib/database.types';
 import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
-import { color, font, radius, space } from '@/theme/tokens';
+import { color, font, lane as lanes, radius, space } from '@/theme/tokens';
 
 type Interest = Tables<'interests'>;
 const laneRank = (l: Interest['youngest_lane']) => Constants.public.Enums.lane.indexOf(l);
@@ -57,36 +60,42 @@ export default function InterestsScreen() {
 
   return (
     <SafeScreen style={styles.root}>
-      <Text style={styles.title}>{profile ? t('onboarding.child.interestsTitle', { name: profile.display_name }) : ''}</Text>
+      <Enter index={0}>
+        <Text style={styles.title} accessibilityRole="header">
+          {profile ? t('onboarding.child.interestsTitle', { name: profile.display_name }) : ''}
+        </Text>
+      </Enter>
+      <Enter index={1}>
+        <Text style={styles.hint}>{t('onboarding.child.interestsHint')}</Text>
+      </Enter>
       <ScrollView contentContainerStyle={styles.grid}>
         {options.length === 0 && <ActivityIndicator color={color.text2} />}
-        {options.map((i) => {
-          const on = picked.has(i.slug);
-          return (
-            <Pressable
-              key={i.slug}
-              onPress={() => {
-                fx.tab();
-                toggle(i.slug);
-              }}
-              accessibilityRole="checkbox"
-              accessibilityState={{ checked: on }}
-              accessibilityLabel={topicLabel(t, i.slug, i.label)}
-              style={[styles.tile, on && styles.tileOn]}
-            >
-              <Text style={styles.emoji}>{i.emoji}</Text>
-              <Text style={[styles.label, on && styles.labelOn]} numberOfLines={1}>
-                {topicLabel(t, i.slug, i.label)}
-              </Text>
-            </Pressable>
-          );
-        })}
+        {options.map((i, n) => (
+          <Enter key={i.slug} index={2 + n} rise={8}>
+            <Chip
+              label={topicLabel(t, i.slug, i.label)}
+              emoji={i.emoji}
+              size="lg"
+              selected={picked.has(i.slug)}
+              tint={profile ? lanes[profile.lane].color : undefined}
+              onPress={() => toggle(i.slug)}
+            />
+          </Enter>
+        ))}
       </ScrollView>
       <View style={styles.footer}>
         <Text style={styles.error}>{error ?? ' '}</Text>
-        <Pressable onPress={save} disabled={picked.size === 0 || saving} style={[styles.button, (picked.size === 0 || saving) && styles.buttonOff]}>
+        <PressScale
+          onPress={() => {
+            fx.tap();
+            save();
+          }}
+          disabled={picked.size === 0 || saving}
+          accessibilityRole="button"
+          style={[styles.button, (picked.size === 0 || saving) && styles.buttonOff]}
+        >
           {saving ? <ActivityIndicator color={color.ink} /> : <Text style={styles.buttonText}>{t('common.done')}</Text>}
-        </Pressable>
+        </PressScale>
         <Pressable onPress={leaveProfile} hitSlop={10} accessibilityRole="button" style={styles.switch}>
           <Text style={styles.switchText}>{t('onboarding.notYou', { name: profile?.display_name ?? '' })}</Text>
         </Pressable>
@@ -97,28 +106,14 @@ export default function InterestsScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: color.ink },
-  title: { color: color.text, fontFamily: font.display, fontSize: 28, textAlign: 'center', paddingHorizontal: space.xl, paddingTop: space.xxl, paddingBottom: space.xl },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: space.md, paddingHorizontal: space.lg, paddingBottom: space.xl },
-  tile: {
-    width: 104,
-    height: 104,
-    borderRadius: radius.card,
-    backgroundColor: color.surface1,
-    borderWidth: 2,
-    borderColor: color.surface1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: space.xs,
-  },
-  tileOn: { borderColor: color.ember, backgroundColor: color.surface2 },
-  emoji: { fontSize: 36 },
-  label: { color: color.text2, fontFamily: font.semibold, fontSize: 14 },
-  labelOn: { color: color.text },
+  title: { color: color.text, fontFamily: font.display, fontSize: 30, lineHeight: 36, letterSpacing: -0.6, textAlign: 'center', paddingHorizontal: space.xl, paddingTop: space.xxl },
+  hint: { color: color.text2, fontFamily: font.medium, fontSize: 15, textAlign: 'center', paddingHorizontal: space.xl, paddingTop: space.sm, paddingBottom: space.xl },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: space.sm, paddingHorizontal: space.lg, paddingBottom: space.xl },
   footer: { paddingHorizontal: space.xl, paddingBottom: space.lg, gap: space.sm },
   error: { color: color.ember, fontFamily: font.medium, fontSize: 13, textAlign: 'center' },
   button: { height: 52, borderRadius: radius.pill, backgroundColor: color.ember, alignItems: 'center', justifyContent: 'center' },
   buttonOff: { opacity: 0.4 },
   buttonText: { color: color.ink, fontFamily: font.bold, fontSize: 16 },
-  switch: { alignSelf: 'center', minHeight: 44, justifyContent: 'center' },
+  switch: { alignSelf: 'center', minHeight: 48, justifyContent: 'center' },
   switchText: { color: color.text2, fontFamily: font.semibold, fontSize: 14 },
 });

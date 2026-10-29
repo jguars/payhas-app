@@ -5,7 +5,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } fr
 import { useT } from '@/i18n';
 import { useInsets } from '@/lib/useInsets';
 import { spring } from '@/theme/motion';
-import { color, font, space } from '@/theme/tokens';
+import { alpha, color, font, space } from '@/theme/tokens';
 
 const TRAVEL = 700;
 
@@ -50,7 +50,7 @@ export function BottomSheet({ open, onClose, title, children }: Props) {
 }
 
 const styles = StyleSheet.create({
-  backdrop: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(0,0,0,0.55)' },
+  backdrop: { ...StyleSheet.absoluteFill, backgroundColor: alpha(color.black, 0.55) },
   sheet: {
     position: 'absolute',
     left: 0,

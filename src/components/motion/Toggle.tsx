@@ -6,7 +6,7 @@ import { spring } from '@/theme/motion';
 import { color } from '@/theme/tokens';
 
 /** A switch whose knob springs across and stretches a little mid-travel. Display only. */
-export function Toggle({ on, tint = '#4FE3B0' }: { on: boolean; tint?: string }) {
+export function Toggle({ on, tint = color.success }: { on: boolean; tint?: string }) {
   const p = useSharedValue(on ? 1 : 0);
   useEffect(() => {
     p.value = withSpring(on ? 1 : 0, spring.snappy);

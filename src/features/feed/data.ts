@@ -47,6 +47,10 @@ const LOCAL_MEDIA: Record<string, { source: number; thumb: number }> = {
 /** Signed links live an hour; a feed session is far shorter, and every fetch re-signs. */
 const SIGNED_FOR_S = 60 * 60;
 
+/** The public Cloudflare R2 bucket (`payhas-media`) that holds curated imports. */
+const R2_PUBLIC = 'https://pub-592e6ab7d542491f89e627a41d432993.r2.dev';
+const R2_PREFIX = 'r2:';
+
 /**
  * Signed URLs for any uploaded files among these rows, in one request.
  * Storage policies decide what can be signed: published files for everyone,
@@ -54,9 +58,13 @@ const SIGNED_FOR_S = 60 * 60;
  */
 export async function signMedia(rows: { storage_path?: string | null; thumb_path?: string | null }[]): Promise<Record<string, string>> {
   const paths = rows.flatMap((r) => [r.storage_path, r.thumb_path]).filter((p): p is string => !!p);
-  if (paths.length === 0) return {};
-  const { data } = await supabase.storage.from('videos').createSignedUrls(paths, SIGNED_FOR_S);
-  return Object.fromEntries((data ?? []).flatMap((d) => (d.signedUrl && d.path ? [[d.path, d.signedUrl] as const] : [])));
+  // Curated imports live in the public R2 bucket (`r2:<key>`) and need no signing.
+  const out: Record<string, string> = Object.fromEntries(paths.filter((p) => p.startsWith(R2_PREFIX)).map((p) => [p, `${R2_PUBLIC}/${p.slice(R2_PREFIX.length)}`]));
+  const signed = paths.filter((p) => !p.startsWith(R2_PREFIX));
+  if (signed.length === 0) return out;
+  const { data } = await supabase.storage.from('videos').createSignedUrls(signed, SIGNED_FOR_S);
+  for (const d of data ?? []) if (d.signedUrl && d.path) out[d.path] = d.signedUrl;
+  return out;
 }
 
 export function mediaFor(row: { asset_key?: string | null; storage_path?: string | null; thumb_path?: string | null }, urls: Record<string, string>) {

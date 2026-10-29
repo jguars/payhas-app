@@ -8,7 +8,7 @@ import { Icon } from '@/components/Icon';
 import { Enter } from '@/components/motion/Enter';
 import { PressScale } from '@/components/motion/PressScale';
 import { useT } from '@/i18n';
-import { color, font, radius, space } from '@/theme/tokens';
+import { alpha, color, font, radius, space } from '@/theme/tokens';
 
 /** Top bar shared by the games: close on the left, the game's readouts on the right. */
 export function GameBar({ children }: { children?: ReactNode }) {
@@ -17,7 +17,7 @@ export function GameBar({ children }: { children?: ReactNode }) {
   const { t } = useT();
   return (
     <View style={[styles.bar, { paddingTop: insets.top + 8 }]} pointerEvents="box-none">
-      <PressScale onPress={() => goBack()} pressedScale={0.88} accessibilityRole="button" accessibilityLabel={t('play.closeGame')} style={styles.close}>
+      <PressScale onPress={() => goBack()} pressedScale={0.88} hitSlop={4} accessibilityRole="button" accessibilityLabel={t('play.closeGame')} style={styles.close}>
         <Icon name="close" size={18} strokeWidth={2.6} />
       </PressScale>
       <View style={styles.readouts}>{children}</View>
@@ -68,17 +68,17 @@ export function Finish({ title, lines, record, onAgain }: { title: string; lines
 
 const styles = StyleSheet.create({
   bar: { position: 'absolute', left: 0, right: 0, top: 0, zIndex: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: space.lg },
-  close: { width: 40, height: 40, borderRadius: 20, backgroundColor: 'rgba(20,20,27,0.7)', alignItems: 'center', justifyContent: 'center' },
+  close: { width: 40, height: 40, borderRadius: 20, backgroundColor: alpha(color.surface1, 0.7), alignItems: 'center', justifyContent: 'center' },
   readouts: { flexDirection: 'row', gap: space.sm },
-  readout: { minWidth: 64, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 14, backgroundColor: 'rgba(20,20,27,0.7)', alignItems: 'center' },
+  readout: { minWidth: 64, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 14, backgroundColor: alpha(color.surface1, 0.7), alignItems: 'center' },
   readoutValue: { color: color.text, fontFamily: font.mono, fontSize: 18, fontVariant: ['tabular-nums'] },
-  readoutLabel: { color: color.text3, fontFamily: font.semibold, fontSize: 10, letterSpacing: 0.6, textTransform: 'uppercase' },
-  finish: { ...StyleSheet.absoluteFill, alignItems: 'center', justifyContent: 'center', gap: space.sm, backgroundColor: 'rgba(10,10,15,0.82)', padding: space.xl },
+  readoutLabel: { color: color.text3, fontFamily: font.semibold, fontSize: 12, letterSpacing: 0.6, textTransform: 'uppercase' },
+  finish: { ...StyleSheet.absoluteFill, alignItems: 'center', justifyContent: 'center', gap: space.sm, backgroundColor: alpha(color.ink, 0.82), padding: space.xl },
   finishTitle: { color: color.text, fontFamily: font.display, fontSize: 34, letterSpacing: -0.8, textAlign: 'center' },
-  record: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#FFD25E', paddingHorizontal: 12, paddingVertical: 5, borderRadius: radius.pill },
+  record: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: color.reward, paddingHorizontal: 12, paddingVertical: 5, borderRadius: radius.pill },
   recordText: { color: color.ink, fontFamily: font.bold, fontSize: 13 },
   finishLine: { color: color.text2, fontFamily: font.medium, fontSize: 16, textAlign: 'center' },
-  button: { height: 50, paddingHorizontal: space.xl, borderRadius: radius.pill, backgroundColor: color.ember, justifyContent: 'center' },
+  button: { minHeight: 50, paddingHorizontal: space.xl, borderRadius: radius.pill, backgroundColor: color.ember, justifyContent: 'center' },
   secondary: { backgroundColor: color.surface2 },
   buttonText: { color: color.ink, fontFamily: font.bold, fontSize: 16 },
 });

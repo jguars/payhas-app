@@ -23,7 +23,7 @@ export function TasteCard({ taste, onReset, delay = 0 }: Props) {
       <View style={styles.head}>
         <Text style={[styles.title, { flexShrink: 1 }]} numberOfLines={1}>{t('me.taste.title')}</Text>
         {!empty && (
-          <PressScale onPress={onReset} pressedScale={0.92} accessibilityRole="button" style={styles.reset}>
+          <PressScale onPress={onReset} pressedScale={0.92} hitSlop={8} accessibilityRole="button" style={styles.reset}>
             <Text style={styles.resetText}>{t('me.taste.reset')}</Text>
           </PressScale>
         )}
@@ -58,7 +58,7 @@ function Bar({ row, delay }: { row: TasteRow & { exploring: boolean }; delay: nu
 
   // scaleX, not width: transform stays on the compositor.
   const anim = useAnimatedStyle(() => ({ transform: [{ scaleX: Math.max(0, fill.value) }] }));
-  const tint = row.exploring ? '#78A6FF' : color.ember;
+  const tint = row.exploring ? color.info : color.ember;
 
   return (
     <View style={{ gap: 6 }}>
@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
   card: { backgroundColor: color.surface1, borderRadius: 24, padding: 18, gap: 14 },
   head: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', minHeight: 32 },
   title: { color: color.text, fontFamily: font.title, fontSize: 19 },
-  reset: { height: 32, paddingHorizontal: 12, borderRadius: radius.pill, borderWidth: 1, borderColor: color.line, justifyContent: 'center' },
+  reset: { minHeight: 32, paddingHorizontal: 12, borderRadius: radius.pill, borderWidth: 1, borderColor: color.line, justifyContent: 'center' },
   resetText: { color: color.text2, fontFamily: font.semibold, fontSize: 12 },
   hint: { color: color.text3, fontFamily: font.medium, fontSize: 14 },
   rowHead: { flexDirection: 'row', justifyContent: 'space-between' },

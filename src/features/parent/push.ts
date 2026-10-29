@@ -7,6 +7,7 @@ import { Platform } from 'react-native';
 import { deviceTimeZone } from '@/features/library/LibraryProvider';
 import { tNow } from '@/i18n';
 import { supabase } from '@/lib/supabase';
+import { color } from '@/theme/tokens';
 
 // The FCM token this phone registered as a parent phone, if it opted in.
 const KEY = 'payhas.pushToken';
@@ -35,7 +36,7 @@ function ensureChannel() {
     name: tNow('parent.channelName'),
     description: tNow('parent.channelDescription'),
     importance: Notifications.AndroidImportance.HIGH,
-    lightColor: '#FF5A3C',
+    lightColor: color.ember,
   });
 }
 

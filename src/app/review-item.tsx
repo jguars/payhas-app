@@ -16,10 +16,10 @@ import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
 import { useInsets } from '@/lib/useInsets';
 import { useGoBack } from '@/lib/useGoBack';
-import { color, font, Lane, lane as lanes, radius, space } from '@/theme/tokens';
+import { alpha, color, font, Lane, lane as lanes, radius, space } from '@/theme/tokens';
 
-const GREEN = '#4FE3B0';
-const RED = '#FF8A73';
+const GREEN = color.success;
+const RED = color.danger;
 
 /** One item from the queue: watch it, set lane + topics, then decide. */
 export default function ReviewItemScreen() {
@@ -218,7 +218,7 @@ function Player({ source }: { source: MediaSource }) {
 }
 
 function Decision({ label, icon, tone, disabled, onPress }: { label: string; icon: 'check' | 'close' | 'eyeOff'; tone: 'good' | 'bad' | 'neutral'; disabled?: boolean; onPress: () => void }) {
-  const bg = tone === 'good' ? GREEN : tone === 'bad' ? 'rgba(255,138,115,0.14)' : color.surface2;
+  const bg = tone === 'good' ? GREEN : tone === 'bad' ? alpha(color.danger, 0.14) : color.surface2;
   const fg = tone === 'good' ? color.ink : tone === 'bad' ? RED : color.text;
   return (
     <PressScale onPress={onPress} disabled={disabled} accessibilityRole="button" style={[styles.decision, { backgroundColor: bg }, disabled && { opacity: 0.4 }]}>
@@ -233,20 +233,20 @@ function Decision({ label, icon, tone, disabled, onPress }: { label: string; ico
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: color.ink },
   content: { paddingHorizontal: space.lg, gap: space.xl },
-  playerWrap: { height: 420, borderRadius: radius.card, overflow: 'hidden', backgroundColor: '#000' },
+  playerWrap: { height: 420, borderRadius: radius.card, overflow: 'hidden', backgroundColor: color.black },
   player: { width: '100%', height: '100%' },
   caption: { color: color.text, fontFamily: font.bold, fontSize: 17 },
   meta: { color: color.text3, fontFamily: font.medium, fontSize: 13 },
-  reportBox: { flexDirection: 'row', gap: space.sm, alignItems: 'center', padding: space.md, borderRadius: 14, backgroundColor: 'rgba(255,138,115,0.1)' },
+  reportBox: { flexDirection: 'row', gap: space.sm, alignItems: 'center', padding: space.md, borderRadius: 14, backgroundColor: alpha(color.danger, 0.1) },
   reportText: { flex: 1, color: RED, fontFamily: font.semibold, fontSize: 13 },
   label: { color: color.text, fontFamily: font.bold, fontSize: 15 },
   help: { color: color.text3, fontFamily: font.medium, fontSize: 12 },
   lanes: { flexDirection: 'row', gap: space.sm },
   lane: { flex: 1, paddingVertical: space.md, borderRadius: 14, borderWidth: 1.5, alignItems: 'center', gap: 2 },
   laneLabel: { fontFamily: font.bold, fontSize: 14 },
-  laneAges: { color: color.text3, fontFamily: font.medium, fontSize: 11 },
+  laneAges: { color: color.text3, fontFamily: font.medium, fontSize: 12 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
-  chip: { flexDirection: 'row', alignItems: 'center', gap: 6, height: 36, paddingHorizontal: 12, borderRadius: radius.pill, backgroundColor: color.surface1, borderWidth: 1, borderColor: color.line },
+  chip: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 36, paddingHorizontal: 12, borderRadius: radius.pill, backgroundColor: color.surface1, borderWidth: 1, borderColor: color.line },
   chipOn: { backgroundColor: color.text, borderColor: color.text },
   chipEmoji: { fontSize: 15 },
   chipText: { color: color.text, fontFamily: font.semibold, fontSize: 13 },

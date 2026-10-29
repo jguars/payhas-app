@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Image } from 'react-native';
+import { Image } from 'expo-image';
 
 import { useFamily } from '@/features/family/FamilyProvider';
 import { useLibrary } from '@/features/library/LibraryProvider';
@@ -45,7 +45,7 @@ export function useFeed(mode: FeedMode = 'forYou') {
       }
       const page = await toFeedVideos(data, lang);
       // Posters back the blurred fill behind each video; fetch them before the videos scroll in.
-      for (const v of page) if (typeof v.thumb === 'object') Image.prefetch(v.thumb.uri).catch(() => {});
+      for (const v of page) if (typeof v.thumb === 'object') Image.prefetch(v.thumb.uri, 'memory-disk').catch(() => {});
       return page;
     },
     [active, mode, leaveProfile, lang],
@@ -77,5 +77,10 @@ export function useFeed(mode: FeedMode = 'forYou') {
     load();
   }, [load, followKey]);
 
-  return { videos: videos.filter((v) => !hidden.has(v.id)), loading, reload: load, loadMore };
+  /** Put a video (opened from elsewhere) at the top unless it's already loaded. */
+  const insert = useCallback((v: FeedVideo) => {
+    setVideos((cur) => (cur.some((c) => c.id === v.id) ? cur : [v, ...cur]));
+  }, []);
+
+  return { videos: videos.filter((v) => !hidden.has(v.id)), loading, reload: load, loadMore, insert };
 }

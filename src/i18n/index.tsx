@@ -64,20 +64,24 @@ export function translate(lang: Lang, key: string, params?: Params): string {
 /** Translate outside React, in the language last set. */
 export const tNow: T = (key, params) => translate(current, key, params);
 
-type Ctx = { lang: Lang; setLang: (l: Lang) => void; t: T };
+type Ctx = { lang: Lang; setLang: (l: Lang) => void; t: T; chosen: boolean };
 const I18nContext = createContext<Ctx | null>(null);
 
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>(current);
+  // Tracked separately: picking the language the phone already uses changes
+  // nothing in `lang`, but the first-run screen still has to move on.
+  const [chosen, setChosen] = useState(hasChosenLanguage);
   const setLang = useCallback((l: Lang) => {
     current = l;
     try {
       localStorage.setItem(KEY, l);
     } catch {}
     setLangState(l);
+    setChosen(true);
   }, []);
   const t = useCallback<T>((key, params) => translate(lang, key, params), [lang]);
-  const value = useMemo(() => ({ lang, setLang, t }), [lang, setLang, t]);
+  const value = useMemo(() => ({ lang, setLang, t, chosen }), [lang, setLang, t, chosen]);
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 }
 

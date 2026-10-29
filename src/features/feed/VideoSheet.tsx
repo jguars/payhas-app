@@ -166,7 +166,7 @@ function FamilyTarget({ profile, allowed, onSend }: { profile: Profile; allowed:
 }
 
 function Action({ icon, label, onPress, filled, tone }: { icon: IconName; label: string; onPress: () => void; filled?: boolean; tone?: 'warn' }) {
-  const tint = tone === 'warn' ? '#FF8A73' : color.text;
+  const tint = tone === 'warn' ? color.danger : color.text;
   return (
     <PressScale onPress={onPress} pressedScale={0.92} accessibilityRole="button" accessibilityLabel={label} style={styles.action}>
       <View style={styles.actionIcon}>
@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
   targetAvatar: { width: 56, height: 56, borderRadius: 20, alignItems: 'center', justifyContent: 'center' },
   targetOff: { opacity: 0.35 },
   targetLetter: { color: color.ink, fontFamily: font.display, fontSize: 24 },
-  targetBadge: { position: 'absolute', right: -4, bottom: -4, width: 22, height: 22, borderRadius: 11, backgroundColor: '#4FE3B0', borderWidth: 2, borderColor: color.surface1, alignItems: 'center', justifyContent: 'center' },
+  targetBadge: { position: 'absolute', right: -4, bottom: -4, width: 22, height: 22, borderRadius: 11, backgroundColor: color.success, borderWidth: 2, borderColor: color.surface1, alignItems: 'center', justifyContent: 'center' },
   targetName: { color: color.text, fontFamily: font.semibold, fontSize: 12 },
   outRow: { paddingHorizontal: space.xl },
   outButton: { height: 48, borderRadius: radius.pill, backgroundColor: color.text, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space.sm },
@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
   reason: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   reasonIcon: { width: 32, height: 32, borderRadius: 16, backgroundColor: color.surface2, alignItems: 'center', justifyContent: 'center' },
   reasonText: { color: color.text, fontFamily: font.medium, fontSize: 15, flex: 1 },
-  reportRow: { flexDirection: 'row', alignItems: 'center', gap: space.md, height: 54, paddingHorizontal: space.lg, borderRadius: 16, backgroundColor: color.surface2 },
+  reportRow: { flexDirection: 'row', alignItems: 'center', gap: space.md, minHeight: 54, paddingHorizontal: space.lg, borderRadius: 16, backgroundColor: color.surface2 },
   reportText: { flex: 1, color: color.text, fontFamily: font.semibold, fontSize: 15 },
   back: { flexDirection: 'row', alignItems: 'center', alignSelf: 'center', gap: 4, paddingVertical: space.sm },
   backText: { color: color.text2, fontFamily: font.semibold, fontSize: 14 },

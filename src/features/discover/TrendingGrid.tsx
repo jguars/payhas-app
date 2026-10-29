@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import { Image } from 'expo-image';
 import Animated, {
   Easing,
   FadeIn,
@@ -52,7 +53,7 @@ export function TrendingGrid({ videos, loading, onOpen, baseIndex = 0 }: Props) 
         <View key={v.id} style={styles.cell}>
           <Enter index={baseIndex + i} rise={22}>
             <PressScale onPress={() => onOpen(v)} accessibilityRole="button" accessibilityLabel={v.caption} style={styles.tile}>
-              <Image source={v.thumb} style={styles.fill} resizeMode="cover" accessibilityIgnoresInvertColors />
+              <Image source={v.thumb} cachePolicy="memory-disk" recyclingKey={v.id} style={styles.fill} contentFit="cover" />
               <View pointerEvents="none" style={styles.scrim} />
               <View style={styles.views}>
                 <Icon name="play" size={10} color={color.text} />
@@ -96,7 +97,7 @@ const styles = StyleSheet.create({
     experimental_backgroundImage: 'linear-gradient(0deg, rgba(10,10,15,0.7), rgba(10,10,15,0))',
   },
   views: { position: 'absolute', left: 8, bottom: 8, flexDirection: 'row', alignItems: 'center', gap: 4 },
-  viewsText: { color: color.text, fontFamily: font.mono, fontSize: 11 },
+  viewsText: { color: color.text, fontFamily: font.mono, fontSize: 12 },
   empty: { height: 120, borderRadius: 16, borderWidth: 1, borderColor: color.line, borderStyle: 'dashed', alignItems: 'center', justifyContent: 'center' },
   emptyText: { color: color.text3, fontFamily: font.medium, fontSize: 14 },
 });

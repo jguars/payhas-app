@@ -8,7 +8,10 @@ import { useLibrary } from '@/features/library/LibraryProvider';
 import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { spring } from '@/theme/motion';
-import { color, font, radius } from '@/theme/tokens';
+import { alpha, color, font, radius } from '@/theme/tokens';
+
+/** Worklets can't call plain JS helpers like `alpha()` on the UI thread, so resolve colours up here. */
+const CLEAR = alpha(color.black, 0);
 
 /** Follow ⇄ Following. The fill drains from ember to outline and the label swaps with a little bounce. */
 export function FollowButton({ creator, size = 'md' }: { creator: string; size?: 'sm' | 'md' }) {
@@ -23,7 +26,7 @@ export function FollowButton({ creator, size = 'md' }: { creator: string; size?:
   }, [on, p]);
 
   const anim = useAnimatedStyle(() => ({
-    backgroundColor: interpolateColor(p.value, [0, 1], [color.ember, 'rgba(0,0,0,0)']),
+    backgroundColor: interpolateColor(p.value, [0, 1], [color.ember, CLEAR]),
     borderColor: interpolateColor(p.value, [0, 1], [color.ember, color.line]),
     transform: [{ scale: s.value }],
   }));

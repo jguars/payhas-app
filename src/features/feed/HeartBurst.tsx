@@ -53,5 +53,5 @@ function Spark({ angle }: { angle: number }) {
 
 const styles = StyleSheet.create({
   at: { position: 'absolute', width: SIZE, height: SIZE, alignItems: 'center', justifyContent: 'center' },
-  spark: { position: 'absolute', width: 10, height: 10, borderRadius: 5, backgroundColor: '#FFD25E' },
+  spark: { position: 'absolute', width: 10, height: 10, borderRadius: 5, backgroundColor: color.reward },
 });

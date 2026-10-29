@@ -1,14 +1,14 @@
 import { useEffect, useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import Animated, { Easing, useAnimatedStyle, useSharedValue, withDelay, withSpring, withTiming } from 'react-native-reanimated';
+import Animated, { Easing, useAnimatedStyle, useReducedMotion, useSharedValue, withDelay, withSpring, withTiming } from 'react-native-reanimated';
 
 import { REACTIONS } from '@/features/library/LibraryProvider';
 import { spring } from '@/theme/motion';
-import { color, radius } from '@/theme/tokens';
+import { alpha, color, radius } from '@/theme/tokens';
 
 type Props = { mine: Set<string>; onPick: (emoji: string) => void };
 
-/** Six big emoji in a pill that unfolds from the react button, one after another. */
+/** Six big emoji in a pill that unfolds from the react pill (bottom-left), one after another. */
 export function ReactionBar({ mine, onPick }: Props) {
   return (
     <View style={styles.bar} accessibilityRole="menu">
@@ -20,11 +20,12 @@ export function ReactionBar({ mine, onPick }: Props) {
 }
 
 function ReactionChoice({ emoji, index, on, onPick }: { emoji: string; index: number; on: boolean; onPick: (e: string) => void }) {
+  const reduce = useReducedMotion();
   const s = useSharedValue(0);
   useEffect(() => {
-    // Unfold from the right (nearest the button) outward.
-    s.value = withDelay((REACTIONS.length - 1 - index) * 35, withSpring(1, spring.bouncy));
-  }, [index, s]);
+    // Unfold from the left (nearest the pill) outward; appear at once when motion is reduced.
+    s.value = reduce ? 1 : withDelay(index * 35, withSpring(1, spring.bouncy));
+  }, [index, reduce, s]);
   const anim = useAnimatedStyle(() => ({ opacity: Math.min(1, s.value), transform: [{ scale: s.value }, { translateY: (1 - s.value) * 12 }] }));
   return (
     <Animated.View style={anim}>
@@ -66,8 +67,8 @@ function Floater({ emoji, x, y, dx, delay, size }: { emoji: string; x: number; y
 }
 
 const styles = StyleSheet.create({
-  bar: { flexDirection: 'row', gap: 4, padding: 6, borderRadius: radius.pill, backgroundColor: 'rgba(20,20,27,0.92)', borderWidth: 1, borderColor: color.line },
-  choice: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
+  bar: { flexDirection: 'row', gap: 4, padding: 6, borderRadius: radius.pill, backgroundColor: alpha(color.surface1, 0.9), borderWidth: 1, borderColor: alpha(color.text, 0.14) },
+  choice: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center' },
   choiceOn: { backgroundColor: color.surface2 },
   emoji: { fontSize: 28 },
 });

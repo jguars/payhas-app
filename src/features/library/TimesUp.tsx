@@ -13,6 +13,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import Svg, { Circle, Path } from 'react-native-svg';
 
+import { Icon } from '@/components/Icon';
 import { Enter } from '@/components/motion/Enter';
 import { PressScale } from '@/components/motion/PressScale';
 import { useFamily } from '@/features/family/FamilyProvider';
@@ -36,6 +37,8 @@ export function TimesUp({ lock }: { lock: Exclude<Lock, null> }) {
   const { leaveProfile, current } = useFamily();
   const { t, lang } = useT();
   const quiet = lock === 'quiet';
+  // Little ones may not read yet: every action carries a big icon that says it on its own.
+  const little = current?.lane === 'little';
   const copy = {
     paused: { title: t('me.stop.pausedTitle'), body: t('me.stop.pausedBody') },
     quiet: { title: t('me.quietHours'), body: t('me.stop.quietBody', { time: hourLabel(current?.wake_hour ?? 7, lang) }) },
@@ -61,11 +64,12 @@ export function TimesUp({ lock }: { lock: Exclude<Lock, null> }) {
       </Enter>
       {lock === 'limit' && (
         <Enter index={4}>
-          <AskForTime />
+          <AskForTime little={little} />
         </Enter>
       )}
       <Enter index={5}>
-        <PressScale onPress={lock === 'games' ? () => router.navigate('/') : leaveProfile} accessibilityRole="button" style={styles.button}>
+        <PressScale onPress={lock === 'games' ? () => router.navigate('/') : leaveProfile} accessibilityRole="button" style={[styles.button, little && styles.big]}>
+          <Icon name={lock === 'games' ? 'play' : 'me'} filled size={little ? 28 : 18} color={color.text} />
           <Text style={styles.buttonText}>{lock === 'games' ? t('me.stop.watchVideos') : t('me.switchProfile')}</Text>
         </PressScale>
       </Enter>
@@ -80,7 +84,7 @@ type Ask = 'idle' | 'sending' | 'waiting' | 'declined' | 'too_many' | 'error';
  * says yes, the extra minutes arrive over Realtime and this screen goes away
  * by itself; while waiting it checks for a "not today" every 8 seconds.
  */
-function AskForTime() {
+function AskForTime({ little }: { little: boolean }) {
   const { active } = useFamily();
   const { t } = useT();
   const token = active?.token;
@@ -120,7 +124,8 @@ function AskForTime() {
   if (state === 'idle' || state === 'sending' || state === 'error') {
     return (
       <View style={{ alignItems: 'center', gap: space.sm }}>
-        <PressScale onPress={ask} disabled={state === 'sending'} accessibilityRole="button" style={styles.ask}>
+        <PressScale onPress={ask} disabled={state === 'sending'} accessibilityRole="button" style={[styles.ask, little && styles.big]}>
+          <Icon name="clock" size={little ? 28 : 18} color={color.ink} strokeWidth={2.4} />
           <Text style={styles.askText}>{t('me.ask.button')}</Text>
         </PressScale>
         {state === 'error' && <Text style={[styles.askNote, { textAlign: 'center' }]}>{t('me.ask.error')}</Text>}
@@ -225,11 +230,12 @@ const styles = StyleSheet.create({
   star: { position: 'absolute', backgroundColor: color.text, left: '50%', top: '50%' },
   title: { color: color.text, fontFamily: font.display, fontSize: 28, textAlign: 'center', letterSpacing: -0.6 },
   body: { color: color.text2, fontFamily: font.medium, fontSize: 16, textAlign: 'center' },
-  ask: { height: 48, paddingHorizontal: space.xxl, borderRadius: radius.pill, backgroundColor: '#FFD25E', justifyContent: 'center', marginTop: space.lg },
+  ask: { minHeight: 48, paddingHorizontal: space.xxl, borderRadius: radius.pill, backgroundColor: color.reward, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space.sm, marginTop: space.lg },
   askText: { color: color.ink, fontFamily: font.bold, fontSize: 15 },
   askState: { flexDirection: 'row', alignItems: 'center', gap: space.sm, marginTop: space.lg, height: 48 },
   askNote: { color: color.text2, fontFamily: font.semibold, fontSize: 14 },
-  breath: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#FFD25E' },
-  button: { marginTop: space.xl, height: 48, paddingHorizontal: space.xxl, borderRadius: radius.pill, backgroundColor: color.surface2, justifyContent: 'center' },
+  breath: { width: 6, height: 6, borderRadius: 3, backgroundColor: color.reward },
+  button: { marginTop: space.xl, minHeight: 48, paddingHorizontal: space.xxl, borderRadius: radius.pill, backgroundColor: color.surface2, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space.sm },
+  big: { minHeight: 64, paddingHorizontal: space.xl },
   buttonText: { color: color.text, fontFamily: font.bold, fontSize: 15 },
 });

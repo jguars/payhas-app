@@ -7,6 +7,7 @@ import { Constants, Tables } from '@/lib/database.types';
 import { supabase } from '@/lib/supabase';
 
 export type Topic = Tables<'interests'> & { picked: boolean; count: number };
+export type Channel = { name: string; videos: FeedVideo[] };
 
 const laneRank = (l: Tables<'interests'>['youngest_lane']) => Constants.public.Enums.lane.indexOf(l);
 
@@ -51,7 +52,21 @@ export function useDiscover() {
     return { topic, videos: shelfVideos };
   }, [topics, videos]);
 
-  return { profile, videos, topics, shelf, loading };
+  // Most watched first, for the Top 10 row.
+  const top = useMemo(() => [...videos].sort((a, b) => b.views - a.views).slice(0, 10), [videos]);
+
+  // Shelves per channel: creators with at least two videos, the busiest first.
+  const channels = useMemo<Channel[]>(() => {
+    const by = new Map<string, FeedVideo[]>();
+    for (const v of videos) by.set(v.creator.name, [...(by.get(v.creator.name) ?? []), v]);
+    return [...by.entries()]
+      .filter(([, vs]) => vs.length >= 2)
+      .map(([name, vs]) => ({ name, videos: vs }))
+      .sort((a, b) => b.videos.length - a.videos.length || a.name.localeCompare(b.name))
+      .slice(0, 6);
+  }, [videos]);
+
+  return { profile, videos, topics, shelf, top, channels, loading };
 }
 
 /** Caption, creator, topic slug or (when given) the topic's label in the app's language. */

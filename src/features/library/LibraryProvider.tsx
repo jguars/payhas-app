@@ -4,7 +4,7 @@ import { useFamily } from '@/features/family/FamilyProvider';
 import type { Database } from '@/lib/database.types';
 import { supabase } from '@/lib/supabase';
 
-export type GameId = 'bubbles' | 'memory';
+export type GameId = 'bubbles' | 'memory' | 'moles' | 'echo' | 'catch' | 'odd' | 'count' | 'slide' | 'maze' | 'three';
 export type InboxItem = Database['public']['Functions']['get_inbox']['Returns'][number];
 export type Signal = 'impression' | 'finish' | 'rewatch' | 'quick_skip';
 export type ReportReason = 'scary' | 'not_my_age' | 'mean' | 'other';

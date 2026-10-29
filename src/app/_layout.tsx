@@ -19,7 +19,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ToastProvider } from '@/components/Toast';
 import { FamilyProvider, useFamily } from '@/features/family/FamilyProvider';
 import { usePresence } from '@/features/family/usePresence';
-import { hasChosenLanguage, I18nProvider, startupLang, useT } from '@/i18n';
+import { I18nProvider, startupLang, useT } from '@/i18n';
 import { useParentAlerts } from '@/features/parent/push';
 import { LibraryProvider } from '@/features/library/LibraryProvider';
 import { initFeedback } from '@/lib/feedback';
@@ -80,8 +80,7 @@ export default function RootLayout() {
  */
 function Routes() {
   const { ready, session, active, needsInterests, needsOnboarding } = useFamily();
-  useT(); // re-render when the language is first chosen
-  const langChosen = hasChosenLanguage();
+  const { chosen: langChosen } = useT();
   usePresence();
   useParentAlerts(ready && !!session);
   if (!ready) return <Blank />;
@@ -107,9 +106,9 @@ function Routes() {
       </Stack.Protected>
       <Stack.Protected guard={!!active && !needsInterests}>
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="games/bubbles" options={{ animation: 'fade', gestureEnabled: false }} />
-        <Stack.Screen name="games/memory" options={{ animation: 'fade', gestureEnabled: false }} />
+        <Stack.Screen name="games/[id]" options={{ animation: 'fade', gestureEnabled: false }} />
         <Stack.Screen name="saved" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="channel" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="following" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="studio" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="upload" options={{ animation: 'slide_from_bottom', gestureEnabled: false }} />

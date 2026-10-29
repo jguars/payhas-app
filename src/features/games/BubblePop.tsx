@@ -18,13 +18,13 @@ import { TimesUp } from '@/features/library/TimesUp';
 import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { spring } from '@/theme/motion';
-import { color, font, Lane, radius, space } from '@/theme/tokens';
+import { alpha, color, font, Lane, radius, space } from '@/theme/tokens';
 
 import { Confetti } from './Confetti';
 import { Finish, GameBar, Readout } from './GameChrome';
 import { BUBBLES, CRITTERS, shuffle, useBest, useGameSession } from './shared';
 
-const TINTS = ['rgba(120,166,255,0.22)', 'rgba(79,227,176,0.2)', 'rgba(255,210,94,0.2)', 'rgba(195,162,255,0.22)', 'rgba(255,90,60,0.2)'];
+const TINTS = ['rgba(120,166,255,0.22)', alpha(color.success, 0.2), alpha(color.reward, 0.2), 'rgba(195,162,255,0.22)', alpha(color.ember, 0.2)];
 const POOL_SIZE = 5; // critters in play at once for target rounds
 const TARGET_EVERY = 5; // correct pops before the target changes
 
@@ -261,12 +261,12 @@ function Orb({ tint, size, x, y, dur }: { tint: string; size: number; x: number;
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: color.ink, overflow: 'hidden' },
   bubbleWrap: { position: 'absolute', top: 0 },
-  bubble: { flex: 1, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: 'rgba(244,243,239,0.45)' },
-  shine: { position: 'absolute', top: '16%', left: '20%', backgroundColor: 'rgba(255,255,255,0.55)', transform: [{ rotate: '-30deg' }] },
-  ring: { position: 'absolute', top: 0, borderWidth: 3, borderColor: 'rgba(244,243,239,0.8)' },
+  bubble: { flex: 1, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: alpha(color.text, 0.45) },
+  shine: { position: 'absolute', top: '16%', left: '20%', backgroundColor: alpha(color.white, 0.55), transform: [{ rotate: '-30deg' }] },
+  ring: { position: 'absolute', top: 0, borderWidth: 3, borderColor: alpha(color.text, 0.8) },
   label: { position: 'absolute', top: 0, textAlign: 'center', color: color.text, fontFamily: font.display, fontSize: 22 },
   targetWrap: { position: 'absolute', left: 0, right: 0, top: 110, alignItems: 'center' },
-  target: { flexDirection: 'row', alignItems: 'center', gap: space.sm, paddingHorizontal: 16, paddingVertical: 8, borderRadius: radius.pill, backgroundColor: 'rgba(20,20,27,0.8)', borderWidth: 1, borderColor: color.line },
+  target: { flexDirection: 'row', alignItems: 'center', gap: space.sm, paddingHorizontal: 16, paddingVertical: 8, borderRadius: radius.pill, backgroundColor: alpha(color.surface1, 0.8), borderWidth: 1, borderColor: color.line },
   targetText: { color: color.text2, fontFamily: font.semibold, fontSize: 15 },
   targetEmoji: { fontSize: 28 },
   mult: { color: color.ember, fontFamily: font.display, fontSize: 18 },

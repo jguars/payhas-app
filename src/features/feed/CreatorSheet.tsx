@@ -1,4 +1,5 @@
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import { Image } from 'expo-image';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
 import { BottomSheet } from '@/components/BottomSheet';
@@ -45,7 +46,7 @@ export function CreatorSheet({ name, videos, onClose, onOpenVideo }: Props) {
             {theirs.map((v, i) => (
               <Animated.View key={v.id} entering={FadeIn.delay(80 + i * 60).duration(220)} style={styles.cell}>
                 <PressScale onPress={() => onOpenVideo(v.id)} accessibilityRole="button" accessibilityLabel={v.caption} style={styles.tile}>
-                  <Image source={v.thumb} style={styles.fill} resizeMode="cover" />
+                  <Image source={v.thumb} cachePolicy="memory-disk" recyclingKey={v.id} style={styles.fill} contentFit="cover" />
                   <View style={styles.views}>
                     <Icon name="play" size={10} />
                     <Text style={styles.viewsText}>{formatCount(v.views)}</Text>
@@ -73,5 +74,5 @@ const styles = StyleSheet.create({
   tile: { height: 150, borderRadius: radius.chip + 2, overflow: 'hidden', backgroundColor: color.surface2 },
   fill: { position: 'absolute', left: 0, top: 0, width: '100%', height: '100%' },
   views: { position: 'absolute', left: 6, bottom: 6, flexDirection: 'row', alignItems: 'center', gap: 3 },
-  viewsText: { color: color.text, fontFamily: font.mono, fontSize: 10 },
+  viewsText: { color: color.text, fontFamily: font.mono, fontSize: 12 },
 });

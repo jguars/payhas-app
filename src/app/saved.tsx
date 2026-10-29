@@ -1,6 +1,7 @@
-import { router, useFocusEffect } from 'expo-router';
+import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image } from 'expo-image';
 
 import { Icon } from '@/components/Icon';
 import { Enter } from '@/components/motion/Enter';
@@ -9,6 +10,7 @@ import { ScreenHeader } from '@/components/ScreenHeader';
 import { useT } from '@/i18n';
 import { useFamily } from '@/features/family/FamilyProvider';
 import { FeedVideo, formatCount, toFeedVideos } from '@/features/feed/data';
+import { openVideo } from '@/features/feed/openVideo';
 import { useLibrary } from '@/features/library/LibraryProvider';
 import { supabase } from '@/lib/supabase';
 import { useInsets } from '@/lib/useInsets';
@@ -51,8 +53,8 @@ export default function SavedScreen() {
         <ScrollView contentContainerStyle={[styles.grid, { paddingBottom: bottom + space.xl }]}>
           {shown.map((v, i) => (
             <Enter key={v.id} index={i} style={styles.cell}>
-              <PressScale onPress={() => router.navigate({ pathname: '/', params: { v: v.id } })} accessibilityRole="button" accessibilityLabel={v.caption} style={styles.tile}>
-                <Image source={v.thumb} style={styles.fill} resizeMode="cover" />
+              <PressScale onPress={() => openVideo(v)} accessibilityRole="button" accessibilityLabel={v.caption} style={styles.tile}>
+                <Image source={v.thumb} cachePolicy="memory-disk" recyclingKey={v.id} style={styles.fill} contentFit="cover" />
                 <View style={styles.views}>
                   <Icon name="play" size={10} />
                   <Text style={styles.viewsText}>{formatCount(v.views)}</Text>
@@ -73,7 +75,7 @@ const styles = StyleSheet.create({
   tile: { aspectRatio: 3 / 4, borderRadius: radius.chip / 2, overflow: 'hidden', backgroundColor: color.surface1 },
   fill: { position: 'absolute', left: 0, top: 0, width: '100%', height: '100%' },
   views: { position: 'absolute', left: 6, bottom: 6, flexDirection: 'row', alignItems: 'center', gap: 3 },
-  viewsText: { color: color.text, fontFamily: font.mono, fontSize: 11 },
+  viewsText: { color: color.text, fontFamily: font.mono, fontSize: 12 },
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.sm, paddingHorizontal: space.xxl, paddingBottom: 80 },
   emptyIcon: { width: 64, height: 64, borderRadius: 32, backgroundColor: color.surface1, alignItems: 'center', justifyContent: 'center', marginBottom: space.sm },
   emptyTitle: { color: color.text, fontFamily: font.title, fontSize: 20 },

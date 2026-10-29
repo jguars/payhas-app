@@ -28,6 +28,6 @@ export function ScreenHeader({ title }: { title: string }) {
 
 const styles = StyleSheet.create({
   bar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: space.md, paddingBottom: space.sm },
-  back: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
+  back: { width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
   title: { color: color.text, fontFamily: font.bold, fontSize: 17 },
 });

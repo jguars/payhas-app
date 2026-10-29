@@ -93,7 +93,7 @@ export function Step({ progress, title, hint, onBack, action, secondary, childre
               accessibilityRole="button"
               style={[styles.button, action.disabled && { opacity: 0.4 }]}
             >
-              <Text style={styles.buttonText}>{action.label}</Text>
+              <Text style={styles.buttonText} numberOfLines={2} maxFontSizeMultiplier={1.4}>{action.label}</Text>
             </PressScale>
           )}
           {secondary && (
@@ -110,15 +110,15 @@ export function Step({ progress, title, hint, onBack, action, secondary, childre
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: color.ink },
   top: { flexDirection: 'row', alignItems: 'center', gap: space.md, paddingHorizontal: space.md },
-  back: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
+  back: { width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
   track: { flex: 1, height: 6, borderRadius: 3, backgroundColor: color.surface2, overflow: 'hidden' },
   fill: { height: 6, width: '100%', borderRadius: 3, backgroundColor: color.ember },
   content: { paddingHorizontal: space.xl, paddingTop: space.xl, paddingBottom: space.xxl, gap: space.md },
   title: { color: color.text, fontFamily: font.display, fontSize: 30, lineHeight: 36, letterSpacing: -0.6 },
   hint: { color: color.text2, fontFamily: font.medium, fontSize: 15, lineHeight: 21, marginBottom: space.sm },
   footer: { paddingHorizontal: space.xl, paddingTop: space.md, gap: space.sm },
-  button: { height: 56, borderRadius: radius.pill, backgroundColor: color.ember, alignItems: 'center', justifyContent: 'center' },
+  button: { minHeight: 56, paddingVertical: space.sm, paddingHorizontal: space.lg, borderRadius: radius.pill, backgroundColor: color.ember, alignItems: 'center', justifyContent: 'center' },
   buttonText: { color: color.ink, fontFamily: font.bold, fontSize: 17 },
-  secondary: { height: 44, alignItems: 'center', justifyContent: 'center' },
+  secondary: { height: 48, alignItems: 'center', justifyContent: 'center' },
   secondaryText: { color: color.text2, fontFamily: font.semibold, fontSize: 15 },
 });

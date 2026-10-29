@@ -75,6 +75,6 @@ const styles = StyleSheet.create({
   meta: { color: color.text2, fontFamily: font.medium, fontSize: 12 },
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.lg, paddingBottom: 80 },
   emptyTitle: { color: color.text, fontFamily: font.title, fontSize: 20 },
-  emptyButton: { height: 48, paddingHorizontal: space.xl, borderRadius: 999, backgroundColor: color.ember, justifyContent: 'center' },
+  emptyButton: { minHeight: 48, paddingHorizontal: space.xl, borderRadius: 999, backgroundColor: color.ember, justifyContent: 'center' },
   emptyButtonText: { color: color.ink, fontFamily: font.bold, fontSize: 15 },
 });

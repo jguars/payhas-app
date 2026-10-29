@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image } from 'expo-image';
 
 import { Icon } from '@/components/Icon';
 import { Enter } from '@/components/motion/Enter';
@@ -13,7 +14,7 @@ import { laneKey, localized, type T, useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
 import { useInsets } from '@/lib/useInsets';
-import { color, font, radius, space } from '@/theme/tokens';
+import { alpha, color, font, radius, space } from '@/theme/tokens';
 
 type Tab = 'uploads' | 'reports';
 
@@ -109,7 +110,7 @@ export default function ReviewScreen() {
             return (
               <Enter key={v.id} index={i}>
                 <PressScale onPress={() => open(v.id, 'uploads')} accessibilityRole="button" style={styles.row}>
-                  {m ? <Image source={m.thumb} style={styles.thumb} /> : <View style={styles.thumb} />}
+                  {m ? <Image source={m.thumb} cachePolicy="memory-disk" style={styles.thumb} /> : <View style={styles.thumb} />}
                   <View style={{ flex: 1, gap: 4 }}>
                     <Text style={styles.caption} numberOfLines={2}>
                       {localized(lang, v.caption, v.caption_i18n)}
@@ -136,7 +137,7 @@ export default function ReviewScreen() {
             return (
               <Enter key={r.video_id} index={i}>
                 <PressScale onPress={() => open(r.video_id, 'reports')} accessibilityRole="button" style={styles.row}>
-                  {m ? <Image source={m.thumb} style={styles.thumb} /> : <View style={styles.thumb} />}
+                  {m ? <Image source={m.thumb} cachePolicy="memory-disk" style={styles.thumb} /> : <View style={styles.thumb} />}
                   <View style={{ flex: 1, gap: 6 }}>
                     <Text style={styles.caption} numberOfLines={1}>
                       {localized(lang, r.caption, r.caption_i18n)}
@@ -168,7 +169,7 @@ export default function ReviewScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: color.ink },
   tabs: { flexDirection: 'row', gap: space.sm, paddingHorizontal: space.lg, paddingBottom: space.md },
-  tab: { flexDirection: 'row', alignItems: 'center', gap: 6, height: 38, paddingHorizontal: 14, borderRadius: radius.pill, backgroundColor: color.surface1 },
+  tab: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 38, paddingHorizontal: 14, borderRadius: radius.pill, backgroundColor: color.surface1 },
   tabOn: { backgroundColor: color.text },
   tabText: { color: color.text, fontFamily: font.semibold, fontSize: 14 },
   count: { minWidth: 20, height: 20, paddingHorizontal: 6, borderRadius: 10, backgroundColor: color.ember, alignItems: 'center', justifyContent: 'center' },
@@ -179,14 +180,14 @@ const styles = StyleSheet.create({
   caption: { color: color.text, fontFamily: font.semibold, fontSize: 14 },
   meta: { color: color.text3, fontFamily: font.medium, fontSize: 12 },
   reasons: { flexDirection: 'row', flexWrap: 'wrap', gap: 4 },
-  reasonPill: { paddingHorizontal: 8, height: 22, borderRadius: radius.pill, backgroundColor: 'rgba(255,138,115,0.14)', justifyContent: 'center' },
-  reasonText: { color: '#FF8A73', fontFamily: font.semibold, fontSize: 11 },
+  reasonPill: { paddingHorizontal: 8, height: 22, borderRadius: radius.pill, backgroundColor: alpha(color.danger, 0.14), justifyContent: 'center' },
+  reasonText: { color: color.danger, fontFamily: font.semibold, fontSize: 12 },
   flagCount: { flexDirection: 'row', alignItems: 'center', gap: 3 },
-  flagText: { color: '#FF8A73', fontFamily: font.mono, fontSize: 13 },
-  approveAll: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space.sm, height: 46, borderRadius: radius.pill, backgroundColor: '#4FE3B0', marginBottom: space.sm },
+  flagText: { color: color.danger, fontFamily: font.mono, fontSize: 13 },
+  approveAll: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space.sm, height: 46, borderRadius: radius.pill, backgroundColor: color.success, marginBottom: space.sm },
   approveAllText: { color: color.ink, fontFamily: font.bold, fontSize: 15 },
   empty: { alignItems: 'center', gap: space.sm, paddingTop: 100 },
-  emptyIcon: { width: 64, height: 64, borderRadius: 32, backgroundColor: 'rgba(79,227,176,0.14)', alignItems: 'center', justifyContent: 'center', marginBottom: space.sm },
+  emptyIcon: { width: 64, height: 64, borderRadius: 32, backgroundColor: alpha(color.success, 0.14), alignItems: 'center', justifyContent: 'center', marginBottom: space.sm },
   emptyTitle: { color: color.text, fontFamily: font.title, fontSize: 20 },
   emptySub: { color: color.text2, fontFamily: font.medium, fontSize: 14 },
 });

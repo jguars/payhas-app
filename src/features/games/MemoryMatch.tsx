@@ -250,6 +250,6 @@ const styles = StyleSheet.create({
   back: { backgroundColor: color.surface2, borderWidth: 1, borderColor: color.line },
   backMark: { backgroundColor: color.ember, opacity: 0.85, transform: [{ rotate: '45deg' }] },
   front: { backgroundColor: color.text, borderWidth: 2, borderColor: color.text },
-  matched: { borderColor: '#4FE3B0', backgroundColor: '#E9FBF4' },
+  matched: { borderColor: color.success, backgroundColor: color.successSoft },
 });
 

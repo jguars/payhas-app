@@ -1,5 +1,5 @@
 import { createContext, ReactNode, useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { AccessibilityInfo, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 
 import { Icon, IconName } from '@/components/Icon';
@@ -29,6 +29,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const show = useCallback(
     (t: ToastSpec) => {
       setToast({ ...t, id: ++seq.current });
+      // Android reads the live region; VoiceOver needs an explicit announcement.
+      if (Platform.OS === 'ios') AccessibilityInfo.announceForAccessibility(t.text);
       y.value = 24;
       y.value = withSpring(0, spring.bouncy);
       o.value = withTiming(1, { duration: 140 });
@@ -49,7 +51,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         <Animated.View pointerEvents="box-none" style={[styles.wrap, { bottom: bottom + TAB_BAR.gap + TAB_BAR.height + 12 }, anim]}>
           <View style={styles.toast} accessibilityLiveRegion="polite">
             {toast.icon && <Icon name={toast.icon} size={18} color={color.text} strokeWidth={2.4} />}
-            <Text style={styles.text} numberOfLines={1}>
+            <Text style={styles.text} numberOfLines={2} maxFontSizeMultiplier={1.4}>
               {toast.text}
             </Text>
             {toast.action && (
@@ -59,6 +61,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                   toast.action?.onPress();
                 }}
                 hitSlop={10}
+                accessibilityRole="button"
               >
                 <Text style={styles.action}>{toast.action.label}</Text>
               </Pressable>
@@ -84,7 +87,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     backgroundColor: color.text,
     elevation: 10,
-    shadowColor: '#000',
+    shadowColor: color.black,
     shadowOpacity: 0.35,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 6 },

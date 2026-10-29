@@ -1,0 +1,324 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-28T08:05:51.262Z",
+  "title": "Design System: Payhas",
+  "extensions": {
+    "colorMeta": {
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "tonalRamp": [
+          "#050508",
+          "#0A0A0F",
+          "#14141B",
+          "#1D1D26",
+          "#2A2A35",
+          "#55545F",
+          "#8C8B97",
+          "#F4F3EF"
+        ]
+      },
+      "surface-1": {
+        "role": "neutral",
+        "displayName": "Night Surface"
+      },
+      "surface-2": {
+        "role": "neutral",
+        "displayName": "Raised Surface"
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Hairline"
+      },
+      "text": {
+        "role": "neutral",
+        "displayName": "Bone"
+      },
+      "text-2": {
+        "role": "neutral",
+        "displayName": "Mist"
+      },
+      "text-3": {
+        "role": "neutral",
+        "displayName": "Dusk"
+      },
+      "ember": {
+        "role": "primary",
+        "displayName": "Ember",
+        "tonalRamp": [
+          "#3D150E",
+          "#6E2719",
+          "#9E3825",
+          "#CF4930",
+          "#FF5A3C",
+          "#FF7D65",
+          "#FFA493",
+          "#FFD3CA"
+        ]
+      },
+      "ember-edge": {
+        "role": "primary",
+        "displayName": "Ember Edge"
+      },
+      "verified": {
+        "role": "secondary",
+        "displayName": "Verified Sky"
+      },
+      "lane-little": {
+        "role": "secondary",
+        "displayName": "Little Sun",
+        "tonalRamp": [
+          "#3D3217",
+          "#6E5A29",
+          "#9E8236",
+          "#CFAA4A",
+          "#FFD25E",
+          "#FFDC80",
+          "#FFE6A3",
+          "#FFF2D1"
+        ]
+      },
+      "lane-kids": {
+        "role": "secondary",
+        "displayName": "Kids Mint",
+        "tonalRamp": [
+          "#13372A",
+          "#22624D",
+          "#318D6D",
+          "#40B88F",
+          "#4FE3B0",
+          "#75E9C0",
+          "#9DEFD2",
+          "#CEF7E8"
+        ]
+      },
+      "lane-teen": {
+        "role": "secondary",
+        "displayName": "Teen Sky",
+        "tonalRamp": [
+          "#1D283D",
+          "#34486E",
+          "#4A679E",
+          "#6187CF",
+          "#78A6FF",
+          "#94B9FF",
+          "#B1CCFF",
+          "#D8E5FF"
+        ]
+      },
+      "lane-adult": {
+        "role": "secondary",
+        "displayName": "Adult Lilac",
+        "tonalRamp": [
+          "#2F273D",
+          "#55466E",
+          "#79649E",
+          "#9E83CF",
+          "#C3A2FF",
+          "#D0B6FF",
+          "#DDCAFF",
+          "#EEE4FF"
+        ]
+      },
+      "success": {
+        "role": "tertiary",
+        "displayName": "Success Mint"
+      },
+      "warning": {
+        "role": "tertiary",
+        "displayName": "Waiting Gold"
+      },
+      "danger": {
+        "role": "tertiary",
+        "displayName": "Problem Coral"
+      },
+      "info": {
+        "role": "tertiary",
+        "displayName": "Info Sky"
+      },
+      "reward": {
+        "role": "tertiary",
+        "displayName": "Reward Gold"
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Tab-root screen titles."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Onboarding steps, game card names."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Shelf and section headers."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Hints, captions, descriptions."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Chips, buttons, row titles."
+      },
+      "caption": {
+        "displayName": "Caption",
+        "purpose": "Metadata, counts, credits."
+      },
+      "numeric": {
+        "displayName": "Numeric",
+        "purpose": "Stats, timers, counts."
+      }
+    },
+    "shadows": [
+      {
+        "name": "float",
+        "value": "0 8px 18px rgba(0,0,0,0.45)",
+        "purpose": "Floating tab bar over video and cards (Android elevation 14)."
+      },
+      {
+        "name": "toast",
+        "value": "0 6px 14px rgba(0,0,0,0.4)",
+        "purpose": "Transient toasts (Android elevation 10)."
+      },
+      {
+        "name": "ledge",
+        "value": "0 3px 0 #2A2A35",
+        "purpose": "Hard ledge under tactile controls; the face drops into it on press."
+      }
+    ],
+    "motion": [
+      {
+        "name": "spring-snappy",
+        "value": "damping 22, stiffness 380, mass 0.6",
+        "purpose": "Press feedback, toggles."
+      },
+      {
+        "name": "spring-smooth",
+        "value": "damping 26, stiffness 170, mass 1",
+        "purpose": "Entrances, layout moves."
+      },
+      {
+        "name": "spring-bouncy",
+        "value": "damping 11, stiffness 220, mass 0.7",
+        "purpose": "Celebratory pops, press release, nav flourishes."
+      },
+      {
+        "name": "stagger",
+        "value": "45ms",
+        "purpose": "Delay between siblings entering."
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one ember call to action on a screen.",
+      "html": "<button class=\"ds-btn-primary\">Continue</button>",
+      "css": ".ds-btn-primary { height: 56px; padding: 0 32px; border: none; border-radius: 999px; background: #FF5A3C; color: #0A0A0F; font: 700 17px Figtree, sans-serif; transition: transform .15s; } .ds-btn-primary:active { transform: scale(.95); } .ds-btn-primary:focus-visible { outline: 2px solid #F4F3EF; outline-offset: 3px; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Quiet text button under the primary.",
+      "html": "<button class=\"ds-btn-secondary\">Skip for now</button>",
+      "css": ".ds-btn-secondary { height: 44px; padding: 0 16px; border: none; background: none; color: #B3B2BD; font: 600 15px Figtree, sans-serif; } .ds-btn-secondary:hover { color: #F4F3EF; } .ds-btn-secondary:focus-visible { outline: 2px solid #F4F3EF; border-radius: 12px; }"
+    },
+    {
+      "name": "Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Chunky tactile chip with a hard ledge it presses into.",
+      "html": "<div style=\"display:flex;gap:10px;padding:12px;background:#0A0A0F\"><button class=\"ds-chip\">🐾 Animals</button><button class=\"ds-chip ds-chip-on\">🚀 Space</button></div>",
+      "css": ".ds-chip { height: 44px; padding: 0 14px; border-radius: 16px; border: 2px solid #2A2A35; background: #14141B; color: #F4F3EF; font: 700 15px Figtree, sans-serif; box-shadow: 0 3px 0 #2A2A35; transition: transform .08s, box-shadow .08s; } .ds-chip:active { transform: translateY(3px); box-shadow: 0 0 0 #2A2A35; } .ds-chip-on { background: #4FE3B0; border-color: #318D6D; color: #0A0A0F; box-shadow: 0 3px 0 #318D6D; } .ds-chip:focus-visible { outline: 2px solid #F4F3EF; outline-offset: 2px; }"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Tonal container on the ink ground.",
+      "html": "<div style=\"padding:16px;background:#0A0A0F\"><div class=\"ds-card\"><div class=\"ds-card-t\">Today</div><div class=\"ds-card-n\">32 min <span>of 60</span></div><div class=\"ds-card-bar\"><i></i></div></div></div>",
+      "css": ".ds-card { background: #14141B; border-radius: 20px; padding: 16px; } .ds-card-t { color: #8C8B97; font: 500 13px Figtree, sans-serif; } .ds-card-n { color: #F4F3EF; font: 500 28px 'JetBrains Mono', monospace; margin: 4px 0 12px; } .ds-card-n span { color: #8C8B97; font-size: 15px; } .ds-card-bar { height: 6px; border-radius: 3px; background: #1D1D26; overflow: hidden; } .ds-card-bar i { display: block; width: 53%; height: 100%; background: #FF5A3C; }"
+    },
+    {
+      "name": "Tab Bar",
+      "kind": "nav",
+      "refersTo": "nav-bar",
+      "description": "Floating capsule; the active pill takes the tab's colour.",
+      "html": "<div style=\"padding:16px;background:#0A0A0F\"><nav class=\"ds-nav\"><span class=\"ds-tab ds-on\"><svg width=\"26\" height=\"26\" viewBox=\"0 0 24 24\"><path d=\"M3.8 11.2 12 4l8.2 7.2v8.3a1.6 1.6 0 0 1-1.6 1.6h-3.7v-5.6H9.1v5.6H5.4a1.6 1.6 0 0 1-1.6-1.6z\" fill=\"#fff\" stroke=\"#0A0A0F\" stroke-width=\"2\" stroke-linejoin=\"round\"/></svg></span><span class=\"ds-tab\"><svg width=\"26\" height=\"26\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"9\" fill=\"none\" stroke=\"#8C8B97\" stroke-width=\"1.9\"/><path d=\"M15.6 8.4 13.7 13.7 8.4 15.6 10.3 10.3z\" fill=\"none\" stroke=\"#8C8B97\" stroke-width=\"1.9\" stroke-linejoin=\"round\"/></svg></span><span class=\"ds-tab\"><svg width=\"26\" height=\"26\" viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"8.6\" r=\"3.9\" fill=\"none\" stroke=\"#8C8B97\" stroke-width=\"1.9\"/><path d=\"M4.6 20.2a7.4 7.4 0 0 1 14.8 0z\" fill=\"none\" stroke=\"#8C8B97\" stroke-width=\"1.9\" stroke-linejoin=\"round\"/></svg></span></nav></div>",
+      "css": ".ds-nav { display: flex; height: 64px; border-radius: 999px; background: rgba(20,20,27,.94); border: 1px solid #2A2A35; box-shadow: 0 8px 18px rgba(0,0,0,.45); align-items: center; } .ds-tab { flex: 1; display: flex; justify-content: center; } .ds-on { background: #FF5A3C; border-radius: 16px; height: 42px; max-width: 54px; margin: 0 auto; align-items: center; } .ds-tab:not(.ds-on):hover svg * { stroke: #F4F3EF; }"
+    },
+    {
+      "name": "Icon Circle",
+      "kind": "custom",
+      "refersTo": "icon-circle",
+      "description": "Filled lane-colour circle with an ink icon (inbox categories).",
+      "html": "<div style=\"display:flex;gap:10px;padding:12px;background:#0A0A0F\"><span class=\"ds-ic\" style=\"background:#78A6FF\">★</span><span class=\"ds-ic\" style=\"background:#4FE3B0\">♥</span><span class=\"ds-ic\" style=\"background:#FFD25E\">✉</span></div>",
+      "css": ".ds-ic { width: 44px; height: 44px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: #0A0A0F; font: 700 20px Figtree, sans-serif; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Night-Light Playroom",
+    "overview": "Payhas is a dark, calm room. The ground is near-black ink, the surfaces are a step or two lighter, and nothing glows unless it means something. The glow comes from two places only: one warm ember for \"do this\", and the four lane colours, which tell you who and how old. A parent picks the phone up at night and it feels quiet and trustworthy. A child touches it and it comes alive.\n\nThat second half is the component doctrine: quiet chrome, loud touch. At rest the interface nearly disappears. Feed chrome is small text over video, the tab bar is a dim floating capsule, and the icons are outlines. Under a finger, everything answers. Chips press down into a hard ledge, tiles dip and spring back, the active tab's pill jelly-slides to its new home, and each nav icon does its own little move. Expression lives in the response, not in the resting state.\n\nIllustration is hand-made. Topic stickers, nav icons and animal avatars are drawn for Payhas with a bold ink outline, a fill in the tile or lane colour and white highlights. They are never pulled from a stock icon set. The world is never light-mode and never pastel. Colour arrives saturated, against the dark.",
+    "keyCharacteristics": [
+      "Dark ink ground with tonal surfaces. Colour is rare and always means something.",
+      "One action colour (ember), always with ink text on it.",
+      "Four lane colours as identity, never decoration.",
+      "Quiet at rest, playful under touch. Spring physics, not timed easing.",
+      "Hand-drawn stickers and icons with an ink outline, colour fill and white glint.",
+      "Rounded, soft, chunky geometry. Nothing sharp."
+    ],
+    "rules": [
+      {
+        "name": "The One Ember Rule",
+        "body": "Ember is the only action colour, and a screen has at most one ember call to action. Text on ember is ink.",
+        "section": "colors"
+      },
+      {
+        "name": "The Lanes Mean Age Rule",
+        "body": "Lane colours identify an age lane or a profile. Never use one as a generic accent where it could be read as the wrong lane.",
+        "section": "colors"
+      },
+      {
+        "name": "The Night-Only Rule",
+        "body": "There is no light theme. Surfaces step up from ink in tone. They never go pale or pastel.",
+        "section": "colors"
+      },
+      {
+        "name": "The Tight Headline Rule",
+        "body": "Bricolage always runs with negative tracking (−0.3 to −1px, scaling with size). Figtree never gets negative tracking.",
+        "section": "typography"
+      },
+      {
+        "name": "The Four-Language Rule",
+        "body": "Every text box must fit the longest of Turkmen, Russian, Turkish and English. Size layouts for the longest string, not the English one.",
+        "section": "typography"
+      },
+      {
+        "name": "The Ledge, Not Shadow Rule",
+        "body": "Tactile controls show depth with a hard offset ledge they press into, never a blurred drop shadow. Blurred shadows are reserved for things that float over content.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do keep ink (#0A0A0F) as the ground of every screen and build depth with surface tones.",
+      "Do put ink text on every coloured fill, whether ember or lane.",
+      "Do draw new icons and illustrations as Payhas stickers: an ink outline, a colour fill and a white glint, with round caps.",
+      "Do give every touchable element a spring response: press dip, ledge drop or flourish.",
+      "Do use the motion presets and the <Enter> stagger instead of inventing timings.",
+      "Do run Bricolage headings with negative tracking, and put numbers in JetBrains Mono."
+    ],
+    "donts": [
+      "Don't use generic stock icon sets (Lucide or Material line icons) where a hand-made Payhas icon belongs.",
+      "Don't introduce a light theme, pale surfaces, or the pastel candy look typical of children's apps.",
+      "Don't use more than one ember call to action on a screen, or use ember for decoration.",
+      "Don't use a lane colour where it could be mistaken for a different lane.",
+      "Don't give tactile controls blurred drop shadows. Use the ledge.",
+      "Don't let chrome compete with video. Feed overlays stay small and quiet until touched."
+    ]
+  }
+}

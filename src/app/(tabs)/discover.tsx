@@ -1,10 +1,11 @@
-import { router, useIsFocused } from 'expo-router';
+import { useIsFocused } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   FadeIn,
   FadeOut,
   interpolate,
+  useAnimatedRef,
   useAnimatedScrollHandler,
   useAnimatedStyle,
   useSharedValue,
@@ -13,27 +14,39 @@ import { useInsets, useTabBarSpace } from '@/lib/useInsets';
 
 import { StatusScrim } from '@/components/StatusScrim';
 import { Enter } from '@/components/motion/Enter';
+import { SectionHeader } from '@/components/ui/SectionHeader';
+import { ChannelHubs } from '@/features/discover/ChannelHubs';
 import { LaneChip } from '@/features/discover/LaneChip';
 import { SearchField } from '@/features/discover/SearchField';
 import { ShelfHero } from '@/features/discover/ShelfHero';
 import { TopicGrid } from '@/features/discover/TopicGrid';
+import { TopTen } from '@/features/discover/TopTen';
 import { TrendingGrid } from '@/features/discover/TrendingGrid';
+import { useChannels } from '@/features/discover/useChannels';
 import { matchesQuery, useDiscover } from '@/features/discover/useDiscover';
+import { Segmented } from '@/components/Segmented';
 import { FeedVideo } from '@/features/feed/data';
+import { openVideo } from '@/features/feed/openVideo';
 import { useScreenTime } from '@/features/library/useScreenTime';
 import { laneKey, topicLabel, useT } from '@/i18n';
 import { color, font, space } from '@/theme/tokens';
+
+type Tab = 'forYou' | 'channels' | 'topics';
+const TABS: Tab[] = ['forYou', 'channels', 'topics'];
 
 export default function DiscoverScreen() {
   const insets = useInsets();
   const barSpace = useTabBarSpace();
   const focused = useIsFocused();
-  const { profile, videos, topics, shelf, loading } = useDiscover();
+  const { profile, videos, topics, shelf, top, loading } = useDiscover();
+  const { channels } = useChannels();
+  const [tab, setTab] = useState<Tab>('channels');
   const { lock } = useScreenTime();
   const { t, lang } = useT();
   const [query, setQuery] = useState('');
   const [topic, setTopic] = useState<string | null>(null);
 
+  const scroller = useAnimatedRef<Animated.ScrollView>();
   const scrollY = useSharedValue(0);
   const onScroll = useAnimatedScrollHandler((e) => {
     scrollY.value = e.contentOffset.y;
@@ -59,17 +72,19 @@ export default function DiscoverScreen() {
   if (!profile) return <View style={styles.root} />;
 
   const picked = topics.find((tp) => tp.slug === topic);
-  const heading = picked
-    ? labelOf(picked.slug)
-    : query.trim()
-      ? t('discover.results')
-      : t('discover.trendingIn', { lane: t(laneKey(profile.lane)) });
+  const heading = picked ? labelOf(picked.slug) : t('discover.results');
 
-  const open = (v: FeedVideo) => router.navigate({ pathname: '/', params: { v: v.id } });
+  const open = (v: FeedVideo) => openVideo(v);
+  const toTop = () => scroller.current?.scrollTo({ y: 0, animated: true });
+  const pickTopic = (slug: string | null) => {
+    setTopic(slug);
+    if (slug) toTop();
+  };
 
   return (
     <View style={styles.root}>
       <Animated.ScrollView
+        ref={scroller}
         onScroll={onScroll}
         scrollEventThrottle={16}
         keyboardShouldPersistTaps="handled"
@@ -88,44 +103,72 @@ export default function DiscoverScreen() {
           <SearchField value={query} onChange={setQuery} suggestions={suggestions} />
         </Enter>
 
-        {shelf && !filtered && (
-          <Enter index={2} rise={24}>
-            <ShelfHero
-              topic={shelf.topic}
-              videos={shelf.videos}
-              scrollY={scrollY}
-              playing={focused && !lock}
-              onPlay={() => open(shelf.videos[0])}
-            />
-          </Enter>
-        )}
-
-        <Enter index={3} style={styles.sectionHead}>
-          <Animated.Text key={heading} entering={FadeIn.duration(220)} style={[styles.h2, styles.shrink]} numberOfLines={1}>
-            {heading}
-          </Animated.Text>
-          {filtered && (
-            <Animated.View entering={FadeIn.duration(180)} exiting={FadeOut.duration(140)}>
-              <Pressable
-                onPress={() => {
-                  setQuery('');
-                  setTopic(null);
-                }}
-                hitSlop={10}
-              >
-                <Text style={styles.link}>{t('discover.clear')}</Text>
-              </Pressable>
-            </Animated.View>
-          )}
-        </Enter>
-        <TrendingGrid key={topic ?? 'all'} videos={shown} loading={loading} onOpen={open} baseIndex={4} />
-
-        {topics.length > 0 && (
+        {filtered ? (
           <>
-            <Enter index={7}>
-              <Text style={[styles.h2, { marginTop: space.xs }]}>{t('discover.browseByTopic')}</Text>
+            <Enter index={2} style={styles.sectionHead}>
+              <Animated.Text key={heading} entering={FadeIn.duration(220)} style={[styles.h2, styles.shrink]} numberOfLines={1}>
+                {heading}
+              </Animated.Text>
+              <Animated.View entering={FadeIn.duration(180)} exiting={FadeOut.duration(140)}>
+                <Pressable
+                  onPress={() => {
+                    setQuery('');
+                    setTopic(null);
+                  }}
+                  hitSlop={12}
+                  accessibilityRole="button"
+                >
+                  <Text style={styles.link}>{t('discover.clear')}</Text>
+                </Pressable>
+              </Animated.View>
             </Enter>
-            <TopicGrid topics={topics} selected={topic} onSelect={setTopic} baseIndex={8} />
+            <TrendingGrid key={topic ?? 'all'} videos={shown} loading={loading} onOpen={open} baseIndex={3} />
+          </>
+        ) : (
+          <>
+            <Enter index={2}>
+              <Segmented words options={TABS} value={tab} onChange={setTab} label={(k) => (k === 'forYou' ? t('feed.tab.forYou') : t(k === 'channels' ? 'discover.tab.channels' : 'discover.tab.topics'))} />
+            </Enter>
+
+            {tab === 'channels' && <ChannelHubs key="channels" channels={channels} baseIndex={3} />}
+
+            {tab === 'forYou' && (
+              <>
+                {shelf && (
+                  <Enter index={3} rise={24}>
+                    <ShelfHero
+                      topic={shelf.topic}
+                      videos={shelf.videos}
+                      tags={shelf.videos[0].topics.slice(0, 3).map(labelOf)}
+                      scrollY={scrollY}
+                      playing={focused && !lock}
+                      onPlay={() => open(shelf.videos[0])}
+                    />
+                  </Enter>
+                )}
+                {loading ? (
+                  <TrendingGrid videos={[]} loading onOpen={open} />
+                ) : (
+                  top.length >= 3 && (
+                    <View style={styles.block}>
+                      <Enter index={4}>
+                        <SectionHeader title={t('discover.top10', { lane: t(laneKey(profile.lane)) })} />
+                      </Enter>
+                      <TopTen videos={top} onOpen={open} baseIndex={5} />
+                    </View>
+                  )
+                )}
+              </>
+            )}
+
+            {tab === 'topics' && topics.length > 0 && (
+              <View style={styles.block}>
+                <Enter index={3}>
+                  <SectionHeader title={t('discover.browseByTopic')} />
+                </Enter>
+                <TopicGrid topics={topics} selected={topic} onSelect={pickTopic} baseIndex={4} />
+              </View>
+            )}
           </>
         )}
       </Animated.ScrollView>
@@ -136,11 +179,12 @@ export default function DiscoverScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: color.ink },
-  content: { paddingHorizontal: space.lg, paddingBottom: space.xxxl, gap: space.lg },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  title: { color: color.text, fontFamily: font.display, fontSize: 30, letterSpacing: -0.9, transformOrigin: 'left center' },
-  sectionHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginTop: space.xs },
-  h2: { color: color.text, fontFamily: font.bold, fontSize: 18 },
+  content: { paddingHorizontal: space.lg, paddingBottom: space.xxxl, gap: space.xl },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: -space.sm },
+  title: { color: color.text, fontFamily: font.display, fontSize: 34, letterSpacing: -1, transformOrigin: 'left center' },
+  block: { gap: space.md },
+  sectionHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: -space.sm },
+  h2: { color: color.text, fontFamily: font.title, fontSize: 20, letterSpacing: -0.3 },
   shrink: { flexShrink: 1 },
   link: { color: color.text2, fontFamily: font.semibold, fontSize: 13 },
 });

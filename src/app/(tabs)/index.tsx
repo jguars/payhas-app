@@ -1,7 +1,7 @@
 import { router, useIsFocused, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { FlatList, LayoutChangeEvent, Pressable, StyleSheet, Text, View, ViewToken } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import Animated, { interpolate, SharedValue, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 
 import { Icon } from '@/components/Icon';
 import { LaneBadge } from '@/components/LaneBadge';
@@ -10,6 +10,7 @@ import { CreatorSheet } from '@/features/feed/CreatorSheet';
 import { FeedVideo } from '@/features/feed/data';
 import { FeedItem } from '@/features/feed/FeedItem';
 import { FollowingEmpty } from '@/features/feed/FollowingEmpty';
+import { takeOpened } from '@/features/feed/openVideo';
 import { FeedMode, useFeed } from '@/features/feed/useFeed';
 import { SheetMode, VideoSheet } from '@/features/feed/VideoSheet';
 import { TimesUp } from '@/features/library/TimesUp';
@@ -17,120 +18,182 @@ import { TKey, useT } from '@/i18n';
 import { useScreenTime } from '@/features/library/useScreenTime';
 import { fx } from '@/lib/feedback';
 import { useInsets, useTabBarSpace } from '@/lib/useInsets';
-import { spring } from '@/theme/motion';
-import { color, font } from '@/theme/tokens';
+import { alpha, color, font } from '@/theme/tokens';
+
+const UNDERLINE = 14;
 
 const TABS: { mode: FeedMode; label: TKey }[] = [
   { mode: 'following', label: 'feed.tab.following' },
   { mode: 'forYou', label: 'feed.tab.forYou' },
 ];
 
+const PAGES: FeedMode[] = ['following', 'forYou'];
+
 export default function FeedScreen() {
   const insets = useInsets();
   const barSpace = useTabBarSpace();
   const focused = useIsFocused();
-  const [height, setHeight] = useState(0);
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [size, setSize] = useState({ width: 0, height: 0 });
+  const { width, height } = size;
   const [mode, setMode] = useState<FeedMode>('forYou');
+  // Each feed remembers which video it's on, so swiping between them resumes where you were.
+  const [activeIndex, setActiveIndex] = useState<Record<FeedMode, number>>({ forYou: 0, following: 0 });
   const { active, leaveProfile } = useFamily();
   const forYou = useFeed('forYou');
   const followingFeed = useFeed('following');
-  const feed = mode === 'forYou' ? forYou : followingFeed;
   const { lock } = useScreenTime();
-  const list = useRef<FlatList>(null);
+  const pager = useRef<Animated.ScrollView>(null);
+  const lists = { forYou: useRef<FlatList>(null), following: useRef<FlatList>(null) };
+  const scrollX = useSharedValue(width);
   const { t } = useT();
 
   const [sheet, setSheet] = useState<{ video: FeedVideo; mode: SheetMode } | null>(null);
   const [creator, setCreator] = useState<string | null>(null);
 
+  // FlatList wants stable viewability callbacks; setActiveIndex is stable, so these can be too.
+  const pick = (m: FeedMode, items: ViewToken[]) => {
+    const first = items.find((v) => v.isViewable);
+    if (first?.index != null) setActiveIndex((cur) => (cur[m] === first.index ? cur : { ...cur, [m]: first.index! }));
+  };
+  const onViewableForYou = useRef(({ viewableItems }: { viewableItems: ViewToken[] }) => pick('forYou', viewableItems)).current;
+  const onViewableFollowing = useRef(({ viewableItems }: { viewableItems: ViewToken[] }) => pick('following', viewableItems)).current;
+
+  /** Slide the pager to a feed (tab tap, deep link, creator sheet). */
+  const goTo = useCallback(
+    (m: FeedMode, animated = true) => {
+      setMode(m);
+      if (width > 0) pager.current?.scrollTo({ x: PAGES.indexOf(m) * width, animated });
+    },
+    [width],
+  );
+
   const jumpTo = useCallback(
     (id: string) => {
-      const index = feed.videos.findIndex((x) => x.id === id);
+      const index = forYou.videos.findIndex((x) => x.id === id);
       if (index < 0 || height === 0) return false;
-      list.current?.scrollToOffset({ offset: index * height, animated: false });
-      setActiveIndex(index);
+      lists.forYou.current?.scrollToOffset({ offset: index * height, animated: false });
+      setActiveIndex((cur) => ({ ...cur, forYou: index }));
       return true;
     },
-    [feed.videos, height],
+    [forYou.videos, height], // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   // Discover, Inbox and Saved open a specific video with /?v=<id>: jump to it in For you.
   const { v: target } = useLocalSearchParams<{ v?: string }>();
   useEffect(() => {
     if (!target) return;
-    if (mode !== 'forYou') return setMode('forYou');
+    if (mode !== 'forYou') return goTo('forYou', false);
     if (height === 0 || forYou.videos.length === 0) return;
-    jumpTo(target);
+    if (!jumpTo(target)) {
+      // Not loaded yet (a channel's older video, say): slot it in; this effect runs again and jumps.
+      const opened = takeOpened(target);
+      if (opened) return forYou.insert(opened);
+    }
     router.setParams({ v: undefined });
-  }, [target, height, forYou.videos, mode, jumpTo]);
+  }, [target, height, forYou.videos, mode, jumpTo, goTo]);
 
-  // Switching feeds starts at the top.
+  const onLayout = (e: LayoutChangeEvent) => {
+    const { width: w, height: h } = e.nativeEvent.layout;
+    setSize({ width: w, height: h });
+    scrollX.value = PAGES.indexOf(mode) * w;
+  };
+
+  // Keep the pager on the current feed after a layout change (rotation, first layout).
   useEffect(() => {
-    setActiveIndex(0);
-    list.current?.scrollToOffset({ offset: 0, animated: false });
-  }, [mode]);
+    if (width > 0) pager.current?.scrollTo({ x: PAGES.indexOf(mode) * width, animated: false });
+  }, [width]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const onLayout = (e: LayoutChangeEvent) => setHeight(e.nativeEvent.layout.height);
-
-  const onViewable = useRef(({ viewableItems }: { viewableItems: ViewToken[] }) => {
-    const first = viewableItems.find((v) => v.isViewable);
-    if (first?.index != null) setActiveIndex(first.index);
-  }).current;
-
-  const getItemLayout = useCallback((_: unknown, index: number) => ({ length: height, offset: height * index, index }), [height]);
+  const onPagerScroll = useAnimatedScrollHandler((e) => {
+    scrollX.value = e.contentOffset.x;
+  });
 
   const onShare = useCallback((video: FeedVideo) => setSheet({ video, mode: 'share' }), []);
   const onOptions = useCallback((video: FeedVideo) => setSheet({ video, mode: 'options' }), []);
   const onCreator = useCallback((name: string) => setCreator(name), []);
 
-  const showEmptyFollowing = mode === 'following' && !followingFeed.loading && followingFeed.videos.length === 0;
+  const showEmptyFollowing = !followingFeed.loading && followingFeed.videos.length === 0;
 
   return (
     <View style={styles.root} onLayout={onLayout}>
-      {height > 0 && !showEmptyFollowing && (
-        <FlatList
-          key={mode}
-          ref={list}
-          data={feed.videos}
-          keyExtractor={(v) => v.id}
-          onEndReached={feed.loadMore}
-          onEndReachedThreshold={3}
-          renderItem={({ item, index }) => (
-            <FeedItem
-              video={item}
-              height={height}
-              chromeBottom={barSpace}
-              active={focused && !lock && index === activeIndex}
-              onShare={onShare}
-              onOptions={onOptions}
-              onCreator={onCreator}
-            />
-          )}
-          // One swipe = one video. Without disableIntervalMomentum a fast flick on
-          // Android carries through 2–3 snap points.
+      {width > 0 && height > 0 && (
+        // Swipe sideways between Following (left) and For you (right); each page scrolls vertically.
+        <Animated.ScrollView
+          ref={pager}
+          horizontal
           pagingEnabled
-          snapToInterval={height}
-          snapToAlignment="start"
-          disableIntervalMomentum
-          decelerationRate="fast"
-          showsVerticalScrollIndicator={false}
-          getItemLayout={getItemLayout}
-          onViewableItemsChanged={onViewable}
-          viewabilityConfig={{ itemVisiblePercentThreshold: 60 }}
-          windowSize={3}
-          initialNumToRender={2}
-          maxToRenderPerBatch={2}
-        />
+          bounces={false}
+          overScrollMode="never"
+          showsHorizontalScrollIndicator={false}
+          contentOffset={{ x: PAGES.indexOf(mode) * width, y: 0 }}
+          onScroll={onPagerScroll}
+          scrollEventThrottle={16}
+          onMomentumScrollEnd={(e) => {
+            const next = PAGES[Math.round(e.nativeEvent.contentOffset.x / width)] ?? 'forYou';
+            if (next !== mode) {
+              fx.tab();
+              setMode(next);
+            }
+          }}
+        >
+          {PAGES.map((m) => {
+            const feed = m === 'forYou' ? forYou : followingFeed;
+            return (
+              <View key={m} style={{ width, height }}>
+                {m === 'following' && showEmptyFollowing ? (
+                  <FollowingEmpty videos={forYou.videos} top={insets.top + 40} />
+                ) : (
+                  <FlatList
+                    ref={lists[m]}
+                    data={feed.videos}
+                    keyExtractor={(v) => v.id}
+                    onEndReached={feed.loadMore}
+                    onEndReachedThreshold={3}
+                    renderItem={({ item, index }) => (
+                      <FeedItem
+                        video={item}
+                        height={height}
+                        chromeBottom={barSpace}
+                        // Only the feed on screen plays.
+                        active={focused && !lock && mode === m && index === activeIndex[m]}
+                        onShare={onShare}
+                        onOptions={onOptions}
+                        onCreator={onCreator}
+                      />
+                    )}
+                    // One swipe = one video. Without disableIntervalMomentum a fast flick on
+                    // Android carries through 2–3 snap points.
+                    pagingEnabled
+                    snapToInterval={height}
+                    snapToAlignment="start"
+                    disableIntervalMomentum
+                    decelerationRate="fast"
+                    showsVerticalScrollIndicator={false}
+                    getItemLayout={(_, index) => ({ length: height, offset: height * index, index })}
+                    onViewableItemsChanged={m === 'forYou' ? onViewableForYou : onViewableFollowing}
+                    viewabilityConfig={{ itemVisiblePercentThreshold: 60 }}
+                    windowSize={3}
+                    initialNumToRender={m === mode ? 2 : 1}
+                    maxToRenderPerBatch={2}
+                    nestedScrollEnabled
+                  />
+                )}
+              </View>
+            );
+          })}
+        </Animated.ScrollView>
       )}
-      {showEmptyFollowing && <FollowingEmpty videos={forYou.videos} top={insets.top + 40} />}
 
-      <View pointerEvents="box-none" style={[styles.top, { paddingTop: insets.top + 8 }]}>
+      <View pointerEvents="box-none" style={[styles.top, { paddingTop: insets.top + 4 }]}>
         <View pointerEvents="none" style={styles.scrimTop} />
-        {active && <LaneBadge lane={active.profile.lane} onPress={leaveProfile} />}
-        <FeedTabs mode={mode} onChange={setMode} />
-        <Pressable onPress={() => router.navigate('/discover')} accessibilityRole="button" accessibilityLabel={t('feed.search')} style={styles.search} hitSlop={8}>
-          <Icon name="search" size={24} strokeWidth={2.2} />
-        </Pressable>
+        <View style={styles.side} pointerEvents="box-none">
+          {active && <LaneBadge lane={active.profile.lane} onPress={leaveProfile} />}
+        </View>
+        <FeedTabs mode={mode} onChange={(m) => goTo(m)} scrollX={scrollX} pageWidth={width} />
+        <View style={[styles.side, styles.sideRight]} pointerEvents="box-none">
+          <Pressable onPress={() => router.navigate('/discover')} accessibilityRole="button" accessibilityLabel={t('feed.search')} style={styles.search} hitSlop={8}>
+            <Icon name="search" size={22} color={alpha(color.text, 0.85)} strokeWidth={2} />
+          </Pressable>
+        </View>
       </View>
 
       <VideoSheet video={sheet?.video ?? null} mode={sheet?.mode ?? 'share'} onClose={() => setSheet(null)} />
@@ -140,7 +203,7 @@ export default function FeedScreen() {
         onClose={() => setCreator(null)}
         onOpenVideo={(id) => {
           setCreator(null);
-          if (mode !== 'forYou') setMode('forYou');
+          if (mode !== 'forYou') goTo('forYou', false);
           setTimeout(() => jumpTo(id), 0);
         }}
       />
@@ -150,15 +213,19 @@ export default function FeedScreen() {
 }
 
 /** Following | For you, with an underline that slides to the selected one. */
-function FeedTabs({ mode, onChange }: { mode: FeedMode; onChange: (m: FeedMode) => void }) {
+function FeedTabs({ mode, onChange, scrollX, pageWidth }: { mode: FeedMode; onChange: (m: FeedMode) => void; scrollX: SharedValue<number>; pageWidth: number }) {
   const { t: tr } = useT();
   const [xs, setXs] = useState<number[]>([0, 0]);
-  const index = TABS.findIndex((t) => t.mode === mode);
-  const x = useSharedValue(0);
-  useEffect(() => {
-    x.value = withSpring(xs[index] ?? 0, spring.snappy);
-  }, [index, xs, x]);
-  const bar = useAnimatedStyle(() => ({ transform: [{ translateX: x.value }] }));
+  // The underline tracks the swipe itself, so it moves with your finger, and stretches mid-way.
+  const bar = useAnimatedStyle(() => {
+    const p = pageWidth > 0 ? Math.min(1, Math.max(0, scrollX.value / pageWidth)) : 1;
+    return {
+      transform: [
+        { translateX: interpolate(p, [0, 1], [xs[0] ?? 0, xs[1] ?? 0]) },
+        { scaleX: interpolate(p, [0, 0.5, 1], [1, 2.2, 1]) },
+      ],
+    };
+  });
 
   return (
     <View style={styles.tabs} accessibilityRole="tablist">
@@ -173,13 +240,13 @@ function FeedTabs({ mode, onChange }: { mode: FeedMode; onChange: (m: FeedMode) 
             }}
             onLayout={(e) => {
               const { x: left, width } = e.nativeEvent.layout;
-              setXs((cur) => Object.assign([...cur], { [i]: left + width / 2 - 9 }));
+              setXs((cur) => Object.assign([...cur], { [i]: left + width / 2 - UNDERLINE / 2 }));
             }}
             accessibilityRole="tab"
             accessibilityState={{ selected: on }}
             style={styles.tabBtn}
           >
-            <Text style={[styles.tabText, on && styles.tabTextOn]} numberOfLines={1}>{tr(t.label)}</Text>
+            <Text style={[styles.tabText, on && styles.tabTextOn]} numberOfLines={1} maxFontSizeMultiplier={1.3}>{tr(t.label)}</Text>
           </Pressable>
         );
       })}
@@ -196,10 +263,9 @@ const styles = StyleSheet.create({
     right: 0,
     top: 0,
     paddingHorizontal: 12,
-    paddingBottom: 12,
+    paddingBottom: 16,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
   },
   scrimTop: {
     position: 'absolute',
@@ -207,12 +273,15 @@ const styles = StyleSheet.create({
     right: 0,
     top: 0,
     bottom: 0,
-    experimental_backgroundImage: 'linear-gradient(180deg, rgba(10,10,15,0.55), rgba(10,10,15,0))',
+    experimental_backgroundImage: 'linear-gradient(180deg, rgba(10,10,15,0.4), rgba(10,10,15,0))',
   },
-  tabs: { flexDirection: 'row', gap: 20 },
-  tabBtn: { alignItems: 'center', minHeight: 44, justifyContent: 'center' },
-  tabText: { color: 'rgba(244,243,239,0.7)', fontFamily: font.semibold, fontSize: 16 },
+  // Equal side slots keep the tabs centred whatever the lane badge's width.
+  side: { flex: 1, flexDirection: 'row', alignItems: 'center' },
+  sideRight: { justifyContent: 'flex-end' },
+  tabs: { flexDirection: 'row', gap: 18 },
+  tabBtn: { alignItems: 'center', minHeight: 48, justifyContent: 'center' },
+  tabText: { color: alpha(color.text, 0.55), fontFamily: font.semibold, fontSize: 15, textShadowColor: alpha(color.black, 0.35), textShadowRadius: 4 },
   tabTextOn: { color: color.text, fontFamily: font.bold },
-  underline: { position: 'absolute', left: 0, bottom: 4, width: 18, height: 3, borderRadius: 3, backgroundColor: color.text },
-  search: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
+  underline: { position: 'absolute', left: 0, bottom: 6, width: UNDERLINE, height: 2, borderRadius: 2, backgroundColor: color.text },
+  search: { width: 48, height: 48, alignItems: 'center', justifyContent: 'center' },
 });

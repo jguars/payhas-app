@@ -1,4 +1,5 @@
-import { Image, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Image } from 'expo-image';
 
 import { Icon } from '@/components/Icon';
 import { Enter } from '@/components/motion/Enter';
@@ -31,7 +32,7 @@ export function FollowingEmpty({ videos, top }: { videos: FeedVideo[]; top: numb
           const thumb = thumbFor(c.latest_video_id);
           return (
             <Enter key={c.creator_name} index={2 + i} rise={24} style={styles.card}>
-              {thumb != null && <Image source={thumb} style={styles.poster} resizeMode="cover" />}
+              {thumb != null && <Image source={thumb} cachePolicy="memory-disk" style={styles.poster} contentFit="cover" />}
               <View style={styles.scrim} />
               <View style={styles.cardBody}>
                 <View style={styles.avatar}>

@@ -1,7 +1,10 @@
+import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 
 import { useFamily } from '@/features/family/FamilyProvider';
+import { FeedVideo, toFeedVideos } from '@/features/feed/data';
 import { deviceTimeZone, useLibrary } from '@/features/library/LibraryProvider';
+import { useT } from '@/i18n';
 import { supabase } from '@/lib/supabase';
 
 export type TasteRow = { slug: string; label: string; share: number; picked: boolean };
@@ -42,4 +45,36 @@ export function tasteRows(taste: TasteRow[]): (TasteRow & { exploring: boolean }
   const top = watched.slice(0, 3).map((t) => ({ ...t, exploring: false }));
   const explore = taste.filter((t) => t.picked && !top.some((x) => x.slug === t.slug)).sort((a, b) => a.share - b.share)[0];
   return explore ? [...top, { ...explore, exploring: true }] : top;
+}
+
+/**
+ * The first few saved videos for the Me tab's poster grid, refetched each
+ * time the tab comes into view (same source as the Saved screen).
+ */
+export function useSavedPreview(max = 9) {
+  const { active } = useFamily();
+  const { saved } = useLibrary();
+  const { lang } = useT();
+  const [videos, setVideos] = useState<FeedVideo[]>([]);
+  const [loaded, setLoaded] = useState(false);
+  const token = active?.token;
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!token) return;
+      let live = true;
+      supabase.rpc('get_saved', { p_session: token }).then(async ({ data }) => {
+        const list = await toFeedVideos(data, lang);
+        if (!live) return;
+        setVideos(list);
+        setLoaded(true);
+      });
+      return () => {
+        live = false;
+      };
+    }, [token, lang]),
+  );
+
+  // Unsaving from the feed drops the poster straight away.
+  return { videos: videos.filter((v) => saved.has(v.id)).slice(0, max), loaded };
 }

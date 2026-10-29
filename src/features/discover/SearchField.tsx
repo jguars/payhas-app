@@ -5,7 +5,6 @@ import Animated, {
   FadeInDown,
   FadeOut,
   FadeOutUp,
-  interpolateColor,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
@@ -15,7 +14,7 @@ import Animated, {
 import { Icon } from '@/components/Icon';
 import { useT } from '@/i18n';
 import { spring } from '@/theme/motion';
-import { color, font } from '@/theme/tokens';
+import { alpha, color, font } from '@/theme/tokens';
 
 type Props = { value: string; onChange: (v: string) => void; suggestions: string[] };
 
@@ -41,10 +40,8 @@ export function SearchField({ value, onChange, suggestions }: Props) {
     focus.value = withSpring(focused ? 1 : 0, spring.snappy);
   }, [focused, focus]);
 
-  const box = useAnimatedStyle(() => ({
-    borderColor: interpolateColor(focus.value, [0, 1], [color.line, 'rgba(255,90,60,0.7)']),
-    backgroundColor: interpolateColor(focus.value, [0, 1], [color.surface1, color.surface2]),
-  }));
+  // Focus warms the field by fading in an ember-ringed layer (opacity only).
+  const ring = useAnimatedStyle(() => ({ opacity: Math.min(1, focus.value) }));
   const glass = useAnimatedStyle(() => ({
     transform: [{ scale: 1 + 0.12 * focus.value }, { rotate: `${-12 * focus.value}deg` }],
   }));
@@ -52,9 +49,10 @@ export function SearchField({ value, onChange, suggestions }: Props) {
   const word = suggestions[i % Math.max(1, suggestions.length)] ?? '';
 
   return (
-    <Animated.View style={[styles.box, box]}>
+    <View style={styles.box}>
+      <Animated.View pointerEvents="none" style={[styles.ring, ring]} />
       <Animated.View style={glass}>
-        <Icon name="search" size={20} color={focused ? color.text : color.text3} strokeWidth={2.2} />
+        <Icon name="search" size={22} color={focused ? color.text : color.text3} strokeWidth={2.2} />
       </Animated.View>
       <View style={styles.field}>
         <TextInput
@@ -88,16 +86,17 @@ export function SearchField({ value, onChange, suggestions }: Props) {
           </Pressable>
         </Animated.View>
       )}
-    </Animated.View>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  box: { flexDirection: 'row', alignItems: 'center', gap: 10, height: 48, paddingHorizontal: 16, borderRadius: 16, borderWidth: 1 },
+  box: { flexDirection: 'row', alignItems: 'center', gap: 12, height: 56, paddingHorizontal: 20, borderRadius: 28, borderWidth: 1, borderColor: color.line, backgroundColor: color.surface1 },
+  ring: { position: 'absolute', left: -1, right: -1, top: -1, bottom: -1, borderRadius: 28, borderWidth: 1.5, borderColor: alpha(color.ember, 0.7), backgroundColor: color.surface2 },
   field: { flex: 1, height: '100%', justifyContent: 'center' },
-  input: { flex: 1, color: color.text, fontFamily: font.medium, fontSize: 15, outlineStyle: 'none' } as never,
+  input: { flex: 1, color: color.text, fontFamily: font.medium, fontSize: 16, outlineStyle: 'none' } as never,
   placeholder: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, flexDirection: 'row', alignItems: 'center', overflow: 'hidden' },
-  placeholderText: { color: color.text3, fontFamily: font.medium, fontSize: 15 },
+  placeholderText: { color: color.text3, fontFamily: font.medium, fontSize: 16 },
   placeholderWord: { color: color.text2 },
-  clear: { width: 22, height: 22, borderRadius: 11, backgroundColor: color.text3, alignItems: 'center', justifyContent: 'center' },
+  clear: { width: 24, height: 24, borderRadius: 12, backgroundColor: color.text3, alignItems: 'center', justifyContent: 'center' },
 });

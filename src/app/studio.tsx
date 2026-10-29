@@ -1,6 +1,7 @@
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image } from 'expo-image';
 
 import { Icon, IconName } from '@/components/Icon';
 import { Enter } from '@/components/motion/Enter';
@@ -13,12 +14,12 @@ import { laneKey, localized, type TKey, useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
 import { useInsets } from '@/lib/useInsets';
-import { color, font, radius, space } from '@/theme/tokens';
+import { alpha, color, font, radius, space } from '@/theme/tokens';
 
 const STATUS: Record<string, { label: TKey; tint: string; icon: IconName }> = {
-  pending: { label: 'creator.status.pending', tint: '#FFD25E', icon: 'clock' },
-  published: { label: 'creator.status.published', tint: '#4FE3B0', icon: 'check' },
-  rejected: { label: 'creator.status.rejected', tint: '#FF8A73', icon: 'close' },
+  pending: { label: 'creator.status.pending', tint: color.warning, icon: 'clock' },
+  published: { label: 'creator.status.published', tint: color.success, icon: 'check' },
+  rejected: { label: 'creator.status.rejected', tint: color.danger, icon: 'close' },
   removed: { label: 'creator.status.removed', tint: color.text3, icon: 'flag' },
 };
 
@@ -91,7 +92,7 @@ export default function StudioScreen() {
                 accessibilityLabel={`${caption}, ${label}`}
                 style={styles.rowInner}
               >
-                {media ? <Image source={media.thumb} style={styles.thumb} resizeMode="cover" /> : <View style={styles.thumb} />}
+                {media ? <Image source={media.thumb} cachePolicy="memory-disk" style={styles.thumb} contentFit="cover" /> : <View style={styles.thumb} />}
                 <View style={{ flex: 1, gap: 6 }}>
                   <Text style={styles.caption} numberOfLines={2}>
                     {caption}
@@ -123,9 +124,9 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: color.ink },
   content: { paddingHorizontal: space.lg, gap: space.sm },
   upload: { flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.lg, borderRadius: radius.card, backgroundColor: color.ember, marginBottom: space.md },
-  uploadIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: 'rgba(10,10,15,0.15)', alignItems: 'center', justifyContent: 'center' },
+  uploadIcon: { width: 44, height: 44, borderRadius: 22, backgroundColor: alpha(color.ink, 0.15), alignItems: 'center', justifyContent: 'center' },
   uploadTitle: { color: color.ink, fontFamily: font.bold, fontSize: 17 },
-  uploadSub: { color: 'rgba(10,10,15,0.7)', fontFamily: font.medium, fontSize: 12 },
+  uploadSub: { color: alpha(color.ink, 0.7), fontFamily: font.medium, fontSize: 12 },
   empty: { color: color.text3, fontFamily: font.medium, fontSize: 14, textAlign: 'center', marginTop: space.xl },
   row: {},
   rowInner: { flexDirection: 'row', gap: space.md, padding: space.md, borderRadius: 18, backgroundColor: color.surface1 },
@@ -133,7 +134,7 @@ const styles = StyleSheet.create({
   caption: { color: color.text, fontFamily: font.semibold, fontSize: 14 },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap' },
   pill: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, height: 22, borderRadius: radius.pill },
-  pillText: { fontFamily: font.bold, fontSize: 11 },
+  pillText: { fontFamily: font.bold, fontSize: 12 },
   meta: { color: color.text3, fontFamily: font.medium, fontSize: 12 },
   reason: { color: color.text2, fontFamily: font.medium, fontSize: 12 },
 });

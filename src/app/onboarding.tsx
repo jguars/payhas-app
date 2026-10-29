@@ -7,6 +7,7 @@ import { LanguagePicker } from '@/components/LanguagePicker';
 import { Enter } from '@/components/motion/Enter';
 import { PressScale } from '@/components/motion/PressScale';
 import { PinPad } from '@/components/PinPad';
+import { Avatar } from '@/components/ui/Avatar';
 import { useFamily } from '@/features/family/FamilyProvider';
 import { ChildSetup } from '@/features/onboarding/ChildSetup';
 import { ParentSessionProvider, useParentSession, withParent } from '@/features/onboarding/ParentSession';
@@ -166,9 +167,7 @@ function Flow() {
         return (
           <Enter key={p.id} index={i}>
             <View style={styles.member}>
-              <View style={[styles.avatar, { backgroundColor: L.color }]}>
-                <Text style={styles.avatarLetter}>{p.display_name[0]?.toUpperCase()}</Text>
-              </View>
+              <Avatar name={p.display_name} avatar={p.avatar} lane={p.lane} size={52} />
               <View style={{ flex: 1, gap: 2 }}>
                 <Text style={styles.memberName} numberOfLines={1}>
                   {p.display_name}
@@ -193,9 +192,9 @@ function Flow() {
 }
 
 const POINTS: { icon: IconName; key: TKey; tint: string }[] = [
-  { icon: 'shield', key: 'onboarding.welcome.lanes', tint: '#4FE3B0' },
-  { icon: 'sliders', key: 'onboarding.welcome.control', tint: '#78A6FF' },
-  { icon: 'sparkle', key: 'onboarding.welcome.learn', tint: '#FFD25E' },
+  { icon: 'shield', key: 'onboarding.welcome.lanes', tint: color.success },
+  { icon: 'sliders', key: 'onboarding.welcome.control', tint: color.info },
+  { icon: 'sparkle', key: 'onboarding.welcome.learn', tint: color.reward },
 ];
 
 function Welcome({ onStart }: { onStart: () => void }) {
@@ -207,7 +206,7 @@ function Welcome({ onStart }: { onStart: () => void }) {
   return (
     <View style={[styles.welcome, { paddingTop: insets.top + 12, paddingBottom: insets.bottom + space.lg }]}>
       <View style={styles.welcomeTop}>
-        <PressScale onPress={() => setLangOpen(true)} accessibilityRole="button" accessibilityLabel={t('common.language')} style={styles.langChip}>
+        <PressScale onPress={() => setLangOpen(true)} hitSlop={6} accessibilityRole="button" accessibilityLabel={t('common.language')} style={styles.langChip}>
           <Icon name="discover" size={16} color={color.text2} strokeWidth={2.2} />
           <Text style={styles.langChipText}>{native}</Text>
         </PressScale>
@@ -266,14 +265,12 @@ const styles = StyleSheet.create({
   pinWhy: { color: color.text3, fontFamily: font.medium, fontSize: 13, textAlign: 'center' },
   nameInput: { color: color.text, fontFamily: font.display, fontSize: 32, paddingVertical: space.md, borderBottomWidth: 2, borderBottomColor: color.line },
   error: { color: color.ember, fontFamily: font.semibold, fontSize: 14 },
-  member: { flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.md, borderRadius: radius.card, backgroundColor: color.surface1 },
-  avatar: { width: 48, height: 48, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
-  avatarLetter: { color: color.ink, fontFamily: font.display, fontSize: 22 },
+  member: { flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.md, borderRadius: radius.card, backgroundColor: color.surface1, borderWidth: 2, borderColor: color.line },
   memberName: { color: color.text, fontFamily: font.bold, fontSize: 17 },
   memberMeta: { color: color.text3, fontFamily: font.medium, fontSize: 13 },
   welcome: { flex: 1, backgroundColor: color.ink, paddingHorizontal: space.xl },
   welcomeTop: { flexDirection: 'row', justifyContent: 'flex-end' },
-  langChip: { flexDirection: 'row', alignItems: 'center', gap: 6, height: 36, paddingHorizontal: 14, borderRadius: radius.pill, backgroundColor: color.surface1, borderWidth: 1, borderColor: color.line },
+  langChip: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 36, paddingHorizontal: 14, borderRadius: radius.pill, backgroundColor: color.surface1, borderWidth: 1, borderColor: color.line },
   langChipText: { color: color.text, fontFamily: font.semibold, fontSize: 14 },
   welcomeBody: { flex: 1, justifyContent: 'center', gap: space.md },
   lanesRow: { flexDirection: 'row', gap: 6, marginBottom: space.lg },

@@ -10,7 +10,26 @@ export const color = {
   text3: '#8C8B97',
   ember: '#FF5A3C', // the only action colour — always carries ink text
   verified: '#78A6FF',
+  /** Darker ember for the ledge under a selected ember control. */
+  emberEdge: '#9E3825',
+  /** Status colours. They borrow lane hues, so keep them to parent, creator
+   *  and system surfaces — never where they could read as an age lane. */
+  success: '#4FE3B0',
+  successSoft: '#E9FBF4',
+  warning: '#FFD25E',
+  danger: '#FF8A73',
+  info: '#78A6FF',
+  /** Stars, sparks, best-score badges. */
+  reward: '#FFD25E',
+  white: '#FFFFFF',
+  black: '#000000',
 } as const;
+
+/** A token at some opacity: `alpha(color.ember, 0.12)`. Accepts #RRGGBB. */
+export function alpha(hex: string, a: number) {
+  const n = parseInt(hex.slice(1, 7), 16);
+  return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
+}
 
 export type Lane = 'little' | 'kids' | 'teen' | 'adult';
 

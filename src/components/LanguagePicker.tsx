@@ -1,8 +1,7 @@
-import { Alert, Platform, StyleSheet, Text, View } from 'react-native';
+import { Alert, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Icon } from '@/components/Icon';
 import { Enter } from '@/components/motion/Enter';
-import { PressScale } from '@/components/motion/PressScale';
 import { Lang, LANGS, startupLang, translate, useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
@@ -21,7 +20,7 @@ export function LanguagePicker({ onPicked, firstRun }: { onPicked?: (l: Lang) =>
         const on = l.code === lang;
         return (
           <Enter key={l.code} index={i}>
-            <PressScale
+            <Pressable
               onPress={() => {
                 fx.tap();
                 setLang(l.code);
@@ -39,14 +38,20 @@ export function LanguagePicker({ onPicked, firstRun }: { onPicked?: (l: Lang) =>
               accessibilityRole="radio"
               accessibilityState={{ selected: on }}
               accessibilityLabel={`${l.native}, ${l.english}`}
-              style={[styles.row, on && styles.rowOn]}
             >
-              <View style={{ flex: 1, gap: 2 }}>
-                <Text style={styles.native}>{l.native}</Text>
-                {l.native !== l.english && <Text style={styles.english}>{l.english}</Text>}
-              </View>
-              <View style={[styles.check, on && styles.checkOn]}>{on && <Icon name="check" size={14} color={color.ink} strokeWidth={3} />}</View>
-            </PressScale>
+              {({ pressed }) => (
+                <View style={{ paddingBottom: LEDGE }}>
+                  <View style={[styles.ledge, on && { backgroundColor: EMBER_EDGE }]} />
+                  <View style={[styles.row, on && styles.rowOn, { transform: [{ translateY: pressed ? LEDGE : 0 }] }]}>
+                    <View style={{ flex: 1, gap: 2 }}>
+                      <Text style={styles.native}>{l.native}</Text>
+                      {l.native !== l.english && <Text style={styles.english}>{l.english}</Text>}
+                    </View>
+                    <View style={[styles.check, on && styles.checkOn]}>{on && <Icon name="check" size={14} color={color.ink} strokeWidth={3} />}</View>
+                  </View>
+                </View>
+              )}
+            </Pressable>
           </Enter>
         );
       })}
@@ -54,9 +59,14 @@ export function LanguagePicker({ onPicked, firstRun }: { onPicked?: (l: Lang) =>
   );
 }
 
+/** The hard ledge under each row (same as `Chip`), darker ember when chosen. */
+const LEDGE = 4;
+const EMBER_EDGE = color.emberEdge;
+
 const styles = StyleSheet.create({
   list: { gap: space.sm },
-  row: { flexDirection: 'row', alignItems: 'center', minHeight: 64, paddingHorizontal: space.lg, borderRadius: radius.card, backgroundColor: color.surface1, borderWidth: 1.5, borderColor: color.surface1 },
+  ledge: { position: 'absolute', left: 0, right: 0, top: LEDGE, bottom: 0, borderRadius: radius.card, backgroundColor: color.line },
+  row: { flexDirection: 'row', alignItems: 'center', minHeight: 64, paddingHorizontal: space.lg, borderRadius: radius.card, backgroundColor: color.surface1, borderWidth: 2, borderColor: color.line },
   rowOn: { borderColor: color.ember },
   native: { color: color.text, fontFamily: font.title, fontSize: 20 },
   english: { color: color.text3, fontFamily: font.medium, fontSize: 13 },
