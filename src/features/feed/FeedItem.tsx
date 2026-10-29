@@ -24,6 +24,10 @@ const DOUBLE_TAP_MS = 280;
 const IMPRESSION_MS = 1000; // on screen this long = seen
 const QUICK_SKIP_MS = 2000; // gone before this = skipped (tasteEngine quickSkip)
 const FINISH_AT = 0.9;
+// The clips next to the playing one (the list keeps them mounted) buffer just enough to start
+// at once; the playing clip goes back to the platform defaults (Android 20 s, iOS automatic).
+const PRELOAD_BUFFER = { preferredForwardBufferDuration: 5, minBufferForPlayback: 1, waitsToMinimizeStalling: true };
+const PLAYING_BUFFER = { preferredForwardBufferDuration: Platform.OS === 'ios' ? 0 : 20, minBufferForPlayback: 2, waitsToMinimizeStalling: true };
 const RAIL_RIGHT = 10;
 const META_LEFT = 16;
 const PILL_H = 32;
@@ -46,6 +50,7 @@ function FeedItemBase({ video, active, height, chromeBottom, onShare, onOptions,
     // Browsers block autoplay with sound; native starts unmuted.
     p.muted = Platform.OS === 'web';
     p.timeUpdateEventInterval = 0.25;
+    if (Platform.OS !== 'web') p.bufferOptions = PRELOAD_BUFFER;
   });
 
   const { muted } = useEvent(player, 'mutedChange', { muted: player.muted });
@@ -83,6 +88,7 @@ function FeedItemBase({ video, active, height, chromeBottom, onShare, onOptions,
   const seq = useRef(0);
 
   useEffect(() => {
+    if (Platform.OS !== 'web') player.bufferOptions = active ? PLAYING_BUFFER : PRELOAD_BUFFER;
     if (active) {
       player.currentTime = 0;
       player.play();

@@ -4,7 +4,8 @@ import type { Database } from '@/lib/database.types';
 import type { Lane } from '@/theme/tokens';
 
 export type VideoRow = Database['public']['Functions']['get_feed']['Returns'][number];
-export type MediaSource = number | { uri: string };
+/** `useCaching` keeps a video on disk (expo-video); only for library URLs, which never change. */
+export type MediaSource = number | { uri: string; useCaching?: boolean };
 
 export type FeedVideo = {
   id: string;
@@ -75,7 +76,10 @@ export function mediaFor(row: { asset_key?: string | null; storage_path?: string
   if (row.asset_key && LOCAL_MEDIA[row.asset_key]) return LOCAL_MEDIA[row.asset_key];
   const src = row.storage_path ? urls[row.storage_path] : undefined;
   const th = row.thumb_path ? urls[row.thumb_path] : undefined;
-  return src ? { source: { uri: src }, thumb: th ? { uri: th } : { uri: src } } : null;
+  if (!src) return null;
+  // Signed upload links change on every fetch, so caching them would only fill the disk.
+  const cached = !!row.storage_path?.startsWith(R2_PREFIX);
+  return { source: { uri: src, useCaching: cached }, thumb: th ? { uri: th } : { uri: src } };
 }
 
 /** Server row → what the UI plays. Rows whose media can't be resolved are skipped (null). */
