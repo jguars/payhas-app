@@ -1,6 +1,6 @@
 # Payhas — Product Documentation
 
-Last updated Oct 29, 2026 · Onki Games
+Last updated Oct 30, 2026 · Onki Games
 
 This is the living product document. Tasks are ticked here as they ship; each
 ticked item names the commit or migration that did it.
@@ -76,7 +76,7 @@ Inside a profile there are five tabs; outside it, the parent dashboard.
 
 **Limits and quiet hours.** A daily limit and quiet hours block both videos and games; game time counts toward the limit. When a limit is reached a Time's up screen offers *Ask for more time* (alerts the parent) or *Switch profile*.
 
-**Feed ranking.** The For you feed ranks by interests, learning mix, follows and freshness, pushes recently watched clips down, and adds a daily shuffle — always inside the lane.
+**Feed ranking (For You v1).** Each profile's taste per topic is learned from what it does over the last 30 days (or since *Reset taste*): finishes, rewatches, reactions, likes, saves and shares pull a topic up; quick skips and *Not for me* push it down, and recent signals count more. The interests picked at onboarding lead for a new profile and fade as signals build up. On top: clip quality in the profile's lane (finished often, rarely skipped; anonymous counts, refreshed hourly), learning mix, follows, freshness, seen clips pushed down and a daily shuffle. Every 5th slot is a topic the profile hasn't tried, and no two clips in a row share a channel or lead topic. `why_this()` gives the main reason for any clip (following, picked, liked, explore, new, popular). Always inside the lane.
 
 **Parent alerts.** A parent's phone can opt in to push alerts (for example, a child asking for more time). Children never get notifications. Alert text says only what happened, in the family's language — no child's name or video caption, because it travels through Google and Apple and shows on the lock screen; the dashboard shows who after the PIN. Android uses Firebase Cloud Messaging; iOS builds carry the push capability (Batyr's paid team) but still need an APNs key to deliver (open).
 
@@ -182,12 +182,14 @@ The core app is built and running on Android and iPhone; content is growing thro
 
 - [x] Preload the next clip — `4984c74`
 - [x] Lint and CI — `3116545`
-- [ ] Double-tap to like, with burst animation
-- [ ] Comments sheet
+- [x] Double-tap to like, with burst animation
 - [ ] Share sheet
 - [ ] Long-press "Why this?" / "Not for me"
-- [ ] Watch-event logging for the taste engine
-- [ ] Taste engine: "Why this?" chips and taste dials
+- [x] Watch-event logging (impression, finish, rewatch, quick skip, share, Not for me, seconds watched)
+- [x] For You v1: ranking learns from logged signals, lane quality, exploration slot, variety, `why_this()` — `20261030090000_for_you_v1.sql`
+- [ ] Apply `20261030090000_for_you_v1.sql` in the Supabase SQL editor
+- [ ] Show "Why this?" chips and taste dials in the app (server side ready: `why_this()`, `private.topic_affinity`)
+- [ ] For You v2: embeddings with pgvector (once the library reaches about 1,000 clips)
 - [ ] Native-speaker review of the Turkmen copy
 
 ### Open decisions and setup

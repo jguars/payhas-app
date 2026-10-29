@@ -10,11 +10,13 @@ import { FeedVideo, toFeedVideos } from './data';
 
 export type FeedMode = 'forYou' | 'following';
 
-const PAGE = 15;
+// Small pages, so what the profile just did (finished, skipped) shapes the next one.
+const PAGE = 6;
 
 /**
  * The feed for the active profile. For You is ranked per profile on the
- * server (interests, learning mix, follows, freshness, what was watched —
+ * server (picked interests blended with what the profile finishes, likes and
+ * skips, clip quality in its lane, follows, freshness, an exploration slot —
  * see get_for_you) and pages by excluding what's already loaded; Following
  * is newest-first from followed channels. Lane filtering is server-side;
  * videos marked "Not interested" this session drop out locally straight away.

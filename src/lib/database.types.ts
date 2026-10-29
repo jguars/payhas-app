@@ -505,6 +505,7 @@ export type Database = {
         Args: { p_session: string; p_limit?: number; p_exclude?: string[] }
         Returns: Database['public']['Functions']['get_feed']['Returns']
       }
+      why_this: { Args: { p_session: string; p_video_id: string }; Returns: Json }
       create_profile: {
         Args: {
           p_parent: string
