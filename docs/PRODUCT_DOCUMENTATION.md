@@ -172,7 +172,7 @@ The core app is built and running on Android and iPhone; content is growing thro
 - [x] Delete one child's profile from the dashboard — `34b71d7`
 - [x] Parental consent before the family's first child profile — `00e8468`, `20261029150000_parental_consent.sql`
 - [x] Block advertising ID, location, camera and microphone on Android — `d85d894`
-- [x] Today's four migrations applied in the Supabase SQL editor
+- [ ] Apply the migration backlog to the live database (checked Oct 30: not applied) — `20261012090000_push_notifications`, `20261028090000_more_games`, `20261029120000_delete_account`, `20261029130000_retention`, `20261029140000_push_privacy`, `20261029150000_parental_consent`
 - [ ] Remaining privacy review items — deferred for now (the review isn't in the repo; add its list here when it's picked up)
 - [ ] Store kids-category requirements (App Store Kids, Google Play Families)
 - [ ] Crash reporting and analytics that fit a children's app
@@ -187,7 +187,7 @@ The core app is built and running on Android and iPhone; content is growing thro
 - [ ] Long-press "Why this?" / "Not for me"
 - [x] Watch-event logging (impression, finish, rewatch, quick skip, share, Not for me, seconds watched)
 - [x] For You v1: ranking learns from logged signals, lane quality, exploration slot, variety, `why_this()` — `20261030090000_for_you_v1.sql`
-- [ ] Apply `20261030090000_for_you_v1.sql` in the Supabase SQL editor
+- [x] `20261030090000_for_you_v1.sql` applied to the live database (Oct 30; hourly quality refresh scheduled with pg_cron)
 - [ ] Show "Why this?" chips and taste dials in the app (server side ready: `why_this()`, `private.topic_affinity`)
 - [ ] For You v2: embeddings with pgvector (once the library reaches about 1,000 clips)
 - [ ] Native-speaker review of the Turkmen copy
