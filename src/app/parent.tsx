@@ -52,14 +52,15 @@ const LATEST_FOLD = 5;
  */
 export default function ParentScreen() {
   const { child: initial } = useLocalSearchParams<{ child?: string }>();
-  const { token, unlocked, children, unlock, lock, setControls, setPaused, addTime, answer, hideVideo } = useParent();
+  const { token, unlocked, children, unlock, lock, reload, setControls, setPaused, addTime, answer, hideVideo } = useParent();
   const { bottom } = useInsets();
   const toast = useToast();
   const goBack = useGoBack();
-  const { signOut, profiles } = useFamily();
+  const { signOut, profiles, refresh } = useFamily();
   const [selected, setSelected] = useState<string | undefined>(initial);
   const [hiding, setHiding] = useState<RecentRow | null>(null);
-  const [deleting, setDeleting] = useState(false);
+  /** What a confirmed delete is waiting on the PIN for: the whole account, or one child's profile. */
+  const [deleting, setDeleting] = useState<'account' | Child | null>(null);
   const { t, lang } = useT();
 
   if (!unlocked) {
@@ -74,23 +75,34 @@ export default function ParentScreen() {
     );
   }
 
-  // Deleting the account asks for the PIN again, even inside an open parent session.
+  // Deleting asks for the PIN again, even inside an open parent session.
   if (deleting) {
+    const target = deleting;
     const confirmDelete = async (pin: string) => {
-      const { data, error } = await supabase.rpc('delete_account', { p_pin: pin });
+      if (target === 'account') {
+        const { data, error } = await supabase.rpc('delete_account', { p_pin: pin });
+        if (error) return error.message;
+        if (!data) return false;
+        toast({ text: t('parent.deletedToast'), icon: 'check' });
+        lock();
+        await disableParentAlerts().catch(() => {});
+        await signOut();
+        return true;
+      }
+      const { data, error } = await supabase.rpc('delete_profile', { p_pin: pin, p_profile_id: target.id });
       if (error) return error.message;
       if (!data) return false;
-      toast({ text: t('parent.deletedToast'), icon: 'check' });
-      lock();
-      await disableParentAlerts().catch(() => {});
-      await signOut();
+      toast({ text: t('parent.profileDeletedToast', { name: target.display_name }), icon: 'check' });
+      setDeleting(null);
+      setSelected(undefined);
+      await Promise.all([reload(), refresh()]);
       return true;
     };
     return (
       <View style={styles.root}>
-        <ScreenHeader title={t('parent.deleteAccount')} />
+        <ScreenHeader title={target === 'account' ? t('parent.deleteAccount') : t('parent.deleteProfile', { name: target.display_name })} />
         <View style={styles.pinWrap}>
-          <PinPad title={t('parent.deletePinTitle')} onComplete={confirmDelete} onCancel={() => setDeleting(false)} />
+          <PinPad title={t('parent.deletePinTitle')} onComplete={confirmDelete} onCancel={() => setDeleting(null)} />
         </View>
       </View>
     );
@@ -130,7 +142,7 @@ export default function ParentScreen() {
         <Enter index={0} style={styles.empty}>
           <Text style={styles.emptyTitle}>{t('parent.emptyTitle')}</Text>
           <Text style={styles.emptySub}>{t('parent.emptySub')}</Text>
-          <AccountActions onLock={() => { lock(); goBack(); }} onSignOut={() => { lock(); signOut(); }} onDelete={() => setDeleting(true)} />
+          <AccountActions onLock={() => { lock(); goBack(); }} onSignOut={() => { lock(); signOut(); }} onDelete={() => setDeleting('account')} />
         </Enter>
       )}
 
@@ -201,12 +213,29 @@ export default function ParentScreen() {
             <Latest child={child} onHide={setHiding} />
           </Enter>
 
+          <Pressable
+            onPress={() =>
+              confirmDestructive(
+                t('parent.deleteProfileTitle', { name: child.display_name }),
+                t('parent.deleteProfileBody', { name: child.display_name }),
+                t('parent.deleteProfileConfirm'),
+                t('common.cancel'),
+                () => setDeleting(child),
+              )
+            }
+            accessibilityRole="button"
+            hitSlop={8}
+            style={styles.deleteLink}
+          >
+            <Text style={styles.deleteText}>{t('parent.deleteProfile', { name: child.display_name })}</Text>
+          </Pressable>
+
           <Enter index={8}>
             <AlertsCard parent={token} onResult={(text, ok) => done(ok, text)} />
           </Enter>
 
           <Enter index={9}>
-            <AccountActions onLock={() => { lock(); goBack(); }} onSignOut={() => { lock(); signOut(); }} onDelete={() => setDeleting(true)} />
+            <AccountActions onLock={() => { lock(); goBack(); }} onSignOut={() => { lock(); signOut(); }} onDelete={() => setDeleting('account')} />
           </Enter>
         </ScrollView>
       )}
@@ -812,18 +841,20 @@ function LiveDot() {
   );
 }
 
+/** Destructive choices confirm first; react-native-web's Alert shows nothing, so the browser build confirms natively. */
+function confirmDestructive(title: string, body: string, action: string, cancel: string, onYes: () => void) {
+  fx.tap();
+  if (Platform.OS === 'web') return window.confirm(`${title}\n\n${body}`) && onYes();
+  Alert.alert(title, body, [
+    { text: cancel, style: 'cancel' },
+    { text: action, style: 'destructive', onPress: onYes },
+  ]);
+}
+
 /** Leaving the dashboard: lock it, sign the whole family out (to switch accounts), or delete the account. */
 function AccountActions({ onLock, onSignOut, onDelete }: { onLock: () => void; onSignOut: () => void; onDelete: () => void }) {
   const { t } = useT();
-  /** Destructive choices confirm first; react-native-web's Alert shows nothing, so the browser build confirms natively. */
-  const confirm = (title: string, body: string, action: string, onYes: () => void) => {
-    fx.tap();
-    if (Platform.OS === 'web') return window.confirm(`${title}\n\n${body}`) && onYes();
-    Alert.alert(title, body, [
-      { text: t('common.cancel'), style: 'cancel' },
-      { text: action, style: 'destructive', onPress: onYes },
-    ]);
-  };
+  const confirm = (title: string, body: string, action: string, onYes: () => void) => confirmDestructive(title, body, action, t('common.cancel'), onYes);
   return (
     <View>
       <View style={styles.accountRow}>

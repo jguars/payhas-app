@@ -104,6 +104,11 @@ export default defineStrings(
     deleteConfirm: 'Delete everything',
     deletePinTitle: 'Parent PIN to delete',
     deletedToast: 'Family account deleted',
+    deleteProfile: 'Delete {name}’s profile',
+    deleteProfileTitle: 'Delete {name}’s profile?',
+    deleteProfileBody: 'This permanently deletes {name}’s profile, with their watch history, saved videos, limits and alerts. It can’t be undone.',
+    deleteProfileConfirm: 'Delete profile',
+    profileDeletedToast: '{name}’s profile deleted',
   },
   {
     tk: {
@@ -199,6 +204,11 @@ export default defineStrings(
       deleteConfirm: 'Hemmesini poz',
       deletePinTitle: 'Pozmak üçin ene-atanyň PIN-i',
       deletedToast: 'Maşgala hasaby pozuldy',
+      deleteProfile: '{name} profilini poz',
+      deleteProfileTitle: '{name} profilini pozmalymy?',
+      deleteProfileBody: '{name} profili görlen wideolaryň taryhy, saklanan wideolar, çäkler we duýduryşlar bilen bilelikde hemişelik pozular. Muny yzyna gaýtaryp bolmaýar.',
+      deleteProfileConfirm: 'Profili poz',
+      profileDeletedToast: '{name} profili pozuldy',
     },
     tr: {
       title: 'Aile',
@@ -293,6 +303,11 @@ export default defineStrings(
       deleteConfirm: 'Her şeyi sil',
       deletePinTitle: 'Silmek için ebeveyn PIN’i',
       deletedToast: 'Aile hesabı silindi',
+      deleteProfile: '{name} profilini sil',
+      deleteProfileTitle: '{name} profili silinsin mi?',
+      deleteProfileBody: '{name} profili; izleme geçmişi, kaydedilen videolar, sınırlar ve uyarılarla birlikte kalıcı olarak silinir. Bu işlem geri alınamaz.',
+      deleteProfileConfirm: 'Profili sil',
+      profileDeletedToast: '{name} profili silindi',
     },
     ru: {
       title: 'Семья',
@@ -387,6 +402,11 @@ export default defineStrings(
       deleteConfirm: 'Удалить всё',
       deletePinTitle: 'Родительский PIN для удаления',
       deletedToast: 'Семейный аккаунт удалён',
+      deleteProfile: 'Удалить профиль «{name}»',
+      deleteProfileTitle: 'Удалить профиль «{name}»?',
+      deleteProfileBody: 'Профиль «{name}» будет удалён навсегда — вместе с историей просмотров, сохранёнными видео, ограничениями и уведомлениями. Это нельзя отменить.',
+      deleteProfileConfirm: 'Удалить профиль',
+      profileDeletedToast: 'Профиль «{name}» удалён',
     },
   },
 );
