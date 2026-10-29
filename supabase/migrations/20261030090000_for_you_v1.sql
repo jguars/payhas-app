@@ -125,6 +125,7 @@ as $$
 $$;
 
 select private.refresh_video_quality();
+create extension if not exists pg_cron with schema pg_catalog;
 select cron.schedule('payhas-video-quality', '23 * * * *', $cron$select private.refresh_video_quality()$cron$);
 
 -- ── every allowed clip, scored for one profile ──────────────────────────────
