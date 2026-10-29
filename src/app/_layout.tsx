@@ -99,7 +99,6 @@ function Routes() {
       </Stack.Protected>
       <Stack.Protected guard={langChosen && settled && !active}>
         <Stack.Screen name="who" />
-        <Stack.Screen name="add-child" options={{ animation: 'slide_from_bottom' }} />
       </Stack.Protected>
       <Stack.Protected guard={!!active && needsInterests}>
         <Stack.Screen name="interests" />
@@ -120,7 +119,10 @@ function Routes() {
           dashboard must never be that fallback. */}
       <Stack.Protected guard={langChosen && settled}>
         <Stack.Screen name="parent" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="parent-child" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="plus" options={{ animation: 'slide_from_right' }} />
+        {/* Reachable from Who's watching? and from the parent dashboard inside a profile; the PIN comes first. */}
+        <Stack.Screen name="add-child" options={{ animation: 'slide_from_bottom' }} />
       </Stack.Protected>
     </Stack>
   );

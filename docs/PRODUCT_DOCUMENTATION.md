@@ -32,7 +32,7 @@ One family account per household. The parent owns it; every family member gets a
 | Teen | 13–17 | Teen Sky #78A6FF | Teen-cleared content, timed games |
 | Adult | 18+ | Adult Lilac #C3A2FF | Everything published; usually PIN-protected so children can't enter |
 
-**The parent** is the primary user. They create the account, set the 4-digit parent PIN, agree to the privacy notice, add children, and use the parent dashboard. The PIN opens a 15-minute parent session.
+**The parent** is the primary user. Their own profile is labelled *Parent* (it watches in the Adult lane). They create the account, set the 4-digit parent PIN, agree to the privacy notice, add children, and use the parent dashboard. The PIN opens a 15-minute parent session.
 
 **Children** watch, play and browse inside their lane and their parent's limits: a daily limit, quiet hours (bedtime to wake-up) and whether games are on. Me tells each child, in words for their lane, what their parent can see.
 
@@ -72,7 +72,7 @@ Inside a profile there are five tabs; outside it, the parent dashboard.
 | Play | Ten lane-tuned games in three sections. Quick play: Bubble Pop, Pop-up Pals, Star Catcher, Echo Lights. Brain games: Memory Match, Odd One Out, Quick Count, Maze Run. Puzzles: Slide Puzzle, Three in a Row. Little never fails or loses; older lanes get clocks, bigger boards and smarter opponents. Best scores stay on the device. |
 | Inbox | Welcome notes, new videos picked for you, and family notices such as "your parent gave you 15 more minutes". |
 | Me | Avatar with today's watch-time ring, lane, stats, Saved and Taste tabs, "What your parent can see", settings (sound, vibration, language), Switch profile, Sign out. |
-| Parent dashboard | Per child: live status (watching, playing, last seen), today vs limit, 7-day chart, top topics, recent videos, anything flagged. Remote controls: pause now, +15 min, daily limit, bedtime and wake time, games on/off, hide a video. Delete one child's profile, or the whole family account. |
+| Parent dashboard | Two levels, after YouTube Family Center, Spotify Kids and Instagram's Time management. **Family**: what needs an answer (time requests, flags from the last day), then everyone in the family — the parent first, labelled *Parent* — each child with live status and today against the limit; then the account (Payhas Plus, alerts, lock, sign out). **A child's page**: avatar and status, today with *Pause now* and *+15 min*, rules as rows (daily limit, quiet hours, games) that open a sheet, the 7-day chart and recent videos (Plus), delete the profile. |
 
 **Limits and quiet hours.** A daily limit and quiet hours block both videos and games; game time counts toward the limit. When a limit is reached a Time's up screen offers *Ask for more time* (alerts the parent) or *Switch profile*.
 

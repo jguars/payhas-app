@@ -1,3 +1,4 @@
+import { useIsFocused } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 
 import { deviceTimeZone } from '@/features/library/LibraryProvider';
@@ -96,13 +97,15 @@ export function useParent() {
     }
   }, [lock]);
 
-  // Live status: refetch every 20s while unlocked; the session runs out by itself.
+  // Live status: refetch every 20s while unlocked and on screen (Family and a
+  // child's page each use this hook; only the one in front polls).
+  const focused = useIsFocused();
   useEffect(() => {
-    if (!token) return;
+    if (!token || !focused) return;
     load();
     const id = setInterval(load, POLL_MS);
     return () => clearInterval(id);
-  }, [token, load]);
+  }, [token, focused, load]);
 
   const patch = (id: string, change: Partial<Child>) =>
     setChildren((list) => list?.map((c) => (c.id === id ? { ...c, ...change } : c)) ?? list);
