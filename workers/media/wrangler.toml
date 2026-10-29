@@ -1,0 +1,14 @@
+# Media Worker: serves the R2 bucket payhas-media at
+# https://payhas-media.<account subdomain>.workers.dev (the app's EXPO_PUBLIC_MEDIA_URL).
+#
+#   npx wrangler@4 deploy --config workers/media/wrangler.toml
+#
+# Free plan: 100k requests a day across the account; Workers Paid lifts that.
+name = "payhas-media"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+workers_dev = true
+
+[[r2_buckets]]
+binding = "MEDIA"
+bucket_name = "payhas-media"

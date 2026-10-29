@@ -48,11 +48,11 @@ const LOCAL_MEDIA: Record<string, { source: number; thumb: number }> = {
 const SIGNED_FOR_S = 60 * 60;
 
 /**
- * The public Cloudflare R2 bucket (`payhas-media`) that holds curated imports.
- * Set EXPO_PUBLIC_MEDIA_URL to its custom domain; r2.dev is rate-limited and
- * only the fallback.
+ * The public Cloudflare R2 bucket (`payhas-media`) that holds curated imports,
+ * served by the media Worker (workers/media). EXPO_PUBLIC_MEDIA_URL overrides
+ * it, e.g. for a custom domain later.
  */
-const R2_PUBLIC = (process.env.EXPO_PUBLIC_MEDIA_URL || 'https://pub-592e6ab7d542491f89e627a41d432993.r2.dev').replace(/\/+$/, '');
+const R2_PUBLIC = (process.env.EXPO_PUBLIC_MEDIA_URL || 'https://payhas-media.guvanch-site.workers.dev').replace(/\/+$/, '');
 const R2_PREFIX = 'r2:';
 
 /**
