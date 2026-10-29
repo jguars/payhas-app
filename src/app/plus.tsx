@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
+import { BottomSheet } from '@/components/BottomSheet';
 import { Icon } from '@/components/Icon';
 import { Enter } from '@/components/motion/Enter';
 import { PressScale } from '@/components/motion/PressScale';
@@ -9,7 +10,8 @@ import { useToast } from '@/components/Toast';
 import { useFamily } from '@/features/family/FamilyProvider';
 import { ParentSessionProvider, useParentSession } from '@/features/onboarding/ParentSession';
 import { currentParentToken } from '@/features/parent/useParent';
-import { formatCode, planDate, redeemCode } from '@/features/plan/plan';
+import { CardPayment } from '@/features/plan/CardPayment';
+import { applyTestKey, formatCode, planDate, redeemCode } from '@/features/plan/plan';
 import { TKey, useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { useInsets } from '@/lib/useInsets';
@@ -26,8 +28,9 @@ const ROWS: { label: TKey; free: string | TKey; plus: string | TKey }[] = [
 
 /**
  * Payhas Plus, for the parent only: the PIN comes first, so a child never sees
- * a price. Shows the family's plan, what Plus adds, the price, and takes an
- * activation code. Card payment slots in here once a bank is chosen.
+ * a price. Shows the family's plan, what Plus adds and the price; pays by card
+ * (Halkbank, Senagat Bank, Rysgal Bank — simulated in test mode) or takes an
+ * activation code. In test mode a secret test key turns Plus on or off.
  */
 export default function PlusScreen() {
   return (
@@ -48,6 +51,23 @@ function Plus() {
   const [code, setCode] = useState('');
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<{ text: string; ok: boolean } | null>(null);
+  const [testOpen, setTestOpen] = useState(false);
+  const [testKey, setTestKey] = useState('');
+  const [testMessage, setTestMessage] = useState<{ text: string; ok: boolean } | null>(null);
+
+  /** Runs a parent call; if the session ran out mid-way, asks for the PIN once more and retries. Null if cancelled. */
+  const run = useCallback(
+    async <T,>(call: (token: string) => Promise<T | null>): Promise<T | null> => {
+      const token = await gate.ensure();
+      if (!token) return null;
+      const res = await call(token);
+      if (res) return res;
+      gate.invalidate();
+      const again = await gate.ensure();
+      return again ? call(again) : null;
+    },
+    [gate],
+  );
 
   // Coming from the dashboard reuses its open session; otherwise ask for the PIN.
   useEffect(() => {
@@ -64,14 +84,7 @@ function Plus() {
   const activate = async () => {
     setBusy(true);
     setMessage(null);
-    let token = await gate.ensure();
-    let res = token ? await redeemCode(token, code) : null;
-    if (token && !res) {
-      // The session ran out mid-way: one more PIN, one more try.
-      gate.invalidate();
-      token = await gate.ensure();
-      res = token ? await redeemCode(token, code) : null;
-    }
+    const res = await run((token) => redeemCode(token, code));
     setBusy(false);
     if (!res) return;
     if (res.result === 'ok') {
@@ -140,7 +153,29 @@ function Plus() {
           </View>
         </Enter>
 
-        <Enter index={3} style={styles.card}>
+        {plan?.card_payments ? (
+          <Enter index={3} style={styles.card}>
+            <CardPayment
+              price={plan.price_tmt}
+              testMode={!!plan.test_mode}
+              run={run}
+              onPaid={async (text) => {
+                toast({ text, icon: 'check' });
+                await refresh();
+              }}
+            />
+          </Enter>
+        ) : (
+          <Enter index={3} style={[styles.card, styles.cardRow]}>
+            <Icon name="lock" size={18} color={color.text3} strokeWidth={2.2} />
+            <Text style={[styles.label, { flex: 1, color: color.text2 }]}>{t('plus.cardTitle')}</Text>
+            <View style={styles.soon}>
+              <Text style={styles.soonText}>{t('plus.cardSoon')}</Text>
+            </View>
+          </Enter>
+        )}
+
+        <Enter index={4} style={styles.card}>
           <Text style={styles.sectionTitle}>{t('plus.codeTitle')}</Text>
           <TextInput
             value={code}
@@ -163,23 +198,66 @@ function Plus() {
             disabled={!complete || busy}
             accessibilityRole="button"
             accessibilityState={{ disabled: !complete || busy }}
-            style={[styles.activate, (!complete || busy) && styles.activateOff]}
+            // With card payment open, Pay is the one ember button; Activate steps back.
+            style={[styles.activate, plan?.card_payments && styles.activateQuiet, (!complete || busy) && styles.activateOff]}
           >
-            <Text style={styles.activateText}>{busy ? '…' : t('plus.activate')}</Text>
+            <Text style={[styles.activateText, plan?.card_payments && { color: color.text }]}>{busy ? '…' : t('plus.activate')}</Text>
           </PressScale>
           {plan?.plus && <Text style={[styles.muted, { textAlign: 'center' }]}>{t('plus.extendHint')}</Text>}
         </Enter>
 
-        {!plan?.card_payments && (
-          <Enter index={4} style={[styles.card, styles.cardRow]}>
-            <Icon name="lock" size={18} color={color.text3} strokeWidth={2.2} />
-            <Text style={[styles.label, { flex: 1, color: color.text2 }]}>{t('plus.cardTitle')}</Text>
-            <View style={styles.soon}>
-              <Text style={styles.soonText}>{t('plus.cardSoon')}</Text>
-            </View>
-          </Enter>
+        {plan?.test_mode && (
+          <PressScale onPress={() => setTestOpen(true)} accessibilityRole="button" style={styles.testRow}>
+            <Icon name="sliders" size={16} color={color.text3} strokeWidth={2.2} />
+            <Text style={styles.testRowText}>{t('plus.testKeyTitle')}</Text>
+          </PressScale>
         )}
       </ScrollView>
+
+      <BottomSheet open={testOpen} onClose={() => setTestOpen(false)} title={t('plus.testKeyTitle')}>
+        <View style={styles.sheet}>
+          <Text style={styles.muted}>{t('plus.testKeyHint')}</Text>
+          <TextInput
+            value={testKey}
+            onChangeText={(v) => {
+              setTestKey(v.toUpperCase());
+              setTestMessage(null);
+            }}
+            placeholder="TEST-XXXX-XXXX-XXXX"
+            placeholderTextColor={color.text3}
+            autoCapitalize="characters"
+            autoCorrect={false}
+            autoComplete="off"
+            maxLength={19}
+            style={styles.codeInput}
+            accessibilityLabel={t('plus.testKeyTitle')}
+          />
+          {testMessage && <Text style={[styles.message, { color: testMessage.ok ? color.success : color.danger }]}>{testMessage.text}</Text>}
+          <View style={styles.testButtons}>
+            {([true, false] as const).map((on) => (
+              <PressScale
+                key={String(on)}
+                disabled={testKey.length < 19}
+                onPress={async () => {
+                  const res = await run((token) => applyTestKey(token, testKey, on));
+                  if (!res) return;
+                  if (res.result !== 'ok') {
+                    fx.error();
+                    return setTestMessage({ text: t(res.result === 'too_many' ? 'plus.codeTooMany' : 'plus.testWrong'), ok: false });
+                  }
+                  fx.success();
+                  setTestMessage({ text: res.plus && res.plus_until ? t('plus.testOnDone', { date: planDate(res.plus_until) }) : t('plus.testOffDone'), ok: true });
+                  await refresh();
+                }}
+                accessibilityRole="button"
+                style={[styles.testButton, testKey.length < 19 && styles.activateOff]}
+              >
+                <Text style={styles.testButtonText}>{t(on ? 'plus.testOn' : 'plus.testOff')}</Text>
+              </PressScale>
+            ))}
+          </View>
+        </View>
+      </BottomSheet>
     </View>
   );
 }
@@ -228,7 +306,14 @@ const styles = StyleSheet.create({
   message: { fontFamily: font.semibold, fontSize: 14, textAlign: 'center' },
   activate: { height: 52, borderRadius: radius.pill, backgroundColor: color.ember, alignItems: 'center', justifyContent: 'center' },
   activateOff: { opacity: 0.4 },
+  activateQuiet: { backgroundColor: color.surface2 },
   activateText: { color: color.ink, fontFamily: font.bold, fontSize: 16 },
+  testRow: { flexDirection: 'row', alignSelf: 'center', alignItems: 'center', gap: 6, minHeight: 48, paddingHorizontal: space.lg },
+  testRowText: { color: color.text3, fontFamily: font.semibold, fontSize: 13 },
+  sheet: { gap: space.md, paddingHorizontal: space.xl, paddingBottom: space.md },
+  testButtons: { flexDirection: 'row', gap: space.sm },
+  testButton: { flex: 1, minHeight: 52, alignItems: 'center', justifyContent: 'center', borderRadius: radius.pill, backgroundColor: color.surface2 },
+  testButtonText: { color: color.text, fontFamily: font.bold, fontSize: 15 },
   soon: { paddingHorizontal: 10, minHeight: 26, justifyContent: 'center', borderRadius: radius.pill, backgroundColor: color.surface2 },
   soonText: { color: color.text2, fontFamily: font.bold, fontSize: 12 },
 });

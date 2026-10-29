@@ -7,10 +7,10 @@ import { Icon } from '@/components/Icon';
 import { LaneBadge } from '@/components/LaneBadge';
 import { useFamily } from '@/features/family/FamilyProvider';
 import { CreatorSheet } from '@/features/feed/CreatorSheet';
-import { DailyDone } from '@/features/feed/DailyDone';
 import { FeedVideo } from '@/features/feed/data';
 import { FeedItem } from '@/features/feed/FeedItem';
 import { FollowingEmpty } from '@/features/feed/FollowingEmpty';
+import { LockedNext } from '@/features/feed/LockedNext';
 import { takeOpened } from '@/features/feed/openVideo';
 import { FeedMode, useFeed } from '@/features/feed/useFeed';
 import { SheetMode, VideoSheet } from '@/features/feed/VideoSheet';
@@ -43,7 +43,8 @@ export default function FeedScreen() {
   const { active, leaveProfile } = useFamily();
   const forYou = useFeed('forYou');
   const followingFeed = useFeed('following');
-  // Free plan: after today's videos the feeds come back empty; check why when one runs dry.
+  // Free plan: after today's 30 videos the feeds come back empty; check why when one runs dry,
+  // and put a locked "next video" (Unlock with Plus) at the end.
   const { plan, reload: reloadPlan } = useProfilePlan();
   const capReached = plan?.videosLeft === 0;
   useEffect(() => {
@@ -61,7 +62,9 @@ export default function FeedScreen() {
   // FlatList wants stable viewability callbacks; setActiveIndex is stable, so these can be too.
   const pick = (m: FeedMode, items: ViewToken[]) => {
     const first = items.find((v) => v.isViewable);
-    if (first?.index != null) setActiveIndex((cur) => (cur[m] === first.index ? cur : { ...cur, [m]: first.index! }));
+    // No video on screen (e.g. the locked slot at the end on Free): nothing plays.
+    const next = first?.index ?? -1;
+    setActiveIndex((cur) => (cur[m] === next ? cur : { ...cur, [m]: next }));
   };
   const onViewableForYou = useRef(({ viewableItems }: { viewableItems: ViewToken[] }) => pick('forYou', viewableItems)).current;
   const onViewableFollowing = useRef(({ viewableItems }: { viewableItems: ViewToken[] }) => pick('following', viewableItems)).current;
@@ -183,8 +186,8 @@ export default function FeedScreen() {
                     initialNumToRender={m === mode ? 2 : 1}
                     maxToRenderPerBatch={2}
                     nestedScrollEnabled
-                    ListFooterComponent={capReached ? <DailyDone height={height} /> : null}
-                    ListEmptyComponent={capReached ? <DailyDone height={height} /> : null}
+                    ListFooterComponent={capReached ? <LockedNext height={height} poster={feed.videos[feed.videos.length - 1]?.thumb} /> : null}
+                    ListEmptyComponent={capReached ? <LockedNext height={height} /> : null}
                   />
                 )}
               </View>

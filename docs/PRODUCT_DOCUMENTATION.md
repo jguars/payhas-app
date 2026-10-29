@@ -114,9 +114,11 @@ One monthly plan per family: **20 TMT a month**. No trial; a free tier stays fre
 | Parent dashboard | Today | 7-day chart, top topics, recent videos |
 
 - **Safety is never paid.** Daily limits, quiet hours, pause, hiding videos and flagged videos work the same on Free.
-- **Children never see a price.** The Plus page sits behind the parent PIN; a locked game or the end of today's videos tells the child to ask a parent or come back tomorrow.
+- **Children never see a price.** The Plus page sits behind the parent PIN. A locked game tells the child to ask a parent; after the 30th video the next slot is a locked, blurred video with *Unlock with Plus*, which opens the PIN-gated Plus page.
 - **Limits live on the server.** Profile limit (a trigger on `profiles`), the 30-video cap (the feed functions return nothing past it) and the trimmed dashboard are enforced in the database; the app only reflects them.
-- **Paying:** activation codes now — `PAYH-XXXX-XXXX-XXXX`, sold through shops, banks or operators, entered on the Plus page. Codes are stored hashed, work once, stack (each adds its months after the current end) and lock out after 5 wrong tries an hour. Admins create a batch in the SQL editor with `select * from private.create_plus_codes(100, 1, 'batch-name');`. Local card payment comes later as another source.
+- **Paying by card:** Halkbank, Senagat Bank or Rysgal Bank, one month per payment. Until a bank is connected this runs in **test mode**: the payment is simulated, only the bank's name reaches the server and card details stay on the phone (*Fill sample card* types a test card).
+- **Test key (test mode only):** a secret key on the Plus page turns Plus on for a month or off, to test both plans. Only its SHA-256 hash is stored; wrong keys count toward the code lockout. **Turn test mode off before launch:** `update private.settings set value = 'false' where key = 'plus_test_mode';`
+- **Paying with a code:** `PAYH-XXXX-XXXX-XXXX`, sold through shops, banks or operators, entered on the Plus page. Codes are stored hashed, work once, stack (each adds its months after the current end) and lock out after 5 wrong tries an hour. Admins create a batch in the SQL editor with `select * from private.create_plus_codes(100, 1, 'batch-name');`. Local card payment comes later as another source.
 - Families with more profiles than their plan allows keep them; the limit only stops new ones.
 
 ## Design system
@@ -222,8 +224,11 @@ The core app is built and running on Android and iPhone; content is growing thro
 - [x] Business model: Payhas Plus, 20 TMT a month per family, 3 profiles; free tier with 2 profiles, 4 games, 30 videos a day, today-only dashboard
 - [x] Plus: database plans, hashed activation codes, server-side limits — `20261029160000_plus.sql`
 - [x] Plus: Payhas Plus page behind the PIN, Plus card and locked history in the dashboard, profile limit in Add and onboarding
-- [x] Plus: locked games and the end-of-day card for children (no prices)
-- [ ] Apply `20261029160000_plus.sql` to the live database (with the app build that shows the new screens)
-- [ ] Local card payment (choose a bank and its online payment API)
+- [x] Plus: locked games and the locked next video (*Unlock with Plus*) for children — no prices on child screens
+- [x] `20261029160000_plus.sql` and `20261029170000_plus_test_mode.sql` applied to the live database (Oct 29)
+- [x] Card payment flow with Halkbank, Senagat Bank and Rysgal Bank — simulated (test mode), with a sample card
+- [x] Test key to turn Plus on or off (test mode)
+- [ ] Real card payment: merchant agreement and online payment API with Halkbank, Senagat Bank and Rysgal Bank
+- [ ] Turn test mode off before launch
 - [ ] Decide where activation codes are sold, and print the first batch
 - [ ] Tablet layouts (iPad support is off until then)
