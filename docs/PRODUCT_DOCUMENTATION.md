@@ -172,8 +172,8 @@ The core app is built and running on Android and iPhone; content is growing thro
 - [x] Delete one child's profile from the dashboard — `34b71d7`
 - [x] Parental consent before the family's first child profile — `00e8468`, `20261029150000_parental_consent.sql`
 - [x] Block advertising ID, location, camera and microphone on Android — `d85d894`
-- [ ] Confirm today's four migrations are applied in the Supabase SQL editor
-- [ ] Remaining privacy review items (the review itself isn't in the repo; add its list here)
+- [x] Today's four migrations applied in the Supabase SQL editor
+- [ ] Remaining privacy review items — deferred for now (the review isn't in the repo; add its list here when it's picked up)
 - [ ] Store kids-category requirements (App Store Kids, Google Play Families)
 - [ ] Crash reporting and analytics that fit a children's app
 - [ ] TestFlight / Play internal beta, then store submission
