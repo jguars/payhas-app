@@ -49,6 +49,8 @@ const AVATAR = 124;
 const RING = 152;
 /** The next lane's colour gives the glow a second hue that still belongs to the palette. */
 const SECOND: Record<string, string> = { little: lanes.kids.color, kids: lanes.teen.color, teen: lanes.adult.color, adult: color.ember };
+/** What each lane is told the parent can see (adult profiles aren't monitored and never show it). */
+const PARENT_SEES = { little: 'me.parentSeesLittle', kids: 'me.parentSeesKids', teen: 'me.parentSeesTeen', adult: 'me.parentSeesTeen' } as const;
 
 type Tab = 'saved' | 'taste';
 
@@ -163,6 +165,19 @@ export default function MeScreen() {
             </View>
           </Enter>
         </Animated.View>
+
+        {/* What the parent dashboard shows, said plainly to the child */}
+        {!isAdult && (
+          <Enter index={2}>
+            <View style={styles.parentSees} accessible accessibilityLabel={`${t('me.parentSees')}. ${t(PARENT_SEES[current.lane])}`}>
+              <Icon name="shield" size={18} color={l.color} strokeWidth={2.2} />
+              <View style={styles.parentSeesText}>
+                <Text style={styles.parentSeesTitle}>{t('me.parentSees')}</Text>
+                <Text style={styles.parentSeesBody}>{t(PARENT_SEES[current.lane])}</Text>
+              </View>
+            </View>
+          </Enter>
+        )}
 
         {/* Stats */}
         <Enter index={2} style={styles.stats}>
@@ -554,6 +569,10 @@ const styles = StyleSheet.create({
   laneDot: { width: 7, height: 7, borderRadius: 4 },
   laneChipText: { fontFamily: font.bold, fontSize: 12, letterSpacing: 0.2 },
   joined: { color: color.text3, fontFamily: font.medium, fontSize: 13 },
+  parentSees: { flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.lg, borderRadius: radius.card, backgroundColor: color.surface1 },
+  parentSeesText: { flex: 1, gap: 2 },
+  parentSeesTitle: { color: color.text, fontFamily: font.semibold, fontSize: 14 },
+  parentSeesBody: { color: color.text2, fontFamily: font.medium, fontSize: 13, lineHeight: 18 },
 
   stats: {
     flexDirection: 'row',
