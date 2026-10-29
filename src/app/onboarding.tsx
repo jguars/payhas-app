@@ -10,6 +10,7 @@ import { PinPad } from '@/components/PinPad';
 import { Avatar } from '@/components/ui/Avatar';
 import { useFamily } from '@/features/family/FamilyProvider';
 import { ChildSetup } from '@/features/onboarding/ChildSetup';
+import { ConsentStep, useParentalConsent } from '@/features/onboarding/Consent';
 import { ParentSessionProvider, useParentSession, withParent } from '@/features/onboarding/ParentSession';
 import { Step } from '@/features/onboarding/Step';
 import { laneKey, LANGS, TKey, useT } from '@/i18n';
@@ -18,7 +19,7 @@ import { supabase } from '@/lib/supabase';
 import { useInsets } from '@/lib/useInsets';
 import { color, font, lane as lanes, radius, space } from '@/theme/tokens';
 
-type Stage = 'welcome' | 'pin' | 'pinConfirm' | 'you' | 'child' | 'family';
+type Stage = 'welcome' | 'pin' | 'pinConfirm' | 'you' | 'consent' | 'child' | 'family';
 
 /**
  * A new family's first run. Collects the parent's name and PIN, then each
@@ -38,6 +39,7 @@ function Flow() {
   const { t, lang } = useT();
   const { profiles, hasPin, refresh } = useFamily();
   const gate = useParentSession();
+  const consent = useParentalConsent();
   const [stage, setStage] = useState<Stage>('welcome');
   const [firstPin, setFirstPin] = useState<string | null>(null);
   const [parentName, setParentName] = useState('');
@@ -47,8 +49,10 @@ function Flow() {
   const adult = profiles.find((p) => p.lane === 'adult');
   const kids = profiles.filter((p) => p.lane !== 'adult');
 
+  /** A child's setup comes after the parental notice, until the family has agreed to it. */
+  const toChild = () => setStage(consent.given ? 'child' : 'consent');
   /** After the PIN: the parent's own profile if there isn't one, then the first child, then the family. */
-  const afterPin = () => setStage(!adult ? 'you' : kids.length === 0 ? 'child' : 'family');
+  const afterPin = () => (!adult ? setStage('you') : kids.length === 0 ? toChild() : setStage('family'));
 
   if (stage === 'welcome') return <Welcome onStart={() => setStage('pin')} />;
 
@@ -110,7 +114,8 @@ function Flow() {
             if (!res) return;
             if (res.error) return setError(t('onboarding.error.generic'));
             await refresh();
-            setStage(kids.length === 0 ? 'child' : 'family');
+            if (kids.length === 0) toChild();
+            else setStage('family');
           },
         }}
       >
@@ -125,6 +130,19 @@ function Flow() {
         />
         {!!error && <Text style={styles.error}>{error}</Text>}
       </Step>
+    );
+  }
+
+  if (stage === 'consent') {
+    return (
+      <ConsentStep
+        progress={0.28}
+        onBack={() => setStage(kids.length > 0 || adult ? 'family' : 'you')}
+        onAgreed={() => {
+          consent.setGiven(true);
+          setStage('child');
+        }}
+      />
     );
   }
 
@@ -160,7 +178,7 @@ function Flow() {
           await refresh(); // onboarded_at set → the router moves on to "Who's watching?"
         },
       }}
-      secondary={profiles.length < 6 ? { label: t('onboarding.review.addChild'), onPress: () => setStage('child') } : undefined}
+      secondary={profiles.length < 6 ? { label: t('onboarding.review.addChild'), onPress: toChild } : undefined}
     >
       {profiles.map((p, i) => {
         const L = lanes[p.lane];

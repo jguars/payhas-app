@@ -219,6 +219,8 @@ export type Database = {
     }
     Functions: {
       delete_account: { Args: { p_pin: string }; Returns: boolean }
+      give_parental_consent: { Args: { p_parent: string; p_version: string; p_language: string }; Returns: undefined }
+      has_parental_consent: { Args: { p_version: string }; Returns: boolean }
       delete_profile: {
         Args: { p_pin: string; p_profile_id: string }
         Returns: boolean
