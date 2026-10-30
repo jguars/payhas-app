@@ -53,3 +53,22 @@ plus a devil's-advocate pass (owner asked for no subagents).
 | 5. Full size without UI | **Press and hold**: everything on the video and Home's top bar hide while held; release brings them back (Instagram Reels). The options menu lives on ••• only (screen readers keep it as an action) |
 
 Checks: tsc clean, lint 699 (was 708), axe 0 in Dark and Light.
+
+## Round 3 — full display (owner request)
+
+Mockup `home-mock-fulldisplay.png`; owner chose **pinch** (one tap stays
+mute / unmute): spread two fingers apart = full display, pinch them together
+= the buttons come back. Built (`home-fulldisplay-built.png`):
+
+- Full display hides every overlay, Home's top bar and the tab bar's
+  contents (the bar keeps its dark place so the video doesn't jump). It stays
+  on while swiping between videos; one tap still mutes / unmutes.
+- A hint "Pinch in to bring the buttons back" shows for 2.5 s (4 languages).
+- The list stops scrolling while two fingers are down, so a pinch doesn't
+  drag the feed.
+- Screen readers get a "Full display" / "Show buttons" action on the video.
+- No new native module: the pinch is read from the view's own touch events.
+- Press and hold still hides everything only while held.
+
+Checks: tsc clean; pinch tested on the web build with real two-finger touch
+events (out → full display, in → back).

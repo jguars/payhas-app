@@ -1,7 +1,7 @@
 import { router, useIsFocused, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { FlatList, LayoutChangeEvent, Pressable, Text, View, ViewToken } from 'react-native';
-import Animated, { interpolate, SharedValue, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut, interpolate, SharedValue, useAnimatedScrollHandler, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 
 import { Icon } from '@/components/Icon';
 import { LaneBadge } from '@/components/LaneBadge';
@@ -20,9 +20,13 @@ import { roleKey, TKey, useT } from '@/i18n';
 import { useScreenTime } from '@/features/library/useScreenTime';
 import { useProfilePlan } from '@/features/plan/usePlan';
 import { fx } from '@/lib/feedback';
-import { useReportVideoUnderBar } from '@/lib/tabBarTone';
+import { useHideTabBar, useReportVideoUnderBar } from '@/lib/tabBarTone';
 import { FEED_CHROME_BOTTOM, useInsets } from '@/lib/useInsets';
-import { alpha, color, font, media, size, themedStyles } from '@/theme/tokens';
+import { duration } from '@/theme/motion';
+import { alpha, color, font, media, radius, size, space, themedStyles } from '@/theme/tokens';
+
+/** How long the "pinch in to bring the buttons back" hint stays after full display turns on. */
+const FULL_HINT_MS = 2500;
 
 const UNDERLINE = 14;
 
@@ -125,6 +129,18 @@ export default function FeedScreen() {
 
   // True while a finger holds the video down: all chrome steps aside.
   const [clear, setClear] = useState(false);
+  // Full display (pinch out): nothing but the video until a pinch in; it stays on while swiping.
+  const [full, setFull] = useState(false);
+  const [pinching, setPinching] = useState(false);
+  const [hint, setHint] = useState(false);
+  const hintTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useHideTabBar(full);
+  const changeFull = useCallback((on: boolean) => {
+    setFull(on);
+    setHint(on);
+    if (hintTimer.current) clearTimeout(hintTimer.current);
+    if (on) hintTimer.current = setTimeout(() => setHint(false), FULL_HINT_MS);
+  }, []);
   const showEmptyFollowing = !followingFeed.loading && followingFeed.videos.length === 0 && !capReached;
   // The tab bar turns dark only while a video is really under it.
   useReportVideoUnderBar(!lock && !(mode === 'following' && showEmptyFollowing));
@@ -175,11 +191,15 @@ export default function FeedScreen() {
                         onOptions={onOptions}
                         onCreator={onCreator}
                         onClear={setClear}
+                        full={full}
+                        onFull={changeFull}
+                        onPinching={setPinching}
                       />
                     )}
                     // One swipe = one video. Without disableIntervalMomentum a fast flick on
                     // Android carries through 2–3 snap points.
                     pagingEnabled
+                    scrollEnabled={!pinching}
                     snapToInterval={height}
                     snapToAlignment="start"
                     disableIntervalMomentum
@@ -203,7 +223,12 @@ export default function FeedScreen() {
       )}
 
       {/* Holding the video hides this too: nothing but the picture. */}
-      <View pointerEvents="box-none" style={[styles.top, { paddingTop: insets.top + 4 }, clear && styles.hidden]}>
+      {hint && (
+        <Animated.View entering={FadeIn.duration(duration.base)} exiting={FadeOut.duration(duration.base)} pointerEvents="none" style={[styles.hint, { top: insets.top + space.xl }]}>
+          <Text style={styles.hintText}>{t('feed.fullHint')}</Text>
+        </Animated.View>
+      )}
+      <View pointerEvents={clear || full ? 'none' : 'box-none'} style={[styles.top, { paddingTop: insets.top + 4 }, (clear || full) && styles.hidden]}>
         <View pointerEvents="none" style={styles.scrimTop}>
           <TopScrim />
         </View>
@@ -290,6 +315,8 @@ const styles = themedStyles(() => ({
     alignItems: 'center',
   },
   hidden: { opacity: 0 },
+  hint: { position: 'absolute', alignSelf: 'center', paddingHorizontal: space.lg, paddingVertical: space.sm, borderRadius: radius.pill, backgroundColor: alpha(media.scrim, 0.7) },
+  hintText: { color: media.text, fontFamily: font.semibold, fontSize: size.small },
   scrimTop: {
     position: 'absolute',
     left: 0,

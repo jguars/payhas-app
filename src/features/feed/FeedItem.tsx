@@ -30,6 +30,9 @@ const FINISH_AT = 0.9;
 const PRELOAD_BUFFER = { preferredForwardBufferDuration: 5, minBufferForPlayback: 1, waitsToMinimizeStalling: true };
 const PLAYING_BUFFER = { preferredForwardBufferDuration: Platform.OS === 'ios' ? 0 : 20, minBufferForPlayback: 2, waitsToMinimizeStalling: true };
 const RAIL_RIGHT = 10;
+/** How far two fingers must spread (or close) before full display turns on (or off). */
+const PINCH_OUT = 1.25;
+const PINCH_IN = 0.8;
 const META_LEFT = 16;
 const DISC = 34;
 
@@ -44,9 +47,14 @@ type Props = {
   onCreator: (name: string) => void;
   /** Called with true while the video is held down (all chrome hides), false on release. */
   onClear?: (clear: boolean) => void;
+  /** Full display: every overlay hidden until the child pinches back in. Owned by Home so it survives swiping. */
+  full?: boolean;
+  onFull?: (full: boolean) => void;
+  /** True while two fingers are down, so the list can stop scrolling under a pinch. */
+  onPinching?: (pinching: boolean) => void;
 };
 
-function FeedItemBase({ video, active, height, chromeBottom, onShare, onOptions, onCreator, onClear }: Props) {
+function FeedItemBase({ video, active, height, chromeBottom, onShare, onOptions, onCreator, onClear, full = false, onFull, onPinching }: Props) {
   const player = useVideoPlayer(video.source, (p) => {
     p.loop = true;
     // Browsers block autoplay with sound; native starts unmuted.
@@ -88,6 +96,37 @@ function FeedItemBase({ video, active, height, chromeBottom, onShare, onOptions,
   const [picking, setPicking] = useState(false);
   // Press and hold: everything on the video hides until the finger lifts (Instagram Reels).
   const [clear, setClear] = useState(false);
+  // Pinch out (fingers apart) = full display; pinch in (fingers together) = buttons back.
+  const pinch = useRef<{ start: number; done: boolean } | null>(null);
+  const spread = (t: readonly { pageX: number; pageY: number }[]) => Math.hypot(t[0].pageX - t[1].pageX, t[0].pageY - t[1].pageY);
+  const onTouchStart = (e: GestureResponderEvent) => {
+    const t = e.nativeEvent.touches;
+    if (t.length === 2) {
+      pinch.current = { start: spread(t), done: false };
+      onPinching?.(true);
+    }
+  };
+  const onTouchMove = (e: GestureResponderEvent) => {
+    const t = e.nativeEvent.touches;
+    const p = pinch.current;
+    if (!p || p.done || t.length < 2 || p.start === 0) return;
+    const ratio = spread(t) / p.start;
+    if (ratio > PINCH_OUT && !full) {
+      p.done = true;
+      fx.tap();
+      onFull?.(true);
+    } else if (ratio < PINCH_IN && full) {
+      p.done = true;
+      fx.tap();
+      onFull?.(false);
+    }
+  };
+  const onTouchEnd = (e: GestureResponderEvent) => {
+    if (pinch.current && e.nativeEvent.touches.length < 2) {
+      pinch.current = null;
+      onPinching?.(false);
+    }
+  };
   const hold = (on: boolean) => {
     setClear(on);
     onClear?.(on);
@@ -201,7 +240,7 @@ function FeedItemBase({ video, active, height, chromeBottom, onShare, onOptions,
   const reactBottom = railBottom + 3 * (control.md + space.xs);
 
   return (
-    <View style={[styles.root, { height }]}>
+    <View style={[styles.root, { height }]} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} onTouchCancel={onTouchEnd}>
       {!fill && (
         // Decorative backdrop: hidden from screen readers.
         <View style={StyleSheet.absoluteFill} pointerEvents="none" aria-hidden importantForAccessibility="no-hide-descendants">
@@ -234,15 +273,17 @@ function FeedItemBase({ video, active, height, chromeBottom, onShare, onOptions,
         accessibilityActions={[
           { name: 'like', label: t('feed.like') },
           { name: 'options', label: t('feed.moreOptions') },
+          { name: 'full', label: full ? t('feed.a11y.fullOff') : t('feed.a11y.fullOn') },
         ]}
         onAccessibilityAction={(e) => {
           if (e.nativeEvent.actionName === 'like') like();
           else if (e.nativeEvent.actionName === 'options') onOptions(video);
+          else if (e.nativeEvent.actionName === 'full') onFull?.(!full);
         }}
       />
 
       {/* Everything on top of the picture; hidden while the video is held down. */}
-      <View pointerEvents={clear ? 'none' : 'box-none'} style={[StyleSheet.absoluteFill, clear && styles.hidden]}>
+      <View pointerEvents={clear || full ? 'none' : 'box-none'} style={[StyleSheet.absoluteFill, (clear || full) && styles.hidden]}>
         <FeedScrims railBottom={railBottom} />
 
         {muted && (

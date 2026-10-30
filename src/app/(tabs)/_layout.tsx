@@ -18,7 +18,7 @@ import { useFamily } from '@/features/family/FamilyProvider';
 import { useLibrary } from '@/features/library/LibraryProvider';
 import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
-import { TabBarToneProvider, useTabBarOnVideo } from '@/lib/tabBarTone';
+import { TabBarToneProvider, useTabBarHidden, useTabBarOnVideo } from '@/lib/tabBarTone';
 import { TAB_BAR, TAB_ROUTES, tabIndex, useInsets } from '@/lib/useInsets';
 import { duration, spring, tabStretch } from '@/theme/motion';
 import { border, color, font, media, pageFill, radius, space, themedStyles, type } from '@/theme/tokens';
@@ -127,6 +127,7 @@ function TabsWithBar() {
   const [width, setWidth] = useState(0);
   const { t } = useT();
   const onMedia = useOnMedia();
+  const hidden = useTabBarHidden() && onMedia;
   const reduce = useReducedMotion();
   // Cross-fade between the page bar and the dark bar over video, instead of a one-frame flip.
   const m = useSharedValue(onMedia ? 1 : 0);
@@ -145,8 +146,12 @@ function TabsWithBar() {
       {/* Android 3-button nav: its buttons follow the bar under them. */}
       <NavigationBar style={onMedia || color.scheme !== 'light' ? 'light' : 'dark'} />
       {/* Docked under the screens (not over them): content never slides behind it. */}
+      {/* Full display on Home: the bar keeps its (dark) place so the video doesn't jump, but shows and takes nothing. */}
       <TabList
         accessibilityRole="tablist"
+        pointerEvents={hidden ? 'none' : 'auto'}
+        accessibilityElementsHidden={hidden}
+        importantForAccessibility={hidden ? 'no-hide-descendants' : 'auto'}
         style={[styles.bar, { height: TAB_BAR.height + bottom, paddingBottom: bottom }]}
         onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
       >
@@ -167,6 +172,7 @@ function TabsWithBar() {
         <TabTrigger name="me" href="/me" asChild>
           <TabButton kind="me" label={t('nav.me')} />
         </TabTrigger>
+        {hidden && <View pointerEvents="none" style={styles.cover} />}
       </TabList>
     </Tabs>
   );
@@ -186,6 +192,7 @@ const styles = themedStyles(() => ({
   root: { flex: 1, ...pageFill() },
   slot: { flex: 1 },
   bar: { flexDirection: 'row' },
+  cover: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: media.scrim },
   fill: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, borderTopWidth: border.hairline },
   tab: { flex: 1, height: TAB_BAR.height, alignItems: 'center', paddingTop: PILL_TOP, gap: space.xs },
   icon: { width: PILL.width, height: PILL.height, alignItems: 'center', justifyContent: 'center' },

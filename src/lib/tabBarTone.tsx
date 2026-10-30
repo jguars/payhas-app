@@ -5,11 +5,29 @@ import { createContext, ReactNode, useContext, useEffect, useState } from 'react
  * actually on screen (not under the time-up lock or an empty Following feed);
  * there the bar is dark in every theme.
  */
-const Ctx = createContext<{ onVideo: boolean; setOnVideo: (v: boolean) => void }>({ onVideo: false, setOnVideo: () => {} });
+const Ctx = createContext<{ onVideo: boolean; setOnVideo: (v: boolean) => void; hidden: boolean; setHidden: (v: boolean) => void }>({
+  onVideo: false,
+  setOnVideo: () => {},
+  hidden: false,
+  setHidden: () => {},
+});
 
 export function TabBarToneProvider({ children }: { children: ReactNode }) {
   const [onVideo, setOnVideo] = useState(false);
-  return <Ctx.Provider value={{ onVideo, setOnVideo }}>{children}</Ctx.Provider>;
+  const [hidden, setHidden] = useState(false);
+  return <Ctx.Provider value={{ onVideo, setOnVideo, hidden, setHidden }}>{children}</Ctx.Provider>;
+}
+
+/** True while Home's full display is on: the bar keeps its place but shows nothing and takes no taps. */
+export const useTabBarHidden = () => useContext(Ctx).hidden;
+
+/** Home calls this with whether full display is on. */
+export function useHideTabBar(hide: boolean) {
+  const { setHidden } = useContext(Ctx);
+  useEffect(() => {
+    setHidden(hide);
+    return () => setHidden(false);
+  }, [hide, setHidden]);
 }
 
 /** The bar reads this; it only counts while Home is the focused tab. */
