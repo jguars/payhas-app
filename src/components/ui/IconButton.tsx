@@ -4,7 +4,8 @@ import { fx } from '@/lib/feedback';
 import { color, control, iconSize, iconStroke, radius, themedStyles } from '@/theme/tokens';
 
 /** A round icon-only button: tonal by default, `plain` without a fill (back arrows, close). Always 48 to tap. */
-export function IconButton({ icon, onPress, label, plain }: { icon: IconName; onPress?: () => void; label: string; plain?: boolean }) {
+/** `testID` lets UI tests (Maestro) tap it on both Android and iOS. */
+export function IconButton({ icon, onPress, label, plain, testID }: { icon: IconName; onPress?: () => void; label: string; plain?: boolean; testID?: string }) {
   return (
     <PressScale
       onPress={() => {
@@ -12,6 +13,7 @@ export function IconButton({ icon, onPress, label, plain }: { icon: IconName; on
         onPress?.();
       }}
       pressedScale={0.9}
+      testID={testID}
       accessibilityRole="button"
       accessibilityLabel={label}
       style={[styles.base, !plain && styles.tonal]}

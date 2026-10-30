@@ -25,13 +25,15 @@ appId: com.onki.payhas
 - tapOn: "Password.*"
 - inputText: ${PASSWORD}
 - hideKeyboard
-- tapOn: "Sign in"
+- tapOn:
+    id: "sign-in-submit"
 - extendedWaitUntil:
     visible: "Who’s watching?"
     timeout: 30000
 - takeScreenshot: 03-who
 # Parent dashboard behind the PIN (test PIN).
-- tapOn: ".*Parent dashboard.*"
+- tapOn:
+    id: "who-dashboard"
 - extendedWaitUntil:
     visible: "2"
     timeout: 10000
@@ -46,7 +48,9 @@ appId: com.onki.payhas
 - takeScreenshot: 04-family
 - scroll
 - takeScreenshot: 05-family-scrolled
-- back
+# iOS has no system back button; the header's back works on both.
+- tapOn:
+    id: "header-back"
 - extendedWaitUntil:
     visible: "Who’s watching?"
     timeout: 20000

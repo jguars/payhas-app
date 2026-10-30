@@ -62,6 +62,8 @@ jobs:
         env:
           EMAIL: payhas-audit@example.com
           PASSWORD: ${{ secrets.PAYHAS_TEST_PASSWORD }}
+          # The driver installs on each new simulator; a cold one can take minutes.
+          MAESTRO_DRIVER_STARTUP_TIMEOUT: "600000"
         run: |
           app=build/Build/Products/Release-iphonesimulator/Payhas.app
           runtime=$(xcrun simctl list runtimes iOS -j | python3 -c "import json,sys;r=[x for x in json.load(sys.stdin)['runtimes'] if x['isAvailable']];print(r[-1]['identifier'])")
@@ -91,6 +93,9 @@ jobs:
                 || { xcrun simctl io "$udid" screenshot "$dir/failure.png"; status=1; }
             fi
             xcrun simctl shutdown "$udid" || true
+            # Free the runner for the next phone: the old simulator and its test driver.
+            pkill -f xcodebuild || true
+            xcrun simctl delete "$udid" || true
           done
           exit $status
 
@@ -107,7 +112,7 @@ jobs:
         run: |
           [ -d ios-screens ] || exit 0
           mkdir -p /tmp/screens
-          (cd ios-screens && find . -name '*.png' | while read -r f; do mkdir -p "/tmp/screens/$(dirname "$f")"; cp "$f" "/tmp/screens/$f"; done)
+          (cd ios-screens && find . \( -name '*.png' -o -name '*.json' -o -name 'maestro.log' -o -name '*.xml' \) | while read -r f; do mkdir -p "/tmp/screens/$(dirname "$f")"; cp "$f" "/tmp/screens/$f"; done)
           [ -n "$(find /tmp/screens -name '*.png')" ] || exit 0
           cd /tmp/screens
           git init -q -b ci-screens-ios

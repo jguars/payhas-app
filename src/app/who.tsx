@@ -115,6 +115,7 @@ export default function WhoScreen() {
           pressedScale={0.94}
           style={styles.footerButton}
           accessibilityRole="button"
+          testID="who-dashboard"
         >
           <Icon name="sliders" size={15} color={color.text3} strokeWidth={2.2} />
           <Text style={styles.footerText}>{t('auth.dashboardSignOut')}</Text>

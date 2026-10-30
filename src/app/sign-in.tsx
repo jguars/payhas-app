@@ -67,7 +67,7 @@ export default function SignInScreen() {
 
         <Text style={styles.message}>{message ?? ' '}</Text>
 
-        <Pressable onPress={submit} disabled={!canSubmit} style={[styles.button, !canSubmit && styles.buttonOff]}>
+        <Pressable testID="sign-in-submit" onPress={submit} disabled={!canSubmit} style={[styles.button, !canSubmit && styles.buttonOff]}>
           {busy ? (
             <ActivityIndicator color={color.ink} />
           ) : (

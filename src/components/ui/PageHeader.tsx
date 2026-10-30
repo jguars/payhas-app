@@ -18,7 +18,7 @@ export function PageHeader({ title, subtitle, back, right }: { title: string; su
     <View style={styles.wrap}>
       {back && (
         <View style={styles.backRow}>
-          <IconButton icon="back" plain label={t('common.back')} onPress={() => goBack()} />
+          <IconButton icon="back" plain label={t('common.back')} onPress={() => goBack()} testID="header-back" />
         </View>
       )}
       <View style={styles.titleRow}>
