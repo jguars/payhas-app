@@ -192,6 +192,7 @@ Per-screen tracker (copy a row per screen). Built screens: `design/screens/*-bui
 | Home (feed) | [x] | [x] | [x] HTML | [x] A | [x] | [x] self-review (skills), axe 0 | [ ] emulator + phone test |
 | Discover | [x] | [x] | [x] HTML | [x] B | [x] | [x] self-review (skills), axe 0 | [ ] emulator + phone test |
 | Play (games) | [x] | [x] | [x] | [x] Gate 2 | [x] | [x] critique + a11y (axe 0) + panel ×4 (beta: yes) | [ ] phone test |
+| Inbox (tab) | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
 | Me | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
 | Who's watching | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
 | Family dashboard | [x] | [x] | [x] | [x] Gate 2 | [x] | [x] critique + a11y (axe 0) + panel ×4 (beta: yes) | [ ] phone test |
@@ -200,6 +201,14 @@ Per-screen tracker (copy a row per screen). Built screens: `design/screens/*-bui
 | Edit profile | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
 | Onboarding + consent | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
 | Sign in / Language | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
+| Saved | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
+| Following list | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
+| Channel page | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
+| Video sheets (share, options, why, report) | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
+| Add a child | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
+| Interests (pick topics) | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
+| Games (in-game screens) | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
+| Creator studio, upload, review queue | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
 
 ## Phase 6 — Build and visual QA loop
 
