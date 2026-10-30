@@ -51,7 +51,9 @@ export default function FeedScreen() {
   // Free plan: after today's 30 videos the feeds come back empty; check why when one runs dry,
   // and put a locked "next video" (Unlock with Plus) at the end.
   const { plan, reload: reloadPlan } = useProfilePlan();
-  const capReached = plan?.videosLeft === 0;
+  // Free plan: the feed ends at the day's allowance (the server serves no more than what's left),
+  // so the locked "next video" follows the last one even before the plan reports zero.
+  const capReached = plan?.videosLeft === 0 || (plan?.videosLeft != null && forYou.done);
   useEffect(() => {
     if (forYou.done || followingFeed.done) reloadPlan();
   }, [forYou.done, followingFeed.done, forYou.videos.length, reloadPlan]);

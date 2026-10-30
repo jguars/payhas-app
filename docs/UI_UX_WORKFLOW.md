@@ -198,6 +198,7 @@ Per-screen tracker (copy a row per screen). Built screens: `design/screens/*-bui
 | Family dashboard | [x] | [x] | [x] | [x] Gate 2 | [x] | [x] critique + a11y (axe 0) + panel ×4 (beta: yes) | [ ] phone test |
 | Child page | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
 | Payhas Plus | [x] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
+| Paywall + locked 31st video | [x] | [x] | [x] HTML | [x] shown to anyone | [x] | [x] web screenshots | [ ] emulator + phone test |
 | Edit profile | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
 | Onboarding + consent | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
 | Sign in / Language | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
