@@ -65,7 +65,8 @@ export function SearchField({ value, onChange, suggestions }: Props) {
           autoCorrect={false}
           style={styles.input}
         />
-        {value.length === 0 && (
+        {/* The rolling placeholder steps aside the moment the field is tapped, not on the first letter. */}
+        {value.length === 0 && !focused && (
           <View pointerEvents="none" style={styles.placeholder}>
             <Animated.Text style={styles.placeholderText}>{t('discover.searchPrefix')}</Animated.Text>
             <Animated.Text

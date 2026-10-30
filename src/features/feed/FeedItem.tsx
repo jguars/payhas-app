@@ -1,5 +1,4 @@
 import { useEvent } from 'expo';
-import { router } from 'expo-router';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { memo, useEffect, useRef, useState } from 'react';
 import { GestureResponderEvent, Platform, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
@@ -231,7 +230,8 @@ function FeedItemBase({ video, active, height, chromeBottom, onShare, onOptions,
     lib.toggleSave(video.id);
     if (saved) fx.tap();
     else fx.save();
-    if (!saved) toast({ text: t('feed.saved'), icon: 'save', action: { label: t('feed.view'), onPress: () => router.push('/saved') } });
+    // A quick confirmation, gone in about a second; Saved lives in Me.
+    if (!saved) toast({ text: t('feed.saved'), icon: 'save', brief: true });
   };
 
   const metaBottom = chromeBottom + 4;

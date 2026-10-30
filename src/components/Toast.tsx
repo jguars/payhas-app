@@ -13,11 +13,13 @@ import { color, control, elevation, font, iconSize, iconStroke, layout, radius, 
  * without its action being pressed — timed out or replaced — so a caller can
  * commit something only once the Undo window has passed.
  */
-type ToastSpec = { text: string; icon?: IconName; action?: { label: string; onPress: () => void }; onDismiss?: () => void | Promise<unknown> };
+/** `brief`: a quick confirmation ("Saved") that's gone in about a second. */
+type ToastSpec = { text: string; icon?: IconName; action?: { label: string; onPress: () => void }; onDismiss?: () => void | Promise<unknown>; brief?: boolean };
 const Ctx = createContext<(t: ToastSpec) => void>(() => {});
 const FlushCtx = createContext<() => Promise<void>>(async () => {});
 
 const SHOW_MS = 2600;
+const BRIEF_MS = 1200;
 /** With an action (Undo) the toast waits long enough to reach it, also with a screen reader (WCAG 2.2.1). */
 const ACTION_MS = 7000;
 /** With a screen reader on, an action toast stays much longer: finding the button takes time. */
@@ -36,6 +38,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const pending = useRef<(() => void | Promise<unknown>) | undefined>(undefined);
   const screenReader = useRef(false);
   useEffect(() => {
+    // react-native-web always answers "on", which would make every web toast linger; phones report it truly.
+    if (Platform.OS === 'web') return;
     AccessibilityInfo.isScreenReaderEnabled().then((on) => (screenReader.current = on));
     const sub = AccessibilityInfo.addEventListener('screenReaderChanged', (on) => (screenReader.current = on));
     return () => sub.remove();
@@ -92,7 +96,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       y.value = withSpring(0, spring.bouncy);
       o.value = withTiming(1, { duration: 140 });
       if (timer.current) clearTimeout(timer.current);
-      timer.current = setTimeout(dismiss, t.action ? (screenReader.current ? ACTION_SR_MS : ACTION_MS) : SHOW_MS);
+      timer.current = setTimeout(dismiss, t.action ? (screenReader.current ? ACTION_SR_MS : ACTION_MS) : t.brief && !screenReader.current ? BRIEF_MS : SHOW_MS);
     },
     [y, o, dismiss],
   );

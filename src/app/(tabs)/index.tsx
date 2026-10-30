@@ -6,7 +6,7 @@ import Animated, { FadeIn, FadeOut, interpolate, SharedValue, useAnimatedScrollH
 import { Icon } from '@/components/Icon';
 import { LaneBadge } from '@/components/LaneBadge';
 import { useFamily } from '@/features/family/FamilyProvider';
-import { CreatorSheet } from '@/features/feed/CreatorSheet';
+import { openChannel } from '@/features/discover/ChannelHubs';
 import { FeedVideo } from '@/features/feed/data';
 import { FeedItem } from '@/features/feed/FeedItem';
 import { TopScrim } from '@/features/feed/FeedScrims';
@@ -62,7 +62,6 @@ export default function FeedScreen() {
   const { t } = useT();
 
   const [sheet, setSheet] = useState<{ video: FeedVideo; mode: SheetMode } | null>(null);
-  const [creator, setCreator] = useState<string | null>(null);
 
   // FlatList wants stable viewability callbacks; setActiveIndex is stable, so these can be too.
   const pick = (m: FeedMode, items: ViewToken[]) => {
@@ -125,7 +124,8 @@ export default function FeedScreen() {
 
   const onShare = useCallback((video: FeedVideo) => setSheet({ video, mode: 'share' }), []);
   const onOptions = useCallback((video: FeedVideo) => setSheet({ video, mode: 'options' }), []);
-  const onCreator = useCallback((name: string) => setCreator(name), []);
+  // The creator's name and face open their channel page.
+  const onCreator = useCallback((name: string) => openChannel(name), []);
 
   // True while a finger holds the video down: all chrome steps aside.
   const [clear, setClear] = useState(false);
@@ -244,16 +244,6 @@ export default function FeedScreen() {
       </View>
 
       <VideoSheet video={sheet?.video ?? null} mode={sheet?.mode ?? 'share'} onClose={() => setSheet(null)} />
-      <CreatorSheet
-        name={creator}
-        videos={forYou.videos}
-        onClose={() => setCreator(null)}
-        onOpenVideo={(id) => {
-          setCreator(null);
-          if (mode !== 'forYou') goTo('forYou', false);
-          setTimeout(() => jumpTo(id), 0);
-        }}
-      />
       {lock && <TimesUp lock={lock} />}
     </View>
   );
