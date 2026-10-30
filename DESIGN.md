@@ -160,6 +160,30 @@ screen; if a screen needs something new, add it here first.
 | Depth | `elevation.ledge 4` (child cards), `elevation.ledgeButton 3` (primary), `elevation.float` (tab bar, toasts, sheets) | Tonal layers first. |
 | Motion | `spring.snappy/smooth/bouncy`, `STAGGER_MS 45`, `duration.fast 150 · base 250 · slow 400` | Everything off under reduce-motion. |
 
+## Components (Phase 4, 2026-10-30)
+
+Code: `src/components/ui/` (+ `Segmented`, `LaneBadge`, `BottomSheet`,
+`motion/Toggle`). Gallery: open `/gallery` in the app; screenshots in
+`design/components-gallery.png` (Dark · Navy · Light).
+
+| Component | Variants / sizes | States | Rules |
+| --- | --- | --- | --- |
+| `Button` | primary · secondary · quiet · destructive; lg 56 (block) · sm 40 (inline); optional icon | pressed (scale 0.97), disabled (surface2 + text3), loading | One primary per screen. Primary sits on its ledge. |
+| `IconButton` | tonal · plain | pressed | Always 48 × 48. Back, close, settings. |
+| `Card` | flat (parent) · tactile (child, ledge) · hero (radius lg) · flush (full-bleed art) | pressed when tappable | The only card. Padding lg, gap md. |
+| `ListGroup` + `ListRow` | leading tile / avatar · value · switch · chevron · danger | pressed (surface2) | Values in words on the right, Figtree. Icon tiles are neutral; only danger rows are coloured. |
+| `Chip` | md 48 · lg 56; emoji/icon | selected (inverse), pressed (ledge), disabled | Topics, years, months, "pick some". |
+| `Segmented` | words · compact | selected (inverse pill) | Tabs inside a screen (Saved / Taste, For you / Channels / Topics). |
+| `Badge` | neutral · plus · success · danger | — | Plan names, counts, states. |
+| `LaneBadge` | filled (pages) · media (over video) | — | The only place lane colour is a fill besides avatars. |
+| `TextField` | text · code (mono) | focused (strong border), error (danger border + message) | Label above, hint or error below. |
+| `ProgressBar` | default 8 · thin 6 | full (danger) | Time used is success green. |
+| `PageHeader` | tab root · pushed (`back`) · with right action | — | The one header: large title left, optional subtitle. |
+| `SectionHeader` | with / without "See all" | — | Sections inside a screen. |
+| `EmptyState` | with / without action | — | Icon circle, title, one line, at most one (secondary) action. |
+| `Toggle` | — | on (success) / off (surface2) | White knob in every theme. |
+| Tab bar | — | active = inverse pill | Same on every tab; never lane colours. |
+
 References: `design/direction/` and the Mobbin collection "Payhas — design
 direction". Workflow: `docs/UI_UX_WORKFLOW.md`.
 

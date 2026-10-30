@@ -10,7 +10,7 @@ import { useFamily } from '@/features/family/FamilyProvider';
 import { Constants, Tables } from '@/lib/database.types';
 import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
-import { color, font, lane as lanes, pageFill, radius, size, space, themedStyles } from '@/theme/tokens';
+import { color, font, pageFill, radius, size, space, themedStyles } from '@/theme/tokens';
 
 type Interest = Tables<'interests'>;
 const laneRank = (l: Interest['youngest_lane']) => Constants.public.Enums.lane.indexOf(l);
@@ -77,7 +77,6 @@ export default function InterestsScreen() {
               emoji={i.emoji}
               size="lg"
               selected={picked.has(i.slug)}
-              tint={profile ? lanes[profile.lane].color : undefined}
               onPress={() => toggle(i.slug)}
             />
           </Enter>

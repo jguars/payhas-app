@@ -5,7 +5,7 @@ import Animated, { interpolateColor, useAnimatedStyle, useSharedValue, withSprin
 import { spring } from '@/theme/motion';
 import { color, themedStyles } from '@/theme/tokens';
 
-/** A switch whose knob springs across and stretches a little mid-travel. Display only. */
+/** A switch whose knob springs across and stretches a little mid-travel. Display only. The knob is white in every theme. */
 export function Toggle({ on, tint = color.success }: { on: boolean; tint?: string }) {
   const p = useSharedValue(on ? 1 : 0);
   useEffect(() => {
@@ -13,7 +13,7 @@ export function Toggle({ on, tint = color.success }: { on: boolean; tint?: strin
   }, [on, p]);
 
   const track = useAnimatedStyle(() => ({
-    backgroundColor: interpolateColor(Math.min(1, Math.max(0, p.value)), [0, 1], [color.line, tint]),
+    backgroundColor: interpolateColor(Math.min(1, Math.max(0, p.value)), [0, 1], [color.surface2, tint]),
   }));
   const knob = useAnimatedStyle(() => {
     const mid = 1 - Math.abs(p.value - 0.5) * 2; // 0 at the ends, 1 halfway
@@ -29,5 +29,5 @@ export function Toggle({ on, tint = color.success }: { on: boolean; tint?: strin
 
 const styles = themedStyles(() => ({
   track: { width: 48, height: 30, borderRadius: 15, padding: 3 },
-  knob: { width: 24, height: 24, borderRadius: 12, backgroundColor: color.ink },
+  knob: { width: 24, height: 24, borderRadius: 12, backgroundColor: color.white, shadowColor: color.black, shadowOpacity: 0.2, shadowRadius: 2, shadowOffset: { width: 0, height: 1 }, elevation: 2 },
 }));

@@ -4,14 +4,14 @@ import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-na
 
 import { fx } from '@/lib/feedback';
 import { spring } from '@/theme/motion';
-import { color, font, size, themedStyles } from '@/theme/tokens';
+import { color, control, font, radius, size, themedStyles } from '@/theme/tokens';
 
 type Props<T> = {
   options: T[];
   value: T;
   onChange: (v: T) => void;
   label: (v: T) => string;
-  /** Word labels (tabs) instead of numbers: UI type, not mono. */
+  /** Word labels (tabs): the larger body size. */
   words?: boolean;
 };
 
@@ -54,10 +54,10 @@ export function Segmented<T>({ options, value, onChange, label, words }: Props<T
 }
 
 const styles = themedStyles(() => ({
-  segments: { flexDirection: 'row', minHeight: 48, padding: 4, borderRadius: 14, backgroundColor: color.bg },
-  pill: { position: 'absolute', left: 4, top: 4, bottom: 4, borderRadius: 10, backgroundColor: color.surface2, borderWidth: 1, borderColor: color.line },
+  segments: { flexDirection: 'row', minHeight: control.md, padding: 4, borderRadius: radius.pill, backgroundColor: color.surface1 },
+  pill: { position: 'absolute', left: 4, top: 4, bottom: 4, borderRadius: radius.pill, backgroundColor: color.inverse },
   seg: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  text: { color: color.text3, fontFamily: font.mono, fontSize: size.small },
+  text: { color: color.text2, fontFamily: font.bold, fontSize: size.small },
   words: { fontFamily: font.bold, fontSize: size.body },
-  textOn: { color: color.text },
+  textOn: { color: color.onInverse },
 }));

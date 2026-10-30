@@ -123,6 +123,8 @@ function Routes() {
         {/* Reachable from Who's watching? and from the parent dashboard inside a profile; the PIN comes first. */}
         <Stack.Screen name="add-child" options={{ animation: 'slide_from_bottom' }} />
       </Stack.Protected>
+      {/* Component gallery for design QA (docs/UI_UX_WORKFLOW.md, step 4.4). Not linked anywhere. */}
+      <Stack.Screen name="gallery" />
     </Stack>
   );
 }

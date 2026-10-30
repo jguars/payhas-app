@@ -199,7 +199,7 @@ export default function FeedScreen() {
       <View pointerEvents="box-none" style={[styles.top, { paddingTop: insets.top + 4 }]}>
         <View pointerEvents="none" style={styles.scrimTop} />
         <View style={styles.side} pointerEvents="box-none">
-          {active && <LaneBadge lane={active.profile.lane} label={t(roleKey(active.profile))} onPress={leaveProfile} />}
+          {active && <LaneBadge variant="media" lane={active.profile.lane} label={t(roleKey(active.profile))} onPress={leaveProfile} />}
         </View>
         <FeedTabs mode={mode} onChange={(m) => goTo(m)} scrollX={scrollX} pageWidth={width} />
         <View style={[styles.side, styles.sideRight]} pointerEvents="box-none">

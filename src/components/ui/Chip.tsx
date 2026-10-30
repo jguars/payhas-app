@@ -3,7 +3,7 @@ import { Pressable, Text, View } from 'react-native';
 
 import { Icon, IconName } from '@/components/Icon';
 import { fx } from '@/lib/feedback';
-import { color, font, size as type, themedStyles } from '@/theme/tokens';
+import { color, control, font, radius, size as type, space, themedStyles } from '@/theme/tokens';
 
 type Props = {
   label: string;
@@ -11,8 +11,6 @@ type Props = {
   onPress?: () => void;
   emoji?: string;
   icon?: IconName;
-  /** Fill when selected; defaults to the text colour (ink label on light chip). */
-  tint?: string;
   size?: 'md' | 'lg';
   disabled?: boolean;
   accessibilityRole?: 'checkbox' | 'radio' | 'button';
@@ -22,11 +20,12 @@ type Props = {
 /**
  * The chunky, tactile chip (after Vocabulary and Duolingo ABC): a 2 px ink
  * outline on a solid fill, with a hard ledge underneath that it presses down
- * into. Selected = filled with the tint. Used for topics, years, months and
- * any "pick some" list kids touch.
+ * into. Selected = the one selected style (inverse fill, onInverse label), in
+ * every theme. Used for topics, years, months and any "pick some" list.
  */
-export function Chip({ label, selected, onPress, emoji, icon, tint = color.text, size = 'md', disabled, accessibilityRole = 'checkbox', right }: Props) {
-  const h = size === 'lg' ? 52 : 48;
+export function Chip({ label, selected, onPress, emoji, icon, size = 'md', disabled, accessibilityRole = 'checkbox', right }: Props) {
+  const tint = color.inverse;
+  const h = size === 'lg' ? control.lg : control.md;
   return (
     <Pressable
       onPress={() => {
@@ -36,7 +35,7 @@ export function Chip({ label, selected, onPress, emoji, icon, tint = color.text,
       disabled={disabled}
       accessibilityRole={accessibilityRole}
       accessibilityState={{ checked: accessibilityRole === 'checkbox' ? !!selected : undefined, selected: accessibilityRole === 'radio' ? !!selected : undefined, disabled }}
-      style={{ opacity: disabled ? 0.35 : 1 }}
+      style={{ opacity: disabled ? 0.4 : 1 }}
     >
       {({ pressed }) => (
         <View style={{ paddingBottom: 3 }}>
@@ -49,8 +48,8 @@ export function Chip({ label, selected, onPress, emoji, icon, tint = color.text,
             ]}
           >
             {!!emoji && <Text style={styles.emoji}>{emoji}</Text>}
-            {!!icon && <Icon name={icon} size={16} color={selected ? color.ink : color.text} strokeWidth={2.4} />}
-            <Text style={[styles.label, size === 'lg' && { fontSize: type.body }, selected && { color: color.ink }]} numberOfLines={1} maxFontSizeMultiplier={1.4}>
+            {!!icon && <Icon name={icon} size={16} color={selected ? color.onInverse : color.text} strokeWidth={2.4} />}
+            <Text style={[styles.label, size === 'lg' && { fontSize: type.body }, selected && { color: color.onInverse }]} numberOfLines={1} maxFontSizeMultiplier={1.4}>
               {label}
             </Text>
             {right}
@@ -72,8 +71,8 @@ function shade(hex: string) {
 }
 
 const styles = themedStyles(() => ({
-  ledge: { position: 'absolute', left: 0, right: 0, borderRadius: 16 },
-  chip: { flexDirection: 'row', alignItems: 'center', gap: 8, borderRadius: 16, borderWidth: 2, borderColor: color.line, backgroundColor: color.surface1 },
+  ledge: { position: 'absolute', left: 0, right: 0, borderRadius: radius.sm },
+  chip: { flexDirection: 'row', alignItems: 'center', gap: space.sm, borderRadius: radius.sm, borderWidth: 2, borderColor: color.line, backgroundColor: color.surface1 },
   emoji: { fontSize: 18 },
   label: { color: color.text, fontFamily: font.bold, fontSize: type.body },
 }));

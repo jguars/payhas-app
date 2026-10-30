@@ -39,3 +39,15 @@ Docs: https://docs.expo.dev/eas/index.md
 - If `ios/` and `android/` directories do not exist, they are generated (Continuous Native Generation). Never create or edit them by hand — configure native behavior in `app.json` and config plugins.
 - Expo Go only includes its bundled native modules. After adding a library with native code, the app needs a development build: `npx expo run:ios|android` locally, or `eas build --profile development`.
 - Prefer recommended Expo modules over third-party libraries, and check your available skills before adding dependencies. Docs: https://docs.expo.dev/versions/latest/index.md
+
+## Design system — screens use components and tokens only
+
+The look is decided once in `DESIGN.md` (direction, principles, tokens) and
+built in `src/theme/tokens.ts` + `src/components/ui/`. Follow
+`docs/UI_UX_WORKFLOW.md` for any UI work.
+
+- Build screens from `src/components/ui/` (Button, IconButton, Card, ListGroup/ListRow, Badge, Chip, TextField, ProgressBar, PageHeader, SectionHeader, EmptyState, Avatar) and `Segmented`, `LaneBadge`, `BottomSheet`.
+- Never invent a value. Sizes, spacing, radii, borders, colours come from tokens (`type.*`, `space.*`, `radius.*`, `border.*`, `control.*`, `iconSize`, `color.*`). If something is missing, add it to the system (tokens + DESIGN.md + the gallery) first.
+- One selected style (inverse), one disabled style (surface2 + text3), errors in `danger`, lane colours only for lanes, one ember action per screen.
+- Lint flags raw numbers and hex colours on screens (`no-restricted-syntax`); don't add new warnings.
+- After any UI change: export the web build, screenshot the screen (and `/gallery` for component changes) in Dark, Navy and Light with `scripts/audit/`, and look at the images before calling it done.

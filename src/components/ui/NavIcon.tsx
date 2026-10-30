@@ -3,7 +3,7 @@ import Animated, { useAnimatedStyle, useReducedMotion, useSharedValue, withSeque
 import Svg, { Circle, Path } from 'react-native-svg';
 
 import { spring } from '@/theme/motion';
-import { color } from '@/theme/tokens';
+import { alpha, color } from '@/theme/tokens';
 
 export type NavKind = 'home' | 'discover' | 'play' | 'inbox' | 'me';
 
@@ -70,8 +70,9 @@ export function NavIcon({ kind, active, size = 26 }: { kind: NavKind; active: bo
     transform: [{ translateY: ty.value }, { rotate: `${rot.value}deg` }, { scale: sc.value }],
   }));
 
-  const stroke = active ? INK : color.text3;
-  const fill = active ? W : 'none';
+  // Active sits on the inverse pill: its outline takes onInverse, with the fill one step softer.
+  const stroke = active ? color.onInverse : color.text3;
+  const fill = active ? (color.scheme === 'light' ? alpha(color.onInverse, 0.25) : W) : 'none';
   const line = { stroke, strokeWidth: active ? 2 : 1.9, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const };
 
   return (

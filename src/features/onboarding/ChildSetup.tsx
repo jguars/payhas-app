@@ -214,7 +214,6 @@ export function ChildSetup({ progress, onDone, onCancel }: Props) {
                   label={topicLabel(t, i.slug, i.label)}
                   emoji={i.emoji}
                   selected={on}
-                  tint={lane ? lanes[lane].color : undefined}
                   size="lg"
                   onPress={() =>
                     setPicked((cur) => {

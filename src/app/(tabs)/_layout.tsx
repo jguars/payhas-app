@@ -3,7 +3,6 @@ import { TabList, TabSlot, TabTrigger, Tabs } from 'expo-router/ui';
 import { forwardRef, useEffect, useState } from 'react';
 import { Pressable, PressableProps, View } from 'react-native';
 import Animated, {
-  interpolateColor,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
@@ -19,12 +18,9 @@ import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { TAB_BAR, useInsets } from '@/lib/useInsets';
 import { spring } from '@/theme/motion';
-import { alpha, color, lane, pageFill, themedStyles } from '@/theme/tokens';
+import { alpha, color, pageFill, radius, themedStyles } from '@/theme/tokens';
 
 const ROUTES = ['/', '/discover', '/play', '/inbox', '/me'];
-/** Each tab owns a colour from the palette; the pill blends between them as it slides. */
-/** One colour per tab, read when drawn so they follow the theme. */
-const tabColors = () => [color.ember, lane.teen.color, lane.kids.color, lane.little.color, lane.adult.color];
 const PILL_W = 54;
 const PILL_H = 42;
 
@@ -35,7 +31,7 @@ const TabButton = forwardRef<View, TabButtonProps>(({ kind, label, isFocused, ba
   <Pressable ref={ref} accessibilityRole="tab" accessibilityLabel={label} accessibilityState={{ selected: !!isFocused }} {...rest} onPressIn={() => !isFocused && fx.tab()} style={styles.tab}>
     <View>
       <NavIcon kind={kind} active={!!isFocused} />
-      {badge && <Animated.View entering={ZoomIn.springify().damping(spring.bouncy.damping)} style={[styles.badge, isFocused && { borderColor: lane.little.color }]} />}
+      {badge && <Animated.View entering={ZoomIn.springify().damping(spring.bouncy.damping)} style={[styles.badge, isFocused && { borderColor: color.inverse }]} />}
     </View>
   </Pressable>
 ));
@@ -51,8 +47,8 @@ InboxTabButton.displayName = 'InboxTabButton';
 
 /**
  * The pill behind the active tab. It slides on a spring, stretches like jelly
- * while it travels (then snaps back with a little squash), and its colour
- * blends from the old tab's to the new one's on the way.
+ * while it travels (then snaps back with a little squash). It is the one
+ * selected style (inverse), the same on every tab — colour is not decoration.
  */
 function Highlight({ width }: { width: number }) {
   const pathname = usePathname();
@@ -76,9 +72,7 @@ function Highlight({ width }: { width: number }) {
     }
   }, [index, reduce, x, sx, sy]);
 
-  const colors = tabColors();
   const anim = useAnimatedStyle(() => ({
-    backgroundColor: interpolateColor(x.value, [0, 1, 2, 3, 4], colors),
     transform: [{ translateX: x.value * slot + (slot - PILL_W) / 2 }, { scaleX: sx.value }, { scaleY: sy.value }],
   }));
   if (width === 0) return null;
@@ -143,7 +137,8 @@ const styles = themedStyles(() => ({
     top: (TAB_BAR.height - 2 - PILL_H) / 2,
     width: PILL_W,
     height: PILL_H,
-    borderRadius: 16,
+    borderRadius: radius.pill,
+    backgroundColor: color.inverse,
   },
   badge: { position: 'absolute', top: -2, right: -3, width: 10, height: 10, borderRadius: 5, backgroundColor: color.ember, borderWidth: 2, borderColor: color.surface1 },
 }));

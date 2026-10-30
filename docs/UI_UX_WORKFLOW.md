@@ -138,31 +138,31 @@ with the same names.
 - [x] **3.9 Write `DESIGN.md`:** principles, every token with its use, and
   do/don't examples. — _skill: `design:design-system`_ — Tokens section in `DESIGN.md`
 - 🚦 **Gate 3:** the owner approves the tokens from a token board (swatches,
-  type ramp, spacing, radii on one page).
+  type ramp, spacing, radii on one page). — ✅ Guvanch, 2026-10-30
 
 ## Phase 4 — Design system: components
 
-- [ ] **4.1 List the core components** from the screen inventory. A typical
+- [x] **4.1 List the core components** from the screen inventory. A typical
   set: Button (primary / secondary / quiet / destructive), IconButton, Card,
   ListRow, SectionHeader, Badge/Chip, Input, Toggle, SegmentedControl,
   Sheet, Dialog, Toast, ScreenHeader, TabBar, Avatar, EmptyState,
-  Skeleton. — _skill: `design-skills:design-systems`_
-- [ ] **4.2 Specify each component:** anatomy, variants, sizes, states
+  Skeleton. — _skill: `design-skills:design-systems`_ — 15 components listed in `DESIGN.md` → Components
+- [x] **4.2 Specify each component:** anatomy, variants, sizes, states
   (default, pressed, focused, disabled, loading, error), and tokens used. —
-  _skill: `design:design-handoff`_
-- [ ] **4.3 Build them in code**, using tokens only, in one folder
-  (`components/ui/`). — _Claude Code_
-- [ ] **4.4 Build a component gallery screen** (dev-only route) that shows
-  every component in every variant and state, in all themes. — _Claude Code_
-- [ ] **4.5 Screenshot the gallery** in each theme and review it. — _Playwright;
-  skills: `design-skills:design-critique`, `design-skills:accessibility-audit`_
-- [ ] **4.6 Build them in Figma** too and link code ↔ Figma *(optional)*. —
-  _skills: `figma-generate-library`, `figma-code-connect`_
-- [ ] **4.7 Enforce the system:** lint rules ban raw colours, font sizes,
+  _skill: `design:design-handoff`_ — variants, states and rules table in `DESIGN.md` → Components
+- [x] **4.3 Build them in code**, using tokens only, in one folder
+  (`components/ui/`). — _Claude Code_ — new: Button, IconButton, Card, ListGroup/ListRow, Badge, TextField, ProgressBar, PageHeader, EmptyState; updated to tokens: Chip (inverse selected), Segmented (inverse pill, no mono), Toggle (white knob), LaneBadge (filled/media), tab bar (neutral, inverse active), error text → danger
+- [x] **4.4 Build a component gallery screen** (dev-only route) that shows
+  every component in every variant and state, in all themes. — _Claude Code_ — `src/app/gallery.tsx` (route `/gallery`)
+- [x] **4.5 Screenshot the gallery** in each theme and review it. — _Playwright;
+  skills: `design-skills:design-critique`, `design-skills:accessibility-audit`_ — `design/components-gallery.png`, Dark · Navy · Light
+- [-] **4.6 Build them in Figma** too and link code ↔ Figma *(optional)*. —
+  _skills: `figma-generate-library`, `figma-code-connect`_ — Figma connector can't connect from this session
+- [x] **4.7 Enforce the system:** lint rules ban raw colours, font sizes,
   spacing and radii outside `theme/` and `components/ui/`, and ban
   hand-built buttons and cards. Add a rule to `CLAUDE.md`/`AGENTS.md`: "screens
   use components and tokens only". — _eslint `no-restricted-syntax`;
-  skill: `code-review`_
+  skill: `code-review`_ — `no-restricted-syntax` in `eslint.config.js` flags raw sizes/spacing/radii/hex on screens (434 warnings = drift to remove in Phases 6–7, then error); rule added to `AGENTS.md`
 - 🚦 **Gate 4:** the owner approves the component gallery.
 
 ## Phase 5 — Screens: design before code
@@ -250,7 +250,7 @@ Per-screen tracker (copy a row per screen):
 | 2026-10-29 | Type: 3 families, 6 faces, 9 sizes | Font audit found 22 sizes and 7 faces | Guvanch (asked for it) |
 | 2026-10-30 | Adopt this system-first workflow for all UI work | Screens looked inconsistent ("AI slop") | Guvanch |
 | 2026-10-30 | Gate 2: Play B with Brain games grid, Family B | Clear single action for kids; parents act without opening a screen | Guvanch |
-| 2026-10-30 | Tokens: AA everywhere, one selected style (inverse), disabled = surface2 + text3, errors = danger, Mono only for codes | Audit problems 1, 3, 5 | Claude (awaiting Gate 3) |
+| 2026-10-30 | Tokens: AA everywhere, one selected style (inverse), disabled = surface2 + text3, errors = danger, Mono only for codes | Audit problems 1, 3, 5 | Guvanch (Gate 3) |
 | 2026-10-30 | Direction: one system, mixed volumes; feeling warm · playful · safe · calm; 6 principles | `design/direction/DIRECTION.md` | Guvanch |
 | 2026-10-30 | Gate 1: audit findings accepted | Top 10 in `design/audit/2026-10-30/AUDIT.md` | Guvanch |
 
