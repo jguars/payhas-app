@@ -1,0 +1,118 @@
+# Builds the iPhone app for the iOS Simulator (no Apple signing needed) on a
+# macOS runner and walks the test family through the main screens with
+# Maestro (.maestro/screens.yaml) on three iPhone sizes: the smallest
+# (iPhone SE, 4.7"), a standard one and the largest Pro Max. Screenshots land
+# in the "ios-screens" artifact and on the ci-screens-ios branch
+# (git fetch origin ci-screens-ios), one folder per phone.
+#
+# macOS minutes count 10x against the GitHub Actions quota on private repos,
+# so a newer push cancels the run in progress. Same test family and secret as
+# android-emulator.yml; without PAYHAS_TEST_PASSWORD only the build runs.
+name: iOS simulator screens
+
+on:
+  push:
+    branches: [plus]
+  workflow_dispatch:
+
+concurrency:
+  group: ios-simulator-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  screens:
+    runs-on: macos-26
+    timeout-minutes: 90
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - run: npm ci --no-audit --no-fund
+
+      - run: cp .env.example .env
+
+      # Native folders aren't committed (Continuous Native Generation); this also runs pod install.
+      - run: npx expo prebuild --platform ios
+
+      - name: Build for the simulator (Release, unsigned)
+        run: |
+          xcodebuild -version
+          xcodebuild -workspace ios/Payhas.xcworkspace -scheme Payhas -configuration Release \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build CODE_SIGNING_ALLOWED=NO -quiet
+          ls build/Build/Products/Release-iphonesimulator
+
+      - name: Install Maestro
+        run: |
+          curl -Ls "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+
+      - name: Run the screens flow on three iPhone sizes
+        env:
+          EMAIL: payhas-audit@example.com
+          PASSWORD: ${{ secrets.PAYHAS_TEST_PASSWORD }}
+        run: |
+          app=build/Build/Products/Release-iphonesimulator/Payhas.app
+          runtime=$(xcrun simctl list runtimes iOS -j | python3 -c "import json,sys;r=[x for x in json.load(sys.stdin)['runtimes'] if x['isAvailable']];print(r[-1]['identifier'])")
+          echo "Runtime: $runtime"
+          mkdir -p ios-screens
+          status=0
+          # Smallest first; each name falls back to the next device type the runner has.
+          for want in "iPhone SE (3rd generation)|iPhone 16e" "iPhone 17|iPhone 16" "iPhone 17 Pro Max|iPhone 16 Pro Max"; do
+            type=""
+            IFS='|' read -ra names <<< "$want"
+            for n in "${names[@]}"; do
+              if xcrun simctl list devicetypes | grep -q "^$n ("; then type="$n"; break; fi
+            done
+            [ -n "$type" ] || { echo "No device type for $want"; continue; }
+            dir="ios-screens/${type// /-}"
+            mkdir -p "$dir"
+            udid=$(xcrun simctl create "Payhas $type" "$type" "$runtime")
+            xcrun simctl boot "$udid"
+            xcrun simctl bootstatus "$udid" -b
+            xcrun simctl install "$udid" "$app"
+            if [ -z "$PASSWORD" ]; then
+              xcrun simctl launch "$udid" com.onki.payhas
+              sleep 15
+              xcrun simctl io "$udid" screenshot "$dir/00-first-screen.png"
+            else
+              (cd "$dir" && maestro --device "$udid" test ../../.maestro/screens.yaml -e EMAIL="$EMAIL" -e PASSWORD="$PASSWORD" --test-output-dir .) \
+                || { xcrun simctl io "$udid" screenshot "$dir/failure.png"; status=1; }
+            fi
+            xcrun simctl shutdown "$udid" || true
+          done
+          exit $status
+
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-screens
+          path: ios-screens/
+          retention-days: 14
+
+      - name: Publish screenshots to the ci-screens-ios branch
+        if: always()
+        run: |
+          [ -d ios-screens ] || exit 0
+          mkdir -p /tmp/screens
+          (cd ios-screens && find . -name '*.png' | while read -r f; do mkdir -p "/tmp/screens/$(dirname "$f")"; cp "$f" "/tmp/screens/$f"; done)
+          [ -n "$(find /tmp/screens -name '*.png')" ] || exit 0
+          cd /tmp/screens
+          git init -q -b ci-screens-ios
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          echo "iOS simulator screenshots for ${GITHUB_SHA}" > README.md
+          git add -A && git commit -q -m "iOS simulator screenshots for ${GITHUB_SHA::7}"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" ci-screens-ios
