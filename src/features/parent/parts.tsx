@@ -26,7 +26,7 @@ import { ago, Child, minutes, RecentRow } from '@/features/parent/useParent';
 import { localized, topicLabel, useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { spring } from '@/theme/motion';
-import { alpha, color, font, lane as lanes, pageFill, radius, size, space, themedStyles } from '@/theme/tokens';
+import { alpha, color, font, lane as lanes, pageFill, radius, size, space, themedStyles, type } from '@/theme/tokens';
 
 /**
  * Pieces of the parent dashboard shared by the Family screen (parent.tsx) and
@@ -87,8 +87,13 @@ export function WeekChart({ child }: { child: Child }) {
   const { t } = useT();
   const dayLetter = t('parent.dayLetters').split(',');
   const total = child.week.reduce((n, d) => n + d.video_s + d.game_s, 0);
-  const max = Math.max(1, ...child.week.map((d) => d.video_s + d.game_s), (child.daily_limit_minutes ?? 0) * 60);
-  const limitY = child.daily_limit_minutes ? (child.daily_limit_minutes * 60) / max : null;
+  // Scaled to the week itself, so a light week still shows its shape; the limit line (and its
+  // scale) joins in only once a day gets to half the limit — far below it, it just empties the chart.
+  const peak = Math.max(...child.week.map((d) => d.video_s + d.game_s), 0);
+  const limitS = (child.daily_limit_minutes ?? 0) * 60;
+  const showLimit = limitS > 0 && peak >= limitS / 2;
+  const max = Math.max(1, showLimit ? Math.max(peak, limitS) : peak * 1.15);
+  const limitY = showLimit ? limitS / max : null;
 
   return (
     <View style={styles.card}>
@@ -555,8 +560,8 @@ const styles = themedStyles(() => ({
   overline: { color: color.text3, fontFamily: font.semibold, fontSize: size.small },
   bigRow: { flexDirection: 'row', alignItems: 'baseline', gap: space.sm },
   bigValue: { color: color.text, fontFamily: font.mono, fontSize: size.display, letterSpacing: -1 },
-  bigOf: { flexShrink: 1, color: color.text3, fontFamily: font.mono, fontSize: size.body },
-  weekValue: { color: color.text, fontFamily: font.mono, fontSize: size.heading, letterSpacing: -0.6 },
+  bigOf: { flexShrink: 1, color: color.text2, fontFamily: font.medium, ...type.body },
+  weekValue: { color: color.text, fontFamily: font.display, ...type.heading },
   meterTrack: { height: 8, borderRadius: 4, backgroundColor: color.surface2, overflow: 'hidden' },
   meterFill: { height: 8, width: '100%', borderRadius: 4 },
   extra: { color: color.warning, fontFamily: font.semibold, fontSize: size.caption },

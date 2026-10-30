@@ -133,6 +133,7 @@ function Routes() {
       <Stack.Protected guard={langChosen && settled}>
         <Stack.Screen name="parent" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="parent-child" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="parent-settings" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="plus" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="profile-edit" options={{ animation: 'slide_from_right' }} />
         {/* Reachable from Who's watching? and from the parent dashboard inside a profile; the PIN comes first. */}

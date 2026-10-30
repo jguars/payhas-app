@@ -48,3 +48,7 @@ google-services.json
 
 # Supabase CLI scratch
 supabase/.temp/
+
+# HTML mockups: fonts are copied in locally (see README.txt); per-variant shots are intermediates
+design/direction/mockups/src/fonts/
+design/direction/mockups/src/shots/

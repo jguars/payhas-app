@@ -197,7 +197,8 @@ Per-screen tracker (copy a row per screen). Built screens: `design/screens/*-bui
 | Who's watching | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
 | Family dashboard | [x] | [x] | [x] | [x] Gate 2 | [x] | [x] critique + a11y (axe 0) + panel ×4 (beta: yes) | [ ] phone test |
 | Child page | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
-| Payhas Plus | [x] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
+| Family dashboard v2 (redesign) | [x] Mobbin ×10 saved (Instagram, YouTube time, Whatnot, Opal, Greenlight) | [x] EN/TK/TR/RU | [x] HTML ×5, Dark + Light: `design/screens/fam-mock-5-*.png` | [x] C | [ ] | [ ] | [ ] |
+| Payhas Plus | [x] Mobbin ×10 saved (Calm, Cal AI, Deezer, YouTube Music, Flighty) | [x] EN/TK/TR/RU | [x] HTML ×5, Dark + Light: `design/screens/plus-mock-5-*.png` | [x] B | [ ] | [ ] | [ ] |
 | Paywall + locked 31st video | [x] | [x] | [x] HTML | [x] shown to anyone | [x] | [x] web screenshots | [ ] emulator + phone test |
 | Edit profile | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
 | Onboarding + consent | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
@@ -274,6 +275,7 @@ Per-screen tracker (copy a row per screen). Built screens: `design/screens/*-bui
 | 2026-10-30 | Discover B: keep For you / Channels / Topics, cleaner; no Top 10; channel list; topic tints | Parents find all channels in one list; no rankings for kids | Guvanch |
 | 2026-10-30 | Home round 2: reaction in the rail, no grown-up line, tick for Following, icon contrast on white, press-and-hold hides all chrome | Owner feedback on the build | Guvanch |
 | 2026-10-30 | Home A: quiet icon column, no counts for children, Follow pill + toast | Familiar layout, more picture; numbers are a nudge for kids | Guvanch |
+| 2026-10-31 | Family C (child switcher: avatars row, picked child's today + week + recent; account behind a settings button) and Plus B (two plan cards: Free, Plus with price and Get Plus) | Owner picked from 5 variants each (`design/screens/fam-mock-5-*.png`, `plus-mock-5-*.png`) | Guvanch |
 | 2026-10-30 | No subagents; mockup approval before any build | Owner: little help from helpers | Guvanch |
 | 2026-10-30 | Tab bar B: docked, labelled, dark over video on Home | Content slid under the floating pill; no words for parents; Light turned it pale over video | Guvanch |
 | 2026-10-30 | Gate 2: Play B with Brain games grid, Family B | Clear single action for kids; parents act without opening a screen | Guvanch |

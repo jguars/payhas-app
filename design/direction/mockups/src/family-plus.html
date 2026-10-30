@@ -1,0 +1,234 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=390">
+<!-- Family dashboard + Payhas Plus redesign, 5 variants each. Open family-plus.html?v=famA..famE|plusA..plusE&t=dark|light -->
+<style>
+@font-face{font-family:B;font-weight:800;src:url(fonts/b800.ttf)}
+@font-face{font-family:B;font-weight:700;src:url(fonts/b700.ttf)}
+@font-face{font-family:F;font-weight:500;src:url(fonts/f500.ttf)}
+@font-face{font-family:F;font-weight:600;src:url(fonts/f600.ttf)}
+@font-face{font-family:F;font-weight:700;src:url(fonts/f700.ttf)}
+:root{--bg:#0A0A0F;--s1:#14141B;--s2:#1D1D26;--line:#2A2A35;--t1:#F4F3EF;--t2:#B3B2BD;--t3:#8C8B97;--ember:#FF5A3C;--etext:#FF5A3C;--edge:#9E3825;--ink:#0A0A0F;--inv:#F4F3EF;--oninv:#0A0A0F;--kids:#4FE3B0;--little:#FFD25E;--teen:#78A6FF;--adult:#C3A2FF;--ok:#4FE3B0;--warn:#FFD25E;--danger:#FF8A73}
+.light{--bg:#E9ECF1;--s1:#F5F7FA;--s2:#DDE2EA;--line:#CBD2DC;--t1:#1B1E26;--t2:#454B5A;--t3:#575D6C;--ember:#E44D2C;--etext:#B5371B;--inv:#22252E;--oninv:#F5F7FA;--ok:#0A6E50;--warn:#735300;--danger:#AE321C}
+*{box-sizing:border-box;margin:0;padding:0}
+body{width:390px;height:844px;overflow:hidden;background:var(--bg);color:var(--t1);font-family:F;font-weight:500;position:relative}
+.screen{padding:12px 16px 120px}
+.top{display:flex;align-items:center;justify-content:space-between;height:44px;margin:0 -6px}
+.icobtn{width:44px;height:44px;border-radius:22px;display:flex;align-items:center;justify-content:center;color:var(--t1)}
+.icobtn.fill{background:var(--s1)}
+.h1{font-family:B;font-weight:800;font-size:30px;line-height:36px;letter-spacing:-.6px;margin-top:4px}
+.sub{color:var(--t2);font-size:16px;line-height:22px;margin-top:2px}
+.sec{font-family:B;font-weight:700;font-size:18px;line-height:24px;margin:22px 0 10px;display:flex;justify-content:space-between;align-items:baseline}
+.sec small{font-family:F;font-weight:600;font-size:14px;color:var(--t3)}
+.over{font-size:12px;line-height:16px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--t3)}
+.card{background:var(--s1);border-radius:20px;overflow:hidden}
+.pad{padding:16px}
+.group{background:var(--s1);border-radius:20px}
+.row{display:flex;align-items:center;gap:12px;min-height:60px;padding:10px 16px}
+.row+.row{border-top:1px solid var(--line)}
+.tile{width:36px;height:36px;border-radius:12px;background:var(--s2);display:flex;align-items:center;justify-content:center;flex:none;color:var(--t1)}
+.av{width:44px;height:44px;border-radius:50%;background-size:115%;background-position:center;flex:none;position:relative}
+.av.m{filter:hue-rotate(-100deg) saturate(1.3)}
+.grow{flex:1;min-width:0}
+.label{font-size:16px;line-height:20px;font-weight:600}
+.hint{font-size:14px;line-height:18px;color:var(--t2);margin-top:2px}
+.val{font-size:14px;color:var(--t2);font-weight:600;white-space:nowrap}
+.chev{color:var(--t3);display:flex}
+.title{font-family:B;font-weight:700;font-size:18px;line-height:22px}
+.lane{display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:999px;font-size:12px;font-weight:700;color:var(--ink);vertical-align:2px}
+.badge{display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:700;background:var(--s2);color:var(--t2)}
+.badge.plus{background:var(--ember);color:var(--ink)}
+.count{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:var(--ember);color:var(--ink);font-size:12px;font-weight:700;font-family:F}
+.dot{width:8px;height:8px;border-radius:4px;background:var(--ok);display:inline-block;margin-right:6px;vertical-align:1px}
+.dot.off{background:var(--t3)}.dot.warn{background:var(--warn)}
+.bar{height:8px;border-radius:4px;background:var(--s2);overflow:hidden}.bar i{display:block;height:100%;border-radius:4px;background:var(--ok)}
+.bar.thin{height:6px}
+.btn{height:52px;border-radius:999px;display:flex;align-items:center;justify-content:center;gap:8px;font-weight:700;font-size:16px}
+.primary{background:var(--ember);color:var(--ink);box-shadow:0 3px 0 var(--edge)}
+.secondary{background:var(--s2);color:var(--t1)}
+.ghost{color:var(--etext)}
+.small{height:40px;font-size:14px;padding:0 14px}
+.stat{font-family:B;font-weight:800;font-size:36px;line-height:40px;letter-spacing:-.6px}
+.stat span{font-family:F;font-weight:600;font-size:16px;color:var(--t2);letter-spacing:0}
+.toggle{width:48px;height:28px;border-radius:14px;background:var(--s2);position:relative;flex:none}.toggle:after{content:'';position:absolute;left:3px;top:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25)}
+.toggle.on{background:var(--ok)}.toggle.on:after{left:23px}
+.note{display:flex;gap:8px;align-items:flex-start;color:var(--t2);font-size:14px;line-height:20px;margin-top:14px}
+.note svg{color:var(--ok);flex:none;margin-top:2px}
+.foot{position:absolute;left:0;right:0;bottom:0;padding:12px 16px 28px;background:var(--bg);border-top:1px solid var(--line)}
+svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+/* charts */
+.week{display:flex;align-items:flex-end;gap:10px;height:120px;margin-top:14px}
+.wd{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end}
+.stack{width:100%;display:flex;flex-direction:column-reverse;border-radius:8px;overflow:hidden;gap:2px}
+.wd small{font-size:12px;font-weight:600;color:var(--t3)}.wd.today small{color:var(--t1);font-weight:700}
+.legend{display:flex;gap:14px;margin-top:12px;font-size:13px;color:var(--t2);font-weight:600}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+/* chips (child switcher) */
+.chips{display:flex;gap:14px;margin-top:16px}
+.chip{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--t2)}
+.chip .av{width:60px;height:60px}
+.chip.on{color:var(--t1)}.chip.on .av{box-shadow:0 0 0 3px var(--bg),0 0 0 5px var(--t1)}
+.chip .add{width:60px;height:60px;border-radius:50%;border:1.5px dashed var(--line);display:flex;align-items:center;justify-content:center;color:var(--t3)}
+.thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.thumbs div{aspect-ratio:3/4;border-radius:14px;background-size:cover;background-position:center}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+/* plus */
+.lanes{display:flex;gap:6px}.lanes i{display:block;width:28px;height:8px;border-radius:4px}
+.price{font-family:B;font-weight:800;font-size:44px;line-height:48px;letter-spacing:-1px}
+.price span{font-family:F;font-weight:600;font-size:16px;color:var(--t2);letter-spacing:0;margin-left:6px}
+.tbl{display:grid;grid-template-columns:1.3fr .8fr 1fr;align-items:center}
+.tbl>div{padding:12px 0;font-size:15px;line-height:19px;border-top:1px solid var(--line)}
+.tbl .h{border-top:0;font-size:13px;font-weight:700;color:var(--t3);padding:0 0 10px}
+.tbl .p{color:var(--t1);font-weight:700;display:flex;gap:6px;align-items:center}
+.tbl .p svg{color:var(--ok)}
+.tbl .f{color:var(--t2)}
+.plan{border-radius:20px;padding:16px;border:2px solid var(--line)}
+.plan.sel{border-color:var(--ember);background:var(--s1)}
+.feat{display:flex;gap:10px;align-items:center;font-size:15px;line-height:20px;margin-top:10px}
+.feat svg{color:var(--ok);flex:none}
+.feat.off{color:var(--t3)}.feat.off svg{color:var(--t3)}
+.ben{display:flex;gap:14px;align-items:center;padding:14px 0}
+.ben+.ben{border-top:1px solid var(--line)}
+.ben .tile{width:44px;height:44px;border-radius:14px}
+.slots{display:flex;gap:10px;margin-top:12px}
+.slot{flex:1;height:72px;border-radius:16px;background:var(--s2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:12px;font-weight:700;color:var(--t2)}
+.slot .av{width:36px;height:36px}
+.slot.empty{background:transparent;border:1.5px dashed var(--ember);color:var(--etext)}
+.games{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin-top:12px}
+.games div{aspect-ratio:1;border-radius:12px;background-size:cover;background-position:center;position:relative}
+.games div.lk{filter:saturate(.3) brightness(.6)}
+.games div.lk:after{content:'';position:absolute;inset:0;background:center/16px no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.6' stroke-linecap='round'%3E%3Crect x='5' y='11' width='14' height='10' rx='2'/%3E%3Cpath d='M8 11V8a4 4 0 0 1 8 0v3'/%3E%3C/svg%3E")}
+.code{height:60px;border-radius:16px;background:var(--s2);border:2px solid var(--line);display:flex;align-items:center;padding:0 16px;font-family:'SF Mono',ui-monospace,monospace;font-size:19px;letter-spacing:1.5px;color:var(--t3);margin-top:12px}
+.step{display:flex;gap:12px;align-items:flex-start;padding:10px 0}
+.step b{width:26px;height:26px;border-radius:13px;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+</style></head>
+<body>
+<div class="screen" id="s"></div>
+<script>
+const I={
+back:'<path d="M15 6l-6 6 6 6"/>',chev:'<path d="M9 6l6 6-6 6"/>',lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+spark:'<path d="M12 3l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/>',bell:'<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/>',
+x:'<path d="M6 6l12 12M18 6L6 18"/>',plus:'<path d="M12 5v14M5 12h14"/>',pause:'<path d="M9 5v14M15 5v14"/>',playI:'<path d="M7 5l12 7-12 7z"/>',
+clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',check:'<path d="M5 12l5 5 9-10"/>',shield:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
+flag:'<path d="M5 21V4h11l-2 4 2 4H5"/>',gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>',
+moon:'<path d="M20 14A8 8 0 1 1 10 4a7 7 0 0 0 10 10z"/>',me:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/>',
+game:'<rect x="2" y="7" width="20" height="11" rx="5"/><path d="M7 11v3M5.5 12.5h3M15 11.5h.01M17 13.5h.01"/>',
+chart:'<path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/>',card:'<rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/>',key:'<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3"/>',
+out:'<path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/>',
+};
+const ic=(n,s=22,w)=>`<svg viewBox="0 0 24 24" style="width:${s}px;height:${s}px${w?';stroke-width:'+w:''}">${I[n]}</svg>`;
+const q=new URLSearchParams(location.search);const v=q.get('v');if(q.get('t')==='light')document.documentElement.className='light';
+const img=(n,x='')=>`style="background-image:url(img/${n}.png);${x}"`;
+const chev=`<span class="chev">${ic('chev',18)}</span>`;
+const topBar=(right='')=>`<div class="top"><div class="icobtn">${ic('back',26)}</div>${right}</div>`;
+const AY={n:'Aylar',lane:'kids',laneT:'Kids · 7–12',used:52,limit:75,cls:''};
+const ME={n:'Merdan',lane:'little',laneT:'Little · 0–6',used:20,limit:45,cls:'m'};
+const fmt=m=>m>=60?`${Math.floor(m/60)} h${m%60?' '+m%60+' min':''}`:`${m} min`;
+const pct=c=>Math.round(100*c.used/c.limit);
+const acct=(extra='')=>`<div class="sec">Account</div><div class="group">
+ <div class="row"><div class="av" ${img('av-parent','width:36px;height:36px')}></div><div class="grow"><div class="label">Guvanch</div><div class="hint">Parent · you</div></div>${chev}</div>
+ <div class="row"><div class="tile">${ic('spark',18)}</div><div class="grow label">Payhas Plus</div><div class="val">Until Nov 30</div>${chev}</div>
+ <div class="row"><div class="tile">${ic('bell',18)}</div><div class="grow"><div class="label">Alerts on this phone</div><div class="hint">Limits, flags and time requests</div></div><div class="toggle on"></div></div>
+ <div class="row"><div class="tile">${ic('lock',18)}</div><div class="grow label">Lock dashboard</div></div>${extra}</div>`;
+const req=(compact)=>`<div class="card pad">
+ <div style="display:flex;gap:12px;align-items:center"><div class="av" ${img('av-kid','width:40px;height:40px')}></div><div class="grow"><div class="label">Aylar asks for more time</div><div class="hint">2 min ago · 23 min left today</div></div></div>
+ <div style="display:flex;gap:8px;margin-top:14px"><div class="btn secondary small" style="flex:1">Not today</div><div class="btn secondary small" style="flex:1">+15 min</div><div class="btn secondary small" style="flex:1">+30 min</div></div></div>`;
+const flag=`<div class="row"><div class="tile" style="color:var(--warn)">${ic('flag',18)}</div><div class="grow"><div class="label">Merdan flagged a video</div><div class="hint">“Too scary” · Ocean storm</div></div><div class="val ghost">Review</div></div>`;
+const S={
+/* ── Family A · Today first: one card per child with inline controls ───────── */
+famA:()=>`${topBar()}<div class="h1">Family</div><div class="sub">Friday, October 30</div>
+ ${[AY,ME].map((c,i)=>`<div class="card pad" style="margin-top:${i?12:18}px">
+  <div style="display:flex;gap:12px;align-items:center"><div class="av ${c.cls}" ${img('av-kid')}></div><div class="grow"><div class="title">${c.n} <span class="lane" style="background:var(--${c.lane});margin-left:4px">${c.laneT}</span></div><div class="hint">${i?'<span class="dot off"></span>Last on at 16:40':'<span class="dot"></span>Watching now'}</div></div>${chev}</div>
+  <div class="stat" style="margin-top:14px;font-size:32px">${fmt(c.used)} <span>of ${fmt(c.limit)}</span></div>
+  <div class="bar" style="margin-top:10px"><i style="width:${pct(c)}%;background:var(--${c.lane})"></i></div>
+  <div style="display:flex;gap:8px;margin-top:14px"><div class="btn secondary small" style="flex:1">${ic('pause',16)} Pause</div><div class="btn secondary small" style="flex:1">${ic('plus',16)} 15 min</div></div></div>`).join('')}
+ <div class="sec">Needs you <span class="count">1</span></div>${req()}
+ ${acct()}`,
+/* ── Family B · Needs you first: an action queue, then compact child rows ───── */
+famB:()=>`${topBar()}<div class="h1">Family</div><div class="sub">2 things need you</div>
+ <div style="margin-top:16px">${req()}</div>
+ <div class="group" style="margin-top:12px">${flag}</div>
+ <div class="sec">Today</div>
+ <div class="group">${[AY,ME].map((c,i)=>`<div class="row" style="min-height:76px"><div class="av ${c.cls}" ${img('av-kid')}></div><div class="grow"><div class="label">${c.n} <span class="lane" style="background:var(--${c.lane});margin-left:4px">${c.lane==='kids'?'Kids':'Little'}</span></div><div class="bar thin" style="margin-top:8px"><i style="width:${pct(c)}%;background:var(--${c.lane})"></i></div><div class="hint" style="margin-top:6px">${i?'<span class="dot off"></span>Not on now':'<span class="dot"></span>Watching now'}</div></div><div class="val">${fmt(c.used)} / ${fmt(c.limit)}</div>${chev}</div>`).join('')}
+  <div class="row"><div class="tile">${ic('plus',18)}</div><div class="grow label">Add a child</div><span class="val">2 of 3 profiles</span></div></div>
+ ${acct()}`,
+/* ── Family C · Child switcher: pick a child, see and run their day ─────────── */
+famC:()=>`${topBar(`<div class="icobtn fill">${ic('gear',20)}</div>`)}<div class="h1">Family</div>
+ <div class="chips"><div class="chip on"><div class="av" ${img('av-kid')}></div>Aylar</div><div class="chip"><div class="av m" ${img('av-kid')}></div>Merdan</div><div class="chip"><div class="add">${ic('plus',22)}</div>Add</div></div>
+ <div class="card pad" style="margin-top:18px">
+  <div style="display:flex;justify-content:space-between;align-items:center"><span class="lane" style="background:var(--kids)">Kids · 7–12</span><span class="hint" style="margin:0"><span class="dot"></span>Watching now</span></div>
+  <div class="stat" style="margin-top:12px">52 min <span>of 1 h 15 min</span></div>
+  <div class="bar" style="margin-top:10px"><i style="width:69%;background:var(--kids)"></i></div>
+  <div style="display:flex;gap:8px;margin-top:14px"><div class="btn secondary small" style="flex:1">${ic('pause',16)} Pause</div><div class="btn secondary small" style="flex:1">${ic('plus',16)} 15 min</div><div class="btn secondary small" style="flex:1">${ic('clock',16)} Limits</div></div></div>
+ <div class="card pad" style="margin-top:12px"><div style="display:flex;justify-content:space-between"><div class="label">This week</div><div class="val">Avg 55 min</div></div>
+  <div class="week" style="height:84px">${[40,65,30,75,50,70,52].map((m,i)=>`<div class="wd ${i==6?'today':''}"><div class="stack" style="height:${m}%"><i style="display:block;height:100%;background:var(--kids);opacity:${i==6?1:.55}"></i></div><small>${'SMTWTFS'[i]}</small></div>`).join('')}</div></div>
+ <div class="sec">Watched today <small>See all</small></div>
+ <div class="thumbs">${['#2D6A8F,#79C2D0','#3E7D4F,#A9D18E','#8A5A2B,#E2B07A'].map(g=>`<div style="background:linear-gradient(160deg,${g});display:flex;align-items:flex-end;padding:8px;color:#fff">${ic('playI',16)}</div>`).join('')}</div>`,
+/* ── Family D · The week up top: one family chart, then the children ───────── */
+famD:()=>`${topBar()}<div class="h1">Family</div>
+ <div class="card pad" style="margin-top:14px"><div class="over">This week</div><div class="stat" style="margin-top:4px">8 h 12 min <span>together</span></div>
+  <div class="week">${[[40,30],[65,25],[30,45],[75,35],[50,20],[70,40],[52,20]].map((d,i)=>`<div class="wd ${i==6?'today':''}"><div class="stack" style="height:${(d[0]+d[1])*0.85}%"><i style="display:block;flex:${d[0]};background:var(--kids)"></i><i style="display:block;flex:${d[1]};background:var(--little)"></i></div><small>${i==6?'Today':'SMTWTF'[i]}</small></div>`).join('')}</div>
+  <div class="legend"><span><i style="background:var(--kids)"></i>Aylar</span><span><i style="background:var(--little)"></i>Merdan</span></div></div>
+ <div class="sec">Today</div>
+ <div class="group">${[AY,ME].map((c,i)=>`<div class="row" style="min-height:72px"><div class="av ${c.cls}" ${img('av-kid')}></div><div class="grow"><div class="label">${c.n}</div><div class="hint">${i?'Not on now':'<span class="dot"></span>Watching now'} · ${fmt(c.limit-c.used)} left</div></div><div class="icobtn" style="width:40px;height:40px;background:var(--s2)">${ic('pause',16)}</div><div class="icobtn" style="width:40px;height:40px;background:var(--s2)">${ic('plus',16)}</div></div>`).join('')}</div>
+ <div class="group" style="margin-top:12px">${flag}</div>
+ ${acct()}`,
+/* ── Family E · Live board: a big tile per child, pause is one tap ─────────── */
+famE:()=>`${topBar(`<div class="icobtn fill">${ic('gear',20)}</div>`)}<div class="h1">Family</div><div class="sub">Who's on right now</div>
+ <div class="tiles">${[AY,ME].map((c,i)=>`<div class="card" style="padding:16px 14px;text-align:center">
+  <div class="av ${c.cls}" ${img('av-kid','width:72px;height:72px;margin:0 auto')}></div>
+  <div class="title" style="margin-top:10px">${c.n}</div>
+  <div style="margin-top:6px"><span class="badge" style="${i?'':'background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)'}">${i?'Not on':'● Watching'}</span></div>
+  <div class="stat" style="font-size:26px;line-height:30px;margin-top:12px">${fmt(c.limit-c.used)}</div><div class="hint" style="margin-top:0">left today</div>
+  <div class="bar thin" style="margin-top:10px"><i style="width:${pct(c)}%;background:var(--${c.lane})"></i></div>
+  <div class="btn ${i?'secondary':'primary'} small" style="margin-top:14px">${ic('pause',16)} ${i?'Pause':'Pause now'}</div></div>`).join('')}</div>
+ <div class="sec">Needs you <span class="count">2</span></div>
+ <div class="group"><div class="row"><div class="av" ${img('av-kid','width:36px;height:36px')}></div><div class="grow"><div class="label">Aylar asks for 15 min</div><div class="hint">2 min ago</div></div><div class="btn secondary small">Give</div></div>${flag}</div>
+ <div class="group" style="margin-top:12px"><div class="row"><div class="tile">${ic('plus',18)}</div><div class="grow label">Add a child</div><span class="val">2 of 3</span></div></div>`,
+
+/* ── Plus A · Refined compare: price, a table with the Plus column lit ──────── */
+plusA:()=>`${topBar()}<div class="lanes" style="margin-top:6px"><i style="background:var(--little)"></i><i style="background:var(--kids)"></i><i style="background:var(--teen)"></i><i style="background:var(--adult)"></i></div>
+ <div class="h1" style="margin-top:12px">Payhas Plus</div><div class="sub">More for the whole family</div>
+ <div class="price" style="margin-top:14px">20<span>TMT / month</span></div><div class="hint">One plan for the whole family</div>
+ <div class="card pad" style="margin-top:18px"><div class="tbl">
+  <div class="h"></div><div class="h">Free</div><div class="h" style="color:var(--etext)">Plus</div>
+  ${[['Profiles','2','3'],['Games','4','All 10'],['Videos','30 a day','No daily cap'],['History','Today','7 days']].map(r=>`<div>${r[0]}</div><div class="f">${r[1]}</div><div class="p">${ic('check',14,3)}${r[2]}</div>`).join('')}</div>
+  <div class="note">${ic('shield',16)}Limits, quiet hours, pause and flags are always free.</div></div>
+ <div class="btn primary" style="margin-top:20px">${ic('card',18)} Pay 20 TMT by card</div>
+ <div class="row" style="padding:0;margin-top:8px;justify-content:center;min-height:48px"><span class="label ghost">Have an activation code?</span></div>`,
+/* ── Plus B · Two plan cards: where you are, and what's next ───────────────── */
+plusB:()=>`${topBar()}<div class="h1">Your plan</div><div class="sub">Pick what fits your family</div>
+ <div class="plan" style="margin-top:18px"><div style="display:flex;justify-content:space-between;align-items:center"><div class="title">Free</div><span class="badge">Current plan</span></div>
+  <div class="feat">${ic('check',18,2.6)}2 profiles</div><div class="feat">${ic('check',18,2.6)}4 games · 30 videos a day</div><div class="feat">${ic('check',18,2.6)}Today on your dashboard</div></div>
+ <div class="plan sel" style="margin-top:12px"><div style="display:flex;justify-content:space-between;align-items:center"><div class="title">Plus</div><span class="badge plus">${ic('spark',12,2.6)} Family</span></div>
+  <div class="price" style="font-size:34px;line-height:40px;margin-top:6px">20<span>TMT / month</span></div>
+  <div class="feat">${ic('check',18,2.6)}3 profiles: room for another child</div><div class="feat">${ic('check',18,2.6)}All 10 games</div><div class="feat">${ic('check',18,2.6)}No daily video cap</div><div class="feat">${ic('check',18,2.6)}7 days of history and topics</div>
+  <div class="btn primary" style="margin-top:16px">Get Plus</div></div>
+ <div class="note">${ic('shield',16)}Limits, quiet hours, pause and flags are always free.</div>
+ <div style="text-align:center;margin-top:10px" class="label ghost">Have an activation code?</div>`,
+/* ── Plus C · Benefits list + sticky price bar ───────────────────────────────── */
+plusC:()=>`${topBar()}<div class="h1">Payhas Plus</div><div class="sub">One plan for the whole family</div>
+ <div class="card" style="margin-top:16px;padding:6px 16px">
+  ${[['me','Room for another child','3 profiles instead of 2'],['game','All 10 games','Free has 4'],['playI','No daily video cap','Free stops at 30 a day'],['chart','See their week','7 days, topics and recent videos']].map(b=>`<div class="ben"><div class="tile">${ic(b[0],20)}</div><div class="grow"><div class="label">${b[1]}</div><div class="hint">${b[2]}</div></div></div>`).join('')}</div>
+ <div class="note">${ic('shield',16)}Limits, quiet hours, pause and flags are always free.</div>
+ <div class="group" style="margin-top:16px"><div class="row"><div class="tile">${ic('key',18)}</div><div class="grow label">Have an activation code?</div>${chev}</div></div>
+ <div class="foot"><div style="display:flex;align-items:center;gap:14px"><div class="grow"><div class="price" style="font-size:28px;line-height:32px">20<span style="font-size:14px">TMT / month</span></div><div class="hint" style="margin:0">For the whole family</div></div><div class="btn primary" style="padding:0 24px">Get Plus</div></div></div>`,
+/* ── Plus D · Made for your family: what Plus changes for you, concretely ──── */
+plusD:()=>`${topBar()}<div class="h1">Plus for your family</div><div class="sub">What changes for you and Aylar</div>
+ <div class="card pad" style="margin-top:16px"><div class="label">Profiles <span class="val" style="float:right">2 of 2 used</span></div>
+  <div class="slots"><div class="slot"><div class="av" ${img('av-parent')}></div>You</div><div class="slot"><div class="av" ${img('av-kid')}></div>Aylar</div><div class="slot empty">${ic('plus',20)}With Plus</div></div></div>
+ <div class="card pad" style="margin-top:12px"><div class="label">Games <span class="val" style="float:right">4 of 10</span></div>
+  <div class="games"><div ${img('bubble')}></div><div ${img('pals')}></div><div ${img('star')}></div><div ${img('echo')}></div><div class="lk" ${img('memory')}></div><div class="lk" ${img('odd')}></div></div><div class="hint" style="margin-top:8px">6 more games unlock with Plus</div></div>
+ <div class="card pad" style="margin-top:12px"><div class="label">Videos</div><div class="hint">Aylar reached the 30-video cap 3 times this week.</div></div>
+ <div class="btn primary" style="margin-top:18px">Get Plus · 20 TMT / month</div>
+ <div style="text-align:center;margin-top:12px" class="label ghost">Have an activation code?</div>`,
+/* ── Plus E · Code first: the way people pay today, with the compare below ─── */
+plusE:()=>`${topBar()}<div class="h1">Payhas Plus</div><div class="sub">20 TMT / month for the whole family</div>
+ <div class="card pad" style="margin-top:16px"><div class="label">Activation code</div><div class="hint">It's 16 characters and starts with PAYH.</div>
+  <div class="code">PAYH-XXXX-XXXX-XXXX</div><div class="btn primary" style="margin-top:12px">Activate</div></div>
+ <div class="group" style="margin-top:12px"><div class="row"><div class="tile">${ic('card',18)}</div><div class="grow"><div class="label">Pay by card</div></div><span class="badge">Coming soon</span></div></div>
+ <div class="sec">What Plus adds</div>
+ <div class="card pad"><div class="tbl">${[['Profiles','2','3'],['Games','4','All 10'],['Videos','30 a day','No cap'],['History','Today','7 days']].map((r,i)=>`<div ${i?'':'style="border-top:0"'}>${r[0]}</div><div class="f" ${i?'':'style="border-top:0"'}>${r[1]}</div><div class="p" ${i?'':'style="border-top:0"'}>${ic('check',14,3)}${r[2]}</div>`).join('')}</div>
+  <div class="note">${ic('shield',16)}Limits, quiet hours, pause and flags are always free.</div></div>`,
+};
+document.getElementById('s').innerHTML=S[v]();
+</script></body></html>

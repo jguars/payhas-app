@@ -171,7 +171,8 @@ Code: `src/components/ui/` (+ `Segmented`, `LaneBadge`, `BottomSheet`,
 | --- | --- | --- | --- |
 | `Button` | primary · secondary · quiet · destructive; lg 56 (block) · sm 40 (inline); optional icon | pressed (scale 0.97), disabled (surface2 + text3), loading | One primary per screen. Primary sits on its ledge. |
 | `IconButton` | tonal · plain | pressed | Always 48 × 48. Back, close, settings. |
-| `Card` | flat (parent) · tactile (child, ledge) · hero (radius lg) · flush (full-bleed art) | pressed when tappable | The only card. Padding lg, gap md. |
+| `Card` | flat (parent) · tactile (child, ledge) · hero (radius lg) · flush (full-bleed art) · selected (strong ember outline) | pressed when tappable | The only card. Padding lg, gap md. `selected` marks the recommended choice among cards (the Plus plan), never a tap state. |
+| `AvatarSwitcher` | avatars 64 in a row · optional dashed "Add" slot | selected (inverse ring, the one selected style), alert (ember dot), pressed | Switch between people on one screen (Family dashboard's children). Scrolls sideways past four; names under each. |
 | `ListGroup` + `ListRow` | leading tile / avatar · value · switch · chevron · danger | pressed (surface2) | Values in words on the right, Figtree. Icon tiles are neutral; only danger rows are coloured. |
 | `Chip` | md 48 · lg 56; emoji/icon | selected (inverse), pressed (ledge), disabled | Topics, years, months, "pick some". |
 | `Segmented` | words · compact | selected (inverse pill) | Tabs inside a screen (Saved / Taste, For you / Channels / Topics). |

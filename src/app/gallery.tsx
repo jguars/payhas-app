@@ -4,6 +4,7 @@ import { ScrollView, Text, View } from 'react-native';
 import { LaneBadge } from '@/components/LaneBadge';
 import { Segmented } from '@/components/Segmented';
 import { Avatar } from '@/components/ui/Avatar';
+import { AvatarSwitcher } from '@/components/ui/AvatarSwitcher';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -29,6 +30,7 @@ export default function GalleryScreen() {
   const [seg, setSeg] = useState('Saved');
   const [chips, setChips] = useState(['Animals']);
   const [on, setOn] = useState(true);
+  const [who, setWho] = useState('a');
   return (
     <ScrollView style={styles.root} contentContainerStyle={[styles.content, { paddingTop: top + space.md, paddingBottom: bottom + space.xxxl }]}>
       <PageHeader back title="Components" subtitle={`Payhas UI · ${color.scheme === 'light' ? 'Light' : color.bg === '#0A0A0F' ? 'Dark' : 'Navy'}`} />
@@ -84,6 +86,22 @@ export default function GalleryScreen() {
           ))}
         </View>
         <Segmented words options={['Saved', 'Taste', 'History']} value={seg} onChange={setSeg} label={(v) => v} />
+      </Section>
+
+      <Section title="Avatar switcher">
+        <AvatarSwitcher
+          items={[
+            { id: 'a', name: 'Aylar', avatar: 'bear', lane: 'kids', alert: true, alertLabel: 'needs you' },
+            { id: 'm', name: 'Merdan', avatar: null, lane: 'little' },
+          ]}
+          selected={who}
+          onSelect={setWho}
+          addLabel="Add"
+          onAdd={() => {}}
+        />
+        <Card selected>
+          <Text style={styles.title}>Selected card (the recommended plan)</Text>
+        </Card>
       </Section>
 
       <Section title="Badges">

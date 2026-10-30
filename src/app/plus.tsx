@@ -1,12 +1,17 @@
 import { useCallback, useEffect, useState } from 'react';
-import { ScrollView, Text, TextInput, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 
 import { BottomSheet } from '@/components/BottomSheet';
-import { Icon, IconName } from '@/components/Icon';
+import { Icon } from '@/components/Icon';
 import { Enter } from '@/components/motion/Enter';
 import { PressScale } from '@/components/motion/PressScale';
-import { ScreenHeader } from '@/components/ScreenHeader';
 import { useToast } from '@/components/Toast';
+import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { ListGroup, ListRow } from '@/components/ui/List';
+import { PageHeader } from '@/components/ui/PageHeader';
+import { TextField } from '@/components/ui/TextField';
 import { useFamily } from '@/features/family/FamilyProvider';
 import { ParentSessionProvider, useParentSession } from '@/features/onboarding/ParentSession';
 import { currentParentToken } from '@/features/parent/useParent';
@@ -16,23 +21,16 @@ import { TKey, useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { useInsets } from '@/lib/useInsets';
 import { useGoBack } from '@/lib/useGoBack';
-import { alpha, color, font, lane as lanes, pageFill, radius, size, space, themedStyles } from '@/theme/tokens';
-
-/** Free vs Plus, row by row. Values are plain numbers or string keys. */
-const ROWS: { label: TKey; icon: IconName; free: string | TKey; plus: string | TKey }[] = [
-  { label: 'plus.rowProfiles', icon: 'me', free: '2', plus: '3' },
-  { label: 'plus.rowGames', icon: 'game', free: '4', plus: 'plus.plusGames' },
-  { label: 'plus.rowVideos', icon: 'play', free: 'plus.freeVideos', plus: 'plus.plusVideos' },
-  { label: 'plus.rowHistory', icon: 'clock', free: 'plus.freeHistory', plus: 'plus.plusHistory' },
-];
+import { border, color, control, font, iconSize, iconStroke, layout, pageFill, radius, space, themedStyles, type } from '@/theme/tokens';
 
 /**
  * Payhas Plus, for the parent only: the PIN comes first, so a child never sees
- * a price. Top to bottom: the price, the family's plan today, Free vs Plus,
- * paying by card (the one ember button), then a folded activation-code row.
- * Pays by card
- * (Halkbank, Senagat Bank, Rysgal Bank — simulated in test mode) or takes an
- * activation code. In test mode a secret test key turns Plus on or off.
+ * a price. Plus B (approved 2026-10-31): two plan cards — Free, marked while
+ * it's the family's, and Plus with the price and the one ember button — then
+ * the always-free note and a quiet activation-code link. Get Plus opens card
+ * payment (Halkbank, Senagat Bank, Rysgal Bank — simulated in test mode) or,
+ * while cards are off, the code. In test mode a secret test key turns Plus on
+ * or off.
  */
 export default function PlusScreen() {
   return (
@@ -46,14 +44,15 @@ function Plus() {
   const gate = useParentSession();
   const goBack = useGoBack();
   const { plan, refresh } = useFamily();
-  const { bottom } = useInsets();
+  const { top, bottom } = useInsets();
   const toast = useToast();
   const { t } = useT();
   const [unlocked, setUnlocked] = useState(false);
   const [code, setCode] = useState('');
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<{ text: string; ok: boolean } | null>(null);
-  const [codeOpen, setCodeOpen] = useState<boolean | null>(null);
+  const [codeOpen, setCodeOpen] = useState(false);
+  const [payOpen, setPayOpen] = useState(false);
   const [testOpen, setTestOpen] = useState(false);
   const [testKey, setTestKey] = useState('');
   const [testMessage, setTestMessage] = useState<{ text: string; ok: boolean } | null>(null);
@@ -81,7 +80,6 @@ function Plus() {
 
   if (!unlocked) return <View style={styles.root} />;
 
-  const label = (v: string | TKey) => (v.includes('.') ? t(v as TKey) : v);
   const complete = code.replace(/[^A-Z0-9]/g, '').length === 16; // PAYH + 12
 
   const activate = async () => {
@@ -106,177 +104,130 @@ function Plus() {
     });
   };
 
-  const used = plan?.profiles ?? 0;
-  const limit = plan?.profile_limit ?? 2;
-  // Without card payment the code is the only way in, so it starts open.
-  const showCode = codeOpen ?? !plan?.card_payments;
+  const showCode = codeOpen;
+
+  // Get Plus opens the card form when card payment is on; otherwise the code, the one way in today.
+  const getPlus = () => {
+    fx.tap();
+    if (plan?.card_payments) setPayOpen(true);
+    else setCodeOpen(true);
+  };
+  const free: TKey[] = ['plus.featFreeProfiles', 'plus.featFreeLimits', 'plus.featFreeHistory'];
+  const plus: TKey[] = ['plus.featPlusProfiles', 'plus.featPlusGames', 'plus.featPlusVideos', 'plus.featPlusHistory'];
+
+  const onPlus = !!plan?.plus;
+  const freeCard = (
+    <Enter key="free" index={onPlus ? 2 : 1}>
+      <Card>
+        <View style={styles.planHead}>
+          <Text style={styles.planName}>{t('plus.planFree')}</Text>
+          {plan && !plan.plus && <Badge label={t('plus.currentPlan')} />}
+        </View>
+        <Features keys={free} />
+      </Card>
+    </Enter>
+  );
+  const plusCard = (
+    <Enter key="plus" index={onPlus ? 1 : 2}>
+      {/* Ember marks the plan to buy; once it's theirs, the header carries the status. */}
+      <Card selected={!onPlus}>
+        <View style={styles.planHead}>
+          <Text style={styles.planName}>{t('plus.planPlus')}</Text>
+          <Badge label={plan?.plus ? t('plus.currentPlan') : t('plus.familyBadge')} tone="plus" icon="sparkle" />
+        </View>
+        <View style={styles.priceRow}>
+          <Text style={styles.price}>{plan?.price_tmt ?? 20}</Text>
+          <Text style={styles.perMonth}>{t('plus.perMonth')}</Text>
+        </View>
+        <Features keys={plus} />
+        {plan?.plus ? (
+          <View style={styles.until}>
+            <Text style={styles.untilText}>
+              {t('plus.activeUntil')} {plan.plus_until ? planDate(plan.plus_until) : ''}
+            </Text>
+            <Text style={styles.muted}>{t('plus.extendHint')}</Text>
+          </View>
+        ) : payOpen && plan?.card_payments ? (
+          <CardPayment
+            price={plan.price_tmt}
+            testMode={!!plan.test_mode}
+            run={run}
+            onPaid={async (text) => {
+              toast({ text, icon: 'check' });
+              setPayOpen(false);
+              await refresh();
+            }}
+          />
+        ) : (
+          <>
+            <Button label={t('plus.getPlus')} onPress={getPlus} />
+            {!plan?.card_payments && <Text style={[styles.muted, styles.center]}>{`${t('plus.cardTitle')} · ${t('plus.cardSoon')}`}</Text>}
+          </>
+        )}
+      </Card>
+    </Enter>
+  );
 
   return (
     <View style={styles.root}>
-      <ScreenHeader title={t('plus.title')} />
       <ScrollView
-        contentContainerStyle={[styles.content, { paddingBottom: bottom + space.xxl }]}
+        contentContainerStyle={[styles.content, { paddingTop: top + space.sm, paddingBottom: bottom + space.xxl }]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* Hero: what it is and what it costs, in one glance. */}
-        <Enter index={0} style={styles.hero}>
-          <View style={styles.lanesRow}>
-            {(['little', 'kids', 'teen', 'adult'] as const).map((l) => (
-              <View key={l} style={[styles.laneBar, { backgroundColor: lanes[l].color }]} />
-            ))}
-          </View>
-          <Text style={styles.title}>{t('plus.title')}</Text>
-          <Text style={styles.tagline}>{t('plus.tagline')}</Text>
-          <View style={styles.priceRow}>
-            <Text style={styles.price}>{plan?.price_tmt ?? 20}</Text>
-            <Text style={styles.perMonth}>{t('plus.perMonth')}</Text>
-          </View>
-          <Text style={styles.muted}>{t('plus.priceSub')}</Text>
+        <Enter index={0}>
+          {/* On Plus, the header says so and the Plus card comes first: this is their plan, not a pitch. */}
+          <PageHeader back title={t('plus.yourPlan')} subtitle={onPlus && plan?.plus_until ? t('plus.codeOk', { date: planDate(plan.plus_until) }) : t('plus.pickSub')} />
         </Enter>
 
-        {/* Your plan: where the family stands today. */}
-        {plan && (
-          <Enter index={1} style={styles.card}>
-            <View style={styles.cardHead}>
-              <Text style={styles.sectionTitle}>{t('plus.yourPlan')}</Text>
-              <View style={[styles.badge, plan.plus && styles.badgePlus]}>
-                {plan.plus && <Icon name="sparkle" size={12} color={color.ink} strokeWidth={2.6} />}
-                <Text style={[styles.badgeText, plan.plus && { color: color.ink }]}>{t(plan.plus ? 'plus.planPlus' : 'plus.planFree')}</Text>
-              </View>
-            </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>{t('plus.rowProfiles')}</Text>
-              <View style={styles.slots}>
-                {Array.from({ length: Math.max(limit, used) }, (_, i) => (
-                  <View key={i} style={[styles.slot, i < used && styles.slotOn]} />
-                ))}
-              </View>
-              <Text style={styles.infoValue}>{t('plus.profilesUsed', { used, limit })}</Text>
-            </View>
-            {plan.plus && plan.plus_until && (
-              <View style={styles.infoRow}>
-                <Text style={styles.infoLabel}>{t('plus.activeUntil')}</Text>
-                <Text style={styles.infoValue}>{planDate(plan.plus_until)}</Text>
-              </View>
-            )}
-            {plan.plus && <Text style={styles.muted}>{t('plus.extendHint')}</Text>}
-          </Enter>
-        )}
+        {/* Free, where most families start, and Plus, the recommended card with the price and the one ember button. */}
+        {onPlus ? [plusCard, freeCard] : [freeCard, plusCard]}
 
-        {/* Free vs Plus. */}
-        <Enter index={2} style={styles.card}>
-          <Text style={styles.sectionTitle}>{t('plus.compareTitle')}</Text>
-          <View>
-            <View style={styles.row}>
-              <View style={styles.rowLabel} />
-              <Text style={[styles.cell, styles.colHead]}>{t('plus.colFree')}</Text>
-              <View style={styles.cell}>
-                <View style={styles.plusHead}>
-                  <Text style={styles.plusHeadText}>{t('plus.colPlus')}</Text>
-                </View>
-              </View>
-            </View>
-            {ROWS.map((r) => (
-              <View key={r.label} style={[styles.row, styles.rowLine]}>
-                <View style={[styles.rowLabel, styles.rowLabelInner]}>
-                  <View style={styles.rowIcon}>
-                    <Icon name={r.icon} size={16} color={color.text2} strokeWidth={2.2} />
-                  </View>
-                  <Text style={styles.label} numberOfLines={2}>
-                    {t(r.label)}
-                  </Text>
-                </View>
-                <Text style={[styles.cell, styles.freeValue]}>{label(r.free)}</Text>
-                <View style={[styles.cell, styles.plusCell]}>
-                  <Icon name="check" size={14} color={color.success} strokeWidth={3} />
-                  <Text style={styles.plusValue}>{label(r.plus)}</Text>
-                </View>
-              </View>
-            ))}
-          </View>
-          <View style={styles.note}>
-            <Icon name="shield" size={16} color={color.success} strokeWidth={2.2} />
-            <Text style={[styles.muted, { flex: 1 }]}>{t('plus.safetyNote')}</Text>
-          </View>
+        <Enter index={3} style={styles.note}>
+          <Icon name="shield" size={iconSize.sm} color={color.success} strokeWidth={iconStroke(iconSize.sm)} />
+          <Text style={[styles.muted, styles.grow]}>{t('plus.safetyNote')}</Text>
         </Enter>
 
-        {/* Pay: the one ember button on the page. */}
-        {plan?.card_payments ? (
-          <Enter index={3} style={styles.card}>
-            <CardPayment
-              price={plan.price_tmt}
-              testMode={!!plan.test_mode}
-              run={run}
-              onPaid={async (text) => {
-                toast({ text, icon: 'check' });
-                await refresh();
-              }}
-            />
-          </Enter>
-        ) : (
-          <Enter index={3} style={[styles.card, styles.cardRow]}>
-            <Icon name="lock" size={18} color={color.text3} strokeWidth={2.2} />
-            <Text style={[styles.label, { flex: 1, color: color.text2 }]}>{t('plus.cardTitle')}</Text>
-            <View style={styles.soon}>
-              <Text style={styles.soonText}>{t('plus.cardSoon')}</Text>
-            </View>
-          </Enter>
-        )}
-
-        {/* Activation code: a quiet row that opens. */}
-        <Enter index={4} style={styles.card}>
-          <PressScale
-            onPress={() => {
-              fx.tap();
-              setCodeOpen(!showCode);
-            }}
-            accessibilityRole="button"
-            accessibilityState={{ expanded: showCode }}
-            style={styles.codeHead}
-          >
-            <Text style={[styles.label, { flex: 1 }]}>{t('plus.codeTitle')}</Text>
-            {!showCode && <Text style={styles.codeLink}>{t('plus.codeLink')}</Text>}
-            <View style={{ transform: [{ rotate: showCode ? '90deg' : '0deg' }] }}>
-              <Icon name="chevron" size={18} color={color.text3} strokeWidth={2.4} />
-            </View>
-          </PressScale>
-          {showCode && (
-            <>
-              <TextInput
+        {/* Activation code: a quiet link that opens the field. */}
+        <Enter index={4} style={styles.code}>
+          {!showCode ? (
+            <ListGroup>
+              <ListRow
+                first
+                icon="lock"
+                label={t('plus.codeTitle')}
+                onPress={() => {
+                  fx.tap();
+                  setCodeOpen(true);
+                }}
+              />
+            </ListGroup>
+          ) : (
+            <Card>
+              <TextField
+                code
+                label={t('plus.codeTitle')}
                 value={code}
                 onChangeText={(v) => {
                   setCode(formatCode(v));
                   setMessage(null);
                 }}
                 placeholder="PAYH-XXXX-XXXX-XXXX"
-                placeholderTextColor={color.text3}
                 autoCapitalize="characters"
                 autoCorrect={false}
                 autoComplete="off"
                 maxLength={19}
-                style={styles.codeInput}
-                accessibilityLabel={t('plus.codeTitle')}
+                error={message && !message.ok ? message.text : null}
               />
-              {message && <Text style={[styles.message, { color: message.ok ? color.success : color.danger }]}>{message.text}</Text>}
-              <PressScale
-                onPress={activate}
-                disabled={!complete || busy}
-                accessibilityRole="button"
-                accessibilityState={{ disabled: !complete || busy }}
-                // With card payment open, Pay is the one ember button; Activate steps back.
-                style={[styles.activate, plan?.card_payments && styles.activateQuiet, (!complete || busy) && styles.activateOff]}
-              >
-                <Text style={[styles.activateText, plan?.card_payments && { color: color.text }]}>{busy ? '…' : t('plus.activate')}</Text>
-              </PressScale>
-            </>
+              {message?.ok && <Text style={[styles.message, { color: color.success }]}>{message.text}</Text>}
+              <Button variant="secondary" label={t('plus.activate')} disabled={!complete || busy} loading={busy} onPress={activate} />
+            </Card>
           )}
-          {!showCode && message && <Text style={[styles.message, { color: message.ok ? color.success : color.danger }]}>{message.text}</Text>}
         </Enter>
 
         {plan?.test_mode && (
           <PressScale onPress={() => setTestOpen(true)} accessibilityRole="button" style={styles.testRow}>
-            <Icon name="sliders" size={16} color={color.text3} strokeWidth={2.2} />
+            <Icon name="sliders" size={iconSize.sm} color={color.text3} strokeWidth={iconStroke(iconSize.sm)} />
             <Text style={styles.testRowText}>{t('plus.testKeyTitle')}</Text>
           </PressScale>
         )}
@@ -285,19 +236,18 @@ function Plus() {
       <BottomSheet open={testOpen} onClose={() => setTestOpen(false)} title={t('plus.testKeyTitle')}>
         <View style={styles.sheet}>
           <Text style={styles.muted}>{t('plus.testKeyHint')}</Text>
-          <TextInput
+          <TextField
+            code
             value={testKey}
             onChangeText={(v) => {
               setTestKey(v.toUpperCase());
               setTestMessage(null);
             }}
             placeholder="TEST-XXXX-XXXX-XXXX"
-            placeholderTextColor={color.text3}
             autoCapitalize="characters"
             autoCorrect={false}
             autoComplete="off"
             maxLength={19}
-            style={styles.codeInput}
             accessibilityLabel={t('plus.testKeyTitle')}
           />
           {testMessage && <Text style={[styles.message, { color: testMessage.ok ? color.success : color.danger }]}>{testMessage.text}</Text>}
@@ -330,84 +280,45 @@ function Plus() {
   );
 }
 
+/** A plan's features, one checked line each. */
+function Features({ keys }: { keys: TKey[] }) {
+  const { t } = useT();
+  return (
+    <View style={styles.features}>
+      {keys.map((k) => (
+        <View key={k} style={styles.feature}>
+          <Icon name="check" size={iconSize.md} color={color.success} strokeWidth={iconStroke(iconSize.md)} />
+          <Text style={styles.featureText}>{t(k)}</Text>
+        </View>
+      ))}
+    </View>
+  );
+}
+
 const styles = themedStyles(() => ({
   root: { flex: 1, ...pageFill() },
-  content: { paddingHorizontal: space.lg, gap: space.md },
-
-  hero: {
-    alignItems: 'center',
-    gap: space.sm,
-    paddingVertical: space.xl,
-    paddingHorizontal: space.lg,
-    borderRadius: 28,
-    backgroundColor: color.surface1,
-    experimental_backgroundImage: `linear-gradient(160deg, ${alpha(color.ember, 0.22)}, ${alpha(color.ember, 0.02)} 70%)`,
-    borderWidth: 1,
-    borderColor: alpha(color.ember, 0.25),
-  },
-  lanesRow: { flexDirection: 'row', gap: 6, marginBottom: space.xs },
-  laneBar: { width: 28, height: 8, borderRadius: 4 },
-  title: { color: color.text, fontFamily: font.display, fontSize: size.display, lineHeight: 42, letterSpacing: -0.8, textAlign: 'center' },
-  tagline: { color: color.text2, fontFamily: font.medium, fontSize: size.body, textAlign: 'center' },
-  priceRow: { flexDirection: 'row', alignItems: 'baseline', gap: 6, marginTop: space.md },
-  price: { color: color.text, fontFamily: font.mono, fontSize: size.hero, lineHeight: 52, letterSpacing: -1.5 },
-  perMonth: { color: color.text2, fontFamily: font.bold, fontSize: size.body },
-
-  card: { backgroundColor: color.surface1, borderRadius: 24, padding: space.lg, gap: space.md },
-  cardRow: { flexDirection: 'row', alignItems: 'center', minHeight: 64 },
-  cardHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  sectionTitle: { color: color.text, fontFamily: font.title, fontSize: size.lead },
-  badge: { flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 28, paddingHorizontal: 12, borderRadius: radius.pill, backgroundColor: color.surface2 },
-  badgePlus: { backgroundColor: color.ember },
-  badgeText: { color: color.text2, fontFamily: font.bold, fontSize: size.caption },
-  infoRow: { flexDirection: 'row', alignItems: 'center', gap: space.sm, minHeight: 44, borderTopWidth: 1, borderTopColor: color.line, paddingTop: space.sm },
-  infoLabel: { flex: 1, color: color.text2, fontFamily: font.semibold, fontSize: size.small },
-  infoValue: { color: color.text, fontFamily: font.bold, fontSize: size.small },
-  slots: { flexDirection: 'row', gap: 4 },
-  slot: { width: 18, height: 6, borderRadius: 3, backgroundColor: color.surface2 },
-  slotOn: { backgroundColor: color.ember },
-  muted: { color: color.text3, fontFamily: font.medium, fontSize: size.small, lineHeight: 20 },
-  label: { color: color.text, fontFamily: font.semibold, fontSize: size.body },
-
-  row: { flexDirection: 'row', alignItems: 'center', gap: space.sm, paddingVertical: space.sm },
-  rowLine: { borderTopWidth: 1, borderTopColor: color.line, minHeight: 56 },
-  rowLabel: { flex: 1.4 },
-  rowLabelInner: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
-  rowIcon: { width: 30, height: 30, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: color.surface2 },
-  cell: { flex: 1, alignItems: 'center', textAlign: 'center' },
-  colHead: { color: color.text3, fontFamily: font.bold, fontSize: size.caption },
-  plusHead: { paddingHorizontal: 10, minHeight: 22, justifyContent: 'center', borderRadius: radius.pill, backgroundColor: color.ember },
-  plusHeadText: { color: color.ink, fontFamily: font.bold, fontSize: size.caption },
-  freeValue: { color: color.text3, fontFamily: font.medium, fontSize: size.small },
-  plusCell: { gap: 2 },
-  plusValue: { color: color.text, fontFamily: font.bold, fontSize: size.small, textAlign: 'center' },
-  note: { flexDirection: 'row', alignItems: 'flex-start', gap: space.sm, paddingTop: space.md, borderTopWidth: 1, borderTopColor: color.line },
-
-  codeHead: { flexDirection: 'row', alignItems: 'center', gap: space.sm, minHeight: 32 },
-  codeLink: { color: color.emberText, fontFamily: font.bold, fontSize: size.small },
-  codeInput: {
-    color: color.text,
-    fontFamily: font.mono,
-    fontSize: size.title,
-    letterSpacing: 1,
-    textAlign: 'center',
-    minHeight: 56,
-    borderRadius: 16,
-    backgroundColor: color.bg,
-    borderWidth: 1.5,
-    borderColor: color.line,
-  },
-  message: { fontFamily: font.semibold, fontSize: size.small, textAlign: 'center' },
-  activate: { height: 52, borderRadius: radius.pill, backgroundColor: color.ember, alignItems: 'center', justifyContent: 'center' },
+  content: { paddingHorizontal: layout.gutter, gap: space.md },
+  planHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.sm },
+  planName: { color: color.text, fontFamily: font.title, ...type.title },
+  priceRow: { flexDirection: 'row', alignItems: 'baseline', gap: space.sm },
+  price: { color: color.text, fontFamily: font.display, ...type.display },
+  perMonth: { color: color.text2, fontFamily: font.semibold, ...type.body },
+  features: { gap: space.sm },
+  feature: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
+  featureText: { flex: 1, color: color.text, fontFamily: font.medium, ...type.body },
+  until: { gap: space.xs, paddingTop: space.md, borderTopWidth: border.hairline, borderTopColor: color.line },
+  untilText: { color: color.text, fontFamily: font.semibold, ...type.body },
+  muted: { color: color.text3, fontFamily: font.medium, ...type.small },
+  center: { textAlign: 'center' },
+  grow: { flex: 1 },
+  note: { flexDirection: 'row', alignItems: 'flex-start', gap: space.sm, paddingHorizontal: space.xs },
+  code: { alignItems: 'stretch' },
+  message: { fontFamily: font.semibold, ...type.small, textAlign: 'center' },
   activateOff: { opacity: 0.4 },
-  activateQuiet: { backgroundColor: color.surface2 },
-  activateText: { color: color.ink, fontFamily: font.bold, fontSize: size.body },
-  testRow: { flexDirection: 'row', alignSelf: 'center', alignItems: 'center', gap: 6, minHeight: 48, paddingHorizontal: space.lg },
-  testRowText: { color: color.text3, fontFamily: font.semibold, fontSize: size.small },
+  testRow: { flexDirection: 'row', alignSelf: 'center', alignItems: 'center', gap: space.xs, minHeight: control.md, paddingHorizontal: space.lg },
+  testRowText: { color: color.text3, fontFamily: font.semibold, ...type.small },
   sheet: { gap: space.md, paddingHorizontal: space.xl, paddingBottom: space.md },
   testButtons: { flexDirection: 'row', gap: space.sm },
-  testButton: { flex: 1, minHeight: 52, alignItems: 'center', justifyContent: 'center', borderRadius: radius.pill, backgroundColor: color.surface2 },
-  testButtonText: { color: color.text, fontFamily: font.bold, fontSize: size.body },
-  soon: { paddingHorizontal: 10, minHeight: 26, justifyContent: 'center', borderRadius: radius.pill, backgroundColor: color.surface2 },
-  soonText: { color: color.text2, fontFamily: font.bold, fontSize: size.caption },
+  testButton: { flex: 1, minHeight: control.lg, alignItems: 'center', justifyContent: 'center', borderRadius: radius.pill, backgroundColor: color.surface2 },
+  testButtonText: { color: color.text, fontFamily: font.bold, ...type.body },
 }));
