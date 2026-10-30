@@ -10,6 +10,12 @@ shouldn't change.
 
 ## 1. Opening the app
 
+0. **A new phone →** *Splash* (the four lane colours and the wordmark, a
+   moment), then *Welcome* in the phone's own language: "Videos and games
+   picked for kids", **Get started** or **I have an account**. Both lead to
+   *Choose your language*: it starts on the phone's language, a tap marks a
+   row (the title follows it) and **Continue** applies it. Get started opens
+   sign-in on *Create account*, I have an account on *Sign in*.
 1. **Signed out →** *Parent sign in.* Enter email and password, or tap
    "Create an account". New accounts confirm by email first.
 2. **Signed in, first time →** *Set a parent PIN* (4 digits). This happens
@@ -26,15 +32,22 @@ shouldn't change.
 5. **Otherwise →** straight into the app, on the Home feed. The last profile
    used reopens by itself next time.
 
-## 2. Inside a profile — the five tabs
+## 2. Inside a profile — the four tabs
+
+A docked tab bar with labels: **Home · Discover · Play · Me** (dark over
+the video on Home).
 
 | Tab | What it's for |
 |---|---|
-| **Home** | Full-screen videos, swipe up for the next. Tap to pause / unmute. Right side: follow, like, comments, save, share. Top: the lane badge (tap it to switch profile), *Following* / *For you*, search. |
-| **Discover** | Search, a featured shelf, trending in your lane, browse by topic. |
-| **Play** (centre) | Two games — Bubble Pop and Memory Match — tuned to the lane. |
-| **Inbox** | Welcome notes, new videos picked for you, family notices (e.g. "your parent gave you 15 more minutes"). |
-| **Me** | Name and lane, time watched today, saved and following, your taste (what the feed thinks you like, with Reset), sound and vibration, **Switch profile**, **Sign out**. |
+| **Home** | Full-screen videos, swipe up for the next. One tap mutes / unmutes. Right rail: like, react, save, send, more (counts only for adults). Tap the creator to open their channel; Follow turns into a tick. **Hold** to hide everything while holding; **pinch out** (two fingers apart) for full display with no buttons at all, **pinch in** to bring them back. Top: the lane badge, *Following* / *For you*, search. |
+| **Discover** | Search (the hint steps aside the moment you tap), then *For you* (today's pick and topic shelves), *Channels* and *Topics*. |
+| **Play** | Ten lane-tuned games. |
+| **Me** | Face, name and lane; today's time against the limit; then one list: **Inbox** (with a "new" badge — the inbox moved here from the tab bar), Saved, Following, My topics; then Family, This phone (sound, vibration, theme, language) and Account (Switch profile, Sign out). |
+
+**Free plan's daily cap.** After 30 videos in a day the feed still scrolls
+to a 31st, which doesn't play: it's locked, with **Unlock more videos**. That
+opens the **Paywall** page (what Plus adds, the monthly price, *Continue with
+parent PIN*). Anyone can see the page; only a parent can buy, behind the PIN.
 
 Everything shown has already passed the lane check on the server — a child
 can never receive a video above their lane, whatever they tap.

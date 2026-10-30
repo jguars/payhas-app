@@ -38,11 +38,12 @@ One family account per household. The parent owns it; every family member gets a
 
 ## UX flow
 
-First launch runs language, parent sign-in, PIN and onboarding once; after that the app always opens on *Who's watching?* (or reopens the last profile).
+First launch runs splash, Welcome, language, parent sign-in, PIN and onboarding once; after that the app always opens on *Who's watching?* (or reopens the last profile).
 
 ```mermaid
 flowchart TD
-  A[First launch: pick language] --> B[Parent sign-in / create account]
+  S[First launch: Splash] --> WE[Welcome, in the phone's language] --> A[Choose language → Continue]
+  A --> B[Parent sign-in / create account]
   B --> C[Set parent PIN]
   C --> D[Parent profile]
   D --> E[Privacy notice: parent consents]
@@ -50,28 +51,31 @@ flowchart TD
   F --> G[Family summary]
   G --> W
   R[Later launches] --> W{Who's watching?}
-  W -->|last profile| P[Profile: Home · Discover · Play · Inbox · Me]
+  W -->|last profile| P[Profile: Home · Discover · Play · Me]
   W -->|PIN-protected profile| PIN[Enter parent PIN] --> P
   W -->|Parent dashboard| PD[PIN → 15-min parent session]
   P -->|daily limit reached| T[Time's up: Ask for more time / Switch profile]
   P -->|quiet hours or paused| X[Blocked until wake-up / un-pause]
   P -->|Switch profile| W
+  P -->|31st video on the free plan| L[Locked video → Paywall → parent PIN → Plus]
 ```
 
 PIN-protected profiles ask for the PIN to enter. Signing out of a child profile goes through the parent dashboard and the PIN; an Adult profile signs out directly.
 
 ## Features
 
-Inside a profile there are five tabs; outside it, the parent dashboard.
+Inside a profile there are four tabs (Home · Discover · Play · Me, docked with labels); outside it, the parent dashboard.
 
 | Area | What it does |
 | --- | --- |
-| Home | Full-screen vertical feed. Swipe left/right between Following and For you; swipe up for the next clip, which is already preloading. Tap to pause or unmute. Right rail: like, save, share. Caption collapsed until tapped, which reveals credit and source. Reactions row under the caption. |
-| Discover | Search, then three tabs. **Channels** (default): the busiest channel as a featured card with its three newest posters and Follow, then every channel as a tinted tile with a follow toggle. **For you**: featured shelf and Top 10 in your lane. **Topics**: hand-drawn topic stickers. |
+| Home | Full-screen vertical feed. Swipe left/right between Following and For you; swipe up for the next clip, which is already preloading. One tap mutes or unmutes. Right rail: like, react, save, send, more — counts for adults only, with a shadow and glow so icons stay readable on any clip and theme. The creator row opens the channel; Follow becomes a tick. Hold hides the controls while held; pinch out for full display (no controls), pinch in to bring them back. After the free plan's 30 videos the next clip is locked and opens the Paywall. |
+| Discover | Search (hint clears on tap), then three tabs. **For you** (default): today's pick and up to four topic shelves. **Channels**: a list with a follow disc. **Topics**: tinted topic tiles. No results suggests topics instead. |
 | Channel page | A channel's avatar, clip count, main topics, Follow, and a grid of every clip your lane may watch; tapping one plays it in the feed. |
 | Play | Ten lane-tuned games in three sections. Quick play: Bubble Pop, Pop-up Pals, Star Catcher, Echo Lights. Brain games: Memory Match, Odd One Out, Quick Count, Maze Run. Puzzles: Slide Puzzle, Three in a Row. Little never fails or loses; older lanes get clocks, bigger boards and smarter opponents. Best scores stay on the device. |
-| Inbox | Welcome notes, new videos picked for you, and family notices such as "your parent gave you 15 more minutes". |
-| Me | Avatar with today's watch-time ring, lane, stats, Saved and Taste tabs, "What your parent can see", settings (sound, vibration, language), Switch profile, Sign out. |
+| Inbox (inside Me) | Welcome notes, new videos picked for you, and family notices such as "your parent gave you 15 more minutes". Opened from Me, with a "new" badge; the Me tab shows a dot. |
+| Me | A list hub: avatar, name and lane; today against the limit; Inbox, Saved, Following, My topics; Family; This phone (sound, vibration, theme, language); Switch profile, Sign out; "What your parent can see". |
+| Paywall | Reached from the locked 31st video. What Plus adds, 20 TMT a month, *Continue with parent PIN* (to the Plus page). Shown to anyone; only a parent buys. |
+| First run | Splash → Welcome (phone's language; Get started / I have an account) → language list with Continue → sign-in. |
 | Parent dashboard | Two levels, after YouTube Family Center, Spotify Kids and Instagram's Time management. **Family**: what needs an answer (time requests, flags from the last day), then everyone in the family — the parent first, labelled *Parent* — each child with live status and today against the limit; then the account (Payhas Plus, alerts, lock, sign out). **A child's page**: avatar and status, today with *Pause now* and *+15 min*, rules as rows (daily limit, quiet hours, games) that open a sheet, the 7-day chart and recent videos (Plus), delete the profile. |
 
 **Limits and quiet hours.** A daily limit and quiet hours block both videos and games; game time counts toward the limit. When a limit is reached a Time's up screen offers *Ask for more time* (alerts the parent) or *Switch profile*.
@@ -171,7 +175,14 @@ The core app is built and running on Android and iPhone; content is growing thro
 - [x] Feed with Following/For you swipe
 - [x] Discover with channel hubs and channel pages
 - [x] Play with ten lane-tuned games
-- [x] Inbox and Me
+- [x] Inbox and Me (Inbox now lives inside Me)
+- [x] Docked tab bar with labels (4 tabs), dark over the video
+- [x] Home polish: quiet icon rail, contrast shadow + glow, tick for following, creator → channel, hold to hide, pinch for full display
+- [x] Discover rebuilt (For you shelves, channel list, topic tiles)
+- [x] Me rebuilt as a list hub with Inbox inside
+- [x] Paywall page and the locked 31st video on the free plan
+- [x] First run: Splash → Welcome → language with Continue
+- [x] Fits every iPhone from the SE (4.7") to the Pro Max; iPhone simulator screenshots in CI
 - [x] Accounts and age lanes with parent PIN
 - [x] Onboarding with real data
 - [x] Four languages, with a Cyrillic font for Russian
@@ -197,7 +208,7 @@ The core app is built and running on Android and iPhone; content is growing thro
 - [ ] Remaining privacy review items — deferred for now (the review isn't in the repo; add its list here when it's picked up)
 - [ ] Store kids-category requirements (App Store Kids, Google Play Families)
 - [ ] Crash reporting and analytics that fit a children's app
-- [ ] TestFlight / Play internal beta, then store submission
+- [ ] TestFlight / Play internal beta, then store submission — the TestFlight workflow is ready (`ios-testflight.yml`); it waits on the App Store Connect key secrets and the app record
 
 ### Roadmap
 
@@ -217,7 +228,7 @@ The core app is built and running on Android and iPhone; content is growing thro
 
 - [x] Serve R2 without r2.dev (rate-limited, not for production) — media Worker, `8e6400d`
 - [ ] Delete the old video copies in Supabase Storage (about 1 GB) now that the library plays from R2
-- [ ] APNs key for parent alerts on iPhone
+- [ ] APNs key for parent alerts on iPhone (until then the iPhone says alerts are coming soon)
 - [ ] Firebase setup for Android alerts (`google-services.json` and service-account secret)
 - [ ] YouTube embeds for creator videos (needs a Google Cloud API key)
 - [ ] Creator uploads and the safety classifier pipeline (not built; content is curated only)
@@ -237,3 +248,5 @@ The core app is built and running on Android and iPhone; content is growing thro
 - [x] Tapping outside the keyboard closes it, on every screen and sheet
 - [x] Type audit: 3 families / 7 faces / 22 sizes → 3 families / 6 faces / 9-step scale
 - [x] Payhas Plus page redesigned: price hero, Your plan (profile slots, active until), Free vs Plus with checks, card payment as the one call to action, folded activation-code row
+
+See also: `docs/TODO.md` (the working to-do list) and `docs/CI_WORKFLOWS.md` (what each GitHub workflow does).

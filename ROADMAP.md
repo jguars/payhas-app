@@ -13,7 +13,7 @@ Design source: https://claude.ai/artifact/EEnQUr5xZXq3b8utWGQyA4 — Feed Varian
 - [x] Feed (Variant A): full-screen paging, autoplay active item only, tap to unmute/pause, progress bar
 - [x] Action rail: follow, like, comment, save, share (local state)
 - [x] Seed content: the three clips in `assets/videos`
-- [ ] Preload next video, double-tap to like with burst animation
+- [x] Preload next video, double-tap to like with burst animation
 - [ ] Comments sheet, share sheet, long-press "Why this?" / "Not for me"
 
 ## Phase 2 — Accounts & age lanes
@@ -57,10 +57,19 @@ Design source: https://claude.ai/artifact/EEnQUr5xZXq3b8utWGQyA4 — Feed Varian
 - [x] Every screen translated (`src/i18n/strings/*`, typed keys); server inbox notices translated client-side; captions carry `caption_i18n` (`tools/content/apply_captions.py`) — needs `20261015090000_onboarding_i18n.sql` applied
 - [ ] Native-speaker review of Turkmen copy; a Cyrillic-capable display/body font pairing for Russian
 
+## Phase 5f — UI polish, first run, iPhone (Oct 30)
+- [x] Docked tab bar with labels: Home · Discover · Play · Me (Inbox moved inside Me)
+- [x] Home, Discover and Me rebuilt through the mockup → approval → build pipeline (`docs/UI_UX_WORKFLOW.md`)
+- [x] Home: pinch out for full display, pinch in to return; hold to hide
+- [x] Free plan: the 31st video is locked and opens the Paywall page
+- [x] First run: Splash → Welcome (phone's language) → language with Continue
+- [x] iPhone: fits the SE to the Pro Max; simulator build with screenshots in CI (`docs/CI_WORKFLOWS.md`)
+- [ ] TestFlight builds (workflow ready; waits on the App Store Connect key secrets)
+
 ## Phase 6 — Launch readiness
 - [ ] COPPA / GDPR-K / UK Children's Code, store kids-category rules
 - [ ] Analytics, crash reporting, performance budget (first frame < 1s, 60fps swipe)
-- [ ] TestFlight / Play internal beta → store submission
+- [ ] TestFlight / Play internal beta → store submission (working list: `docs/TODO.md`)
 
 ## Running it
 ```bash
