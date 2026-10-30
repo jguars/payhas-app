@@ -1,5 +1,5 @@
-import { router } from 'expo-router';
-import { useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
 
 import { Icon } from '@/components/Icon';
@@ -10,6 +10,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { ListGroup, ListRow } from '@/components/ui/List';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { useFamily } from '@/features/family/FamilyProvider';
+import { useLinkedPhones } from '@/features/parent/devices';
 import { confirmDestructive } from '@/features/parent/parts';
 import { disableParentAlerts, enableParentAlerts, storedPushToken } from '@/features/parent/push';
 import { useParent } from '@/features/parent/useParent';
@@ -36,6 +37,13 @@ export default function ParentSettingsScreen() {
   const { top, bottom } = useInsets();
   const { t } = useT();
   const [deletingAccount, setDeletingAccount] = useState(false);
+  const linked = useLinkedPhones(token);
+  // Back from linking a phone: show it.
+  useFocusEffect(
+    useCallback(() => {
+      linked.reload();
+    }, [linked.reload]), // eslint-disable-line react-hooks/exhaustive-deps
+  );
 
   if (!unlocked || deletingAccount) {
     return (
@@ -133,6 +141,29 @@ export default function ParentSettingsScreen() {
           </ListGroup>
         </Enter>
 
+        {/* Every phone linked to the family, and the one way to cut a lost one off. */}
+        <Enter index={2}>
+          <ListGroup title={t('parent.phonesTitle')} footer={t('parent.phonesFooter')}>
+            {(linked.phones ?? []).map((ph, i) => (
+              <ListRow
+                key={ph.id}
+                first={i === 0}
+                icon="link"
+                label={ph.name}
+                sub={ph.status === 'pending' ? t('parent.phoneWaiting') : ph.kind === 'shared' ? t('parent.sharedPhone') : t('parent.phoneOf', { name: ph.profile_name ?? '' })}
+                value={<Text style={styles.remove}>{t('parent.removePhone')}</Text>}
+                chevron={false}
+                onPress={() =>
+                  confirmDestructive(t('parent.removePhoneTitle', { name: ph.name }), t('parent.removePhoneBody'), t('parent.removePhone'), t('common.cancel'), async () =>
+                    done(await linked.remove(ph.id), t('parent.removedToast', { name: ph.name })),
+                  )
+                }
+              />
+            ))}
+            <ListRow first={(linked.phones ?? []).length === 0} icon="plus" label={t('parent.addSharedPhone')} onPress={() => router.push('/link-phone')} />
+          </ListGroup>
+        </Enter>
+
         <View style={styles.footer}>
           <View style={styles.trust}>
             <Icon name="shield" size={iconSize.sm} color={color.text3} strokeWidth={iconStroke(iconSize.sm)} />
@@ -193,4 +224,5 @@ const styles = themedStyles(() => ({
   trust: { flexDirection: 'row', alignItems: 'flex-start', gap: space.sm, alignSelf: 'stretch' },
   footnote: { flex: 1, color: color.text3, fontFamily: font.medium, ...type.small },
   deleteLink: { color: color.text3, fontFamily: font.semibold, ...type.small, textDecorationLine: 'underline' },
+  remove: { color: color.danger, fontFamily: font.semibold, ...type.small },
 }));

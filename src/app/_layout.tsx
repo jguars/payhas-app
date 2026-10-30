@@ -82,7 +82,7 @@ const SPLASH_MS = 1200;
  * onboarding. No profile chosen → who's watching. Otherwise → the app.
  */
 function Routes() {
-  const { ready, session, active, needsInterests, needsOnboarding } = useFamily();
+  const { ready, session, active, needsInterests, needsOnboarding, device } = useFamily();
   const { chosen: langChosen } = useT();
   usePresence();
   useParentAlerts(ready && !!session);
@@ -94,7 +94,9 @@ function Routes() {
     return () => clearTimeout(id);
   }, [holding]);
   if (!ready || holding) return <Splash />;
-  const settled = !!session && !needsOnboarding;
+  // A linked phone the parent hasn't allowed yet waits on the join screen.
+  const waiting = device?.status === 'pending';
+  const settled = !!session && !needsOnboarding && !waiting;
 
   return (
     <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: color.bg } }}>
@@ -105,7 +107,11 @@ function Routes() {
       <Stack.Protected guard={langChosen && !session}>
         <Stack.Screen name="sign-in" />
       </Stack.Protected>
-      <Stack.Protected guard={langChosen && !!session && needsOnboarding}>
+      {/* Another member's own phone: join with the parent's code, then wait for Allow. */}
+      <Stack.Protected guard={langChosen && (!session || waiting)}>
+        <Stack.Screen name="join" options={{ animation: 'slide_from_right' }} />
+      </Stack.Protected>
+      <Stack.Protected guard={langChosen && !!session && needsOnboarding && !waiting}>
         <Stack.Screen name="onboarding" options={{ gestureEnabled: false }} />
       </Stack.Protected>
       <Stack.Protected guard={langChosen && settled && !active}>
@@ -134,6 +140,7 @@ function Routes() {
         <Stack.Screen name="parent" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="parent-child" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="parent-settings" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="link-phone" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="plus" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="profile-edit" options={{ animation: 'slide_from_right' }} />
         {/* Reachable from Who's watching? and from the parent dashboard inside a profile; the PIN comes first. */}

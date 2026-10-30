@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from 'react-native';
 
@@ -45,6 +46,8 @@ export default function SignInScreen() {
             {message ?? ' '}
           </Text>
 
+          {/* A child's or a shared phone joins the parent's family with a code instead of signing in. */}
+          <Button variant="secondary" icon="link" label={t('auth.joinFamily')} onPress={() => router.push('/join')} />
           <Button
             variant="quiet"
             label={method === 'phone' ? t('auth.useEmail') : t('auth.usePhone')}

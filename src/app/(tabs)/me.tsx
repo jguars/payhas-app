@@ -42,7 +42,10 @@ export default function MeScreen() {
   const insets = useInsets();
   const barSpace = useTabBarSpace();
   const focused = useIsFocused();
-  const { current, leaveProfile, signOut } = useFamily();
+  const { current, leaveProfile, signOut, device } = useFamily();
+  // A linked phone (a member's own or a shared one) has no parent dashboard; the parent manages it from theirs.
+  const linked = !!device;
+  const ownPhone = device?.kind === 'child';
   const { unread } = useLibrary();
   const { todaySeconds } = useUsage();
   const { limitMinutes } = useScreenTime();
@@ -83,7 +86,7 @@ export default function MeScreen() {
             </Text>
             <LaneBadge lane={current.lane} label={current.is_parent ? t(roleKey(current)) : undefined} />
           </View>
-          <IconButton icon="sliders" label={isAdult ? t('me.familyDashboard') : t('me.familyControls')} onPress={openParent} />
+          {!linked && <IconButton icon="sliders" label={isAdult ? t('me.familyDashboard') : t('me.familyControls')} onPress={openParent} />}
         </Enter>
 
         {!isAdult && (
@@ -117,13 +120,15 @@ export default function MeScreen() {
           </ListGroup>
         </Enter>
 
+        {!(linked && isAdult) && (
         <Enter index={3}>
           <ListGroup title={t('me.group.family')}>
-            <ListRow first icon="me" label={t('parent.editProfile')} onPress={() => router.push({ pathname: '/profile-edit', params: { id: current.id } })} />
+            {!linked && <ListRow first icon="me" label={t('parent.editProfile')} onPress={() => router.push({ pathname: '/profile-edit', params: { id: current.id } })} />}
             {!isAdult && (
               <>
-                <ListRow icon="clock" label={t('me.dailyLimit')} value={limitMinutes != null ? minutes(t, limitMinutes * 60) : t('common.off')} onPress={openParent} />
-                <ListRow icon="moon" label={t('me.quietHours')} value={current.quiet_hours ? t('common.on') : t('common.off')} onPress={openParent} />
+                {/* On a linked phone these only show the rules; the parent changes them from their own phone. */}
+                <ListRow first={linked} icon="clock" label={t('me.dailyLimit')} value={limitMinutes != null ? minutes(t, limitMinutes * 60) : t('common.off')} chevron={!linked} onPress={linked ? undefined : openParent} />
+                <ListRow icon="moon" label={t('me.quietHours')} value={current.quiet_hours ? t('common.on') : t('common.off')} chevron={!linked} onPress={linked ? undefined : openParent} />
               </>
             )}
             {isAdult && <ListRow icon="sliders" label={t('me.familyDashboard')} onPress={openParent} />}
@@ -133,18 +138,22 @@ export default function MeScreen() {
             )}
           </ListGroup>
         </Enter>
+        )}
 
         <Enter index={4}>
           <DeviceGroup />
         </Enter>
 
-        <Enter index={5}>
-          <ListGroup title={t('me.group.account')}>
-            <ListRow first icon="me" label={t('me.switchProfile')} onPress={leaveProfile} />
-            {/* Children reach Sign out through the parent PIN, so they can't sign the family out. */}
-            <ListRow icon="logout" label={t('me.signOut')} onPress={isAdult ? signOut : openParent} />
-          </ListGroup>
-        </Enter>
+        {/* A child's own phone has nobody to switch to and nothing to sign out of: the parent removes it. */}
+        {!(ownPhone && !isAdult) && (
+          <Enter index={5}>
+            <ListGroup title={t('me.group.account')}>
+              {!ownPhone && <ListRow first icon="me" label={t('me.switchProfile')} onPress={leaveProfile} />}
+              {/* Children reach Sign out through the parent PIN, so they can't sign the family out. */}
+              {(isAdult || !linked) && <ListRow first={ownPhone} icon="logout" label={t('me.signOut')} onPress={isAdult ? signOut : openParent} />}
+            </ListGroup>
+          </Enter>
+        )}
 
         {!isAdult && (
           <Enter index={6}>

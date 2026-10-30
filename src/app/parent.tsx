@@ -19,6 +19,7 @@ import { ProgressBar } from '@/components/ui/ProgressBar';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { useFamily } from '@/features/family/FamilyProvider';
 import { LiveDot, LockedHistory, WeekChart } from '@/features/parent/parts';
+import { LinkedPhone, useLinkedPhones } from '@/features/parent/devices';
 import { RecentStrip } from '@/features/parent/RecentStrip';
 import { ago, Child, minutes, presence, useParent } from '@/features/parent/useParent';
 import { localized, roleKey, useT } from '@/i18n';
@@ -37,7 +38,8 @@ import { color, control, font, iconSize, iconStroke, lane as lanes, layout, page
  */
 export default function FamilyScreen() {
   const { child: initial } = useLocalSearchParams<{ child?: string }>();
-  const { unlocked, children, plus, failed, unlock, reload, answer, setPaused, previewExtra, grantExtra } = useParent();
+  const { token, unlocked, children, plus, failed, unlock, reload, answer, setPaused, previewExtra, grantExtra } = useParent();
+  const linked = useLinkedPhones(token);
   const childrenRef = useRef(children);
   childrenRef.current = children;
   const { profiles, plan } = useFamily();
@@ -60,8 +62,11 @@ export default function FamilyScreen() {
   // Back from a child's page or Payhas Plus: show what changed there.
   useFocusEffect(
     useCallback(() => {
-      if (unlocked) reload();
-    }, [unlocked, reload]),
+      if (unlocked) {
+        reload();
+        linked.reload();
+      }
+    }, [unlocked, reload, linked.reload]), // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   if (!unlocked) {
@@ -231,8 +236,9 @@ export default function FamilyScreen() {
               </Enter>
             )}
 
-            <Enter index={2}>
+            <Enter index={2} style={styles.section}>
               <TodayCard child={child} onPause={() => onPause(child)} onAddTime={() => onAddTime(child)} onRules={() => openChild(child)} />
+              <PhoneRows child={child} phones={linked.phones} />
             </Enter>
 
             {plus === false ? (
@@ -256,6 +262,46 @@ export default function FamilyScreen() {
         )}
       </ScrollView>
     </View>
+  );
+}
+
+/**
+ * The child's own phone (linked phones, flow D): the phone and when it was last
+ * used, or "Not linked yet" with Link. Phones are managed in Family settings.
+ */
+function PhoneRows({ child, phones }: { child: Child; phones: LinkedPhone[] | null }) {
+  const { t } = useT();
+  if (!phones) return null;
+  const mine = phones.filter((p) => p.profile_id === child.id);
+  const name = child.display_name;
+  return (
+    <ListGroup>
+      {mine.length === 0 ? (
+        <ListRow
+          first
+          icon="link"
+          label={t('parent.phoneOf', { name })}
+          sub={t('parent.phoneNotLinked')}
+          value={<Button size="sm" variant="secondary" label={t('parent.phoneLink')} onPress={() => router.push({ pathname: '/link-phone', params: { profile: child.id, name } })} />}
+          chevron={false}
+        />
+      ) : (
+        mine.map((p, i) => (
+          <ListRow
+            key={p.id}
+            first={i === 0}
+            icon="link"
+            label={p.name}
+            sub={
+              p.status === 'pending'
+                ? t('parent.phoneWaiting')
+                : `${t('parent.phoneOf', { name })}${p.last_seen_at ? ` · ${ago(t, Math.round((Date.now() - new Date(p.last_seen_at).getTime()) / 60_000))}` : ''}`
+            }
+            onPress={() => router.push('/parent-settings')}
+          />
+        ))
+      )}
+    </ListGroup>
   );
 }
 
