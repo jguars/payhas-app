@@ -5,8 +5,8 @@ export default defineStrings(
   {
     name: 'Pop-up Pals',
     subLittle: 'Say hi to the pals',
-    sub: 'Tap them before they hide · {s} sec',
-    subDecoy: 'Tap the pals, skip the cactus · {s} sec',
+    sub: 'Tap them before they hide · {s} sec',
+    subDecoy: 'Tap the pals, skip the cactus · {s} sec',
     pal: '{symbol}, tap!',
     decoy: "{symbol}, don't tap",
     burrow: 'Empty burrow',
@@ -21,8 +21,8 @@ export default defineStrings(
     tk: {
       name: 'Hindäki dostlar',
       subLittle: 'Dostlara salam ber',
-      sub: 'Gizlenmänkä bas · {s} sek',
-      subDecoy: 'Dostlara bas, kaktusa degme · {s} sek',
+      sub: 'Gizlenmänkä bas · {s} sek',
+      subDecoy: 'Dostlara bas, kaktusa degme · {s} sek',
       pal: '{symbol}, bas!',
       decoy: '{symbol}, basma',
       burrow: 'Boş hin',
@@ -39,8 +39,8 @@ export default defineStrings(
     tr: {
       name: 'Ce-e Dostlar',
       subLittle: 'Dostlara merhaba de',
-      sub: 'Saklanmadan dokun · {s} sn',
-      subDecoy: 'Dostlara dokun, kaktüse değme · {s} sn',
+      sub: 'Saklanmadan dokun · {s} sn',
+      subDecoy: 'Dostlara dokun, kaktüse değme · {s} sn',
       pal: '{symbol}, dokun!',
       decoy: '{symbol}, dokunma',
       burrow: 'Boş yuva',
@@ -57,8 +57,8 @@ export default defineStrings(
     ru: {
       name: 'Весёлые норки',
       subLittle: 'Поздоровайся с друзьями',
-      sub: 'Успей нажать · {s} с',
-      subDecoy: 'Жми на друзей, не на кактус · {s} с',
+      sub: 'Успей нажать · {s} с',
+      subDecoy: 'Жми на друзей, не на кактус · {s} с',
       pal: '{symbol}, жми!',
       decoy: '{symbol}, не трогай',
       burrow: 'Пустая норка',

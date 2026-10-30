@@ -35,6 +35,7 @@ export type IconName =
   | 'send'
   | 'more'
   | 'back'
+  | 'logout'
   | 'sound'
   | 'vibrate'
   | 'pause'
@@ -176,6 +177,13 @@ export function Icon({ name, size = 24, color = c.text, filled = false, strokeWi
         return <Path d="m9.5 6 6 6-6 6" {...stroke} strokeWidth={strokeWidth + 0.3} />;
       case 'back':
         return <Path d="m14.5 6-6 6 6 6" {...stroke} strokeWidth={strokeWidth + 0.3} />;
+      case 'logout':
+        return (
+          <>
+            <Path d="M10 4.6H7a2 2 0 0 0-2 2v10.8a2 2 0 0 0 2 2h3" {...stroke} />
+            <Path d="M14.6 8.2 18.4 12l-3.8 3.8M18.2 12H9.6" {...stroke} />
+          </>
+        );
       case 'sparkle':
         return (
           <>

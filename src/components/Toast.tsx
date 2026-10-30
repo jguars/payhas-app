@@ -1,5 +1,5 @@
 import { createContext, ReactNode, useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { AccessibilityInfo, Platform, Pressable, Text, View } from 'react-native';
+import { AccessibilityInfo, AppState, Platform, Pressable, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 
 import { Icon, IconName } from '@/components/Icon';
@@ -12,8 +12,9 @@ import { color, control, elevation, font, iconSize, iconStroke, radius, size, sp
  * without its action being pressed — timed out or replaced — so a caller can
  * commit something only once the Undo window has passed.
  */
-type ToastSpec = { text: string; icon?: IconName; action?: { label: string; onPress: () => void }; onDismiss?: () => void };
+type ToastSpec = { text: string; icon?: IconName; action?: { label: string; onPress: () => void }; onDismiss?: () => void | Promise<unknown> };
 const Ctx = createContext<(t: ToastSpec) => void>(() => {});
+const FlushCtx = createContext<() => Promise<void>>(async () => {});
 
 const SHOW_MS = 2600;
 /** With an action (Undo) the toast waits long enough to reach it, also with a screen reader (WCAG 2.2.1). */
@@ -29,7 +30,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const o = useSharedValue(0);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const seq = useRef(0);
-  const pending = useRef<(() => void) | undefined>(undefined);
+  const pending = useRef<(() => void | Promise<unknown>) | undefined>(undefined);
   const screenReader = useRef(false);
   useEffect(() => {
     AccessibilityInfo.isScreenReaderEnabled().then((on) => (screenReader.current = on));
@@ -43,12 +44,21 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   }, [y, o]);
 
   /** Hide, and run the pending onDismiss (the action wasn't taken). */
-  const dismiss = useCallback(() => {
+  const dismiss = useCallback(async () => {
     const done = pending.current;
     pending.current = undefined;
+    if (timer.current) clearTimeout(timer.current);
     hide();
-    done?.();
+    await done?.();
   }, [hide]);
+
+  // Going to the background ends the Undo window: send what's waiting while the app can still reach the server.
+  useEffect(() => {
+    const sub = AppState.addEventListener('change', (s) => {
+      if (s !== 'active' && pending.current) dismiss();
+    });
+    return () => sub.remove();
+  }, [dismiss]);
 
   const show = useCallback(
     (t: ToastSpec) => {
@@ -81,6 +91,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
   return (
     <Ctx.Provider value={show}>
+      <FlushCtx.Provider value={dismiss}>
       {children}
       {toast && (
         <Animated.View pointerEvents="box-none" style={[styles.wrap, { bottom: bottom + TAB_BAR.gap + TAB_BAR.height + 12 }, anim]}>
@@ -106,11 +117,14 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           </View>
         </Animated.View>
       )}
+      </FlushCtx.Provider>
     </Ctx.Provider>
   );
 }
 
 export const useToast = () => useContext(Ctx);
+/** Ends the current Undo window now and waits for its commit — call before locking or signing out. */
+export const useToastFlush = () => useContext(FlushCtx);
 
 const styles = themedStyles(() => ({
   wrap: { position: 'absolute', left: TAB_BAR.side, right: TAB_BAR.side, alignItems: 'center' },

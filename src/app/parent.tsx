@@ -6,7 +6,7 @@ import { Icon } from '@/components/Icon';
 import { LaneBadge } from '@/components/LaneBadge';
 import { Enter } from '@/components/motion/Enter';
 import { PinPad } from '@/components/PinPad';
-import { useToast } from '@/components/Toast';
+import { useToast, useToastFlush } from '@/components/Toast';
 import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -38,7 +38,8 @@ import { color, control, font, iconSize, iconStroke, lane as lanes, layout, page
  */
 export default function FamilyScreen() {
   const { child: initial } = useLocalSearchParams<{ child?: string }>();
-  const { token, unlocked, children, failed, unlock, lock, reload, answer, setPaused, addTime } = useParent();
+  const { token, unlocked, children, failed, unlock, lock, reload, answer, setPaused, previewExtra, grantExtra } = useParent();
+  const flush = useToastFlush();
   const childrenRef = useRef(children);
   childrenRef.current = children;
   const { signOut, profiles, plan } = useFamily();
@@ -222,17 +223,32 @@ export default function FamilyScreen() {
                   onAddTime={async () => {
                     // A pending request is answered by the same +15, so it never stays "asking".
                     if (c.request) return done(await answer(c, 15), t('parent.addedTime', { count: 15, name: c.display_name }));
-                    // Otherwise nothing is sent until the Undo window has passed: undoing costs nothing.
+                    // Shown on the card at once; sent when the Undo window ends (or earlier: lock, sign-out,
+                    // background), so undoing costs nothing and the child never sees a grant taken back.
+                    // The card stays busy until it's sent or undone — no double grants.
+                    previewExtra(c.id, 15);
                     fx.success();
-                    toast({
-                      text: t('parent.addedTime', { count: 15, name: c.display_name }),
-                      icon: 'check',
-                      action: { label: t('parent.undo'), onPress: () => {} },
-                      onDismiss: async () => {
-                        const now = latest(c.id) ?? c;
-                        if (!(await addTime(now, 15))) failToast('parent.networkError');
-                      },
-                    });
+                    await new Promise<void>((resolve) =>
+                      toast({
+                        text: t('parent.addedTime', { count: 15, name: c.display_name }),
+                        icon: 'check',
+                        action: {
+                          label: t('parent.undo'),
+                          onPress: () => {
+                            previewExtra(c.id, -15);
+                            resolve();
+                          },
+                        },
+                        onDismiss: async () => {
+                          const ok = await grantExtra(latest(c.id) ?? c, 15);
+                          if (!ok) {
+                            previewExtra(c.id, -15);
+                            failToast('parent.networkError');
+                          }
+                          resolve();
+                        },
+                      }),
+                    );
                   }}
                 />
               ))
@@ -276,18 +292,20 @@ export default function FamilyScreen() {
               icon="lock"
               label={t('parent.lock')}
               chevron={false}
-              onPress={() => {
+              onPress={async () => {
+                await flush(); // send a waiting +15 while the session is still open
                 lock();
                 goBack();
               }}
             />
+            {/* A door, not a red X (X means close here); the confirm dialog guards it, red stays for Delete. */}
             <ListRow
-              icon="close"
+              icon="logout"
               label={t('parent.signOut')}
-              danger
               chevron={false}
               onPress={() =>
-                confirmDestructive(t('parent.signOutTitle'), t('parent.signOutBody'), t('parent.signOut'), t('common.cancel'), () => {
+                confirmDestructive(t('parent.signOutTitle'), t('parent.signOutBody'), t('parent.signOut'), t('common.cancel'), async () => {
+                  await flush();
                   lock();
                   signOut();
                 })

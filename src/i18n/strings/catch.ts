@@ -5,7 +5,7 @@ export default defineStrings(
   {
     name: 'Star Catcher',
     subLittle: 'Catch the falling stars',
-    sub: 'Catch stars, dodge the rain · {s} sec',
+    sub: 'Catch stars, dodge the rain · {s} sec',
     subEndless: 'Three hearts · how long can you last?',
     basket: 'Basket. Drag left or right',
     drag: 'Drag to move',
@@ -23,7 +23,7 @@ export default defineStrings(
     tk: {
       name: 'Ýyldyz tutujy',
       subLittle: 'Gaçýan ýyldyzlary tut',
-      sub: 'Ýyldyzlary tut, ýagyşdan gaç · {s} sek',
+      sub: 'Ýyldyzlary tut, ýagyşdan gaç · {s} sek',
       subEndless: 'Üç ýürek · näçä çenli çydarsyň?',
       basket: 'Sebet. Saga ýa-da çepe süýşür',
       drag: 'Süýşürip ýöret',
@@ -40,7 +40,7 @@ export default defineStrings(
     tr: {
       name: 'Yıldız Avcısı',
       subLittle: 'Düşen yıldızları yakala',
-      sub: 'Yıldızları yakala, yağmurdan kaç · {s} sn',
+      sub: 'Yıldızları yakala, yağmurdan kaç · {s} sn',
       subEndless: 'Üç kalp · ne kadar dayanırsın?',
       basket: 'Sepet. Sağa ya da sola kaydır',
       drag: 'Kaydırarak taşı',
@@ -57,7 +57,7 @@ export default defineStrings(
     ru: {
       name: 'Лови звёзды',
       subLittle: 'Лови падающие звёзды',
-      sub: 'Лови звёзды, уходи от дождя · {s} с',
+      sub: 'Лови звёзды, уходи от дождя · {s} с',
       subEndless: 'Три сердца · сколько продержишься?',
       basket: 'Корзинка. Двигай влево или вправо',
       drag: 'Веди пальцем',

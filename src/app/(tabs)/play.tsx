@@ -26,8 +26,10 @@ import { durationWords } from '@/i18n/format';
 import { useInsets, useTabBarSpace } from '@/lib/useInsets';
 import { color, control, font, iconSize, iconStroke, Lane, layout, leading, pageFill, radius, space, themedStyles, type } from '@/theme/tokens';
 
-/** Sections shown as a grid; short sections (under three games) are grids too, so a shelf always scrolls. */
+/** Sections shown as a grid; short sections (under four games) are grids too, so a shelf always scrolls past the edge. */
 const GRID_SECTIONS = ['play.section.brain'];
+/** How long game scenes play on each visit before they hold still. */
+const SCENE_MS = 6000;
 const SHELF_TILE = 148;
 const HERO_STAGE = 200;
 const GRID_STAGE = 104;
@@ -50,11 +52,26 @@ export default function PlayScreen() {
   const { width } = useWindowDimensions();
   const { current } = useFamily();
   const { lock, todaySeconds, limitMinutes } = useScreenTime({ games: true });
-  const { gameOpen, loaded } = useProfilePlan();
+  const { gameOpen, loaded, failed, reload } = useProfilePlan();
   const [moreOpen, setMoreOpen] = useState(false);
   // Re-read on every visit, on the phone's own calendar: the featured game changes each local day.
   const [day, setDay] = useState(localDay);
-  useFocusEffect(useCallback(() => setDay(localDay()), []));
+  // Every visit: today's featured game, and the plan again (a Plus upgrade shows up at once).
+  useFocusEffect(
+    useCallback(() => {
+      setDay(localDay());
+      reload();
+    }, [reload]),
+  );
+  // Scenes play for a few seconds on each visit, then hold still (WCAG 2.2.2: nothing moves on its own for long).
+  const [live, setLive] = useState(true);
+  useFocusEffect(
+    useCallback(() => {
+      setLive(true);
+      const id = setTimeout(() => setLive(false), SCENE_MS);
+      return () => clearTimeout(id);
+    }, []),
+  );
   const { t } = useT();
   if (!current) return <View style={styles.root} />;
   const lane = current.lane;
@@ -80,13 +97,17 @@ export default function PlayScreen() {
           {limitMinutes != null && limitMinutes > 0 && leftS != null && <ProgressBar progress={leftS / (limitMinutes * 60)} label={subtitle} remaining decorative />}
         </Enter>
 
-        {!loaded ? (
+        {!loaded && failed ? (
+          <Card>
+            <EmptyState icon="help" title={t('parent.loadFailed')} body={t('parent.loadFailedSub')} action={t('parent.retry')} onAction={reload} />
+          </Card>
+        ) : !loaded ? (
           <Card hero style={styles.skeleton}>
             {null}
           </Card>
         ) : featured ? (
           <Enter index={1}>
-            <Featured meta={GAMES[featured].meta} lane={lane} focused={focused} onPlay={() => play(featured)} />
+            <Featured meta={GAMES[featured].meta} lane={lane} focused={focused && live} onPlay={() => play(featured)} />
           </Enter>
         ) : (
           // Nothing open right now: say so kindly, with no lock and no price.
@@ -99,7 +120,7 @@ export default function PlayScreen() {
           const games = section.games.filter((id) => id !== featured);
           if (games.length === 0) return null;
           // Decided on the whole section, so the layout doesn't change when the featured game rotates.
-          const grid = GRID_SECTIONS.includes(section.title) || section.games.length < 3;
+          const grid = GRID_SECTIONS.includes(section.title) || section.games.length < 4;
           return (
             <Enter key={section.title} index={order++} style={styles.section}>
               <SectionHeader title={t(section.title)} />
@@ -107,14 +128,14 @@ export default function PlayScreen() {
                 <View style={styles.grid}>
                   {games.map((id) => (
                     <View key={id} style={{ width: gridW }}>
-                      <GridTile meta={GAMES[id].meta} lane={lane} focused={focused} onPress={() => play(id)} />
+                      <GridTile meta={GAMES[id].meta} lane={lane} focused={focused} live={live} onPress={() => play(id)} />
                     </View>
                   ))}
                 </View>
               ) : (
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.shelfScroll} contentContainerStyle={styles.shelf}>
                   {games.map((id) => (
-                    <ShelfTile key={id} meta={GAMES[id].meta} lane={lane} focused={focused} onPress={() => play(id)} />
+                    <ShelfTile key={id} meta={GAMES[id].meta} lane={lane} focused={focused} live={live} onPress={() => play(id)} />
                   ))}
                 </ScrollView>
               )}
@@ -178,15 +199,15 @@ function Featured({ meta, lane, focused, onPlay }: { meta: GameMeta; lane: Lane;
   );
 }
 
-/** One control per tile: art, name and best score. (Scenes only draw their characters while running, so every tile animates.) */
-function ShelfTile({ meta, lane, focused, onPress }: { meta: GameMeta; lane: Lane; focused: boolean; onPress: () => void }) {
+/** One control per tile: art, name and best score. Its scene plays for a few seconds, then holds its frame. */
+function ShelfTile({ meta, lane, focused, live, onPress }: { meta: GameMeta; lane: Lane; focused: boolean; live: boolean; onPress: () => void }) {
   const { t } = useT();
   const name = t(meta.name);
   return (
     // No label override: the name and the best score inside are what a screen reader says.
     <PressScale onPress={onPress} pressedScale={0.97} accessibilityRole="button" style={styles.shelfTile}>
       <Card tactile flush>
-        <Stage meta={meta} active={focused} height={SHELF_TILE} />
+        <Stage meta={meta} active={focused && live} height={SHELF_TILE} />
       </Card>
       <Text style={styles.name} numberOfLines={2} maxFontSizeMultiplier={1.3}>
         {name}
@@ -196,13 +217,13 @@ function ShelfTile({ meta, lane, focused, onPress }: { meta: GameMeta; lane: Lan
   );
 }
 
-function GridTile({ meta, lane, focused, onPress }: { meta: GameMeta; lane: Lane; focused: boolean; onPress: () => void }) {
+function GridTile({ meta, lane, focused, live, onPress }: { meta: GameMeta; lane: Lane; focused: boolean; live: boolean; onPress: () => void }) {
   const { t } = useT();
   const name = t(meta.name);
   const sub = meta.sub(lane, t);
   return (
     <Card tactile flush onPress={onPress}>
-      <Stage meta={meta} active={focused} height={GRID_STAGE} />
+      <Stage meta={meta} active={focused && live} height={GRID_STAGE} />
       <View style={styles.gridFoot}>
         <Text style={styles.name} numberOfLines={1} maxFontSizeMultiplier={1.3}>
           {name}

@@ -110,4 +110,35 @@ except the Alerts copy (still 3 lines) and the shelf tile label (stars not spoke
 | Hero art reads empty between animation frames | Deferred to a dedicated task: proper poster art per game (image-generation / Layer.ai), shown when a scene isn't running and as the hero backdrop. Patching ten scenes' first frames would be a stopgap. |
 | Every tile animates at once (WCAG 2.2.2, attention) | Deferred with the poster task: once posters exist, shelf/grid tiles show the poster and only the hero animates. Today, stopping scenes leaves blank tiles. |
 
-Round 3 runs on this build.
+## Round 3
+
+| Lens | Score |
+| --- | --- |
+| Designer polish | Play 7 · Family 8 |
+| Child-UX / parent usability / a11y | Play 7 · Family 7 · a11y 7 |
+| UX writer | EN 8 · TK 7 · TR 7.5 · RU 7.5 |
+| Devil (ready?) | 5.5 |
+
+Round-2 fixes verified, except two regressions in the "+15 waits for Undo" design.
+
+### Fixed after round 3
+
+| From | Fix |
+| --- | --- |
+| Devil, child-UX | **Bug:** +15 could still double-grant (busy cleared before the commit) and a grant was lost if the parent locked or signed out inside the Undo window. Now the card shows the minutes at once, stays busy until sent or undone, and the waiting grant is sent before Lock, Sign out or the app going to the background. **Verified in the browser and in the database:** one tap + Lock inside the window → exactly 15 extra minutes saved; second tap blocked |
+| Devil | Play: plan load failure shows Try again (no endless skeleton); the plan reloads on every visit so a Plus upgrade shows at once |
+| Child-UX (WCAG 2.2.2) | Game scenes play for 6 s on each visit, then hold their frame |
+| Writer | "45\u00a0sec" never splits; TK "/ 1 sag şu gün"; TK Alerts line shortened |
+| Designer, child-UX | Sign out: a door icon, not a red X; red kept for Delete |
+
+### Rejected after round 3
+
+| Suggestion | Why not |
+| --- | --- |
+| Make 3-game sections a grid so no name is cut | The third tile peeking past the edge is the cue that a shelf scrolls; layout must not depend on the featured rotation (round-2 devil). |
+| Server `revoke_extra_time` instead of the Undo window | The window means the child never sees time given and then taken back; with the flush on lock/sign-out/background the grant can't be lost. |
+
+### Owner question
+- TK "Sakla" (Pause) — a reviewer worried it can read as "keep"; asked the owner (native speaker).
+
+Round 4 runs on this build.

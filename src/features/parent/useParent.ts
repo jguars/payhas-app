@@ -151,6 +151,14 @@ export function useParent() {
   const setPaused = (c: Child, paused: boolean) =>
     act(c.id, { paused }, (t) => supabase.rpc('set_profile_paused', { p_parent: t, p_profile_id: c.id, p_paused: paused }));
 
+  /** Show extra minutes on the card right away, before anything is sent (+15 with Undo). */
+  const previewExtra = (id: string, minutes: number) =>
+    setChildren((list) => list?.map((c) => (c.id === id ? { ...c, extra_minutes: Math.max(0, Math.min(240, c.extra_minutes + minutes)) } : c)) ?? list);
+
+  /** Send extra minutes already shown with previewExtra; false if it failed (the caller takes the preview back). */
+  const grantExtra = (c: Child, minutes: number) =>
+    act(c.id, {}, (t) => supabase.rpc('grant_extra_time', { p_parent: t, p_profile_id: c.id, p_minutes: minutes, p_until: endOfToday() }));
+
   const addTime = (c: Child, minutes: number) =>
     act(c.id, { extra_minutes: Math.min(240, c.extra_minutes + minutes) }, (t) =>
       supabase.rpc('grant_extra_time', { p_parent: t, p_profile_id: c.id, p_minutes: minutes, p_until: endOfToday() }),
@@ -167,7 +175,7 @@ export function useParent() {
       supabase.rpc('parent_hide_video', { p_parent: t, p_profile_id: c.id, p_video_id: videoId }),
     );
 
-  return { token, unlocked: !!token, children, plus, failed, unlock, lock, reload: load, setControls, setPaused, addTime, answer, hideVideo };
+  return { token, unlocked: !!token, children, plus, failed, unlock, lock, reload: load, setControls, setPaused, addTime, previewExtra, grantExtra, answer, hideVideo };
 }
 
 /** "5m ago", "2h ago", "3d ago" in the current language. */

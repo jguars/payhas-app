@@ -3,9 +3,10 @@
 # (.maestro/screens.yaml). Screenshots are uploaded as the "emulator-screens"
 # artifact for design review (.claude/skills/ui-screen, step 10).
 #
-# Off until set up: needs two repository secrets for the test family (never a
-# real account), PAYHAS_TEST_EMAIL and PAYHAS_TEST_PASSWORD, and the repository
-# variable EMULATOR_SCREENS = true. Runs by hand from the Actions tab too.
+# Signs in as the CI test family (payhas-audit@example.com — a throwaway
+# account, never a real family). Its password lives only in Supabase Vault
+# ("payhas_ci_test_password") and in the repository secret
+# PAYHAS_TEST_PASSWORD. Until that secret exists the job skips itself.
 name: Android emulator screens
 
 on:
@@ -18,8 +19,20 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Secrets can't gate a job directly, so a tiny job reports whether it's set.
+  ready:
+    runs-on: ubuntu-latest
+    outputs:
+      ok: ${{ steps.check.outputs.ok }}
+    steps:
+      - id: check
+        env:
+          PASSWORD: ${{ secrets.PAYHAS_TEST_PASSWORD }}
+        run: echo "ok=$([ -n "$PASSWORD" ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+
   screens:
-    if: ${{ vars.EMULATOR_SCREENS == 'true' }}
+    needs: ready
+    if: ${{ needs.ready.outputs.ok == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -61,7 +74,7 @@ jobs:
       - name: Run the screens flow on an emulator
         uses: reactivecircus/android-emulator-runner@v2
         env:
-          EMAIL: ${{ secrets.PAYHAS_TEST_EMAIL }}
+          EMAIL: payhas-audit@example.com
           PASSWORD: ${{ secrets.PAYHAS_TEST_PASSWORD }}
         with:
           api-level: 34
