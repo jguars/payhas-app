@@ -6,10 +6,16 @@ appId: com.onki.payhas
 - launchApp:
     clearState: true
 - extendedWaitUntil:
-    visible: "English"
+    visible: "I have an account"
     timeout: 60000
-- takeScreenshot: 01-language
+- takeScreenshot: 00-welcome
+- tapOn: "I have an account"
+- extendedWaitUntil:
+    visible: "English"
+    timeout: 20000
 - tapOn: "English"
+- takeScreenshot: 01-language
+- tapOn: "Continue"
 - extendedWaitUntil:
     visible: "Parent sign in"
     timeout: 20000
