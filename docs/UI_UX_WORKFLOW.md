@@ -71,17 +71,17 @@ Name what's available in each project; strike out what isn't.
 
 ## Phase 1 — Audit (skip for a brand-new product)
 
-- [ ] **1.1 Make screenshots possible:** get the app rendering in a headless
+- [~] **1.1 Make screenshots possible:** get the app rendering in a headless
   browser (web build) or simulator. Write a script that opens every screen.
-  — _tools: Playwright, `run` skill; output: `scripts/screens.(ts|js)`_
-- [ ] **1.2 Screenshot every screen** in every theme, language with the
-  longest strings, and key state. — _output: `design/audit/<date>/`_
+  — _tools: Playwright, `run` skill; output: `scripts/screens.(ts|js)`_ — web export + `scripts/audit/serve.js`, `shoot.js` work; signed-in screens blocked: session network denies the Supabase host
+- [~] **1.2 Screenshot every screen** in every theme, language with the
+  longest strings, and key state. — _output: `design/audit/<date>/`_ — signed-out screens, 3 themes + Russian: `design/audit/2026-10-30/`
 - [ ] **1.3 Build the audit board:** all screens on one page, grouped by
   pattern (headers, cards, lists, buttons, sheets, empty states). —
   _tools: Artifact page_
-- [ ] **1.4 Count the drift:** distinct colours, font sizes and weights,
+- [x] **1.4 Count the drift:** distinct colours, font sizes and weights,
   spacing values, radii, shadows, button styles and icon styles in the code.
-  — _tools: grep script; skill: `design-skills:design-systems` (audit)_
+  — _tools: grep script; skill: `design-skills:design-systems` (audit)_ — `design/audit/2026-10-30/AUDIT.md` (33 radii, 26 raw spacings, 57 heights, 33 hand-built buttons)
 - [ ] **1.5 Run a heuristic critique** of the board: the top 10 problems,
   ranked. — _skills: `design-skills:design-critique`,
   `design-skills:accessibility-audit`_
