@@ -188,9 +188,9 @@ Per-screen tracker (copy a row per screen). Built screens: `design/screens/*-bui
 
 | Screen | Refs | Copy | Mockup | 🚦 | Built | QA | Shipped |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Tab bar | [x] | [x] | [x] HTML (Figma limit) | [x] B | [x] | [x] critique + a11y (axe 0) + panel ×4, fixes in | [ ] emulator + phone test |
-| Home (feed) | [x] | [x] | [x] HTML | [x] A | [x] | [x] self-review (skills), axe 0 | [ ] emulator + phone test |
-| Discover | [x] | [x] | [x] HTML | [x] B | [x] | [x] self-review (skills), axe 0 | [ ] emulator + phone test |
+| Tab bar | [x] | [x] | [x] HTML (Figma limit) | [x] B | [x] | [x] critique + a11y (axe 0) + panel ×4, fixes in | [x] emulator (a49677c) · [ ] phone test |
+| Home (feed) | [x] | [x] | [x] HTML | [x] A | [x] | [x] self-review (skills), axe 0 | [x] emulator (a49677c) · [ ] phone test |
+| Discover | [x] | [x] | [x] HTML | [x] B | [x] | [x] self-review (skills), axe 0 | [x] emulator (a49677c) · [ ] phone test |
 | Play (games) | [x] | [x] | [x] | [x] Gate 2 | [x] | [x] critique + a11y (axe 0) + panel ×4 (beta: yes) | [ ] phone test |
 | Inbox (tab) | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
 | Me | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
