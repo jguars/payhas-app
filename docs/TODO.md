@@ -5,12 +5,12 @@ Updated 2026-10-30. Longer-range phases are in `ROADMAP.md`; the
 per-screen UI tracker and decision log are in `docs/UI_UX_WORKFLOW.md`.
 
 Rules that stay in force: mockups first, the owner approves, then build
-(`.claude/skills/ui-screen`). `plus` is not merged into `main` until the
-owner approves after a phone test.
+(`.claude/skills/ui-screen`). Work happens on `plus`; it goes to `main` only
+when the owner says so (merged 2026-10-30 on the owner's word).
 
 ## Needs the owner
 
-- [ ] **Phone test** of the latest APK (and iPhone once TestFlight works), then approve merging `plus` into `main`.
+- [ ] **Phone test** of the latest APK (and iPhone once TestFlight works).
 - [ ] **TestFlight**: create the app record `com.onki.payhas` in App Store Connect, make an App Store Connect API key (App Manager), and add the repository secrets `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8`. The workflow `ios-testflight.yml` then uploads every push to `plus`.
 - [ ] **APNs key** (Apple push) added to Firebase, so parent alerts reach iPhones. Until then the iPhone says "Alerts on iPhone are coming soon".
 - [ ] Apply `supabase/migrations/20261029190000_update_profile.sql` to the live database — saving an edited profile needs it (checked Oct 30: not applied yet).
