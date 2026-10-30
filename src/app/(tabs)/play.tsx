@@ -26,7 +26,7 @@ import { durationWords } from '@/i18n/format';
 import { useInsets, useTabBarSpace } from '@/lib/useInsets';
 import { color, control, font, iconSize, iconStroke, Lane, layout, leading, pageFill, radius, space, themedStyles, type } from '@/theme/tokens';
 
-/** Sections shown as a grid; short sections (under four games) are grids too, so a shelf always scrolls past the edge. */
+/** Sections shown as a grid; sections with fewer than four games are grids too (decided on the whole section, so the featured rotation never changes the layout). */
 const GRID_SECTIONS = ['play.section.brain'];
 /** How long game scenes play on each visit before they hold still. */
 const SCENE_MS = 6000;
@@ -54,6 +54,7 @@ export default function PlayScreen() {
   const { lock, todaySeconds, limitMinutes } = useScreenTime({ games: true });
   const { gameOpen, loaded, failed, reload } = useProfilePlan();
   const [moreOpen, setMoreOpen] = useState(false);
+  const [retrying, setRetrying] = useState(false);
   // Re-read on every visit, on the phone's own calendar: the featured game changes each local day.
   const [day, setDay] = useState(localDay);
   // Every visit: today's featured game, and the plan again (a Plus upgrade shows up at once).
@@ -97,9 +98,19 @@ export default function PlayScreen() {
           {limitMinutes != null && limitMinutes > 0 && leftS != null && <ProgressBar progress={leftS / (limitMinutes * 60)} label={subtitle} remaining decorative />}
         </Enter>
 
-        {!loaded && failed ? (
+        {!loaded && failed && !retrying ? (
           <Card>
-            <EmptyState icon="help" title={t('parent.loadFailed')} body={t('parent.loadFailedSub')} action={t('parent.retry')} onAction={reload} />
+            <EmptyState
+              icon="help"
+              title={t('play.loadFailed')}
+              body={t('play.loadFailedSub')}
+              action={t('play.retry')}
+              onAction={async () => {
+                setRetrying(true);
+                await reload();
+                setRetrying(false);
+              }}
+            />
           </Card>
         ) : !loaded ? (
           <Card hero style={styles.skeleton}>

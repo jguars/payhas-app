@@ -821,7 +821,8 @@ function CatchScene({ active }: { active: boolean }) {
   useEffect(() => {
     if (reduce || !active) {
       cancelAnimation(c);
-      if (reduce) c.value = 0.25;
+      // Hold the poster pose (a star mid-fall) rather than whatever frame the loop stopped on.
+      c.value = reduce ? 0.25 : withTiming(0.25, { duration: 300 });
       return;
     }
     c.value = 0;

@@ -16,7 +16,7 @@ export function useProfilePlan() {
   const token = active?.token;
 
   const reload = useCallback(async () => {
-    if (!token) return;
+    if (!token) return setFailed(true);
     const { data, error } = await supabase.rpc('get_profile_plan', { p_session: token });
     setFailed(!!error || !data);
     if (!data) return;

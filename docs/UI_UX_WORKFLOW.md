@@ -190,10 +190,10 @@ Per-screen tracker (copy a row per screen). Built screens: `design/screens/*-bui
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Home (feed) | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
 | Discover | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
-| Play (games) | [x] | [x] | [x] | [x] Gate 2 | [x] | [x] critique + a11y (axe 0) | [ ] phone test |
+| Play (games) | [x] | [x] | [x] | [x] Gate 2 | [x] | [x] critique + a11y (axe 0) + panel ×4 (beta: yes) | [ ] phone test |
 | Me | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
 | Who's watching | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
-| Family dashboard | [x] | [x] | [x] | [x] Gate 2 | [x] | [x] critique + a11y (axe 0) | [ ] phone test |
+| Family dashboard | [x] | [x] | [x] | [x] Gate 2 | [x] | [x] critique + a11y (axe 0) + panel ×4 (beta: yes) | [ ] phone test |
 | Child page | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
 | Payhas Plus | [x] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
 | Edit profile | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |

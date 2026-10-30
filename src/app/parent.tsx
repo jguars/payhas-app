@@ -115,7 +115,7 @@ export default function FamilyScreen() {
     );
   }
 
-  const failToast = (key: 'parent.networkError' | 'parent.undoFailed') => {
+  const failToast = (key: 'parent.networkError' | 'parent.undoFailed' | 'parent.sessionExpired') => {
     fx.error();
     toast({ text: t(key), icon: 'close' });
   };
@@ -240,10 +240,10 @@ export default function FamilyScreen() {
                           },
                         },
                         onDismiss: async () => {
-                          const ok = await grantExtra(latest(c.id) ?? c, 15);
-                          if (!ok) {
+                          const res = await grantExtra(c.id, 15);
+                          if (res !== 'ok') {
                             previewExtra(c.id, -15);
-                            failToast('parent.networkError');
+                            failToast(res === 'expired' ? 'parent.sessionExpired' : 'parent.networkError');
                           }
                           resolve();
                         },
@@ -341,13 +341,15 @@ export default function FamilyScreen() {
  */
 function ChildCard({ child, avatar, onOpen, onPause, onAddTime }: { child: Child; avatar: string | null; onOpen: () => void; onPause: () => Promise<unknown>; onAddTime: () => Promise<unknown> }) {
   const { t } = useT();
-  // One action at a time per card: a double tap can't grant 30 minutes or answer a request twice.
-  const [busy, setBusy] = useState(false);
-  const once = (run: () => Promise<unknown>) => async () => {
+  // One run at a time per button: a double tap can't grant 30 minutes or answer a request twice.
+  // Separate per button, so Pause stays usable while +15 waits out its Undo window.
+  const [pauseBusy, setPauseBusy] = useState(false);
+  const [addBusy, setAddBusy] = useState(false);
+  const once = (busy: boolean, set: (b: boolean) => void, run: () => Promise<unknown>) => async () => {
     if (busy) return;
-    setBusy(true);
+    set(true);
     await run();
-    setBusy(false);
+    set(false);
   };
   const p = presence(child, t);
   const today = child.week[child.week.length - 1];
@@ -398,11 +400,11 @@ function ChildCard({ child, avatar, onOpen, onPause, onAddTime }: { child: Child
       {limit != null && limit > 0 && <ProgressBar progress={used / (limit * 60)} label={`${child.display_name}: ${minutes(t, used)} ${t('parent.ofToday', { limit: minutes(t, limit * 60) })}`} />}
       <View style={styles.actions}>
         <View style={styles.action}>
-          <Button size="md" block variant="secondary" icon={child.paused ? 'play' : 'pause'} label={t(child.paused ? 'parent.resume' : 'parent.pauseShort')} accessibilityLabel={`${t(child.paused ? 'parent.resume' : 'parent.pauseShort')}: ${child.display_name}`} loading={busy} onPress={once(onPause)} />
+          <Button size="md" block variant="secondary" icon={child.paused ? 'play' : 'pause'} label={t(child.paused ? 'parent.resume' : 'parent.pauseShort')} accessibilityLabel={`${t(child.paused ? 'parent.resume' : 'parent.pauseShort')}: ${child.display_name}`} loading={pauseBusy} onPress={once(pauseBusy, setPauseBusy, onPause)} />
         </View>
         {limit != null && (
           <View style={styles.action}>
-            <Button size="md" block variant="secondary" icon="plus" label={t('parent.addMin', { count: 15 })} accessibilityLabel={t('parent.addTimeA11y', { name: child.display_name })} disabled={busy} onPress={once(onAddTime)} />
+            <Button size="md" block variant="secondary" icon="plus" label={t('parent.addMin', { count: 15 })} accessibilityLabel={t('parent.addTimeA11y', { name: child.display_name })} disabled={addBusy} onPress={once(addBusy, setAddBusy, onAddTime)} />
           </View>
         )}
       </View>

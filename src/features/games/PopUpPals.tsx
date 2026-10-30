@@ -661,7 +661,8 @@ function PalsScene({ active }: { active: boolean }) {
   useEffect(() => {
     if (reduce || !active) {
       cancelAnimation(c);
-      if (reduce) c.value = 0.4;
+      // Hold the poster pose (a pal peeking out) rather than whatever frame the loop stopped on.
+      c.value = reduce ? 0.4 : withTiming(0.4, { duration: 300 });
       return;
     }
     c.value = 0;

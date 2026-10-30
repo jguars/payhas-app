@@ -38,9 +38,20 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     return () => sub.remove();
   }, []);
 
+  /** Toasts waiting behind one with an action (a failure note mustn't knock an Undo off the screen). */
+  const queue = useRef<ToastSpec[]>([]);
+  const next = useRef<(t: ToastSpec) => void>(() => {});
+
   const hide = useCallback(() => {
     y.value = withTiming(30, { duration: 180 });
     o.value = withTiming(0, { duration: 180 });
+    // Take it out of the tree once faded: an invisible Undo must not be tappable or read aloud.
+    const id = seq.current;
+    setTimeout(() => {
+      setToast((cur) => (cur?.id === id ? null : cur));
+      const waiting = queue.current.shift();
+      if (waiting) next.current(waiting);
+    }, 200);
   }, [y, o]);
 
   /** Hide, and run the pending onDismiss (the action wasn't taken). */
@@ -62,13 +73,18 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
   const show = useCallback(
     (t: ToastSpec) => {
+      // A plain note waits while an action toast (Undo) is still up.
+      if (!t.action && pending.current) {
+        queue.current.push(t);
+        return;
+      }
       // A new toast replaces the old one: the old one counts as dismissed.
       const prev = pending.current;
       pending.current = t.onDismiss;
       prev?.();
       setToast({ ...t, id: ++seq.current });
       // Android reads the live region; VoiceOver needs an explicit announcement.
-      if (Platform.OS === 'ios') AccessibilityInfo.announceForAccessibility(t.text);
+      if (Platform.OS === 'ios') AccessibilityInfo.announceForAccessibility(t.action ? `${t.text}. ${t.action.label}` : t.text);
       y.value = 24;
       y.value = withSpring(0, spring.bouncy);
       o.value = withTiming(1, { duration: 140 });
@@ -77,6 +93,9 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     },
     [y, o, dismiss],
   );
+  useEffect(() => {
+    next.current = show;
+  }, [show]);
 
   // Leaving the app's tree (sign-out, theme remount) commits whatever is waiting.
   useEffect(

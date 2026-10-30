@@ -138,7 +138,35 @@ Round-2 fixes verified, except two regressions in the "+15 waits for Undo" desig
 | Make 3-game sections a grid so no name is cut | The third tile peeking past the edge is the cue that a shelf scrolls; layout must not depend on the featured rotation (round-2 devil). |
 | Server `revoke_extra_time` instead of the Undo window | The window means the child never sees time given and then taken back; with the flush on lock/sign-out/background the grant can't be lost. |
 
-### Owner question
-- TK "Sakla" (Pause) — a reviewer worried it can read as "keep"; asked the owner (native speaker).
+### Owner decision
+- TK "Sakla" (Pause) stays — confirmed by the owner (native speaker). Small wording calls are made by the team without asking.
 
-Round 4 runs on this build.
+## Round 4 (two separate reviewers)
+
+| Lens | Score |
+| --- | --- |
+| Designer polish | Play 7 · Family 8.5 |
+| Child-UX / parent usability / a11y | Play 7 · Family 7.5 · a11y 7.5 |
+| UX writer | EN 8 · TK 7.5 · TR 7.5 · RU 7.5 |
+| Devil (ready?) | 5 (before the fixes below) |
+
+**Verdict (designer + child-UX): ready for closed beta, once Pause is unblocked during +15 and the child gets a child-voice error — both done below.**
+
+### Fixed after round 4 (verified in the browser and the database)
+
+| From | Fix |
+| --- | --- |
+| Devil | **Bug:** the faded toast stayed in the tree — its invisible Undo could be tapped and read aloud. It now leaves the tree after fading (0 Undo buttons left, checked) |
+| Devil | **Bug:** the 20 s refresh wiped the +15 preview, so a later Undo/failure subtracted minutes never shown. Pending extras now live in their own state and are laid over every load |
+| Devil | **Bug:** a failed send rolled back twice from a stale snapshot. `grantExtra` only sends; the caller takes the preview back once; an expired session gets its own message |
+| Designer, devil | Pause no longer blocked or spinning while +15 waits (busy per button). Test: +15 → Pause at once → both saved (30 extra min in the database), Undo on the pause restored it |
+| Devil | Failure notes queue behind an Undo toast instead of knocking it off; iOS announces "… Undo" |
+| Designer, writer | Play errors in a child's voice: "Games didn't load / Ask a grown-up to check the internet." (4 languages); retry shows loading; a missing session counts as failed |
+| Designer | Star Catcher and Pop-up Pals settle into a poster pose (star mid-fall, pal peeking) when their few seconds end — never an empty frame |
+| Writer | RU "Осталось на сегодня: {time}" (agrees with any number), TK "başga oýunlary", TR Alerts line shortened |
+
+### Where the remaining sub-8 scores come from
+Play's 7s now rest on the art itself: thin hero scenes, game tints borrowing
+lane colours, scene colours that change with the theme. All three are in the
+poster-art task (#42), which also gives each game fixed art colours. The next
+panel round runs on that build.

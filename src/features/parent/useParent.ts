@@ -1,5 +1,5 @@
 import { useIsFocused } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { deviceTimeZone } from '@/features/library/LibraryProvider';
 import type { T } from '@/i18n';
@@ -70,6 +70,8 @@ export function useParent() {
   const [plus, setPlus] = useState<boolean | null>(null);
   /** The last dashboard load failed (network or server), so the screen can say so and offer a retry. */
   const [failed, setFailed] = useState(false);
+  /** Extra minutes shown on cards but not sent yet (+15 inside its Undo window); laid over every load. */
+  const pendingExtra = useRef<Record<string, number>>({});
 
   const lock = useCallback(() => {
     if (parent) supabase.rpc('end_parent_session', { p_parent: parent.token }).then(() => {});
@@ -96,7 +98,7 @@ export function useParent() {
     setFailed(!!error || !data);
     if (data) {
       const d = data as { profiles: Child[]; plus?: boolean };
-      setChildren(d.profiles);
+      setChildren(d.profiles.map((c) => (pendingExtra.current[c.id] ? { ...c, extra_minutes: c.extra_minutes + pendingExtra.current[c.id] } : c)));
       setPlus(d.plus ?? null);
     }
   }, [lock]);
@@ -152,12 +154,28 @@ export function useParent() {
     act(c.id, { paused }, (t) => supabase.rpc('set_profile_paused', { p_parent: t, p_profile_id: c.id, p_paused: paused }));
 
   /** Show extra minutes on the card right away, before anything is sent (+15 with Undo). */
-  const previewExtra = (id: string, minutes: number) =>
+  const previewExtra = (id: string, minutes: number) => {
+    pendingExtra.current[id] = (pendingExtra.current[id] ?? 0) + minutes;
     setChildren((list) => list?.map((c) => (c.id === id ? { ...c, extra_minutes: Math.max(0, Math.min(240, c.extra_minutes + minutes)) } : c)) ?? list);
+  };
 
-  /** Send extra minutes already shown with previewExtra; false if it failed (the caller takes the preview back). */
-  const grantExtra = (c: Child, minutes: number) =>
-    act(c.id, {}, (t) => supabase.rpc('grant_extra_time', { p_parent: t, p_profile_id: c.id, p_minutes: minutes, p_until: endOfToday() }));
+  /**
+   * Send minutes already shown with previewExtra. It never touches the list
+   * itself: on 'ok' the preview simply becomes real; on 'failed' or 'expired'
+   * the caller takes the preview back once (previewExtra with −minutes).
+   */
+  const grantExtra = async (id: string, minutes: number): Promise<'ok' | 'failed' | 'expired'> => {
+    const t = valid();
+    if (!t) return 'expired';
+    const { error } = await supabase.rpc('grant_extra_time', { p_parent: t, p_profile_id: id, p_minutes: minutes, p_until: endOfToday() });
+    if (expired(error)) {
+      lock();
+      return 'expired';
+    }
+    if (error) return 'failed';
+    pendingExtra.current[id] = (pendingExtra.current[id] ?? 0) - minutes;
+    return 'ok';
+  };
 
   const addTime = (c: Child, minutes: number) =>
     act(c.id, { extra_minutes: Math.min(240, c.extra_minutes + minutes) }, (t) =>
