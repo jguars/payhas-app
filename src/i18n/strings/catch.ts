@@ -5,7 +5,7 @@ export default defineStrings(
   {
     name: 'Star Catcher',
     subLittle: 'Catch the falling stars',
-    sub: 'Catch stars, dodge the rain · {s}s',
+    sub: 'Catch stars, dodge the rain · {s} sec',
     subEndless: 'Three hearts · how long can you last?',
     basket: 'Basket. Drag left or right',
     drag: 'Drag to move',

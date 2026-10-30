@@ -76,6 +76,7 @@ export function useParent() {
     parent = null;
     setToken(null);
     setChildren(null);
+    setFailed(false);
   }, []);
 
   const unlock = useCallback(async (pin: string) => {

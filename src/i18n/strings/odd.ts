@@ -5,8 +5,8 @@ export default defineStrings(
   {
     name: 'Odd One Out',
     'sub.little': 'Find the animal that’s different',
-    'sub.kids': 'Find the different one · {s}s',
-    'sub.hard': 'Spot the tiny difference · {s}s',
+    'sub.kids': 'Find the different one · {s} sec',
+    'sub.hard': 'Spot the tiny difference · {s} sec',
     'readout.found': 'Found',
     finds: { one: '{count} found', other: '{count} found' },
     sharpEyes: 'Sharp eyes!',

@@ -39,12 +39,15 @@ import { color, control, font, iconSize, iconStroke, lane as lanes, layout, page
 export default function FamilyScreen() {
   const { child: initial } = useLocalSearchParams<{ child?: string }>();
   const { token, unlocked, children, failed, unlock, lock, reload, answer, setPaused, addTime } = useParent();
+  const childrenRef = useRef(children);
+  childrenRef.current = children;
   const { signOut, profiles, plan } = useFamily();
   const { top, bottom } = useInsets();
   const toast = useToast();
   const goBack = useGoBack();
   const { t, lang } = useT();
   const [deletingAccount, setDeletingAccount] = useState(false);
+  const [retrying, setRetrying] = useState(false);
   // Flags from the last day count as "needs you"; the cut-off is taken when the screen opens.
   // Ticks with the 20 s refresh so request ages and the 24 h flag window stay true.
   const [now, setNow] = useState(() => Date.now());
@@ -111,16 +114,18 @@ export default function FamilyScreen() {
     );
   }
 
+  const failToast = (key: 'parent.networkError' | 'parent.undoFailed') => {
+    fx.error();
+    toast({ text: t(key), icon: 'close' });
+  };
   /** Report an action; Pause passes `undo` so a mis-tap is one tap to reverse. */
   const done = (ok: boolean, text: string, undo?: () => Promise<boolean>) => {
-    if (!ok) {
-      fx.error();
-      toast({ text: t('parent.networkError'), icon: 'close' });
-      return;
-    }
+    if (!ok) return failToast('parent.networkError');
     fx.success();
-    toast({ text, icon: 'check', action: undo ? { label: t('parent.undo'), onPress: () => void undo() } : undefined });
+    toast({ text, icon: 'check', action: undo ? { label: t('parent.undo'), onPress: async () => !(await undo()) && failToast('parent.undoFailed') } : undefined });
   };
+  /** The child as the list holds them now — undo must start from the current state, not the one at tap time. */
+  const latest = (id: string) => childrenRef.current?.find((c) => c.id === id);
 
   const adults = profiles.filter((p) => p.lane === 'adult').sort((a, b) => Number(b.is_parent) - Number(a.is_parent));
   const avatarOf = (id: string) => profiles.find((p) => p.id === id)?.avatar ?? null;
@@ -178,9 +183,25 @@ export default function FamilyScreen() {
         )}
 
         <Enter index={2} style={styles.section}>
-          {children == null && failed ? (
+          {children != null && failed && (
+            <View style={styles.stale}>
+              <Icon name="help" size={iconSize.sm} color={color.warning} strokeWidth={iconStroke(iconSize.sm)} />
+              <Text style={styles.staleText}>{t('parent.staleData')}</Text>
+            </View>
+          )}
+          {children == null && failed && !retrying ? (
             <Card>
-              <EmptyState icon="close" title={t('parent.loadFailed')} body={t('parent.loadFailedSub')} action={t('parent.retry')} onAction={reload} />
+              <EmptyState
+                icon="help"
+                title={t('parent.loadFailed')}
+                body={t('parent.loadFailedSub')}
+                action={t('parent.retry')}
+                onAction={async () => {
+                  setRetrying(true);
+                  await reload();
+                  setRetrying(false);
+                }}
+              />
             </Card>
           ) : children == null ? (
             <Card style={styles.skeleton}>{null}</Card>
@@ -193,10 +214,26 @@ export default function FamilyScreen() {
                   onOpen={() => openChild(c)}
                   onPause={async () => {
                     const next = !c.paused;
-                    done(await setPaused(c, next), t(next ? 'parent.pausedToast' : 'parent.resumedToast', { name: c.display_name }), () => setPaused(c, !next));
+                    done(await setPaused(c, next), t(next ? 'parent.pausedToast' : 'parent.resumedToast', { name: c.display_name }), async () => {
+                      const now = latest(c.id);
+                      return now ? setPaused(now, !next) : false;
+                    });
                   }}
-                  // A pending request is answered by the same +15, so it never stays "asking".
-                  onAddTime={async () => done(await (c.request ? answer(c, 15) : addTime(c, 15)), t('parent.addedTime', { count: 15, name: c.display_name }))}
+                  onAddTime={async () => {
+                    // A pending request is answered by the same +15, so it never stays "asking".
+                    if (c.request) return done(await answer(c, 15), t('parent.addedTime', { count: 15, name: c.display_name }));
+                    // Otherwise nothing is sent until the Undo window has passed: undoing costs nothing.
+                    fx.success();
+                    toast({
+                      text: t('parent.addedTime', { count: 15, name: c.display_name }),
+                      icon: 'check',
+                      action: { label: t('parent.undo'), onPress: () => {} },
+                      onDismiss: async () => {
+                        const now = latest(c.id) ?? c;
+                        if (!(await addTime(now, 15))) failToast('parent.networkError');
+                      },
+                    });
+                  }}
                 />
               ))
           )}
@@ -284,8 +321,16 @@ export default function FamilyScreen() {
  * no-time-today said in words), and the two things a parent does most —
  * pause and add 15 minutes. The header opens their page.
  */
-function ChildCard({ child, avatar, onOpen, onPause, onAddTime }: { child: Child; avatar: string | null; onOpen: () => void; onPause: () => void; onAddTime: () => void }) {
+function ChildCard({ child, avatar, onOpen, onPause, onAddTime }: { child: Child; avatar: string | null; onOpen: () => void; onPause: () => Promise<unknown>; onAddTime: () => Promise<unknown> }) {
   const { t } = useT();
+  // One action at a time per card: a double tap can't grant 30 minutes or answer a request twice.
+  const [busy, setBusy] = useState(false);
+  const once = (run: () => Promise<unknown>) => async () => {
+    if (busy) return;
+    setBusy(true);
+    await run();
+    setBusy(false);
+  };
   const p = presence(child, t);
   const today = child.week[child.week.length - 1];
   const used = (today?.video_s ?? 0) + (today?.game_s ?? 0);
@@ -309,14 +354,14 @@ function ChildCard({ child, avatar, onOpen, onPause, onAddTime }: { child: Child
           </Text>
           <View style={styles.statusRow}>
             <LaneBadge lane={child.lane} label={`${t(roleKey(child))} · ${lanes[child.lane].ages}`} />
-            {child.paused ? (
-              <Badge label={t('parent.paused')} icon="pause" />
-            ) : (
-              <Text style={styles.status} numberOfLines={1}>
-                {status}
-              </Text>
-            )}
+            {child.paused && <Badge label={t('parent.paused')} icon="pause" />}
           </View>
+          {/* Its own line, so the one live fact is never cut off (long lane names, Turkmen). */}
+          {!child.paused && (
+            <Text style={styles.status} numberOfLines={1}>
+              {status}
+            </Text>
+          )}
         </View>
         <Icon name="chevron" size={iconSize.sm} color={color.text3} strokeWidth={iconStroke(iconSize.sm)} />
       </Pressable>
@@ -335,11 +380,11 @@ function ChildCard({ child, avatar, onOpen, onPause, onAddTime }: { child: Child
       {limit != null && limit > 0 && <ProgressBar progress={used / (limit * 60)} label={`${child.display_name}: ${minutes(t, used)} ${t('parent.ofToday', { limit: minutes(t, limit * 60) })}`} />}
       <View style={styles.actions}>
         <View style={styles.action}>
-          <Button size="md" block variant="secondary" icon={child.paused ? 'play' : 'pause'} label={t(child.paused ? 'parent.resume' : 'parent.pauseShort')} accessibilityLabel={`${t(child.paused ? 'parent.resume' : 'parent.pauseShort')}: ${child.display_name}`} onPress={onPause} />
+          <Button size="md" block variant="secondary" icon={child.paused ? 'play' : 'pause'} label={t(child.paused ? 'parent.resume' : 'parent.pauseShort')} accessibilityLabel={`${t(child.paused ? 'parent.resume' : 'parent.pauseShort')}: ${child.display_name}`} loading={busy} onPress={once(onPause)} />
         </View>
         {limit != null && (
           <View style={styles.action}>
-            <Button size="md" block variant="secondary" icon="plus" label={t('parent.addMin', { count: 15 })} accessibilityLabel={t('parent.addTimeA11y', { name: child.display_name })} onPress={onAddTime} />
+            <Button size="md" block variant="secondary" icon="plus" label={t('parent.addMin', { count: 15 })} accessibilityLabel={t('parent.addTimeA11y', { name: child.display_name })} disabled={busy} onPress={once(onAddTime)} />
           </View>
         )}
       </View>
@@ -387,6 +432,8 @@ const styles = themedStyles(() => ({
   content: { paddingHorizontal: layout.gutter, gap: layout.section },
   section: { gap: space.md },
   footer: { gap: space.lg, alignItems: 'center' },
+  stale: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
+  staleText: { flex: 1, color: color.text2, fontFamily: font.medium, ...type.small },
   trust: { flexDirection: 'row', alignItems: 'flex-start', gap: space.sm, alignSelf: 'stretch' },
   footnote: { flex: 1, color: color.text3, fontFamily: font.medium, ...type.small },
   deleteLink: { color: color.text3, fontFamily: font.semibold, ...type.small, textDecorationLine: 'underline' },

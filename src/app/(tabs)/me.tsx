@@ -188,7 +188,7 @@ export default function MeScreen() {
             value={todayMin}
             format={(n) => t('me.todayValue', { n })}
             label={t('me.stat.today')}
-            sub={limitMinutes ? t('me.todayOf', { n: limitMinutes }) : t('me.noLimit')}
+            sub={limitMinutes === 0 ? t('me.noTimeToday') : limitMinutes != null ? t('me.todayOf', { n: limitMinutes }) : t('me.noLimit')}
             delay={380}
           />
           <View style={styles.statDivider} />

@@ -71,4 +71,43 @@ product questions they raised were taken the same day.
 | Little lane (0–6): reduced Play with voice prompts | new |
 | "Updated 20 s ago" on Family | new |
 
-Round 2 of the panel runs on the fixed build (any score below 8 → another round).
+## Round 2 (on the fixed build)
+
+| Reviewer | Play | Family |
+| --- | --- | --- |
+| Designer polish | 6.5 | 8 |
+| Child-UX / parent usability | 6.5 | 7.5 |
+| Accessibility | 6.5 (both) | |
+| UX writer | EN 7.5 · TK 6.5 · TR 7 · RU 7 | |
+| Devil (ready?) | 5 | |
+
+All round-1 fixes that could be checked were **verified** in code or on screen,
+except the Alerts copy (still 3 lines) and the shelf tile label (stars not spoken).
+
+### Fixed after round 2
+
+| From | Fix |
+| --- | --- |
+| Devil | **Bug:** games counted as open until the plan loaded — Free kids saw locked games flash in, and a failed load unlocked everything. Now nothing is open until the plan loads; Play shows a skeleton |
+| Devil | **Bug:** a failed Undo left the wrong state on screen — Undo now starts from the current state and says "Couldn't undo" if it fails |
+| Devil | **Bug:** +15 could fire twice — one action at a time per card |
+| Devil | Limit 0 handled on Me and Play too ("No playtime today", no bar); the stop screen says "That's today's screen time" |
+| Devil | Error state: retry shows loading; a failed refresh says "showing the last update"; `failed` resets on lock; help icon instead of a close X |
+| Devil | Nothing-open state designed (kind message, no lock, no price); sheet no longer repeats its title |
+| Devil | Layout no longer shifts when the featured game rotates (grid/shelf decided on the whole section); the featured day re-reads on every visit |
+| Devil, designer | "45s" → "45 sec" in every game line |
+| Designer, child-UX | +15 now has **Undo without a server change**: nothing is sent until the Undo window passes (toast `onDismiss`) |
+| Child-UX | Toast: two-line safe (min height 48), Undo hit area 48, stays 30 s with a screen reader on; Undo no longer ember on inverse (it failed contrast in every theme) |
+| Child-UX | The time bar is hidden from screen readers (the subtitle already says it) |
+| Child-UX | Shelf and grid tiles speak their name **and** best score; empty stars at 3:1 |
+| Designer | Child card status on its own line (no truncation in TK); Play button aligned with the name |
+| Writer | Children see durations in full words ("1 hour left today", "Şu gün 1 sagat galdy"); 15 more string fixes (TK "şu günki çäk: …", TR "bugünkü sınır: …", RU declension-safe "{name}: +15 мин", "Häzir onlaýn", "Başga oýunlar", TR child side "Anne-baban", "{n} min ago", capitalised dates, shorter Alerts line) |
+
+### Still disagreed / deferred
+
+| Item | Status |
+| --- | --- |
+| Hero art reads empty between animation frames | Deferred to a dedicated task: proper poster art per game (image-generation / Layer.ai), shown when a scene isn't running and as the hero backdrop. Patching ten scenes' first frames would be a stopgap. |
+| Every tile animates at once (WCAG 2.2.2, attention) | Deferred with the poster task: once posters exist, shelf/grid tiles show the poster and only the hero animates. Today, stopping scenes leaves blank tiles. |
+
+Round 3 runs on this build.

@@ -25,5 +25,7 @@ export function useProfilePlan() {
     reload();
   }, [reload]);
 
-  return { plan, reload, gameOpen: (id: GameId) => !plan?.games || plan.games.includes(id) };
+  // Nothing counts as open until the plan has loaded: a Free child never sees
+  // locked games flash in, and a failed load never unlocks everything.
+  return { plan, loaded: plan != null, reload, gameOpen: (id: GameId) => plan != null && (!plan.games || plan.games.includes(id)) };
 }

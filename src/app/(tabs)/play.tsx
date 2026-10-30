@@ -1,5 +1,5 @@
-import { router, useIsFocused } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { router, useFocusEffect, useIsFocused } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
 import { ScrollView, Text, useWindowDimensions, View } from 'react-native';
 
 import { BottomSheet } from '@/components/BottomSheet';
@@ -20,9 +20,9 @@ import type { GameMeta } from '@/features/games/types';
 import type { GameId } from '@/features/library/LibraryProvider';
 import { TimesUp } from '@/features/library/TimesUp';
 import { useScreenTime } from '@/features/library/useScreenTime';
-import { minutes } from '@/features/parent/useParent';
 import { useProfilePlan } from '@/features/plan/usePlan';
 import { useT } from '@/i18n';
+import { durationWords } from '@/i18n/format';
 import { useInsets, useTabBarSpace } from '@/lib/useInsets';
 import { color, control, font, iconSize, iconStroke, Lane, layout, leading, pageFill, radius, space, themedStyles, type } from '@/theme/tokens';
 
@@ -31,6 +31,11 @@ const GRID_SECTIONS = ['play.section.brain'];
 const SHELF_TILE = 148;
 const HERO_STAGE = 200;
 const GRID_STAGE = 104;
+
+const localDay = () => {
+  const d = new Date();
+  return d.getFullYear() * 400 + d.getMonth() * 32 + d.getDate();
+};
 
 /**
  * Play: one featured game with the screen's only ember button, then shelves
@@ -45,22 +50,22 @@ export default function PlayScreen() {
   const { width } = useWindowDimensions();
   const { current } = useFamily();
   const { lock, todaySeconds, limitMinutes } = useScreenTime({ games: true });
-  const { gameOpen } = useProfilePlan();
+  const { gameOpen, loaded } = useProfilePlan();
   const [moreOpen, setMoreOpen] = useState(false);
-  // Read once per visit, on the phone's own calendar: the featured game changes each local day.
-  const [day] = useState(() => {
-    const d = new Date();
-    return d.getFullYear() * 400 + d.getMonth() * 32 + d.getDate();
-  });
+  // Re-read on every visit, on the phone's own calendar: the featured game changes each local day.
+  const [day, setDay] = useState(localDay);
+  useFocusEffect(useCallback(() => setDay(localDay()), []));
   const { t } = useT();
   if (!current) return <View style={styles.root} />;
   const lane = current.lane;
   const contentW = Math.min(width, layout.maxContent) - layout.gutter * 2;
   const gridW = (contentW - space.md) / 2;
   const leftS = limitMinutes != null ? Math.max(0, limitMinutes * 60 - todaySeconds) : null;
+  const subtitle =
+    limitMinutes === 0 ? t('play.noTimeToday') : leftS != null ? t('play.leftToday', { time: durationWords(t, leftS) }) : t('play.playedToday', { time: durationWords(t, todaySeconds) });
 
   const sections = SECTIONS.map((s) => ({ ...s, games: s.games.filter((id) => gameOpen(id)) }));
-  const hidden = SECTIONS.some((s) => s.games.some((id) => !gameOpen(id)));
+  const hidden = loaded && SECTIONS.some((s) => s.games.some((id) => !gameOpen(id)));
   const pool = sections[0].games.length > 0 ? sections[0].games : sections.flatMap((s) => s.games);
   const featured: GameId | undefined = pool[day % Math.max(1, pool.length)];
   const play = (id: GameId) => router.push(`/games/${id}`);
@@ -70,26 +75,31 @@ export default function PlayScreen() {
     <View style={styles.root}>
       <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + space.md, paddingBottom: barSpace }]} showsVerticalScrollIndicator={false}>
         <Enter index={0} style={styles.head}>
-          <PageHeader
-            title={t('play.title')}
-            subtitle={leftS != null ? t('play.leftToday', { time: minutes(t, leftS) }) : t('play.playedToday', { time: minutes(t, todaySeconds) })}
-          />
-          {/* Kids see things: the bar is the time left, shrinking as they play. */}
-          {limitMinutes != null && limitMinutes > 0 && leftS != null && (
-            <ProgressBar progress={leftS / (limitMinutes * 60)} label={t('play.leftToday', { time: minutes(t, leftS) })} remaining />
-          )}
+          <PageHeader title={t('play.title')} subtitle={subtitle} />
+          {/* Kids see things: the bar is the time left, shrinking as they play. The subtitle already says it aloud. */}
+          {limitMinutes != null && limitMinutes > 0 && leftS != null && <ProgressBar progress={leftS / (limitMinutes * 60)} label={subtitle} remaining decorative />}
         </Enter>
 
-        {featured && (
+        {!loaded ? (
+          <Card hero style={styles.skeleton}>
+            {null}
+          </Card>
+        ) : featured ? (
           <Enter index={1}>
             <Featured meta={GAMES[featured].meta} lane={lane} focused={focused} onPlay={() => play(featured)} />
           </Enter>
+        ) : (
+          // Nothing open right now: say so kindly, with no lock and no price.
+          <Card>
+            <EmptyState icon="game" title={t('play.moreGamesSub')} />
+          </Card>
         )}
 
         {sections.map((section) => {
           const games = section.games.filter((id) => id !== featured);
           if (games.length === 0) return null;
-          const grid = GRID_SECTIONS.includes(section.title) || games.length < 3;
+          // Decided on the whole section, so the layout doesn't change when the featured game rotates.
+          const grid = GRID_SECTIONS.includes(section.title) || section.games.length < 3;
           return (
             <Enter key={section.title} index={order++} style={styles.section}>
               <SectionHeader title={t(section.title)} />
@@ -112,7 +122,7 @@ export default function PlayScreen() {
           );
         })}
 
-        {hidden && (
+        {hidden && featured && (
           <Enter index={order++}>
             <Card onPress={() => setMoreOpen(true)} accessibilityLabel={t('play.moreGames')} style={styles.more}>
               <View style={styles.moreIcon}>
@@ -127,7 +137,7 @@ export default function PlayScreen() {
       <StatusScrim />
       {/* Free plan: a friendly note, never a price, a lock wall or a way to pay. */}
       <BottomSheet open={moreOpen} onClose={() => setMoreOpen(false)} title={t('play.moreGames')}>
-        <EmptyState icon="game" title={t('play.moreGames')} body={t('play.moreGamesSub')} />
+        <EmptyState icon="game" title={t('play.moreGamesSub')} />
       </BottomSheet>
       {lock && <TimesUp lock={lock} />}
     </View>
@@ -173,7 +183,8 @@ function ShelfTile({ meta, lane, focused, onPress }: { meta: GameMeta; lane: Lan
   const { t } = useT();
   const name = t(meta.name);
   return (
-    <PressScale onPress={onPress} pressedScale={0.97} accessibilityRole="button" accessibilityLabel={name} style={styles.shelfTile}>
+    // No label override: the name and the best score inside are what a screen reader says.
+    <PressScale onPress={onPress} pressedScale={0.97} accessibilityRole="button" style={styles.shelfTile}>
       <Card tactile flush>
         <Stage meta={meta} active={focused} height={SHELF_TILE} />
       </Card>
@@ -190,7 +201,7 @@ function GridTile({ meta, lane, focused, onPress }: { meta: GameMeta; lane: Lane
   const name = t(meta.name);
   const sub = meta.sub(lane, t);
   return (
-    <Card tactile flush onPress={onPress} accessibilityLabel={`${name}. ${sub}`}>
+    <Card tactile flush onPress={onPress}>
       <Stage meta={meta} active={focused} height={GRID_STAGE} />
       <View style={styles.gridFoot}>
         <Text style={styles.name} numberOfLines={1} maxFontSizeMultiplier={1.3}>
@@ -220,7 +231,7 @@ function Best({ meta, lane, focused }: { meta: GameMeta; lane: Lane; focused: bo
   return (
     <View style={styles.best} accessibilityLabel={label}>
       {[0, 1, 2].map((i) => (
-        <Icon key={i} name="star" size={iconSize.sm} color={i < earned ? color.reward : color.line} filled />
+        <Icon key={i} name="star" size={iconSize.sm} color={i < earned ? color.reward : color.text3} filled={i < earned} />
       ))}
       <Text style={styles.bestText} numberOfLines={1}>
         {label}
@@ -239,7 +250,7 @@ const styles = themedStyles(() => ({
   shelf: { gap: space.md, paddingHorizontal: layout.gutter },
   shelfTile: { width: SHELF_TILE, gap: space.xs },
   stage: { overflow: 'hidden', alignItems: 'center', justifyContent: 'center' },
-  heroFoot: { flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.lg },
+  heroFoot: { flexDirection: 'row', alignItems: 'flex-start', gap: space.md, padding: space.lg },
   gridFoot: { padding: space.lg, gap: space.xs },
   grow: { flex: 1, gap: space.xs },
   heroName: { color: color.text, fontFamily: font.title, ...type.heading },
@@ -248,6 +259,7 @@ const styles = themedStyles(() => ({
   twoLines: { minHeight: leading.small * 2 },
   best: { flexDirection: 'row', alignItems: 'center', gap: space.xs },
   bestText: { flexShrink: 1, color: color.text2, fontFamily: font.semibold, ...type.caption },
+  skeleton: { height: HERO_STAGE + control.lg + space.xl, opacity: 0.5 },
   more: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   moreIcon: { width: control.md, height: control.md, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center', backgroundColor: color.surface2 },
 }));

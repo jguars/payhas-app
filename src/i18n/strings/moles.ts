@@ -5,8 +5,8 @@ export default defineStrings(
   {
     name: 'Pop-up Pals',
     subLittle: 'Say hi to the pals',
-    sub: 'Tap them before they hide · {s}s',
-    subDecoy: 'Tap the pals, skip the cactus · {s}s',
+    sub: 'Tap them before they hide · {s} sec',
+    subDecoy: 'Tap the pals, skip the cactus · {s} sec',
     pal: '{symbol}, tap!',
     decoy: "{symbol}, don't tap",
     burrow: 'Empty burrow',

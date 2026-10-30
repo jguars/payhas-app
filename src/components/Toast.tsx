@@ -5,14 +5,21 @@ import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } fr
 import { Icon, IconName } from '@/components/Icon';
 import { TAB_BAR, useInsets } from '@/lib/useInsets';
 import { spring } from '@/theme/motion';
-import { color, font, radius, size, space, themedStyles } from '@/theme/tokens';
+import { color, control, elevation, font, iconSize, iconStroke, radius, size, space, themedStyles } from '@/theme/tokens';
 
-type ToastSpec = { text: string; icon?: IconName; action?: { label: string; onPress: () => void } };
+/**
+ * `action` adds one button (Undo). `onDismiss` runs when the toast goes away
+ * without its action being pressed — timed out or replaced — so a caller can
+ * commit something only once the Undo window has passed.
+ */
+type ToastSpec = { text: string; icon?: IconName; action?: { label: string; onPress: () => void }; onDismiss?: () => void };
 const Ctx = createContext<(t: ToastSpec) => void>(() => {});
 
 const SHOW_MS = 2600;
 /** With an action (Undo) the toast waits long enough to reach it, also with a screen reader (WCAG 2.2.1). */
 const ACTION_MS = 7000;
+/** With a screen reader on, an action toast stays much longer: finding the button takes time. */
+const ACTION_SR_MS = 30000;
 
 /** One toast at a time, floating just above the tab bar. A new toast replaces the old one. */
 export function ToastProvider({ children }: { children: ReactNode }) {
@@ -22,14 +29,33 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const o = useSharedValue(0);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const seq = useRef(0);
+  const pending = useRef<(() => void) | undefined>(undefined);
+  const screenReader = useRef(false);
+  useEffect(() => {
+    AccessibilityInfo.isScreenReaderEnabled().then((on) => (screenReader.current = on));
+    const sub = AccessibilityInfo.addEventListener('screenReaderChanged', (on) => (screenReader.current = on));
+    return () => sub.remove();
+  }, []);
 
   const hide = useCallback(() => {
     y.value = withTiming(30, { duration: 180 });
     o.value = withTiming(0, { duration: 180 });
   }, [y, o]);
 
+  /** Hide, and run the pending onDismiss (the action wasn't taken). */
+  const dismiss = useCallback(() => {
+    const done = pending.current;
+    pending.current = undefined;
+    hide();
+    done?.();
+  }, [hide]);
+
   const show = useCallback(
     (t: ToastSpec) => {
+      // A new toast replaces the old one: the old one counts as dismissed.
+      const prev = pending.current;
+      pending.current = t.onDismiss;
+      prev?.();
       setToast({ ...t, id: ++seq.current });
       // Android reads the live region; VoiceOver needs an explicit announcement.
       if (Platform.OS === 'ios') AccessibilityInfo.announceForAccessibility(t.text);
@@ -37,12 +63,19 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       y.value = withSpring(0, spring.bouncy);
       o.value = withTiming(1, { duration: 140 });
       if (timer.current) clearTimeout(timer.current);
-      timer.current = setTimeout(hide, t.action ? ACTION_MS : SHOW_MS);
+      timer.current = setTimeout(dismiss, t.action ? (screenReader.current ? ACTION_SR_MS : ACTION_MS) : SHOW_MS);
     },
-    [y, o, hide],
+    [y, o, dismiss],
   );
 
-  useEffect(() => () => void (timer.current && clearTimeout(timer.current)), []);
+  // Leaving the app's tree (sign-out, theme remount) commits whatever is waiting.
+  useEffect(
+    () => () => {
+      if (timer.current) clearTimeout(timer.current);
+      pending.current?.();
+    },
+    [],
+  );
 
   const anim = useAnimatedStyle(() => ({ opacity: o.value, transform: [{ translateY: y.value }] }));
 
@@ -52,17 +85,19 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       {toast && (
         <Animated.View pointerEvents="box-none" style={[styles.wrap, { bottom: bottom + TAB_BAR.gap + TAB_BAR.height + 12 }, anim]}>
           <View style={styles.toast} accessibilityLiveRegion="polite">
-            {toast.icon && <Icon name={toast.icon} size={18} color={color.onInverse} strokeWidth={2.4} />}
+            {toast.icon && <Icon name={toast.icon} size={iconSize.md} color={color.onInverse} strokeWidth={iconStroke(iconSize.md)} />}
             <Text style={styles.text} numberOfLines={2} maxFontSizeMultiplier={1.4}>
               {toast.text}
             </Text>
             {toast.action && (
               <Pressable
                 onPress={() => {
+                  pending.current = undefined;
+                  if (timer.current) clearTimeout(timer.current);
                   hide();
                   toast.action?.onPress();
                 }}
-                hitSlop={10}
+                hitSlop={space.md}
                 accessibilityRole="button"
               >
                 <Text style={styles.action}>{toast.action.label}</Text>
@@ -84,16 +119,14 @@ const styles = themedStyles(() => ({
     alignItems: 'center',
     gap: space.sm,
     maxWidth: '100%',
-    paddingHorizontal: 16,
-    height: 46,
-    borderRadius: radius.pill,
+    paddingHorizontal: space.lg,
+    paddingVertical: space.sm,
+    minHeight: control.md,
+    borderRadius: radius.lg,
     backgroundColor: color.inverse,
-    elevation: 10,
-    shadowColor: color.black,
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
+    ...elevation.float,
   },
   text: { color: color.onInverse, fontFamily: font.semibold, fontSize: size.small, flexShrink: 1 },
-  action: { color: color.ember, fontFamily: font.bold, fontSize: size.small, marginLeft: space.xs },
+  // On the inverse surface ember fails contrast in every theme; the action is the toast's own colour, bold and underlined.
+  action: { color: color.onInverse, fontFamily: font.bold, fontSize: size.small, marginLeft: space.xs, textDecorationLine: 'underline' },
 }));
