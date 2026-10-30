@@ -5,7 +5,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } fr
 import { Icon, IconName } from '@/components/Icon';
 import { TAB_BAR, useInsets } from '@/lib/useInsets';
 import { spring } from '@/theme/motion';
-import { color, control, elevation, font, iconSize, iconStroke, radius, size, space, themedStyles } from '@/theme/tokens';
+import { color, control, elevation, font, iconSize, iconStroke, layout, radius, size, space, themedStyles } from '@/theme/tokens';
 
 /**
  * `action` adds one button (Undo). `onDismiss` runs when the toast goes away
@@ -113,7 +113,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       <FlushCtx.Provider value={dismiss}>
       {children}
       {toast && (
-        <Animated.View pointerEvents="box-none" style={[styles.wrap, { bottom: bottom + TAB_BAR.gap + TAB_BAR.height + 12 }, anim]}>
+        <Animated.View pointerEvents="box-none" style={[styles.wrap, { bottom: bottom + TAB_BAR.height + space.md }, anim]}>
           <View style={styles.toast} accessibilityLiveRegion="polite">
             {toast.icon && <Icon name={toast.icon} size={iconSize.md} color={color.onInverse} strokeWidth={iconStroke(iconSize.md)} />}
             <Text style={styles.text} numberOfLines={2} maxFontSizeMultiplier={1.4}>
@@ -146,7 +146,7 @@ export const useToast = () => useContext(Ctx);
 export const useToastFlush = () => useContext(FlushCtx);
 
 const styles = themedStyles(() => ({
-  wrap: { position: 'absolute', left: TAB_BAR.side, right: TAB_BAR.side, alignItems: 'center' },
+  wrap: { position: 'absolute', left: layout.gutter, right: layout.gutter, alignItems: 'center' },
   toast: {
     flexDirection: 'row',
     alignItems: 'center',

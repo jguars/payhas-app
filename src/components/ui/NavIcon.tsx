@@ -3,7 +3,7 @@ import Animated, { useAnimatedStyle, useReducedMotion, useSharedValue, withSeque
 import Svg, { Circle, Path } from 'react-native-svg';
 
 import { spring } from '@/theme/motion';
-import { alpha, color } from '@/theme/tokens';
+import { alpha, color, media } from '@/theme/tokens';
 
 export type NavKind = 'home' | 'discover' | 'play' | 'inbox' | 'me';
 
@@ -16,7 +16,7 @@ const W = color.white;
  * move when it becomes active — home hops, the compass needle spins, the
  * controller wiggles, the bell rings, the person pops.
  */
-export function NavIcon({ kind, active, size = 26 }: { kind: NavKind; active: boolean; size?: number }) {
+export function NavIcon({ kind, active, size = 26, onMedia = false }: { kind: NavKind; active: boolean; size?: number; onMedia?: boolean }) {
   const reduce = useReducedMotion();
   const ty = useSharedValue(0);
   const rot = useSharedValue(0);
@@ -71,8 +71,9 @@ export function NavIcon({ kind, active, size = 26 }: { kind: NavKind; active: bo
   }));
 
   // Active sits on the inverse pill: its outline takes onInverse, with the fill one step softer.
-  const stroke = active ? color.onInverse : color.text3;
-  const fill = active ? (color.scheme === 'light' ? alpha(color.onInverse, 0.25) : W) : 'none';
+  // Over video (`onMedia`) the bar is always dark, so the pill is light in every theme.
+  const stroke = onMedia ? (active ? media.scrim : media.text3) : active ? color.onInverse : color.text3;
+  const fill = !active ? 'none' : onMedia || color.scheme !== 'light' ? W : alpha(color.onInverse, 0.25);
   const line = { stroke, strokeWidth: active ? 2 : 1.9, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const };
 
   return (

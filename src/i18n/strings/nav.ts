@@ -1,6 +1,6 @@
 import { defineStrings } from '../define';
 
-/** The floating tab bar. */
+/** The tab bar. Labels stay one short word: five share a 360 px phone. */
 export default defineStrings(
   {
     home: 'Home',
@@ -15,17 +15,17 @@ export default defineStrings(
       home: 'Baş sahypa',
       discover: 'Açyşlar',
       play: 'Oýna',
-      inbox: 'Gelen hatlar',
+      inbox: 'Hatlar',
       me: 'Men',
-      inboxUnread: { one: 'Gelen hatlar, {count} täze', other: 'Gelen hatlar, {count} täze' },
+      inboxUnread: { one: 'Hatlar, {count} täze', other: 'Hatlar, {count} täze' },
     },
     tr: {
       home: 'Ana sayfa',
       discover: 'Keşfet',
       play: 'Oyna',
-      inbox: 'Gelen kutusu',
+      inbox: 'Mesajlar',
       me: 'Ben',
-      inboxUnread: { one: 'Gelen kutusu, {count} yeni', other: 'Gelen kutusu, {count} yeni' },
+      inboxUnread: { one: 'Mesajlar, {count} yeni', other: 'Mesajlar, {count} yeni' },
     },
     ru: {
       home: 'Главная',

@@ -304,7 +304,7 @@ export const control = { sm: 40, md: 48, lg: 56 } as const;
 /**
  * Depth. Tonal layers first (bg → surface1 → surface2); the "ledge" is a hard
  * offset under tactile things (child cards, primary buttons); the one soft
- * shadow is for things that float over content (tab bar, toasts, sheets).
+ * shadow is for things that float over content (toasts, sheets).
  */
 export const elevation = {
   ledge: 4,

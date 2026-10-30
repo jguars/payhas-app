@@ -158,7 +158,7 @@ screen; if a screen needs something new, add it here first.
 | Border | `border.hairline 1 · strong 2` | Dividers and quiet outlines / focus and selection. |
 | Control height | `control.sm 40 · md 48 · lg 56` | md is also the minimum touch target. |
 | Icons | `iconSize.sm 16 · md 20 · lg 24 · xl 32`, `iconStroke(size)` | One glyph family (`Icon`); stroke from the size, not per screen. Emoji are not icons. |
-| Depth | `elevation.ledge 4` (child cards), `elevation.ledgeButton 3` (primary), `elevation.float` (tab bar, toasts, sheets) | Tonal layers first. |
+| Depth | `elevation.ledge 4` (child cards), `elevation.ledgeButton 3` (primary), `elevation.float` (toasts, sheets) | Tonal layers first. |
 | Motion | `spring.snappy/smooth/bouncy`, `STAGGER_MS 45`, `duration.fast 150 · base 250 · slow 400` | Everything off under reduce-motion. |
 
 ## Components (Phase 4, 2026-10-30)
@@ -183,7 +183,7 @@ Code: `src/components/ui/` (+ `Segmented`, `LaneBadge`, `BottomSheet`,
 | `SectionHeader` | with / without "See all" | — | Sections inside a screen. |
 | `EmptyState` | with / without action | — | Icon circle, title, one line, at most one (secondary) action. |
 | `Toggle` | — | on (success) / off (surface2) | White knob in every theme. |
-| Tab bar | — | active = inverse pill | Same on every tab; never lane colours. |
+| Tab bar | page / media (Home) | active = inverse pill behind the icon + bold label | Docked, icon + one-word label on every tab; dark (`media`) on Home in every theme; never lane colours. |
 
 References: `design/direction/` and the Mobbin collection "Payhas — design
 direction". Workflow: `docs/UI_UX_WORKFLOW.md`.
@@ -200,7 +200,7 @@ and it feels quiet and trustworthy. A child touches it and it comes alive.
 
 That second half is the component doctrine: **quiet chrome, loud touch.** At
 rest the interface nearly disappears. Feed chrome is small text over video,
-the tab bar is a dim floating capsule, and the icons are outlines. Under a
+the tab bar is a quiet docked strip with small labels, and the icons are outlines. Under a
 finger, everything answers. Chips press down into a hard ledge, tiles dip and
 spring back, the active tab's pill jelly-slides to its new home, and each nav
 icon does its own little move. Expression lives in the response, not in the
@@ -252,7 +252,7 @@ tiles, and carry the tab-pill colours for the non-Home tabs.
 ### Neutral
 - **Ink** (#0A0A0F): the ground of every screen, and the text colour on any
   coloured fill.
-- **Night Surface** (#14141B): cards, rows, chips at rest, the tab bar (at 94%).
+- **Night Surface** (#14141B): cards, rows, chips at rest, the tab bar.
 - **Raised Surface** (#1D1D26): nested surfaces, progress tracks, pressed wells.
 - **Hairline** (#2A2A35): 1–2px borders, dividers, the ledge under an
   unselected chip.
@@ -315,9 +315,11 @@ This is a single-column phone layout on a 4px base scale: 4, 8, 12, 16, 24,
 - **Feed:** full-bleed edge to edge. Video that isn't the screen's aspect
   ratio is centred and contained over a blurred copy of its poster, never
   cropped to fill.
-- **Tab bar:** a floating capsule 64px tall, inset 16px from each side and
-  10px above the bottom inset. Scrolling screens reserve that space so the
-  last item clears it.
+- **Tab bar:** docked full width, 64px tall plus the bottom inset, with a
+  hairline on top (`TAB_BAR`). It sits under the screens, not over them, so
+  content never slides behind it; scrolling screens only add `space.lg` after
+  the last item (`useTabBarSpace`). Labels are one short word (five share a
+  360px phone).
 - **Touch targets:** at least 48dp. Smaller visuals (steppers, close buttons)
   extend their hit area with `hitSlop` to reach 48.
 

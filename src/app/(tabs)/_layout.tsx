@@ -1,7 +1,7 @@
 import { usePathname } from 'expo-router';
 import { TabList, TabSlot, TabTrigger, Tabs } from 'expo-router/ui';
 import { forwardRef, useEffect, useState } from 'react';
-import { Pressable, PressableProps, View } from 'react-native';
+import { Pressable, PressableProps, Text, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useReducedMotion,
@@ -18,40 +18,69 @@ import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { TAB_BAR, useInsets } from '@/lib/useInsets';
 import { spring } from '@/theme/motion';
-import { alpha, color, pageFill, radius, themedStyles } from '@/theme/tokens';
+import { border, color, font, media, pageFill, radius, space, themedStyles, type } from '@/theme/tokens';
 
 const ROUTES = ['/', '/discover', '/play', '/inbox', '/me'];
-const PILL_W = 54;
-const PILL_H = 42;
+const PILL = TAB_BAR.pill;
+/** Icon pill + label, centred in the bar. */
+const PILL_TOP = (TAB_BAR.height - PILL.height - space.xs / 2 - type.caption.lineHeight) / 2;
 
-type TabButtonProps = PressableProps & { kind: NavKind; label: string; isFocused?: boolean; badge?: boolean };
+type TabButtonProps = PressableProps & { kind: NavKind; label: string; a11yLabel?: string; isFocused?: boolean; badge?: boolean };
 
-const TabButton = forwardRef<View, TabButtonProps>(({ kind, label, isFocused, badge, ...rest }, ref) => (
-  // `rest` last except style: TabTrigger passes its own style, which would undo the equal-width slots.
-  <Pressable ref={ref} accessibilityRole="tab" accessibilityLabel={label} accessibilityState={{ selected: !!isFocused }} {...rest} onPressIn={() => !isFocused && fx.tab()} style={styles.tab}>
-    <View>
-      <NavIcon kind={kind} active={!!isFocused} />
-      {badge && <Animated.View entering={ZoomIn.springify().damping(spring.bouncy.damping)} style={[styles.badge, isFocused && { borderColor: color.inverse }]} />}
-    </View>
-  </Pressable>
-));
+/** Home plays video edge to edge: there the bar is dark in every theme. */
+const useOnMedia = () => usePathname() === '/';
+
+const TabButton = forwardRef<View, TabButtonProps>(({ kind, label, a11yLabel, isFocused, badge, ...rest }, ref) => {
+  const onMedia = useOnMedia();
+  return (
+    // `rest` first: TabTrigger passes its own style and state, which would undo the equal-width slots and the selected state.
+    <Pressable
+      ref={ref}
+      {...rest}
+      accessibilityRole="tab"
+      accessibilityLabel={a11yLabel ?? label}
+      accessibilityState={{ selected: !!isFocused }}
+      aria-selected={!!isFocused}
+      onPressIn={() => !isFocused && fx.tab()}
+      style={styles.tab}
+    >
+      <View style={styles.icon}>
+        <NavIcon kind={kind} active={!!isFocused} onMedia={onMedia} />
+        {badge && (
+          <Animated.View
+            entering={ZoomIn.springify().damping(spring.bouncy.damping)}
+            style={[styles.badge, { borderColor: isFocused ? (onMedia ? media.text : color.inverse) : onMedia ? media.scrim : color.surface1 }]}
+          />
+        )}
+      </View>
+      <Text
+        numberOfLines={1}
+        maxFontSizeMultiplier={1.3}
+        style={[styles.label, isFocused && styles.labelOn, onMedia && { color: isFocused ? media.text : media.text3 }]}
+      >
+        {label}
+      </Text>
+    </Pressable>
+  );
+});
 TabButton.displayName = 'TabButton';
 
 // TabTrigger clones props (isFocused, onPress…) onto its child, so pass them through.
 const InboxTabButton = forwardRef<View, PressableProps & { isFocused?: boolean }>((props, ref) => {
   const { unread } = useLibrary();
   const { t } = useT();
-  return <TabButton ref={ref} kind="inbox" label={unread ? t('nav.inboxUnread', { count: unread }) : t('nav.inbox')} badge={unread > 0} {...props} />;
+  return <TabButton ref={ref} kind="inbox" label={t('nav.inbox')} a11yLabel={unread ? t('nav.inboxUnread', { count: unread }) : undefined} badge={unread > 0} {...props} />;
 });
 InboxTabButton.displayName = 'InboxTabButton';
 
 /**
- * The pill behind the active tab. It slides on a spring, stretches like jelly
- * while it travels (then snaps back with a little squash). It is the one
+ * The pill behind the active tab's icon. It slides on a spring, stretches like
+ * jelly while it travels (then snaps back with a little squash). It is the one
  * selected style (inverse), the same on every tab — colour is not decoration.
  */
 function Highlight({ width }: { width: number }) {
   const pathname = usePathname();
+  const onMedia = pathname === '/';
   const reduce = useReducedMotion();
   const index = Math.max(0, ROUTES.indexOf(pathname));
   const slot = width / ROUTES.length;
@@ -73,22 +102,27 @@ function Highlight({ width }: { width: number }) {
   }, [index, reduce, x, sx, sy]);
 
   const anim = useAnimatedStyle(() => ({
-    transform: [{ translateX: x.value * slot + (slot - PILL_W) / 2 }, { scaleX: sx.value }, { scaleY: sy.value }],
+    transform: [{ translateX: x.value * slot + (slot - PILL.width) / 2 }, { scaleX: sx.value }, { scaleY: sy.value }],
   }));
   if (width === 0) return null;
-  return <Animated.View pointerEvents="none" style={[styles.highlight, anim]} />;
+  return <Animated.View pointerEvents="none" style={[styles.highlight, onMedia && { backgroundColor: media.text }, anim]} />;
 }
 
 export default function TabsLayout() {
   const { bottom } = useInsets();
   const [width, setWidth] = useState(0);
   const { t } = useT();
+  const onMedia = useOnMedia();
 
   return (
     <Tabs style={styles.root}>
-      <TabSlot style={styles.root} />
-      {/* Floats above the gesture bar; screens add useTabBarSpace() so content clears it. */}
-      <TabList accessibilityRole="tablist" style={[styles.bar, { bottom: bottom + TAB_BAR.gap }]} onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
+      <TabSlot style={styles.slot} />
+      {/* Docked under the screens (not over them): content never slides behind it. */}
+      <TabList
+        accessibilityRole="tablist"
+        style={[styles.bar, { height: TAB_BAR.height + bottom, paddingBottom: bottom }, onMedia && styles.barMedia]}
+        onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
+      >
         <Highlight width={width} />
         <TabTrigger name="index" href="/" asChild>
           <TabButton kind="home" label={t('nav.home')} />
@@ -110,35 +144,39 @@ export default function TabsLayout() {
   );
 }
 
+const BADGE = space.sm + border.strong;
+
 const styles = themedStyles(() => ({
   root: { flex: 1, ...pageFill() },
+  slot: { flex: 1 },
   bar: {
-    position: 'absolute',
-    left: TAB_BAR.side,
-    right: TAB_BAR.side,
-    height: TAB_BAR.height,
-    borderRadius: TAB_BAR.height / 2,
-    backgroundColor: alpha(color.surface1, 0.94),
-    borderWidth: 1,
-    borderColor: color.line,
     flexDirection: 'row',
-    alignItems: 'center',
-    // Lift it off whatever is behind (video, cards): soft shadow on both platforms.
-    elevation: 14,
-    shadowColor: color.black,
-    shadowOpacity: 0.45,
-    shadowRadius: 18,
-    shadowOffset: { width: 0, height: 8 },
+    backgroundColor: color.surface1,
+    borderTopWidth: border.hairline,
+    borderTopColor: color.line,
   },
-  tab: { flex: 1, height: '100%', alignItems: 'center', justifyContent: 'center' },
+  barMedia: { backgroundColor: media.scrim, borderTopColor: media.line },
+  tab: { flex: 1, height: TAB_BAR.height, alignItems: 'center', paddingTop: PILL_TOP, gap: space.xs / 2 },
+  icon: { width: PILL.width, height: PILL.height, alignItems: 'center', justifyContent: 'center' },
+  label: { ...type.caption, fontFamily: font.semibold, color: color.text3, paddingHorizontal: space.xs / 2 },
+  labelOn: { fontFamily: font.bold, color: color.text },
   highlight: {
     position: 'absolute',
     left: 0,
-    top: (TAB_BAR.height - 2 - PILL_H) / 2,
-    width: PILL_W,
-    height: PILL_H,
+    top: PILL_TOP,
+    width: PILL.width,
+    height: PILL.height,
     borderRadius: radius.pill,
     backgroundColor: color.inverse,
   },
-  badge: { position: 'absolute', top: -2, right: -3, width: 10, height: 10, borderRadius: 5, backgroundColor: color.ember, borderWidth: 2, borderColor: color.surface1 },
+  badge: {
+    position: 'absolute',
+    top: space.xs / 2,
+    right: space.md,
+    width: BADGE,
+    height: BADGE,
+    borderRadius: BADGE / 2,
+    backgroundColor: color.ember,
+    borderWidth: border.strong,
+  },
 }));
