@@ -166,6 +166,12 @@ const FIXED = {
 export const color: Palette & typeof FIXED = { ...PALETTES[theme], ...FIXED };
 
 /** Over video and posters: light text and dark scrims in every theme. */
+/**
+ * Topic tile tints: five friendly hues used only at low opacity behind topic
+ * tiles (never text, never lanes — lane colours stay for lanes).
+ */
+export const topicTints = ['#FF7A59', '#3FC79A', '#6E9BFF', '#F2C14E', '#B48CFF'] as const;
+
 export const media = {
   text: '#F4F3EF',
   text2: '#D9D8E0',
@@ -278,7 +284,8 @@ export const type = Object.fromEntries(
 export const space = { xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32, xxxl: 48 } as const;
 
 /** Screen edge padding, the gap between sections, and the widest a content column gets (tablets, web). */
-export const layout = { gutter: space.lg, section: space.xl, maxContent: 560 } as const;
+/** `poster`: a video poster in a shelf (3:4), sized so two and a bit fit a phone and the row reads as scrollable. */
+export const layout = { gutter: space.lg, section: space.xl, maxContent: 560, poster: { width: 132, height: 176 } } as const;
 
 /**
  * Four radii and nothing else: sm (chips, tiles, inputs), md (cards, rows

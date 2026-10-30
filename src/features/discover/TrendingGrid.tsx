@@ -53,7 +53,7 @@ export function TrendingGrid({ videos, loading, onOpen, baseIndex = 0 }: Props) 
         <View key={v.id} style={styles.cell}>
           <Enter index={baseIndex + i} rise={22}>
             <PressScale onPress={() => onOpen(v)} accessibilityRole="button" accessibilityLabel={v.caption} style={styles.tile}>
-              <Image source={v.thumb} cachePolicy="memory-disk" recyclingKey={v.id} style={styles.fill} contentFit="cover" />
+              <Image source={v.thumb} cachePolicy="memory-disk" recyclingKey={v.id} style={styles.fill} contentFit="cover" alt="" accessible={false} aria-hidden />
               <View pointerEvents="none" style={styles.scrim} />
               <View style={styles.views}>
                 <Icon name="play" size={10} color={media.text} />

@@ -41,7 +41,8 @@ export function Segmented<T>({ options, value, onChange, label, words }: Props<T
             }}
             style={styles.seg}
             accessibilityRole="radio"
-            accessibilityState={{ selected: on }}
+            accessibilityState={{ checked: on }}
+            aria-checked={on}
           >
             <Text style={[styles.text, words && styles.words, on && styles.textOn]} numberOfLines={1}>
               {label(o)}

@@ -23,6 +23,9 @@ export default defineStrings(
     'tab.channels': 'Channels',
     'tab.topics': 'Topics',
     allChannels: 'All channels',
+    today: 'Today · {topic}',
+    noResults: 'No videos about “{query}” yet',
+    tryThese: 'Try one of these:',
   },
   {
     tk: {
@@ -45,6 +48,9 @@ export default defineStrings(
       'tab.channels': 'Kanallar',
       'tab.topics': 'Temalar',
       allChannels: 'Ähli kanallar',
+      today: 'Şu gün · {topic}',
+      noResults: '«{query}» barada entek wideo ýok',
+      tryThese: 'Şulardan birini synap gör:',
     },
     tr: {
       title: 'Keşfet',
@@ -66,6 +72,9 @@ export default defineStrings(
       'tab.channels': 'Kanallar',
       'tab.topics': 'Konular',
       allChannels: 'Tüm kanallar',
+      today: 'Bugün · {topic}',
+      noResults: '“{query}” hakkında henüz video yok',
+      tryThese: 'Bunlardan birini dene:',
     },
     ru: {
       title: 'Обзор',
@@ -92,6 +101,9 @@ export default defineStrings(
       'tab.channels': 'Каналы',
       'tab.topics': 'Темы',
       allChannels: 'Все каналы',
+      today: 'Сегодня · {topic}',
+      noResults: 'Пока нет видео про «{query}»',
+      tryThese: 'Попробуй одно из этих:',
     },
   },
 );

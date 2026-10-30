@@ -8,12 +8,9 @@ import { TopicIcon } from '@/components/ui/TopicIcon';
 import { topicLabel, useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { spring } from '@/theme/motion';
-import { color, font, lane, size, themedStyles } from '@/theme/tokens';
+import { alpha, border, color, control, font, radius, space, themedStyles, topicTints, type } from '@/theme/tokens';
 
 import type { Topic } from './useDiscover';
-
-/** Read when drawn, so the swatches follow the theme. */
-const swatches = () => [color.ember, lane.kids.color, lane.teen.color, lane.little.color, lane.adult.color];
 
 type Props = { topics: Topic[]; selected: string | null; onSelect: (slug: string | null) => void; baseIndex?: number };
 
@@ -29,7 +26,7 @@ export function TopicGrid({ topics, selected, onSelect, baseIndex = 0 }: Props) 
         <Enter key={t.slug} index={baseIndex + Math.min(i, 8)} style={styles.cell}>
           <TopicTile
             topic={t}
-            swatch={swatches()[i % 5]}
+            swatch={topicTints[i % topicTints.length]}
             on={selected === t.slug}
             onPress={() => {
               fx.tab();
@@ -57,15 +54,14 @@ function TopicTile({ topic, swatch, on, onPress }: { topic: Topic; swatch: strin
 
   return (
     <PressScale onPress={onPress} accessibilityRole="button" accessibilityState={{ selected: on }} accessibilityLabel={label}>
-      <View style={[styles.tile, { backgroundColor: swatch + '1F' }]}>
+      <View style={[styles.tile, { backgroundColor: alpha(swatch, color.scheme === 'light' ? 0.22 : 0.16) }]}>
         <Animated.View style={[styles.icon, emoji]} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-          <TopicIcon slug={topic.slug} tint={swatch} emoji={topic.emoji} size={58} />
+          <TopicIcon slug={topic.slug} tint={swatch} emoji={topic.emoji} size={control.lg} />
         </Animated.View>
         <View style={styles.foot}>
           <Text style={styles.label} numberOfLines={1}>
             {label}
           </Text>
-          {topic.count > 0 && <Text style={[styles.count, { color: swatch }]}>{topic.count}</Text>}
         </View>
         <Animated.View pointerEvents="none" style={[styles.ring, { borderColor: swatch }, ring]} />
       </View>
@@ -74,12 +70,12 @@ function TopicTile({ topic, swatch, on, onPress }: { topic: Topic; swatch: strin
 }
 
 const styles = themedStyles(() => ({
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  cell: { width: '48.5%' },
-  tile: { height: 104, borderRadius: 18, overflow: 'hidden', padding: 14, justifyContent: 'flex-end' },
-  icon: { position: 'absolute', right: 8, top: 8 },
-  foot: { flexDirection: 'row', alignItems: 'baseline', gap: 8 },
-  label: { flexShrink: 1, color: color.text, fontFamily: font.title, fontSize: size.lead, letterSpacing: -0.2 },
-  count: { fontFamily: font.mono, fontSize: size.caption },
-  ring: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, borderRadius: 18, borderWidth: 2 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: space.md },
+  // Two up with one gap between: each cell is half the row less half a gap.
+  cell: { flexBasis: '47%', flexGrow: 1 },
+  tile: { height: control.lg * 2, borderRadius: radius.md, overflow: 'hidden', padding: space.md, justifyContent: 'flex-end' },
+  icon: { position: 'absolute', right: space.sm, top: space.sm },
+  foot: { flexDirection: 'row', alignItems: 'baseline', gap: space.sm },
+  label: { flexShrink: 1, color: color.text, fontFamily: font.title, ...type.lead },
+  ring: { position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, borderRadius: radius.md, borderWidth: border.strong },
 }));

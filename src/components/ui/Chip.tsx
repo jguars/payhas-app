@@ -15,6 +15,8 @@ type Props = {
   disabled?: boolean;
   accessibilityRole?: 'checkbox' | 'radio' | 'button';
   right?: ReactNode;
+  /** Art before the label (a topic icon); the emoji/icon props cover the simple cases. */
+  leading?: ReactNode;
 };
 
 /**
@@ -23,7 +25,7 @@ type Props = {
  * into. Selected = the one selected style (inverse fill, onInverse label), in
  * every theme. Used for topics, years, months and any "pick some" list.
  */
-export function Chip({ label, selected, onPress, emoji, icon, size = 'md', disabled, accessibilityRole = 'checkbox', right }: Props) {
+export function Chip({ label, selected, onPress, emoji, icon, size = 'md', disabled, accessibilityRole = 'checkbox', right, leading }: Props) {
   const tint = color.inverse;
   const h = size === 'lg' ? control.lg : control.md;
   return (
@@ -47,6 +49,7 @@ export function Chip({ label, selected, onPress, emoji, icon, size = 'md', disab
               selected ? { backgroundColor: tint, borderColor: shade(tint) } : null,
             ]}
           >
+            {leading}
             {!!emoji && <Text style={styles.emoji}>{emoji}</Text>}
             {!!icon && <Icon name={icon} size={16} color={selected ? color.onInverse : color.text} strokeWidth={2.4} />}
             <Text style={[styles.label, size === 'lg' && { fontSize: type.body }, selected && { color: color.onInverse }]} numberOfLines={1} maxFontSizeMultiplier={1.4}>

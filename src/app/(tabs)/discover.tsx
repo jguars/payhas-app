@@ -20,16 +20,19 @@ import { LaneChip } from '@/features/discover/LaneChip';
 import { SearchField } from '@/features/discover/SearchField';
 import { ShelfHero } from '@/features/discover/ShelfHero';
 import { TopicGrid } from '@/features/discover/TopicGrid';
-import { TopTen } from '@/features/discover/TopTen';
 import { TrendingGrid } from '@/features/discover/TrendingGrid';
+import { VideoShelf } from '@/features/discover/VideoShelf';
+import { Chip } from '@/components/ui/Chip';
+import { EmptyState } from '@/components/ui/EmptyState';
+import { TopicIcon } from '@/components/ui/TopicIcon';
 import { useChannels } from '@/features/discover/useChannels';
 import { matchesQuery, useDiscover } from '@/features/discover/useDiscover';
 import { Segmented } from '@/components/Segmented';
 import { FeedVideo } from '@/features/feed/data';
 import { openVideo } from '@/features/feed/openVideo';
 import { useScreenTime } from '@/features/library/useScreenTime';
-import { laneKey, topicLabel, useT } from '@/i18n';
-import { color, font, pageFill, size, space, themedStyles } from '@/theme/tokens';
+import { topicLabel, useT } from '@/i18n';
+import { color, font, iconSize, pageFill, size, space, themedStyles, topicTints } from '@/theme/tokens';
 
 type Tab = 'forYou' | 'channels' | 'topics';
 const TABS: Tab[] = ['forYou', 'channels', 'topics'];
@@ -38,9 +41,9 @@ export default function DiscoverScreen() {
   const insets = useInsets();
   const barSpace = useTabBarSpace();
   const focused = useIsFocused();
-  const { profile, videos, topics, shelf, top, loading } = useDiscover();
+  const { profile, videos, topics, shelf, loading } = useDiscover();
   const { channels } = useChannels();
-  const [tab, setTab] = useState<Tab>('channels');
+  const [tab, setTab] = useState<Tab>('forYou');
   const { lock } = useScreenTime();
   const { t, lang } = useT();
   const [query, setQuery] = useState('');
@@ -68,6 +71,15 @@ export default function DiscoverScreen() {
   );
   const suggestions = useMemo(() => topics.map((tp) => labelOf(tp.slug)), [topics, labelOf]);
   const filtered = query.trim().length > 0 || topic != null;
+  const missed = !loading && shown.length === 0 && query.trim().length > 0;
+  // For you: a row per topic with something to watch (the profile's picks first), after today's video.
+  const shelves = useMemo(() => {
+    const lead = shelf?.videos[0]?.id;
+    return topics
+      .filter((tp) => tp.count >= 2)
+      .slice(0, 4)
+      .map((tp) => ({ topic: tp, videos: videos.filter((v) => v.topics.includes(tp.slug) && v.id !== lead).slice(0, 10) }));
+  }, [topics, videos, shelf]);
 
   if (!profile) return <View style={styles.root} />;
 
@@ -106,8 +118,9 @@ export default function DiscoverScreen() {
         {filtered ? (
           <>
             <Enter index={2} style={styles.sectionHead}>
+              {/* With nothing found, the empty state says it; the heading would only repeat it. */}
               <Animated.Text key={heading} entering={FadeIn.duration(220)} style={[styles.h2, styles.shrink]} numberOfLines={1}>
-                {heading}
+                {missed ? '' : heading}
               </Animated.Text>
               <Animated.View entering={FadeIn.duration(180)} exiting={FadeOut.duration(140)}>
                 <Pressable
@@ -122,7 +135,30 @@ export default function DiscoverScreen() {
                 </Pressable>
               </Animated.View>
             </Enter>
-            <TrendingGrid key={topic ?? 'all'} videos={shown} loading={loading} onOpen={open} baseIndex={3} />
+            {missed ? (
+              // Nothing matched: say so plainly and offer topics that do have videos.
+              <EmptyState icon="search" title={t('discover.noResults', { query: query.trim() })} body={t('discover.tryThese')}>
+                <View style={styles.tryRow}>
+                  {topics
+                    .filter((tp) => tp.count > 0)
+                    .slice(0, 4)
+                    .map((tp, i) => (
+                      <Chip
+                        key={tp.slug}
+                        label={labelOf(tp.slug)}
+                        accessibilityRole="button"
+                        leading={<TopicIcon slug={tp.slug} tint={topicTints[i % topicTints.length]} emoji={tp.emoji} size={iconSize.md} />}
+                        onPress={() => {
+                          setQuery('');
+                          pickTopic(tp.slug);
+                        }}
+                      />
+                    ))}
+                </View>
+              </EmptyState>
+            ) : (
+              <TrendingGrid key={topic ?? 'all'} videos={shown} loading={loading} onOpen={open} baseIndex={3} />
+            )}
           </>
         ) : (
           <>
@@ -149,14 +185,9 @@ export default function DiscoverScreen() {
                 {loading ? (
                   <TrendingGrid videos={[]} loading onOpen={open} />
                 ) : (
-                  top.length >= 3 && (
-                    <View style={styles.block}>
-                      <Enter index={4}>
-                        <SectionHeader title={t('discover.top10', { lane: t(laneKey(profile.lane)) })} />
-                      </Enter>
-                      <TopTen videos={top} onOpen={open} baseIndex={5} />
-                    </View>
-                  )
+                  shelves.map((sh, i) => (
+                    <VideoShelf key={sh.topic.slug} title={labelOf(sh.topic.slug)} videos={sh.videos} onOpen={open} onSeeAll={() => pickTopic(sh.topic.slug)} index={4 + i} />
+                  ))
                 )}
               </>
             )}
@@ -187,4 +218,5 @@ const styles = themedStyles(() => ({
   h2: { color: color.text, fontFamily: font.title, fontSize: size.title, letterSpacing: -0.3 },
   shrink: { flexShrink: 1 },
   link: { color: color.text2, fontFamily: font.semibold, fontSize: size.small },
+  tryRow: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: space.sm, marginTop: space.sm },
 }));

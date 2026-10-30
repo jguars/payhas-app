@@ -14,7 +14,7 @@ import Animated, {
 import { Icon } from '@/components/Icon';
 import { useT } from '@/i18n';
 import { spring } from '@/theme/motion';
-import { alpha, color, font, size, themedStyles } from '@/theme/tokens';
+import { alpha, color, font, size, space, themedStyles } from '@/theme/tokens';
 
 type Props = { value: string; onChange: (v: string) => void; suggestions: string[] };
 
@@ -81,7 +81,7 @@ export function SearchField({ value, onChange, suggestions }: Props) {
       </View>
       {value.length > 0 && (
         <Animated.View entering={FadeIn.duration(150)} exiting={FadeOut.duration(120)}>
-          <Pressable onPress={() => onChange('')} accessibilityLabel={t('discover.clearSearch')} hitSlop={12} style={styles.clear}>
+          <Pressable onPress={() => onChange('')} accessibilityRole="button" accessibilityLabel={t('discover.clearSearch')} hitSlop={space.md} style={styles.clear}>
             <Icon name="close" size={14} color={color.ink} strokeWidth={3} />
           </Pressable>
         </Animated.View>
