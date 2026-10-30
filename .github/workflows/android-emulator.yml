@@ -86,12 +86,15 @@ jobs:
           script: |
             adb install -r android/app/build/outputs/apk/release/app-release.apk
             mkdir -p emulator-screens
-            cd emulator-screens && maestro test ../.maestro/screens.yaml -e EMAIL="$EMAIL" -e PASSWORD="$PASSWORD" --format junit --output report.xml || (adb exec-out screencap -p > failure.png; exit 1)
+            cd emulator-screens && maestro test ../.maestro/screens.yaml -e EMAIL="$EMAIL" -e PASSWORD="$PASSWORD" --format junit --output report.xml --test-output-dir . || (adb exec-out screencap -p > failure.png; exit 1)
 
       - name: Upload screenshots
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: emulator-screens
-          path: emulator-screens/
+          # Newer Maestro writes takeScreenshot files into its test output folder, not the working directory.
+          path: |
+            emulator-screens/
+            ~/.maestro/tests/**/*.png
           retention-days: 14
