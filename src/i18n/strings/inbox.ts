@@ -50,7 +50,7 @@ export default defineStrings(
   },
   {
     tk: {
-      title: 'Gelen hatlar',
+      title: 'Habarlar',
       new: 'Täze',
       earlier: 'Öňräk',
       empty: 'Täze habar ýok',
@@ -93,7 +93,7 @@ export default defineStrings(
       brokeGuidelines: 'Payhas-yň düzgünlerini bozdy.',
     },
     tr: {
-      title: 'Gelen kutusu',
+      title: 'Bildirimler',
       new: 'Yeni',
       earlier: 'Daha önce',
       empty: 'Yeni bir şey yok',
