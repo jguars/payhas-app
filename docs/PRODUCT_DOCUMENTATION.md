@@ -232,7 +232,7 @@ The core app is built and running on Android and iPhone; content is growing thro
 - [ ] Firebase setup for Android alerts (`google-services.json` and service-account secret)
 - [ ] YouTube embeds for creator videos (needs a Google Cloud API key)
 - [ ] Creator uploads and the safety classifier pipeline (not built; content is curated only)
-- [x] Business model: Payhas Plus, 20 TMT a month per family, 3 profiles; free tier with 2 profiles, 4 games, 30 videos a day, today-only dashboard
+- [x] Business model: Payhas Plus, 20 TMT a month per family, 4 profiles (the parent and 3 children); free tier with 2 profiles (the parent and 1 child), 4 games, 30 videos a day, today-only dashboard
 - [x] Plus: database plans, hashed activation codes, server-side limits — `20261029160000_plus.sql`
 - [x] Plus: Payhas Plus page behind the PIN, Plus card and locked history in the dashboard, profile limit in Add and onboarding
 - [x] Plus: locked games and the locked next video (*Unlock with Plus*) for children — no prices on child screens
