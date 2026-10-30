@@ -4,6 +4,10 @@ import { defineStrings } from '../define';
 export default defineStrings(
   {
     title: 'Family',
+    inviteParent: 'Invite another parent',
+    inviteParentSub: 'On their phone, open Payhas, tap Join my family, type this code and confirm their own number.',
+    allowCoParent: 'They’ll see the dashboard and can change limits and rules, using the family PIN.',
+    coParent: 'Parent',
     phoneOf: '{name}’s phone',
     phoneNotLinked: 'Not linked yet',
     phoneLink: 'Link',
@@ -181,6 +185,10 @@ export default defineStrings(
   {
     tk: {
       title: 'Maşgala',
+      inviteParent: 'Başga ene-atany çagyr',
+      inviteParentSub: 'Olaryň telefonynda Payhas-y açyň, Maşgalama goşul diýip basyň, bu kody ýazyň we öz belgisini tassyklaň.',
+      allowCoParent: 'Ol paneli görer we maşgala PIN kody bilen çäkleri we düzgünleri üýtgedip biler.',
+      coParent: 'Ene-ata',
       phoneOf: '{name} telefony',
       phoneNotLinked: 'Heniz baglanmadyk',
       phoneLink: 'Bagla',
@@ -348,6 +356,10 @@ export default defineStrings(
     },
     tr: {
       title: 'Aile',
+      inviteParent: 'Başka bir ebeveyn davet et',
+      inviteParentSub: 'Onların telefonunda Payhas’ı açın, Aileme katıl’a dokunun, bu kodu yazın ve kendi numaralarını onaylayın.',
+      allowCoParent: 'Paneli görür ve aile PIN’iyle sınırları ve kuralları değiştirebilir.',
+      coParent: 'Ebeveyn',
       phoneOf: '{name} adlı kişinin telefonu',
       phoneNotLinked: 'Henüz bağlı değil',
       phoneLink: 'Bağla',
@@ -515,6 +527,10 @@ export default defineStrings(
     },
     ru: {
       title: 'Семья',
+      inviteParent: 'Пригласить второго родителя',
+      inviteParentSub: 'На их телефоне откройте Payhas, нажмите «Присоединиться к семье», введите этот код и подтвердите свой номер.',
+      allowCoParent: 'Им будет доступна панель, и они смогут менять лимиты и правила с семейным PIN-кодом.',
+      coParent: 'Родитель',
       phoneOf: 'Телефон: {name}',
       phoneNotLinked: 'Ещё не привязан',
       phoneLink: 'Привязать',

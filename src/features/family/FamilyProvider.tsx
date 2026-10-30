@@ -11,12 +11,13 @@ export type ActiveProfile = { profile: Profile; token: string };
 export type Family = Pick<Tables<'families'>, 'id' | 'language' | 'onboarded_at'>;
 /**
  * A phone linked to the family (another member's own phone), from my_device().
- * Null on the parent's own phone. `child` phones are locked to one profile;
- * `shared` phones get "Who's watching?". `pending` until the parent allows it.
+ * Null for the family's owner. `child` phones are locked to one profile;
+ * `shared` phones get "Who's watching?"; a `coparent` is another parent with
+ * their own login and the whole app. `pending` until the parent allows it.
  */
 export type Device = {
   id: string;
-  kind: 'child' | 'shared';
+  kind: 'child' | 'shared' | 'coparent';
   status: 'pending' | 'active';
   profile_id: string | null;
   profile_name: string | null;
@@ -77,15 +78,14 @@ export function FamilyProvider({ children }: { children: ReactNode }) {
   const [device, setDevice] = useState<Device | null>(null);
 
   const refresh = useCallback(async () => {
+    // Linked phones and co-parents have a family_devices row; the owner has none.
     const linked = isDeviceUser((await supabase.auth.getSession()).data.session);
-    if (linked) {
-      const { data: me, error } = await supabase.rpc('my_device');
-      // Removed by the parent (or turned away): this phone goes back to the join screen.
-      if (!error && !me) return void supabase.auth.signOut();
-      setDevice((me as Device | null) ?? null);
-      // Not allowed yet: the family isn't readable until it is.
-      if ((me as Device | null)?.status !== 'active') return;
-    } else setDevice(null);
+    const { data: me, error } = await supabase.rpc('my_device');
+    // A linked phone removed by the parent (or turned away) goes back to the join screen.
+    if (linked && !error && !me) return void supabase.auth.signOut();
+    setDevice((me as Device | null) ?? null);
+    // Not allowed yet: the family isn't readable until it is.
+    if (me && (me as Device).status !== 'active') return;
     const [{ data: rows }, { data: pinSet }, { data: fam }, familyPlan] = await Promise.all([
       supabase.from('profiles').select('*, profile_interests(count)').order('created_at'),
       supabase.rpc('has_parent_pin'),

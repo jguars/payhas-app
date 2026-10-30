@@ -4,6 +4,9 @@ import { defineStrings } from '../define';
 export default defineStrings(
   {
     signInTitle: 'Parent sign in',
+    joinPhoneTitle: 'Confirm your number',
+    joinPhoneSub: 'You’re joining as a parent. Use your own phone number — you’ll sign in with it next time.',
+    phoneTaken: 'This number already has its own family on Payhas. Use another number.',
     joinFamily: 'Join my family',
     joinSub: 'Type the code from your parent’s phone',
     joinCodeLabel: 'Family code',
@@ -50,6 +53,9 @@ export default defineStrings(
   {
     tk: {
       signInTitle: 'Ene-ata üçin giriş',
+      joinPhoneTitle: 'Belgiňizi tassyklaň',
+      joinPhoneSub: 'Siz ene-ata hökmünde goşulýarsyňyz. Öz telefon belgiňizi ulanyň — indiki gezek şonuň bilen girersiňiz.',
+      phoneTaken: 'Bu belgide Payhas-da öz maşgalasy bar. Başga belgi ulanyň.',
       joinFamily: 'Maşgalama goşul',
       joinSub: 'Ene-ataňyzyň telefonyndaky kody ýazyň',
       joinCodeLabel: 'Maşgala kody',
@@ -95,6 +101,9 @@ export default defineStrings(
     },
     tr: {
       signInTitle: 'Ebeveyn girişi',
+      joinPhoneTitle: 'Numaranızı onaylayın',
+      joinPhoneSub: 'Ebeveyn olarak katılıyorsunuz. Kendi telefon numaranızı kullanın — bir dahaki sefere onunla giriş yaparsınız.',
+      phoneTaken: 'Bu numaranın Payhas’ta zaten kendi ailesi var. Başka bir numara kullanın.',
       joinFamily: 'Aileme katıl',
       joinSub: 'Ebeveyninizin telefonundaki kodu yazın',
       joinCodeLabel: 'Aile kodu',
@@ -140,6 +149,9 @@ export default defineStrings(
     },
     ru: {
       signInTitle: 'Вход для родителей',
+      joinPhoneTitle: 'Подтвердите номер',
+      joinPhoneSub: 'Вы присоединяетесь как родитель. Укажите свой номер — в следующий раз войдёте по нему.',
+      phoneTaken: 'У этого номера уже есть своя семья в Payhas. Укажите другой номер.',
       joinFamily: 'Присоединиться к семье',
       joinSub: 'Введите код с телефона родителя',
       joinCodeLabel: 'Семейный код',

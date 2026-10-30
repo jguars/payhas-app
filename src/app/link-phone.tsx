@@ -23,12 +23,14 @@ const POLL_MS = 2000;
 
 /**
  * Link a phone (approved flow D + A's Allow): a 6-digit code for one child's
- * phone (?profile=&name=) or a shared phone (no profile). The page waits on
+ * phone (?profile=&name=), a shared phone (no profile), or another parent
+ * (?kind=coparent — they also confirm their own number when they join). The page waits on
  * its own; when the new phone types the code, the Allow sheet comes up here —
  * the code alone never lets a phone in.
  */
 export default function LinkPhoneScreen() {
-  const { profile, name } = useLocalSearchParams<{ profile?: string; name?: string }>();
+  const { profile, name, kind } = useLocalSearchParams<{ profile?: string; name?: string; kind?: string }>();
+  const coparent = kind === 'coparent';
   const { token, unlocked, unlock } = useParent();
   const goBack = useGoBack();
   const toast = useToast();
@@ -47,10 +49,10 @@ export default function LinkPhoneScreen() {
     setFailed(false);
     setExpired(false);
     setJoined(null);
-    const c = await createLinkCode(token, profile ?? null);
+    const c = await createLinkCode(token, profile ?? null, coparent);
     if (!c) return setFailed(true);
     setCode(c);
-  }, [token, profile]);
+  }, [token, profile, coparent]);
 
   useEffect(() => {
     if (unlocked) fresh();
@@ -107,13 +109,13 @@ export default function LinkPhoneScreen() {
 
   const left = code ? Math.max(0, Math.round((new Date(code.expires_at).getTime() - now) / 1000)) : 0;
   const shown = code ? `${code.code.slice(0, 3)} ${code.code.slice(3)}` : '';
-  const title = name ? t('parent.linkTitle', { name }) : t('parent.linkSharedTitle');
+  const title = coparent ? t('parent.inviteParent') : name ? t('parent.linkTitle', { name }) : t('parent.linkSharedTitle');
 
   return (
     <View style={styles.root}>
       <ScrollView contentContainerStyle={[styles.content, { paddingTop: top + space.sm, paddingBottom: bottom + space.xxl }]} showsVerticalScrollIndicator={false}>
         <Enter index={0}>
-          <PageHeader back title={title} subtitle={t('parent.linkSub')} />
+          <PageHeader back title={title} subtitle={coparent ? t('parent.inviteParentSub') : t('parent.linkSub')} />
         </Enter>
 
         <Enter index={1}>
@@ -164,7 +166,7 @@ export default function LinkPhoneScreen() {
 
       <BottomSheet open={!!joined} onClose={() => !answered.current && answer(false)} title={joined ? t('parent.allowTitle', { name: joined.name }) : ''}>
         <View style={styles.sheet}>
-          <Text style={styles.sheetBody}>{name ? t('parent.allowChild', { child: name }) : t('parent.allowShared')}</Text>
+          <Text style={styles.sheetBody}>{coparent ? t('parent.allowCoParent') : name ? t('parent.allowChild', { child: name }) : t('parent.allowShared')}</Text>
           <Button label={t('parent.allow')} loading={busy} onPress={() => answer(true)} />
           <Button variant="secondary" label={t('parent.notNow')} disabled={busy} onPress={() => answer(false)} />
         </View>

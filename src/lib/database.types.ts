@@ -509,13 +509,15 @@ export type Database = {
       why_this: { Args: { p_session: string; p_video_id: string }; Returns: Json }
       get_family_plan: { Args: never; Returns: Json }
       my_device: { Args: never; Returns: Json }
-      create_link_code: { Args: { p_parent: string; p_profile?: string | null }; Returns: Json }
+      create_link_code: { Args: { p_parent: string; p_profile?: string | null; p_kind?: string }; Returns: Json }
+      leave_family_phone: { Args: never; Returns: boolean }
+      delete_my_profile: { Args: { p_pin: string }; Returns: boolean }
       link_code_status: { Args: { p_parent: string; p_code_id: string }; Returns: Json }
       answer_device: { Args: { p_parent: string; p_device: string; p_allow: boolean }; Returns: boolean }
       remove_device: { Args: { p_parent: string; p_device: string }; Returns: boolean }
       list_devices: {
         Args: { p_parent: string }
-        Returns: { id: string; name: string; kind: string; status: string; profile_id: string | null; profile_name: string | null; last_seen_at: string | null; created_at: string }[]
+        Returns: { id: string; name: string; kind: string; status: string; profile_id: string | null; profile_name: string | null; phone: string | null; last_seen_at: string | null; created_at: string }[]
       }
       get_profile_plan: { Args: { p_session: string }; Returns: Json }
       redeem_code: { Args: { p_parent: string; p_code: string }; Returns: Json }

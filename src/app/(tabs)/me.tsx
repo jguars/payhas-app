@@ -21,6 +21,7 @@ import { useLibrary, useUsage } from '@/features/library/LibraryProvider';
 import { useScreenTime } from '@/features/library/useScreenTime';
 import { TasteCard } from '@/features/me/TasteCard';
 import { useMe } from '@/features/me/useMe';
+import { confirmDestructive } from '@/features/parent/parts';
 import { minutes } from '@/features/parent/useParent';
 import { LANGS, roleKey, useT } from '@/i18n';
 import { fx, getFeedbackSettings, setFeedbackSettings } from '@/lib/feedback';
@@ -44,7 +45,8 @@ export default function MeScreen() {
   const focused = useIsFocused();
   const { current, leaveProfile, signOut, device } = useFamily();
   // A linked phone (a member's own or a shared one) has no parent dashboard; the parent manages it from theirs.
-  const linked = !!device;
+  // A co-parent is a parent: they keep everything.
+  const linked = !!device && device.kind !== 'coparent';
   const ownPhone = device?.kind === 'child';
   const { unread } = useLibrary();
   const { todaySeconds } = useUsage();
@@ -144,13 +146,44 @@ export default function MeScreen() {
           <DeviceGroup />
         </Enter>
 
-        {/* A child's own phone has nobody to switch to and nothing to sign out of: the parent removes it. */}
-        {!(ownPhone && !isAdult) && (
+        {ownPhone ? (
+          // A child's own phone: leave it (the parent links it again with a new code), or delete the account with the parent PIN.
           <Enter index={5}>
             <ListGroup title={t('me.group.account')}>
-              {!ownPhone && <ListRow first icon="me" label={t('me.switchProfile')} onPress={leaveProfile} />}
+              <ListRow
+                first
+                icon="logout"
+                label={t('me.signOutPhone')}
+                chevron={false}
+                onPress={() =>
+                  confirmDestructive(t('me.signOutPhoneTitle'), t('me.signOutPhoneBody'), t('me.signOut'), t('common.cancel'), async () => {
+                    await supabase.rpc('leave_family_phone');
+                    signOut();
+                  })
+                }
+              />
+              <ListRow
+                icon="close"
+                danger
+                label={t('me.deleteMe')}
+                onPress={() =>
+                  confirmDestructive(
+                    t('me.deleteMeTitle', { name: current.display_name }),
+                    t('me.deleteMeBody', { name: current.display_name }),
+                    t('parent.deleteProfileConfirm'),
+                    t('common.cancel'),
+                    () => router.push('/delete-me'),
+                  )
+                }
+              />
+            </ListGroup>
+          </Enter>
+        ) : (
+          <Enter index={5}>
+            <ListGroup title={t('me.group.account')}>
+              <ListRow first icon="me" label={t('me.switchProfile')} onPress={leaveProfile} />
               {/* Children reach Sign out through the parent PIN, so they can't sign the family out. */}
-              {(isAdult || !linked) && <ListRow first={ownPhone} icon="logout" label={t('me.signOut')} onPress={isAdult ? signOut : openParent} />}
+              {(isAdult || !linked) && <ListRow icon="logout" label={t('me.signOut')} onPress={isAdult ? signOut : openParent} />}
             </ListGroup>
           </Enter>
         )}

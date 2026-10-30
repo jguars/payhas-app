@@ -10,14 +10,14 @@ import { useFamily } from '@/features/family/FamilyProvider';
 import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
-import { color, font, layout, pageFill, space, themedStyles, type } from '@/theme/tokens';
+import { border, color, control, font, layout, pageFill, radius, space, themedStyles, type } from '@/theme/tokens';
 
 const CODE_LENGTH = 6;
 /** How often a waiting phone asks whether the parent has allowed it. */
 const POLL_MS = 3000;
 
 /**
- * "Join my family" on a member's own phone. The code from the parent's
+ * "Join my family" on a member's own phone (or a co-parent joining with their own number). The code from the parent's
  * dashboard (join-family edge function) makes this phone its own user in the
  * family — never the parent's login — and then it waits here until the parent
  * taps Allow. Allowed, the family provider takes over: a child's phone opens
@@ -44,26 +44,91 @@ function EnterCode() {
   const [code, setCode] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // A co-parent invite: the code is right, and their own number comes next.
+  const [asParent, setAsParent] = useState(false);
+  const [digits, setDigits] = useState('');
+  const [otp, setOtp] = useState('');
 
-  const join = async (value: string) => {
+  const join = async (value: string, phone?: { number: string; otp: string }) => {
     if (busy) return;
     setBusy(true);
     setError(null);
     const name = Device.modelName ?? (Platform.OS === 'ios' ? 'iPhone' : 'Android phone');
-    const { data, error: fnError } = await supabase.functions.invoke('join-family', { body: { code: value, name } });
+    const body = phone ? { code: value, name, phone: phone.number, otp: phone.otp } : { code: value, name };
+    const { data, error: fnError } = await supabase.functions.invoke('join-family', { body });
     if (fnError || !data?.email) {
       setBusy(false);
       // A non-2xx reply carries the reason in its body.
       const reason = fnError && 'context' in fnError ? await (fnError.context as Response).json().then((b) => b?.error).catch(() => null) : null;
+      if (reason === 'needs_phone') return setAsParent(true);
       fx.error();
-      setCode('');
-      return setError(t(reason === 'too_many' ? 'auth.joinTooMany' : reason === 'bad_code' ? 'auth.joinWrong' : 'auth.connectionError'));
+      if (reason === 'bad_otp') {
+        setOtp('');
+        return setError(t('auth.wrongCode'));
+      }
+      if (!phone) setCode('');
+      return setError(
+        t(
+          reason === 'too_many'
+            ? 'auth.joinTooMany'
+            : reason === 'bad_code'
+              ? 'auth.joinWrong'
+              : reason === 'phone_taken'
+                ? 'auth.phoneTaken'
+                : reason === 'phone_off'
+                  ? 'auth.phoneOff'
+                  : 'auth.connectionError',
+        ),
+      );
     }
     const { error: signInError } = await supabase.auth.signInWithPassword({ email: data.email, password: data.password });
     setBusy(false);
     if (signInError) setError(t('auth.connectionError'));
     // Signed in: the family provider sees a pending phone and this screen switches to waiting.
   };
+
+  if (asParent) {
+    const ready = digits.length === 8 && otp.length === 4;
+    return (
+      <View style={styles.form}>
+        <Text style={styles.stepTitle}>{t('auth.joinPhoneTitle')}</Text>
+        <Text style={styles.stepSub}>{t('auth.joinPhoneSub')}</Text>
+        <View style={styles.phoneRow}>
+          <View style={styles.country}>
+            <Text style={styles.countryText}>+993</Text>
+          </View>
+          <View style={styles.grow}>
+            <TextField
+              value={digits}
+              onChangeText={(v) => setDigits(v.replace(/\D/g, '').slice(0, 8))}
+              placeholder="61234567"
+              keyboardType="number-pad"
+              autoComplete="tel-national"
+              maxLength={8}
+              accessibilityLabel={`${t('auth.phoneLabel')}, +993`}
+            />
+          </View>
+        </View>
+        <TextField
+          code
+          label={t('auth.codeLabel')}
+          hint={t('auth.codeHint', { phone: `+993 ${digits}` })}
+          error={error}
+          value={otp}
+          onChangeText={(v) => {
+            setOtp(v.replace(/\D/g, '').slice(0, 4));
+            setError(null);
+          }}
+          placeholder="0000"
+          keyboardType="number-pad"
+          autoComplete="sms-otp"
+          textContentType="oneTimeCode"
+          maxLength={4}
+        />
+        <Button label={t('auth.continue')} loading={busy} disabled={!ready} onPress={() => join(code, { number: `+993${digits}`, otp })} />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.form}>
@@ -120,6 +185,21 @@ const styles = themedStyles(() => ({
   logo: { color: color.text, fontFamily: font.display, ...type.hero, textAlign: 'center' },
   title: { color: color.text2, fontFamily: font.medium, ...type.body, textAlign: 'center', marginBottom: space.lg },
   form: { gap: space.md },
+  stepTitle: { color: color.text, fontFamily: font.title, ...type.title },
+  stepSub: { color: color.text2, fontFamily: font.medium, ...type.body },
+  phoneRow: { flexDirection: 'row', alignItems: 'stretch', gap: space.sm },
+  grow: { flex: 1 },
+  country: {
+    minHeight: control.lg,
+    paddingHorizontal: space.lg,
+    borderRadius: radius.sm,
+    borderWidth: border.hairline,
+    borderColor: color.line,
+    backgroundColor: color.surface2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  countryText: { color: color.text, fontFamily: font.semibold, ...type.body },
   waiting: { alignItems: 'center', gap: space.sm, paddingVertical: space.xl },
   waitTitle: { color: color.text, fontFamily: font.title, ...type.title, textAlign: 'center' },
   waitBody: { color: color.text2, fontFamily: font.medium, ...type.body, textAlign: 'center' },

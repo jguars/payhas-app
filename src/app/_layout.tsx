@@ -122,6 +122,7 @@ function Routes() {
       </Stack.Protected>
       <Stack.Protected guard={!!active && !needsInterests}>
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="delete-me" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="games/[id]" options={{ animation: 'fade', gestureEnabled: false }} />
         <Stack.Screen name="saved" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="channel" options={{ animation: 'slide_from_right' }} />

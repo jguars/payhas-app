@@ -150,7 +150,15 @@ export default function ParentSettingsScreen() {
                 first={i === 0}
                 icon="link"
                 label={ph.name}
-                sub={ph.status === 'pending' ? t('parent.phoneWaiting') : ph.kind === 'shared' ? t('parent.sharedPhone') : t('parent.phoneOf', { name: ph.profile_name ?? '' })}
+                sub={
+                  ph.status === 'pending'
+                    ? t('parent.phoneWaiting')
+                    : ph.kind === 'coparent'
+                      ? `${t('parent.coParent')} · ${ph.phone ?? ''}`
+                      : ph.kind === 'shared'
+                        ? t('parent.sharedPhone')
+                        : t('parent.phoneOf', { name: ph.profile_name ?? '' })
+                }
                 value={<Text style={styles.remove}>{t('parent.removePhone')}</Text>}
                 chevron={false}
                 onPress={() =>
@@ -161,6 +169,8 @@ export default function ParentSettingsScreen() {
               />
             ))}
             <ListRow first={(linked.phones ?? []).length === 0} icon="plus" label={t('parent.addSharedPhone')} onPress={() => router.push('/link-phone')} />
+            {/* Another grown-up with their own login: same code and Allow, plus their own number. */}
+            <ListRow icon="me" label={t('parent.inviteParent')} onPress={() => router.push({ pathname: '/link-phone', params: { kind: 'coparent' } })} />
           </ListGroup>
         </Enter>
 

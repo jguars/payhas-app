@@ -61,6 +61,14 @@ Deno.serve(async (req) => {
     return reply(200, { email: aliasEmail(phone), password, created: false });
   }
 
+  // A co-parent: joined another family with this number (join-family), so sign them in to that.
+  const { data: member } = await db.from('family_devices').select('user_id').eq('phone', phone).eq('kind', 'coparent').maybeSingle();
+  if (member) {
+    const { error } = await db.auth.admin.updateUserById(member.user_id, { password });
+    if (error) return reply(500, { error: 'server' });
+    return reply(200, { email: aliasEmail(phone), password, created: false });
+  }
+
   // New number: the auth user's insert trigger creates the family; then the number goes on it.
   const { data: created, error: createError } = await db.auth.admin.createUser({
     email: aliasEmail(phone),

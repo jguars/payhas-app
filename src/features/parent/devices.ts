@@ -6,19 +6,21 @@ import { supabase } from '@/lib/supabase';
 export type LinkedPhone = {
   id: string;
   name: string;
-  kind: 'child' | 'shared';
+  kind: 'child' | 'shared' | 'coparent';
   status: 'pending' | 'active';
   profile_id: string | null;
   profile_name: string | null;
+  /** A co-parent's sign-in number. */
+  phone: string | null;
   last_seen_at: string | null;
 };
 
 export type LinkCode = { id: string; code: string; expires_at: string };
 export type LinkState = { state: 'waiting' | 'expired' } | { state: 'joined' | 'allowed'; device: { id: string; name: string } };
 
-/** A fresh 6-digit code for one child's phone, or a shared phone when `profile` is null. */
-export async function createLinkCode(parent: string, profile: string | null): Promise<LinkCode | null> {
-  const { data, error } = await supabase.rpc('create_link_code', { p_parent: parent, p_profile: profile });
+/** A fresh 6-digit code: one child's phone, a shared phone (`profile` null), or another parent (`coparent`). */
+export async function createLinkCode(parent: string, profile: string | null, coparent = false): Promise<LinkCode | null> {
+  const { data, error } = await supabase.rpc('create_link_code', { p_parent: parent, p_profile: profile, p_kind: coparent ? 'coparent' : 'device' });
   return error ? null : (data as LinkCode);
 }
 
