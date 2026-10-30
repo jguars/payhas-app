@@ -37,7 +37,7 @@ export default defineStrings(
       bestStreak: 'Iň uzyn tapgyr: {n}',
     },
     tr: {
-      name: 'Cee Dostlar',
+      name: 'Ce-e Dostlar',
       subLittle: 'Dostlara merhaba de',
       sub: 'Saklanmadan dokun · {s} sn',
       subDecoy: 'Dostlara dokun, kaktüse değme · {s} sn',

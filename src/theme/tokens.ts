@@ -277,8 +277,8 @@ export const type = Object.fromEntries(
 
 export const space = { xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32, xxxl: 48 } as const;
 
-/** Screen edge padding and the gap between sections. */
-export const layout = { gutter: space.lg, section: space.xl } as const;
+/** Screen edge padding, the gap between sections, and the widest a content column gets (tablets, web). */
+export const layout = { gutter: space.lg, section: space.xl, maxContent: 560 } as const;
 
 /**
  * Four radii and nothing else: sm (chips, tiles, inputs), md (cards, rows

@@ -11,6 +11,8 @@ type ToastSpec = { text: string; icon?: IconName; action?: { label: string; onPr
 const Ctx = createContext<(t: ToastSpec) => void>(() => {});
 
 const SHOW_MS = 2600;
+/** With an action (Undo) the toast waits long enough to reach it, also with a screen reader (WCAG 2.2.1). */
+const ACTION_MS = 7000;
 
 /** One toast at a time, floating just above the tab bar. A new toast replaces the old one. */
 export function ToastProvider({ children }: { children: ReactNode }) {
@@ -35,7 +37,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       y.value = withSpring(0, spring.bouncy);
       o.value = withTiming(1, { duration: 140 });
       if (timer.current) clearTimeout(timer.current);
-      timer.current = setTimeout(hide, SHOW_MS);
+      timer.current = setTimeout(hide, t.action ? ACTION_MS : SHOW_MS);
     },
     [y, o, hide],
   );

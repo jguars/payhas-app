@@ -12,7 +12,8 @@ type Props = {
   onPress?: () => void;
   /** primary: the one ember action on a screen · secondary: tonal · quiet: text only · destructive: danger text on tonal. */
   variant?: Variant;
-  size?: 'sm' | 'lg';
+  /** lg 56 (block) for the screen's main action · md 48 for actions in cards · sm 40 inline (touch area still 48). */
+  size?: 'sm' | 'md' | 'lg';
   icon?: IconName;
   disabled?: boolean;
   loading?: boolean;
@@ -30,6 +31,7 @@ export function Button({ label, onPress, variant = 'primary', size = 'lg', icon,
   const off = disabled || loading;
   const fg = off ? color.text3 : variant === 'primary' ? color.ink : variant === 'destructive' ? color.danger : color.text;
   const lg = size === 'lg';
+  const sm = size === 'sm';
   return (
     <PressScale
       onPress={() => {
@@ -39,7 +41,7 @@ export function Button({ label, onPress, variant = 'primary', size = 'lg', icon,
       disabled={off}
       pressedScale={0.97}
       // Small buttons draw at 40 but take touches across the 48 minimum.
-      hitSlop={lg ? undefined : (control.md - control.sm) / 2}
+      hitSlop={sm ? (control.md - control.sm) / 2 : undefined}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel ?? label}
       accessibilityState={{ disabled: !!off, busy: !!loading }}
@@ -48,7 +50,7 @@ export function Button({ label, onPress, variant = 'primary', size = 'lg', icon,
       <View
         style={[
           styles.base,
-          { height: lg ? control.lg : control.sm, paddingHorizontal: lg ? space.xl : space.lg },
+          { height: lg ? control.lg : sm ? control.sm : control.md, paddingHorizontal: sm ? space.lg : space.xl },
           off ? styles.off : variant === 'primary' ? styles.primary : variant === 'quiet' ? styles.quiet : styles.tonal,
         ]}
       >
@@ -56,8 +58,8 @@ export function Button({ label, onPress, variant = 'primary', size = 'lg', icon,
           <ActivityIndicator color={fg} />
         ) : (
           <>
-            {!!icon && <Icon name={icon} size={lg ? iconSize.md : iconSize.sm} color={fg} strokeWidth={iconStroke(lg ? iconSize.md : iconSize.sm)} />}
-            <Text style={[lg ? styles.labelLg : styles.labelSm, { color: fg }]} numberOfLines={1} maxFontSizeMultiplier={1.4}>
+            {!!icon && <Icon name={icon} size={sm ? iconSize.sm : iconSize.md} color={fg} strokeWidth={iconStroke(sm ? iconSize.sm : iconSize.md)} />}
+            <Text style={[sm ? styles.labelSm : styles.labelLg, { color: fg }]} numberOfLines={1} maxFontSizeMultiplier={1.4}>
               {label}
             </Text>
           </>

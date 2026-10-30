@@ -68,6 +68,8 @@ export function useParent() {
   const [children, setChildren] = useState<Child[] | null>(null);
   /** Whether the family is on Plus (the server trims history on Free). Null before the first load. */
   const [plus, setPlus] = useState<boolean | null>(null);
+  /** The last dashboard load failed (network or server), so the screen can say so and offer a retry. */
+  const [failed, setFailed] = useState(false);
 
   const lock = useCallback(() => {
     if (parent) supabase.rpc('end_parent_session', { p_parent: parent.token }).then(() => {});
@@ -90,6 +92,7 @@ export function useParent() {
     if (!t) return setToken(null);
     const { data, error } = await supabase.rpc('get_family_dashboard', { p_parent: t, p_tz: deviceTimeZone() });
     if (expired(error)) return lock();
+    setFailed(!!error || !data);
     if (data) {
       const d = data as { profiles: Child[]; plus?: boolean };
       setChildren(d.profiles);
@@ -163,7 +166,7 @@ export function useParent() {
       supabase.rpc('parent_hide_video', { p_parent: t, p_profile_id: c.id, p_video_id: videoId }),
     );
 
-  return { token, unlocked: !!token, children, plus, unlock, lock, reload: load, setControls, setPaused, addTime, answer, hideVideo };
+  return { token, unlocked: !!token, children, plus, failed, unlock, lock, reload: load, setControls, setPaused, addTime, answer, hideVideo };
 }
 
 /** "5m ago", "2h ago", "3d ago" in the current language. */

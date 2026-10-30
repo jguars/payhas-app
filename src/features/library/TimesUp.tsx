@@ -1,4 +1,3 @@
-import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, {
@@ -68,9 +67,10 @@ export function TimesUp({ lock }: { lock: Exclude<Lock, null> }) {
         </Enter>
       )}
       <Enter index={5}>
-        <PressScale onPress={lock === 'games' ? () => router.navigate('/') : leaveProfile} accessibilityRole="button" style={[styles.button, little && styles.big]}>
-          <Icon name={lock === 'games' ? 'play' : 'me'} filled size={little ? 28 : 18} color={color.text} />
-          <Text style={styles.buttonText}>{lock === 'games' ? t('me.stop.watchVideos') : t('me.switchProfile')}</Text>
+        {/* Game time out ends the session gently — it never nudges a child from games to videos. */}
+        <PressScale onPress={leaveProfile} accessibilityRole="button" style={[styles.button, little && styles.big]}>
+          <Icon name={lock === 'games' ? 'check' : 'me'} filled size={little ? 28 : 18} color={color.text} />
+          <Text style={styles.buttonText}>{lock === 'games' ? t('me.stop.doneForNow') : t('me.switchProfile')}</Text>
         </PressScale>
       </Enter>
     </Animated.View>

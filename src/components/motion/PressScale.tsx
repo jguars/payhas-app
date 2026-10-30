@@ -1,6 +1,6 @@
 import { forwardRef, ReactNode } from 'react';
 import { Pressable, PressableProps, StyleProp, View, ViewStyle } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useReducedMotion, useSharedValue, withSpring } from 'react-native-reanimated';
 
 import { spring } from '@/theme/motion';
 
@@ -17,17 +17,18 @@ export const PressScale = forwardRef<View, Props>(function PressScale(
   ref,
 ) {
   const s = useSharedValue(1);
+  const reduce = useReducedMotion();
   const anim = useAnimatedStyle(() => ({ transform: [{ scale: s.value }] }));
 
   return (
     <Pressable
       ref={ref}
       onPressIn={(e) => {
-        s.value = withSpring(pressedScale, spring.snappy);
+        if (!reduce) s.value = withSpring(pressedScale, spring.snappy);
         onPressIn?.(e);
       }}
       onPressOut={(e) => {
-        s.value = withSpring(1, spring.bouncy);
+        if (!reduce) s.value = withSpring(1, spring.bouncy);
         onPressOut?.(e);
       }}
       {...rest}

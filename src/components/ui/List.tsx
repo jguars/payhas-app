@@ -95,7 +95,7 @@ export function ListRow({ label, sub, leading, icon, value, toggle, onPress, dan
 }
 
 const styles = themedStyles(() => ({
-  groupTitle: { color: color.text, fontFamily: font.title, ...type.lead, paddingHorizontal: space.xs },
+  groupTitle: { color: color.text, fontFamily: font.title, ...type.lead },
   group: { backgroundColor: color.surface1, borderRadius: radius.md, overflow: 'hidden' },
   footer: { color: color.text3, fontFamily: font.medium, ...type.caption, paddingHorizontal: space.xs },
   row: { flexDirection: 'row', alignItems: 'center', gap: space.md, minHeight: control.lg + space.sm, paddingHorizontal: space.lg, paddingVertical: space.sm },
@@ -104,5 +104,5 @@ const styles = themedStyles(() => ({
   label: { color: color.text, fontFamily: font.semibold, ...type.body },
   sub: { color: color.text2, fontFamily: font.medium, ...type.small },
   value: { color: color.text2, fontFamily: font.semibold, ...type.small },
-  tile: { width: 36, height: 36, borderRadius: radius.sm, alignItems: 'center', justifyContent: 'center', backgroundColor: color.surface2 },
+  tile: { width: control.sm, height: control.sm, borderRadius: radius.sm, alignItems: 'center', justifyContent: 'center', backgroundColor: color.surface2 },
 }));

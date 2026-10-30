@@ -51,9 +51,10 @@ typography:
     fontFamily: "Figtree"
     fontSize: "13px"
     fontWeight: 500
-  numeric:
+  code:
     fontFamily: "JetBrains Mono"
     fontWeight: 500
+    use: "codes only (PAYH-…, card numbers)"
 rounded:
   chip: "12px"
   control: "16px"
@@ -225,7 +226,7 @@ saturated lane lights.
 
 ### Primary
 - **Ember** (#FF5A3C): marks the one thing to do: primary buttons, the
-  Home-tab pill, liked hearts, progress fills, unread dots. Text on ember is
+  liked hearts, unread dots. Never a label, a badge or the tab bar. Text on ember is
   always ink, never white.
 - **Ember Edge** (#9E3825): the darker ledge under a selected ember control,
   such as a chosen language row.
@@ -273,14 +274,15 @@ in tone. They never go pale or pastel.
 
 **Display Font:** Bricolage Grotesque, ExtraBold 800 and Bold 700.
 **Body Font:** Figtree, 400 to 700.
-**Numeric Font:** JetBrains Mono 500.
+**Code Font:** JetBrains Mono 500 — only for codes people type or read back (PAYH-…, card numbers).
 **Cyrillic:** when the language is Russian, Onest loads under the Bricolage
 and Figtree names, so every role keeps its weight.
 
 **Character:** Bricolage is a characterful, slightly quirky grotesque. It
 gives screen titles a hand-made warmth at tight tracking. Figtree is a clean,
 friendly UI sans that stays legible at 12–15px. Counts, timers and stats use
-mono so numbers don't jitter as they change.
+Figtree too ("Numbers in words, not code" — principle 5); the one duration
+format is "45 min", "1 h", "1 h 15 min".
 
 ### Hierarchy
 - **Display** (Bricolage 800, 34px, −1 tracking): screen titles on tab roots
@@ -294,7 +296,7 @@ mono so numbers don't jitter as they change.
 - **Label** (Figtree 700, 15px; 17px on primary buttons): chips, buttons and
   row titles.
 - **Caption** (Figtree 500, 13px; 12px minimum for tags): metadata, counts, credits.
-- **Numeric** (JetBrains Mono 500): stats, timers, counts.
+- **Numbers** (Figtree 600/700, or Bricolage for big stats): counts, timers. Mono only for codes.
 
 ### Named Rules
 **The Tight Headline Rule.** Bricolage always runs with negative tracking
@@ -387,11 +389,10 @@ The signature tactile control.
 - **Tab bar:** a floating pill capsule at 94% opacity, with five equal tabs:
   Home, Discover, Play, Inbox, Me.
 - **Resting icons:** hand-drawn outline icons in Dusk at 1.9 stroke.
-- **Active pill:** a 54×42 pill with a 16px radius slides between tabs on a
-  spring, stretching and squashing as it travels. It blends through the
-  per-tab colours: Home is ember; Discover, Play, Inbox and Me use the Teen,
-  Kids, Little and Adult lane colours.
-- **Active icon:** white-filled with ink lines on the pill, and it plays its
+- **Active pill:** a 54×42 pill in the one selected style (`inverse`) slides
+  between tabs on a spring, stretching and squashing as it travels. The same
+  on every tab — lane colours are never decoration.
+- **Active icon:** drawn in `onInverse` on the pill, and it plays its
   own move. Home hops, the compass spins, the controller wiggles, the bell
   rings and the person pops.
 - **Even weighting:** no tab, Play included, is visually promoted over the
@@ -435,8 +436,8 @@ Physics over curves.
   drop or flourish.
 - **Do** use the motion presets and the `<Enter>` stagger instead of
   inventing timings.
-- **Do** run Bricolage headings with negative tracking, and put numbers in
-  JetBrains Mono.
+- **Do** run Bricolage headings with negative tracking, and keep numbers in
+  the UI face (mono is for codes only).
 
 ### Don't:
 - **Don't** use generic stock icon sets (Lucide or Material line icons) where

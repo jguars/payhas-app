@@ -1,19 +1,24 @@
 import { useEffect } from 'react';
 
-import Animated, { interpolateColor, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import Animated, { interpolateColor, useAnimatedStyle, useReducedMotion, useSharedValue, withSpring } from 'react-native-reanimated';
 
 import { spring } from '@/theme/motion';
 import { color, themedStyles } from '@/theme/tokens';
 
-/** A switch whose knob springs across and stretches a little mid-travel. Display only. The knob is white in every theme. */
+/**
+ * A switch whose knob springs across and stretches a little mid-travel (still
+ * under reduce-motion). Display only. White knob in every theme; the off track
+ * is text3 so the switch reads at 3:1 against the card (WCAG 1.4.11).
+ */
 export function Toggle({ on, tint = color.success }: { on: boolean; tint?: string }) {
   const p = useSharedValue(on ? 1 : 0);
+  const reduce = useReducedMotion();
   useEffect(() => {
-    p.value = withSpring(on ? 1 : 0, spring.snappy);
-  }, [on, p]);
+    p.value = reduce ? (on ? 1 : 0) : withSpring(on ? 1 : 0, spring.snappy);
+  }, [on, p, reduce]);
 
   const track = useAnimatedStyle(() => ({
-    backgroundColor: interpolateColor(Math.min(1, Math.max(0, p.value)), [0, 1], [color.surface2, tint]),
+    backgroundColor: interpolateColor(Math.min(1, Math.max(0, p.value)), [0, 1], [color.text3, tint]),
   }));
   const knob = useAnimatedStyle(() => {
     const mid = 1 - Math.abs(p.value - 0.5) * 2; // 0 at the ends, 1 halfway

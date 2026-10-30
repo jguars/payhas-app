@@ -23,8 +23,8 @@ module.exports = defineConfig([
         "warn",
         {
           selector:
-            "Property[key.name=/^(fontSize|lineHeight|letterSpacing|borderRadius|borderWidth|borderTopWidth|borderBottomWidth|gap|rowGap|columnGap|padding|paddingHorizontal|paddingVertical|paddingTop|paddingBottom|paddingLeft|paddingRight|margin|marginHorizontal|marginVertical|marginTop|marginBottom|marginLeft|marginRight)$/] > Literal[value>0]",
-          message: "Use a token (type.*, space.*, radius.*, border.*) instead of a raw number. See DESIGN.md → Tokens.",
+            "Property[key.name=/^(fontSize|lineHeight|letterSpacing|borderRadius|borderWidth|borderTopWidth|borderBottomWidth|gap|rowGap|columnGap|padding|paddingHorizontal|paddingVertical|paddingTop|paddingBottom|paddingLeft|paddingRight|margin|marginHorizontal|marginVertical|marginTop|marginBottom|marginLeft|marginRight|width|height|minWidth|minHeight|maxWidth|maxHeight)$/] > Literal[value>0]",
+          message: "Use a token (type.*, space.*, radius.*, border.*, control.*, iconSize.*) instead of a raw number. See DESIGN.md → Tokens.",
         },
         {
           selector: "Literal[value=/^#[0-9a-fA-F]{3,8}$/]",

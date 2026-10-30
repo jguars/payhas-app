@@ -11,6 +11,7 @@ import { Avatar } from '@/components/ui/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { EmptyState } from '@/components/ui/EmptyState';
 import { ListGroup, ListRow } from '@/components/ui/List';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { ProgressBar } from '@/components/ui/ProgressBar';
@@ -21,11 +22,12 @@ import { disableParentAlerts, enableParentAlerts, storedPushToken } from '@/feat
 import { ago, Child, minutes, presence, useParent } from '@/features/parent/useParent';
 import { planDate } from '@/features/plan/plan';
 import { localized, roleKey, useT } from '@/i18n';
+import { formatDay } from '@/i18n/format';
 import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
 import { useGoBack } from '@/lib/useGoBack';
 import { useInsets } from '@/lib/useInsets';
-import { color, font, iconSize, iconStroke, lane as lanes, layout, pageFill, radius, space, themedStyles, type } from '@/theme/tokens';
+import { color, control, font, iconSize, iconStroke, lane as lanes, layout, pageFill, radius, space, themedStyles, type } from '@/theme/tokens';
 
 /**
  * Family: the parent's dashboard home, behind the PIN (15 minutes). What
@@ -36,7 +38,7 @@ import { color, font, iconSize, iconStroke, lane as lanes, layout, pageFill, rad
  */
 export default function FamilyScreen() {
   const { child: initial } = useLocalSearchParams<{ child?: string }>();
-  const { token, unlocked, children, unlock, lock, reload, answer, setPaused, addTime } = useParent();
+  const { token, unlocked, children, failed, unlock, lock, reload, answer, setPaused, addTime } = useParent();
   const { signOut, profiles, plan } = useFamily();
   const { top, bottom } = useInsets();
   const toast = useToast();
@@ -44,7 +46,12 @@ export default function FamilyScreen() {
   const { t, lang } = useT();
   const [deletingAccount, setDeletingAccount] = useState(false);
   // Flags from the last day count as "needs you"; the cut-off is taken when the screen opens.
-  const [now] = useState(() => Date.now());
+  // Ticks with the 20 s refresh so request ages and the 24 h flag window stay true.
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 20_000);
+    return () => clearInterval(id);
+  }, []);
   const dayAgo = now - 24 * 3600_000;
 
   // Back from a child's page or Payhas Plus: show what changed there.
@@ -126,7 +133,7 @@ export default function FamilyScreen() {
     <View style={styles.root}>
       <ScrollView contentContainerStyle={[styles.content, { paddingTop: top + space.sm, paddingBottom: bottom + space.xxl }]} showsVerticalScrollIndicator={false}>
         <Enter index={0}>
-          <PageHeader back title={t('parent.title')} subtitle={t('parent.familyGlance')} />
+          <PageHeader back title={t('parent.title')} subtitle={formatDay(lang, new Date(now))} />
         </Enter>
 
         {(requests.length > 0 || flags.length > 0) && (
@@ -171,9 +178,14 @@ export default function FamilyScreen() {
         )}
 
         <Enter index={2} style={styles.section}>
-          {children == null
-            ? [0, 1].map((i) => <Card key={i} style={styles.skeleton}>{null}</Card>)
-            : children.map((c) => (
+          {children == null && failed ? (
+            <Card>
+              <EmptyState icon="close" title={t('parent.loadFailed')} body={t('parent.loadFailedSub')} action={t('parent.retry')} onAction={reload} />
+            </Card>
+          ) : children == null ? (
+            <Card style={styles.skeleton}>{null}</Card>
+          ) : (
+            children.map((c) => (
                 <ChildCard
                   key={c.id}
                   child={c}
@@ -183,9 +195,11 @@ export default function FamilyScreen() {
                     const next = !c.paused;
                     done(await setPaused(c, next), t(next ? 'parent.pausedToast' : 'parent.resumedToast', { name: c.display_name }), () => setPaused(c, !next));
                   }}
-                  onAddTime={async () => done(await addTime(c, 15), t('parent.addedTime', { count: 15, name: c.display_name }))}
+                  // A pending request is answered by the same +15, so it never stays "asking".
+                  onAddTime={async () => done(await (c.request ? answer(c, 15) : addTime(c, 15)), t('parent.addedTime', { count: 15, name: c.display_name }))}
                 />
-              ))}
+              ))
+          )}
           <ListGroup>
             <ListRow
               first
@@ -193,6 +207,7 @@ export default function FamilyScreen() {
               label={t('parent.addChild')}
               sub={atLimit && !plan?.plus ? t('parent.thirdWithPlus') : undefined}
               value={atLimit && !plan?.plus ? <Badge label={t('plus.colPlus')} tone="plus" icon="sparkle" /> : undefined}
+              chevron={!(atLimit && !plan?.plus)}
               onPress={() => router.push(atLimit ? '/plus' : '/add-child')}
             />
           </ListGroup>
@@ -215,7 +230,7 @@ export default function FamilyScreen() {
                 first={adults.length === 0}
                 icon="sparkle"
                 label={t('plus.title')}
-                value={plan.plus && plan.plus_until ? planDate(plan.plus_until) : t('plus.colFree')}
+                value={plan.plus && plan.plus_until ? planDate(plan.plus_until) : t('parent.freePlan')}
                 onPress={() => router.push('/plus')}
               />
             )}
@@ -244,13 +259,19 @@ export default function FamilyScreen() {
           </ListGroup>
         </Enter>
 
-        <View style={styles.center}>
-          <Button
-            size="sm"
-            variant="quiet"
-            label={t('parent.deleteAccount')}
+        <View style={styles.footer}>
+          <View style={styles.trust}>
+            <Icon name="shield" size={iconSize.sm} color={color.text3} strokeWidth={iconStroke(iconSize.sm)} />
+            <Text style={styles.footnote}>{t('parent.trustLine')}</Text>
+          </View>
+          {/* The most destructive action is the quietest thing on the page. */}
+          <Pressable
             onPress={() => confirmDestructive(t('parent.deleteTitle'), t('parent.deleteBody'), t('parent.deleteConfirm'), t('common.cancel'), () => setDeletingAccount(true))}
-          />
+            accessibilityRole="button"
+            hitSlop={space.md}
+          >
+            <Text style={styles.deleteLink}>{t('parent.deleteAccount')}</Text>
+          </Pressable>
         </View>
       </ScrollView>
     </View>
@@ -259,8 +280,9 @@ export default function FamilyScreen() {
 
 /**
  * One child, as a card (approved at Gate 2): who they are and what they're
- * doing, time used today in big type against the limit, and the three things
- * a parent does most — pause, add 15 minutes, open their rules.
+ * doing, time used today in big type against the limit (over the limit and
+ * no-time-today said in words), and the two things a parent does most —
+ * pause and add 15 minutes. The header opens their page.
  */
 function ChildCard({ child, avatar, onOpen, onPause, onAddTime }: { child: Child; avatar: string | null; onOpen: () => void; onPause: () => void; onAddTime: () => void }) {
   const { t } = useT();
@@ -268,6 +290,7 @@ function ChildCard({ child, avatar, onOpen, onPause, onAddTime }: { child: Child
   const today = child.week[child.week.length - 1];
   const used = (today?.video_s ?? 0) + (today?.game_s ?? 0);
   const limit = child.daily_limit_minutes == null ? null : child.daily_limit_minutes + child.extra_minutes;
+  const over = limit != null && limit > 0 && used > limit * 60;
   const status = child.paused ? t('parent.paused') : p.text;
   return (
     <Card>
@@ -286,22 +309,39 @@ function ChildCard({ child, avatar, onOpen, onPause, onAddTime }: { child: Child
           </Text>
           <View style={styles.statusRow}>
             <LaneBadge lane={child.lane} label={`${t(roleKey(child))} · ${lanes[child.lane].ages}`} />
-            <Text style={styles.status} numberOfLines={1}>
-              {status}
-            </Text>
+            {child.paused ? (
+              <Badge label={t('parent.paused')} icon="pause" />
+            ) : (
+              <Text style={styles.status} numberOfLines={1}>
+                {status}
+              </Text>
+            )}
           </View>
         </View>
         <Icon name="chevron" size={iconSize.sm} color={color.text3} strokeWidth={iconStroke(iconSize.sm)} />
       </Pressable>
       <View style={styles.usedRow}>
         <Text style={styles.used}>{minutes(t, used)}</Text>
-        <Text style={styles.muted}>{limit ? t('parent.ofToday', { limit: minutes(t, limit * 60) }) : t('parent.noLimit')}</Text>
+        <Text style={[styles.muted, over && { color: color.danger }]}>
+          {limit == null
+            ? t('parent.noLimit')
+            : limit === 0
+              ? t('parent.noTimeToday')
+              : over
+                ? t('parent.overBy', { time: minutes(t, used - limit * 60) })
+                : t('parent.ofToday', { limit: minutes(t, limit * 60) })}
+        </Text>
       </View>
-      {limit != null && <ProgressBar progress={used / (limit * 60)} label={`${child.display_name}: ${minutes(t, used)} ${t('parent.ofToday', { limit: minutes(t, limit * 60) })}`} />}
+      {limit != null && limit > 0 && <ProgressBar progress={used / (limit * 60)} label={`${child.display_name}: ${minutes(t, used)} ${t('parent.ofToday', { limit: minutes(t, limit * 60) })}`} />}
       <View style={styles.actions}>
-        <Button size="sm" variant="secondary" icon={child.paused ? 'play' : 'pause'} label={t(child.paused ? 'parent.resume' : 'parent.pauseShort')} accessibilityLabel={`${t(child.paused ? 'parent.resume' : 'parent.pauseShort')}: ${child.display_name}`} onPress={onPause} />
-        {limit != null && <Button size="sm" variant="secondary" icon="plus" label={t('parent.addMin', { count: 15 })} accessibilityLabel={t('parent.addedTime', { count: 15, name: child.display_name })} onPress={onAddTime} />}
-        <Button size="sm" variant="secondary" icon="chevron" label={t('parent.details')} accessibilityLabel={`${t('parent.details')}: ${child.display_name}`} onPress={onOpen} />
+        <View style={styles.action}>
+          <Button size="md" block variant="secondary" icon={child.paused ? 'play' : 'pause'} label={t(child.paused ? 'parent.resume' : 'parent.pauseShort')} accessibilityLabel={`${t(child.paused ? 'parent.resume' : 'parent.pauseShort')}: ${child.display_name}`} onPress={onPause} />
+        </View>
+        {limit != null && (
+          <View style={styles.action}>
+            <Button size="md" block variant="secondary" icon="plus" label={t('parent.addMin', { count: 15 })} accessibilityLabel={t('parent.addTimeA11y', { name: child.display_name })} onPress={onAddTime} />
+          </View>
+        )}
       </View>
     </Card>
   );
@@ -336,7 +376,7 @@ function AlertsRow({ parent, first, onResult }: { parent: string | null; first: 
     setBusy(false);
   };
 
-  return <ListRow first={first} icon="send" label={t('parent.alertsLabel')} sub={t('parent.alertsSub')} toggle={on} onPress={flip} />;
+  return <ListRow first={first} icon="inbox" label={t('parent.alertsLabel')} sub={t('parent.alertsSub')} toggle={on} onPress={flip} />;
 }
 
 const styles = themedStyles(() => ({
@@ -346,17 +386,21 @@ const styles = themedStyles(() => ({
   pinHead: { paddingHorizontal: layout.gutter },
   content: { paddingHorizontal: layout.gutter, gap: layout.section },
   section: { gap: space.md },
-  center: { alignItems: 'center' },
-  skeleton: { height: 196, opacity: 0.5 },
+  footer: { gap: space.lg, alignItems: 'center' },
+  trust: { flexDirection: 'row', alignItems: 'flex-start', gap: space.sm, alignSelf: 'stretch' },
+  footnote: { flex: 1, color: color.text3, fontFamily: font.medium, ...type.small },
+  deleteLink: { color: color.text3, fontFamily: font.semibold, ...type.small, textDecorationLine: 'underline' },
+  skeleton: { height: control.lg * 3, opacity: 0.5 },
   who: { flexDirection: 'row', alignItems: 'center', gap: space.md },
   grow: { flex: 1, gap: space.xs },
   name: { color: color.text, fontFamily: font.title, ...type.title },
   statusRow: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   status: { flexShrink: 1, color: color.text2, fontFamily: font.medium, ...type.small },
-  liveBadge: { position: 'absolute', right: -2, bottom: -2, width: 18, height: 18, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center', backgroundColor: color.surface1 },
+  liveBadge: { position: 'absolute', right: -2, bottom: -2, width: iconSize.md, height: iconSize.md, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center', backgroundColor: color.surface1 },
   usedRow: { flexDirection: 'row', alignItems: 'baseline', flexWrap: 'wrap', columnGap: space.sm },
   used: { color: color.text, fontFamily: font.display, ...type.display },
   muted: { color: color.text2, fontFamily: font.medium, ...type.body },
   cardTitle: { color: color.text, fontFamily: font.semibold, ...type.body },
   actions: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
+  action: { flex: 1 },
 }));

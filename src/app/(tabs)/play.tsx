@@ -1,12 +1,12 @@
 import { router, useIsFocused } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { ScrollView, Text, useWindowDimensions, View } from 'react-native';
 
 import { BottomSheet } from '@/components/BottomSheet';
 import { Icon } from '@/components/Icon';
 import { Enter } from '@/components/motion/Enter';
+import { PressScale } from '@/components/motion/PressScale';
 import { StatusScrim } from '@/components/StatusScrim';
-import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -17,24 +17,26 @@ import { useFamily } from '@/features/family/FamilyProvider';
 import { GAMES, SECTIONS } from '@/features/games/catalog';
 import { useBest } from '@/features/games/shared';
 import type { GameMeta } from '@/features/games/types';
-import { TimesUp } from '@/features/library/TimesUp';
 import type { GameId } from '@/features/library/LibraryProvider';
+import { TimesUp } from '@/features/library/TimesUp';
 import { useScreenTime } from '@/features/library/useScreenTime';
+import { minutes } from '@/features/parent/useParent';
 import { useProfilePlan } from '@/features/plan/usePlan';
 import { useT } from '@/i18n';
 import { useInsets, useTabBarSpace } from '@/lib/useInsets';
-import { alpha, color, font, iconSize, iconStroke, Lane, layout, pageFill, radius, space, themedStyles, type } from '@/theme/tokens';
+import { color, control, font, iconSize, iconStroke, Lane, layout, leading, pageFill, radius, space, themedStyles, type } from '@/theme/tokens';
 
-/** Sections shown as a grid; the rest are horizontal shelves (approved at Gate 2). */
+/** Sections shown as a grid; short sections (under three games) are grids too, so a shelf always scrolls. */
 const GRID_SECTIONS = ['play.section.brain'];
 const SHELF_TILE = 148;
-const HERO_STAGE = 184;
+const HERO_STAGE = 200;
 const GRID_STAGE = 104;
 
 /**
  * Play: one featured game with the screen's only ember button, then shelves
- * of quick games and a grid of brain games. Every tile is a tactile Card; a
- * locked game says "Ask a parent" — never a price.
+ * of quick games and a grid of brain games. Children only see games they can
+ * play — on Free the rest fold into one quiet "More games" tile that never
+ * shows a lock wall or a price (owner decision, review panel 2026-10-30).
  */
 export default function PlayScreen() {
   const insets = useInsets();
@@ -44,22 +46,24 @@ export default function PlayScreen() {
   const { current } = useFamily();
   const { lock, todaySeconds, limitMinutes } = useScreenTime({ games: true });
   const { gameOpen } = useProfilePlan();
-  const [lockedOpen, setLockedOpen] = useState(false);
-  // Read once per visit: the featured game changes each day among the open quick games.
-  const [day] = useState(() => Math.floor(Date.now() / 86_400_000));
+  const [moreOpen, setMoreOpen] = useState(false);
+  // Read once per visit, on the phone's own calendar: the featured game changes each local day.
+  const [day] = useState(() => {
+    const d = new Date();
+    return d.getFullYear() * 400 + d.getMonth() * 32 + d.getDate();
+  });
   const { t } = useT();
   if (!current) return <View style={styles.root} />;
   const lane = current.lane;
-  const todayMin = Math.floor(todaySeconds / 60);
-  const contentW = Math.min(width, 560) - layout.gutter * 2;
+  const contentW = Math.min(width, layout.maxContent) - layout.gutter * 2;
   const gridW = (contentW - space.md) / 2;
+  const leftS = limitMinutes != null ? Math.max(0, limitMinutes * 60 - todaySeconds) : null;
 
-  const quick = SECTIONS[0].games.filter((id) => gameOpen(id));
-  const featured: GameId | undefined = quick[day % Math.max(1, quick.length)];
-  const open = (id: GameId) => {
-    if (!gameOpen(id)) return setLockedOpen(true);
-    router.push(`/games/${id}`);
-  };
+  const sections = SECTIONS.map((s) => ({ ...s, games: s.games.filter((id) => gameOpen(id)) }));
+  const hidden = SECTIONS.some((s) => s.games.some((id) => !gameOpen(id)));
+  const pool = sections[0].games.length > 0 ? sections[0].games : sections.flatMap((s) => s.games);
+  const featured: GameId | undefined = pool[day % Math.max(1, pool.length)];
+  const play = (id: GameId) => router.push(`/games/${id}`);
   let order = 2; // running index so sections cascade in down the page
 
   return (
@@ -68,22 +72,24 @@ export default function PlayScreen() {
         <Enter index={0} style={styles.head}>
           <PageHeader
             title={t('play.title')}
-            subtitle={limitMinutes != null ? t('play.leftToday', { n: Math.max(0, limitMinutes - todayMin) }) : t('play.playedToday', { n: todayMin })}
+            subtitle={leftS != null ? t('play.leftToday', { time: minutes(t, leftS) }) : t('play.playedToday', { time: minutes(t, todaySeconds) })}
           />
-          {limitMinutes != null && limitMinutes > 0 && <ProgressBar progress={todayMin / limitMinutes} label={t('play.leftToday', { n: Math.max(0, limitMinutes - todayMin) })} />}
+          {/* Kids see things: the bar is the time left, shrinking as they play. */}
+          {limitMinutes != null && limitMinutes > 0 && leftS != null && (
+            <ProgressBar progress={leftS / (limitMinutes * 60)} label={t('play.leftToday', { time: minutes(t, leftS) })} remaining />
+          )}
         </Enter>
 
         {featured && (
           <Enter index={1}>
-            <Featured meta={GAMES[featured].meta} lane={lane} focused={focused} onPlay={() => open(featured)} />
+            <Featured meta={GAMES[featured].meta} lane={lane} focused={focused} onPlay={() => play(featured)} />
           </Enter>
         )}
 
-        {SECTIONS.map((section) => {
-          // Open games first, locked ones after: a child shouldn't meet a wall of locks.
-          const games = section.games.filter((id) => id !== featured).sort((a, b) => Number(!gameOpen(a)) - Number(!gameOpen(b)));
+        {sections.map((section) => {
+          const games = section.games.filter((id) => id !== featured);
           if (games.length === 0) return null;
-          const grid = GRID_SECTIONS.includes(section.title);
+          const grid = GRID_SECTIONS.includes(section.title) || games.length < 3;
           return (
             <Enter key={section.title} index={order++} style={styles.section}>
               <SectionHeader title={t(section.title)} />
@@ -91,45 +97,49 @@ export default function PlayScreen() {
                 <View style={styles.grid}>
                   {games.map((id) => (
                     <View key={id} style={{ width: gridW }}>
-                      <GridTile meta={GAMES[id].meta} lane={lane} focused={focused} locked={!gameOpen(id)} onPress={() => open(id)} />
+                      <GridTile meta={GAMES[id].meta} lane={lane} focused={focused} onPress={() => play(id)} />
                     </View>
                   ))}
                 </View>
               ) : (
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.shelfScroll} contentContainerStyle={styles.shelf}>
                   {games.map((id) => (
-                    <ShelfTile key={id} meta={GAMES[id].meta} lane={lane} focused={focused} locked={!gameOpen(id)} onPress={() => open(id)} />
+                    <ShelfTile key={id} meta={GAMES[id].meta} lane={lane} focused={focused} onPress={() => play(id)} />
                   ))}
                 </ScrollView>
               )}
             </Enter>
           );
         })}
+
+        {hidden && (
+          <Enter index={order++}>
+            <Card onPress={() => setMoreOpen(true)} accessibilityLabel={t('play.moreGames')} style={styles.more}>
+              <View style={styles.moreIcon}>
+                <Icon name="game" size={iconSize.lg} color={color.text2} strokeWidth={iconStroke(iconSize.lg)} />
+              </View>
+              <Text style={[styles.name, styles.grow]}>{t('play.moreGames')}</Text>
+              <Icon name="chevron" size={iconSize.sm} color={color.text3} strokeWidth={iconStroke(iconSize.sm)} />
+            </Card>
+          </Enter>
+        )}
       </ScrollView>
       <StatusScrim />
-      {/* Free plan: a locked game says "ask a parent" — never a price, never a way to pay. */}
-      <BottomSheet open={lockedOpen} onClose={() => setLockedOpen(false)} title={t('plus.gameLockedTitle')}>
-        <EmptyState icon="lock" title={t('play.askParent')} body={t('plus.gameLockedSub')} />
+      {/* Free plan: a friendly note, never a price, a lock wall or a way to pay. */}
+      <BottomSheet open={moreOpen} onClose={() => setMoreOpen(false)} title={t('play.moreGames')}>
+        <EmptyState icon="game" title={t('play.moreGames')} body={t('play.moreGamesSub')} />
       </BottomSheet>
       {lock && <TimesUp lock={lock} />}
     </View>
   );
 }
 
-/** The game's animated scene on its own colour; dimmed with a lock when it isn't open. */
-function Stage({ meta, active, locked, height }: { meta: GameMeta; active: boolean; locked: boolean; height: number }) {
+/** The game's scene on its own colour. Decorative: the tile around it carries the name for screen readers. */
+function Stage({ meta, active, height }: { meta: GameMeta; active: boolean; height: number }) {
   const { Scene } = meta;
   return (
-    // Decorative scene: the tile around it carries the name for screen readers.
     <View style={[styles.stage, { height, backgroundColor: meta.tint }]} accessible={false} importantForAccessibility="no-hide-descendants" aria-hidden>
-      <Scene active={active && !locked} />
-      {locked && (
-        <View style={styles.lockScrim}>
-          <View style={styles.lockBadge}>
-            <Icon name="lock" size={iconSize.md} color={color.text} strokeWidth={iconStroke(iconSize.md)} />
-          </View>
-        </View>
-      )}
+      <Scene active={active} />
     </View>
   );
 }
@@ -139,76 +149,72 @@ function Featured({ meta, lane, focused, onPlay }: { meta: GameMeta; lane: Lane;
   const name = t(meta.name);
   return (
     <Card hero tactile flush>
-      {/* The art is a big tap target for small hands; screen readers get the one Play button instead. */}
-      <Pressable onPress={onPlay} accessible={false} importantForAccessibility="no-hide-descendants">
-        <Stage meta={meta} active={focused} locked={false} height={HERO_STAGE} />
-      </Pressable>
+      {/* The art is a big tap target for small hands; screen readers get the one Play button. */}
+      <PressScale onPress={onPlay} pressedScale={0.98} accessible={false} importantForAccessibility="no-hide-descendants">
+        <Stage meta={meta} active={focused} height={HERO_STAGE} />
+      </PressScale>
       <View style={styles.heroFoot}>
         <View style={styles.grow}>
-          <Text style={styles.heroName} numberOfLines={1}>
+          <Text style={styles.heroName} numberOfLines={2} maxFontSizeMultiplier={1.3}>
             {name}
           </Text>
-          <Text style={styles.sub} numberOfLines={2}>
+          <Text style={styles.sub} numberOfLines={2} maxFontSizeMultiplier={1.3}>
             {meta.sub(lane, t)}
           </Text>
         </View>
-        <Button label={t('play.play')} accessibilityLabel={`${t('play.play')}: ${name}`} size="sm" block={false} onPress={onPlay} />
+        <Button label={t('play.play')} accessibilityLabel={`${t('play.play')}: ${name}`} size="md" block={false} onPress={onPlay} />
       </View>
     </Card>
   );
 }
 
-function ShelfTile({ meta, lane, focused, locked, onPress }: { meta: GameMeta; lane: Lane; focused: boolean; locked: boolean; onPress: () => void }) {
+/** One control per tile: art, name and best score. (Scenes only draw their characters while running, so every tile animates.) */
+function ShelfTile({ meta, lane, focused, onPress }: { meta: GameMeta; lane: Lane; focused: boolean; onPress: () => void }) {
   const { t } = useT();
   const name = t(meta.name);
   return (
-    <View style={styles.shelfTile}>
-      <Card tactile flush onPress={onPress} accessibilityLabel={locked ? `${name}. ${t('play.askParent')}` : name}>
-        <Stage meta={meta} active={focused} locked={locked} height={SHELF_TILE} />
+    <PressScale onPress={onPress} pressedScale={0.97} accessibilityRole="button" accessibilityLabel={name} style={styles.shelfTile}>
+      <Card tactile flush>
+        <Stage meta={meta} active={focused} height={SHELF_TILE} />
       </Card>
-      <Text style={styles.name} numberOfLines={1} maxFontSizeMultiplier={1.3}>
+      <Text style={styles.name} numberOfLines={2} maxFontSizeMultiplier={1.3}>
         {name}
       </Text>
-      {locked ? <Badge label={t('play.askParent')} icon="lock" /> : <Best meta={meta} lane={lane} focused={focused} fallback={meta.sub(lane, t)} />}
-    </View>
+      <Best meta={meta} lane={lane} focused={focused} />
+    </PressScale>
   );
 }
 
-function GridTile({ meta, lane, focused, locked, onPress }: { meta: GameMeta; lane: Lane; focused: boolean; locked: boolean; onPress: () => void }) {
+function GridTile({ meta, lane, focused, onPress }: { meta: GameMeta; lane: Lane; focused: boolean; onPress: () => void }) {
   const { t } = useT();
   const name = t(meta.name);
   const sub = meta.sub(lane, t);
   return (
-    <Card tactile flush onPress={onPress} accessibilityLabel={locked ? `${name}. ${t('play.askParent')}` : `${name}. ${sub}`}>
-      <Stage meta={meta} active={focused} locked={locked} height={GRID_STAGE} />
+    <Card tactile flush onPress={onPress} accessibilityLabel={`${name}. ${sub}`}>
+      <Stage meta={meta} active={focused} height={GRID_STAGE} />
       <View style={styles.gridFoot}>
-        <Text style={styles.name} numberOfLines={2} maxFontSizeMultiplier={1.3}>
+        <Text style={styles.name} numberOfLines={1} maxFontSizeMultiplier={1.3}>
           {name}
         </Text>
-        <Text style={styles.sub} numberOfLines={2} maxFontSizeMultiplier={1.3}>
+        {/* Two lines kept even when the line is short, so cards in a row end level. */}
+        <Text style={[styles.sub, styles.twoLines]} numberOfLines={2} maxFontSizeMultiplier={1.3}>
           {sub}
         </Text>
-        {locked ? <Badge label={t('play.askParent')} icon="lock" /> : <Best meta={meta} lane={lane} focused={focused} />}
+        <Best meta={meta} lane={lane} focused={focused} />
       </View>
     </Card>
   );
 }
 
-/** Best score as three stars and the score in words; the fallback line until there is one. */
-function Best({ meta, lane, focused, fallback }: { meta: GameMeta; lane: Lane; focused: boolean; fallback?: string }) {
+/** Best score as three stars and the score in words; nothing until there's a score. */
+function Best({ meta, lane, focused }: { meta: GameMeta; lane: Lane; focused: boolean }) {
   const { t } = useT();
   const { read } = useBest(meta.id, lane);
   const [value, setValue] = useState<number | null>(null);
   useEffect(() => {
     if (focused) setValue(read()); // re-read after coming back from a game
   }, [focused]); // eslint-disable-line react-hooks/exhaustive-deps
-  if (value == null || !meta.best || meta.best.hiddenFor?.includes(lane)) {
-    return fallback ? (
-      <Text style={styles.sub} numberOfLines={1}>
-        {fallback}
-      </Text>
-    ) : null;
-  }
+  if (value == null || !meta.best || meta.best.hiddenFor?.includes(lane)) return null;
   const earned = meta.best.stars(value, lane);
   const label = meta.best.format(value, lane, t);
   return (
@@ -225,7 +231,7 @@ function Best({ meta, lane, focused, fallback }: { meta: GameMeta; lane: Lane; f
 
 const styles = themedStyles(() => ({
   root: { flex: 1, ...pageFill() },
-  content: { paddingHorizontal: layout.gutter, gap: layout.section, alignSelf: 'center', width: '100%', maxWidth: 560 },
+  content: { paddingHorizontal: layout.gutter, gap: layout.section, alignSelf: 'center', width: '100%', maxWidth: layout.maxContent },
   head: { gap: space.md },
   section: { gap: space.md },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: space.md },
@@ -234,13 +240,14 @@ const styles = themedStyles(() => ({
   shelfTile: { width: SHELF_TILE, gap: space.xs },
   stage: { overflow: 'hidden', alignItems: 'center', justifyContent: 'center' },
   heroFoot: { flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.lg },
-  gridFoot: { padding: space.md, gap: space.xs },
+  gridFoot: { padding: space.lg, gap: space.xs },
   grow: { flex: 1, gap: space.xs },
-  heroName: { color: color.text, fontFamily: font.title, ...type.title },
+  heroName: { color: color.text, fontFamily: font.title, ...type.heading },
   name: { color: color.text, fontFamily: font.title, ...type.lead },
   sub: { color: color.text2, fontFamily: font.medium, ...type.small },
+  twoLines: { minHeight: leading.small * 2 },
   best: { flexDirection: 'row', alignItems: 'center', gap: space.xs },
   bestText: { flexShrink: 1, color: color.text2, fontFamily: font.semibold, ...type.caption },
-  lockScrim: { ...StyleSheet.absoluteFill, alignItems: 'center', justifyContent: 'center', backgroundColor: alpha(color.ink, 0.5) },
-  lockBadge: { width: 44, height: 44, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center', backgroundColor: color.surface2 },
+  more: { flexDirection: 'row', alignItems: 'center', gap: space.md },
+  moreIcon: { width: control.md, height: control.md, borderRadius: radius.pill, alignItems: 'center', justifyContent: 'center', backgroundColor: color.surface2 },
 }));
