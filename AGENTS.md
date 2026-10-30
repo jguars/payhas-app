@@ -42,6 +42,12 @@ Docs: https://docs.expo.dev/eas/index.md
 
 ## Design system — screens use components and tokens only
 
+**Any UI work follows the `ui-screen` skill (`.claude/skills/ui-screen/SKILL.md`)
+end to end:** Mobbin refs → ux-writing → Superdesign/Figma variants → owner
+gate → build → screenshots in 3 themes → design-critique → accessibility-audit
++ axe → independent reviewer-agent panel that pushes back → fix → emulator →
+tracker tick. Skipping a step needs a written reason in the tracker.
+
 The look is decided once in `DESIGN.md` (direction, principles, tokens) and
 built in `src/theme/tokens.ts` + `src/components/ui/`. Follow
 `docs/UI_UX_WORKFLOW.md` for any UI work.

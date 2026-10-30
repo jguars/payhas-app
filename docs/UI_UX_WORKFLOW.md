@@ -167,6 +167,11 @@ with the same names.
 
 ## Phase 5 — Screens: design before code
 
+> Per screen, Phases 5–6 run as the **`ui-screen` skill** (`.claude/skills/ui-screen/SKILL.md`):
+> every step is a task, every skill and connector is used, and an independent
+> reviewer-agent panel (designer, child-UX/a11y, UX writer, devil's advocate)
+> judges the build and pushes back before it is ticked.
+
 Repeat for each screen or flow, starting with the 4–6 that matter most.
 
 - [ ] **5.1 Pull references** for this screen's patterns from the project
