@@ -35,9 +35,10 @@ The system it builds on: `DESIGN.md` (principles, tokens, components),
   Playwright (`design/direction/mockups/src/`).
 - Variants differ in layout, never in the system (same tokens/components).
 
-## 4. 🚦 Owner gate
-- Show the variants (Dark + Light) and a recommendation. Build nothing until
-  the owner picks. Record the decision in the decision log.
+## 4. 🚦 Owner gate — mockups first, always
+- Show the variants (Dark + Light) and a recommendation. **Build nothing**
+  (no code, no tokens) until the owner approves a mockup. Record the
+  decision in the decision log.
 
 ## 5. Build — components and tokens only
 - Only `src/components/ui/*`, `Segmented`, `LaneBadge`, `BottomSheet` and
@@ -62,19 +63,15 @@ The system it builds on: `DESIGN.md` (principles, tokens, components),
   violations** — and read the accessibility tree (Playwright `ariaSnapshot`).
   Report: `design/screens/A11Y-<screen>.md`.
 
-## 9. Reviewer panel — independent subagents that push back
-Spawn in parallel (Agent tool, background), each with the screenshots, the
-code paths and DESIGN.md — **not** your own conclusions:
-1. **Senior product designer** — polish, hierarchy, craft vs Mobbin refs; scores 1–10.
-2. **Child-UX + accessibility + safety** — pre-readers, parents one-handed, TalkBack, dark patterns.
-3. **Multilingual UX writer** (EN/TK/TR/RU, uses the ux-writing skill) — concrete string changes.
-4. **Devil's advocate** — unfixed audit problems, undesigned states, distrust.
-
-Every reviewer must give scores, ranked findings with exact fixes, and
-explicit push-back. Synthesize into `design/screens/PANEL-<screen>.md`:
-accepted / rejected (with a reason) / deferred (with a task). Fix the
-accepted ones. If a reviewer scored below 8, run the panel again on the
-fixed build.
+## 9. Self-review with the skills (no subagents)
+The owner asked for no helper agents or subagents (2026-10-30). Run the
+review yourself with the skills, in four passes, each pushing back on your
+own build: `design-skills:design-critique` (polish vs the Mobbin refs),
+`design-skills:accessibility-audit` (child, parent one-handed, TalkBack),
+`design-skills:ux-writing` (EN/TK/TR/RU strings) and a devil's-advocate pass
+(grep every consumer of what changed; undesigned states). Score each 1–10,
+write `design/screens/REVIEW-<screen>.md` (accepted / rejected with a
+reason / deferred with a task), fix, and re-review anything below 8.
 
 ## 10. Verify on Android
 - Re-run steps 6 and 8 on the fixed build.
