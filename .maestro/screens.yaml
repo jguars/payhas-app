@@ -20,6 +20,8 @@ appId: com.onki.payhas
     visible: "Parent sign in"
     timeout: 20000
 - takeScreenshot: 02-sign-in
+# Phone is the main way in; the test family signs in by email.
+- tapOn: "Use email instead"
 - tapOn: "Email"
 - inputText: ${EMAIL}
 - tapOn: "Password.*"

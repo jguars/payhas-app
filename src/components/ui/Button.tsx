@@ -20,6 +20,8 @@ type Props = {
   /** Stretch to the parent's width (default for lg). */
   block?: boolean;
   accessibilityLabel?: string;
+  /** For UI tests (Maestro). */
+  testID?: string;
 };
 
 /**
@@ -27,7 +29,7 @@ type Props = {
  * variant — never a faded colour. Primary sits on a hard ledge like the
  * tactile cards and presses down into it.
  */
-export function Button({ label, onPress, variant = 'primary', size = 'lg', icon, disabled, loading, block = size === 'lg', accessibilityLabel }: Props) {
+export function Button({ label, onPress, variant = 'primary', size = 'lg', icon, disabled, loading, block = size === 'lg', accessibilityLabel, testID }: Props) {
   const off = disabled || loading;
   const fg = off ? color.text3 : variant === 'primary' ? color.ink : variant === 'destructive' ? color.danger : color.text;
   const lg = size === 'lg';
@@ -42,6 +44,7 @@ export function Button({ label, onPress, variant = 'primary', size = 'lg', icon,
       pressedScale={0.97}
       // Small buttons draw at 40 but take touches across the 48 minimum.
       hitSlop={sm ? (control.md - control.sm) / 2 : undefined}
+      testID={testID}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel ?? label}
       accessibilityState={{ disabled: !!off, busy: !!loading }}
