@@ -1,9 +1,10 @@
 import { createContext, ReactNode, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { AccessibilityInfo, AppState, Platform, Pressable, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
+import { usePathname } from 'expo-router';
 
 import { Icon, IconName } from '@/components/Icon';
-import { TAB_BAR, useInsets } from '@/lib/useInsets';
+import { TAB_BAR, tabIndex, useInsets } from '@/lib/useInsets';
 import { spring } from '@/theme/motion';
 import { color, control, elevation, font, iconSize, iconStroke, layout, radius, size, space, themedStyles } from '@/theme/tokens';
 
@@ -22,9 +23,11 @@ const ACTION_MS = 7000;
 /** With a screen reader on, an action toast stays much longer: finding the button takes time. */
 const ACTION_SR_MS = 30000;
 
-/** One toast at a time, floating just above the tab bar. A new toast replaces the old one. */
+/** One toast at a time, floating just above the tab bar (or the bottom edge off the tabs). A new toast replaces the old one. */
 export function ToastProvider({ children }: { children: ReactNode }) {
   const { bottom } = useInsets();
+  // Lift above the tab bar only where there is one.
+  const barHeight = tabIndex(usePathname()) >= 0 ? TAB_BAR.height : 0;
   const [toast, setToast] = useState<(ToastSpec & { id: number }) | null>(null);
   const y = useSharedValue(40);
   const o = useSharedValue(0);
@@ -113,7 +116,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       <FlushCtx.Provider value={dismiss}>
       {children}
       {toast && (
-        <Animated.View pointerEvents="box-none" style={[styles.wrap, { bottom: bottom + TAB_BAR.height + space.md }, anim]}>
+        <Animated.View pointerEvents="box-none" style={[styles.wrap, { bottom: bottom + barHeight + space.md }, anim]}>
           <View style={styles.toast} accessibilityLiveRegion="polite">
             {toast.icon && <Icon name={toast.icon} size={iconSize.md} color={color.onInverse} strokeWidth={iconStroke(iconSize.md)} />}
             <Text style={styles.text} numberOfLines={2} maxFontSizeMultiplier={1.4}>

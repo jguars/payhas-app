@@ -19,7 +19,8 @@ import { roleKey, TKey, useT } from '@/i18n';
 import { useScreenTime } from '@/features/library/useScreenTime';
 import { useProfilePlan } from '@/features/plan/usePlan';
 import { fx } from '@/lib/feedback';
-import { useInsets, useTabBarSpace } from '@/lib/useInsets';
+import { useReportVideoUnderBar } from '@/lib/tabBarTone';
+import { FEED_CHROME_BOTTOM, useInsets } from '@/lib/useInsets';
 import { alpha, color, font, media, size, themedStyles } from '@/theme/tokens';
 
 const UNDERLINE = 14;
@@ -33,7 +34,6 @@ const PAGES: FeedMode[] = ['following', 'forYou'];
 
 export default function FeedScreen() {
   const insets = useInsets();
-  const barSpace = useTabBarSpace();
   const focused = useIsFocused();
   const [size, setSize] = useState({ width: 0, height: 0 });
   const { width, height } = size;
@@ -123,6 +123,8 @@ export default function FeedScreen() {
   const onCreator = useCallback((name: string) => setCreator(name), []);
 
   const showEmptyFollowing = !followingFeed.loading && followingFeed.videos.length === 0 && !capReached;
+  // The tab bar turns dark only while a video is really under it.
+  useReportVideoUnderBar(!lock && !(mode === 'following' && showEmptyFollowing));
 
   return (
     <View style={styles.root} onLayout={onLayout}>
@@ -163,7 +165,7 @@ export default function FeedScreen() {
                       <FeedItem
                         video={item}
                         height={height}
-                        chromeBottom={barSpace}
+                        chromeBottom={FEED_CHROME_BOTTOM}
                         // Only the feed on screen plays.
                         active={focused && !lock && mode === m && index === activeIndex[m]}
                         onShare={onShare}

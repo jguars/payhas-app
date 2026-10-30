@@ -59,9 +59,9 @@ function FeedItemBase({ video, active, height, chromeBottom, onShare, onOptions,
   const { width } = useWindowDimensions();
 
   // Every video plays whole, exactly as shot, centred over a blurred copy of its poster —
-  // never cropped. A 9:16 clip on a taller phone leaves thin strips that sit behind the top
-  // tabs and the tab bar; a landscape clip sits in the middle. Only a video already the
-  // screen's exact shape (within 3%) fills edge to edge.
+  // never cropped. A 9:16 clip on a taller phone leaves thin strips above and below (the
+  // tab bar is docked under the feed); a landscape clip sits in the middle. Only a video
+  // already the feed's exact shape (within 3%) fills edge to edge.
   const loaded = useEvent(player, 'sourceLoad', null);
   const track = (loaded?.availableVideoTracks ?? player.availableVideoTracks)?.[0]?.size;
   const videoAspect = track?.width && track?.height ? track.width / track.height : null;

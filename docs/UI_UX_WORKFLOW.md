@@ -188,7 +188,8 @@ Per-screen tracker (copy a row per screen). Built screens: `design/screens/*-bui
 
 | Screen | Refs | Copy | Mockup | 🚦 | Built | QA | Shipped |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| Home (feed) | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
+| Tab bar | [x] | [x] | [x] HTML (Figma limit) | [x] B | [x] | [x] critique + a11y (axe 0) + panel ×4, fixes in | [ ] emulator + phone test |
+| Home (feed) | [x] | [x] | [ ] | [ ] | [ ] | [ ] | [ ] |
 | Discover | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
 | Play (games) | [x] | [x] | [x] | [x] Gate 2 | [x] | [x] critique + a11y (axe 0) + panel ×4 (beta: yes) | [ ] phone test |
 | Me | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
@@ -254,6 +255,7 @@ Per-screen tracker (copy a row per screen). Built screens: `design/screens/*-bui
 | 2026-10-29 | Three themes: Dark (default), Navy, calm Light | Owner request; less eye strain than pure black or white | Guvanch |
 | 2026-10-29 | Type: 3 families, 6 faces, 9 sizes | Font audit found 22 sizes and 7 faces | Guvanch (asked for it) |
 | 2026-10-30 | Adopt this system-first workflow for all UI work | Screens looked inconsistent ("AI slop") | Guvanch |
+| 2026-10-30 | Tab bar B: docked, labelled, dark over video on Home | Content slid under the floating pill; no words for parents; Light turned it pale over video | Guvanch |
 | 2026-10-30 | Gate 2: Play B with Brain games grid, Family B | Clear single action for kids; parents act without opening a screen | Guvanch |
 | 2026-10-30 | Tokens: AA everywhere, one selected style (inverse), disabled = surface2 + text3, errors = danger, Mono only for codes | Audit problems 1, 3, 5 | Guvanch (Gate 3) |
 | 2026-10-30 | Direction: one system, mixed volumes; feeling warm · playful · safe · calm; 6 principles | `design/direction/DIRECTION.md` | Guvanch |

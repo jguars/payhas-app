@@ -134,7 +134,7 @@ export default function MeScreen() {
       <Animated.ScrollView
         onScroll={onScroll}
         scrollEventThrottle={16}
-        contentContainerStyle={[styles.content, { paddingTop: insets.top + 56, paddingBottom: barSpace + space.lg }]}
+        contentContainerStyle={[styles.content, { paddingTop: insets.top + 56, paddingBottom: barSpace }]}
         showsVerticalScrollIndicator={false}
       >
         {/* Hero */}

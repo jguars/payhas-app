@@ -50,17 +50,21 @@ appId: com.onki.payhas
     timeout: 30000
 - waitForAnimationToEnd
 - takeScreenshot: 06-home
-- tapOn: "Discover"
+- tapOn:
+    id: "tab-discover"
 - waitForAnimationToEnd
 - takeScreenshot: 07-discover
-- tapOn: "Play"
+- tapOn:
+    id: "tab-play"
 - waitForAnimationToEnd
 - takeScreenshot: 08-play
 - scroll
 - takeScreenshot: 09-play-scrolled
-- tapOn: "Inbox.*"
+- tapOn:
+    id: "tab-inbox"
 - waitForAnimationToEnd
 - takeScreenshot: 10-inbox
-- tapOn: "Me"
+- tapOn:
+    id: "tab-me"
 - waitForAnimationToEnd
 - takeScreenshot: 11-me

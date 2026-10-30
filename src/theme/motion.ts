@@ -8,7 +8,12 @@ export const spring = {
   smooth: { damping: 26, stiffness: 170, mass: 1 },
   /** Small celebratory pops (a selected swatch, a badge). */
   bouncy: { damping: 11, stiffness: 220, mass: 0.7 },
+  /** The tab bar's selected pill sliding to a new tab. */
+  tabPill: { damping: 16, stiffness: 170, mass: 0.9 },
 } satisfies Record<string, WithSpringConfig>;
+
+/** How far the tab pill stretches while it travels (per tab crossed, and at most), and its squash. */
+export const tabStretch = { perTab: 0.12, max: 0.3, squash: 0.9 } as const;
 
 /** Delay between siblings entering. ~2–3 frames at 60fps reads as a cascade, not a wait. */
 export const STAGGER_MS = 45;

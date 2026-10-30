@@ -3,7 +3,7 @@ import Animated, { useAnimatedStyle, useReducedMotion, useSharedValue, withSeque
 import Svg, { Circle, Path } from 'react-native-svg';
 
 import { spring } from '@/theme/motion';
-import { alpha, color, media } from '@/theme/tokens';
+import { alpha, color, iconSize, media } from '@/theme/tokens';
 
 export type NavKind = 'home' | 'discover' | 'play' | 'inbox' | 'me';
 
@@ -16,7 +16,7 @@ const W = color.white;
  * move when it becomes active — home hops, the compass needle spins, the
  * controller wiggles, the bell rings, the person pops.
  */
-export function NavIcon({ kind, active, size = 26, onMedia = false }: { kind: NavKind; active: boolean; size?: number; onMedia?: boolean }) {
+export function NavIcon({ kind, active, size = iconSize.lg, onMedia = false }: { kind: NavKind; active: boolean; size?: number; onMedia?: boolean }) {
   const reduce = useReducedMotion();
   const ty = useSharedValue(0);
   const rot = useSharedValue(0);

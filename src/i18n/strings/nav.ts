@@ -1,6 +1,6 @@
 import { defineStrings } from '../define';
 
-/** The tab bar. Labels stay one short word: five share a 360 px phone. */
+/** The tab bar. Labels stay short (one word where the language allows): five share a 360 px phone. */
 export default defineStrings(
   {
     home: 'Home',

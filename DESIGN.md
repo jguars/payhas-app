@@ -183,7 +183,7 @@ Code: `src/components/ui/` (+ `Segmented`, `LaneBadge`, `BottomSheet`,
 | `SectionHeader` | with / without "See all" | — | Sections inside a screen. |
 | `EmptyState` | with / without action | — | Icon circle, title, one line, at most one (secondary) action. |
 | `Toggle` | — | on (success) / off (surface2) | White knob in every theme. |
-| Tab bar | page / media (Home) | active = inverse pill behind the icon + bold label | Docked, icon + one-word label on every tab; dark (`media`) on Home in every theme; never lane colours. |
+| Tab bar | page / media (Home) | active = inverse pill behind the icon + `text` label | Docked, icon + one-word label on every tab; dark (`media`) on Home in every theme; never lane colours. |
 
 References: `design/direction/` and the Mobbin collection "Payhas — design
 direction". Workflow: `docs/UI_UX_WORKFLOW.md`.
@@ -315,7 +315,7 @@ This is a single-column phone layout on a 4px base scale: 4, 8, 12, 16, 24,
 - **Feed:** full-bleed edge to edge. Video that isn't the screen's aspect
   ratio is centred and contained over a blurred copy of its poster, never
   cropped to fill.
-- **Tab bar:** docked full width, 64px tall plus the bottom inset, with a
+- **Tab bar:** docked full width, 68px tall plus the bottom inset, with a
   hairline on top (`TAB_BAR`). It sits under the screens, not over them, so
   content never slides behind it; scrolling screens only add `space.lg` after
   the last item (`useTabBarSpace`). Labels are one short word (five share a
@@ -331,10 +331,9 @@ shadows. Tactile controls get physical depth from a hard **ledge**, not
 from a shadow.
 
 ### Shadow Vocabulary
-- **Float** (`shadowColor #000, opacity 0.45, radius 18, offset 0/8; Android
-  elevation 14`): the floating tab bar, so it lifts off video and cards.
-- **Toast** (`elevation 10`, similar soft black): transient toasts above the
-  tab bar.
+- **Float** (`elevation.float`): toasts and bottom sheets, the only things
+  that float over content. The tab bar is docked and casts no shadow; a
+  hairline separates it from the page (none over video).
 - **Ledge** (a solid block of Hairline, or a 62%-darker shade of the fill,
   offset 3–4px below the control): chips, language rows and game cards. On
   press the face drops into it.
@@ -350,9 +349,9 @@ Everything is soft and rounded, with no sharp corners anywhere.
 - **Chips and controls:** 12–16px radius.
 - **Cards and rows:** 20px radius.
 - **Video and hero posters:** 28px radius.
-- **Buttons, the tab bar and lane pills:** full pill (999px).
+- **Buttons, the tab bar's selected pill and lane pills:** full pill (999px).
 - **Avatars:** circles, with the animal face drawn in a 64-unit box.
-- **Borders:** 1px on floating chrome, 2px on tactile controls, where the
+- **Borders:** 1px on chrome (the tab bar's top edge, toasts), 2px on tactile controls, where the
   border turns ember or a darker tint when the control is selected.
 - **Sticker illustrations:** a 2.6-unit ink outline in a 64-unit box, round
   caps and joins.
@@ -388,12 +387,20 @@ The signature tactile control.
 - **Internal Padding:** 16px, or 24px for hero cards.
 
 ### Navigation
-- **Tab bar:** a floating pill capsule at 94% opacity, with five equal tabs:
-  Home, Discover, Play, Inbox, Me.
-- **Resting icons:** hand-drawn outline icons in Dusk at 1.9 stroke.
-- **Active pill:** a 54×42 pill in the one selected style (`inverse`) slides
-  between tabs on a spring, stretching and squashing as it travels. The same
-  on every tab — lane colours are never decoration.
+- **Tab bar:** docked full width under the screens (`TAB_BAR.height` 68 plus
+  the bottom inset), five equal tabs with an icon and a short label: Home,
+  Discover, Play, Inbox, Me. On Home, while a video is on screen, it turns
+  dark (`media`) in every theme and cross-fades back over `duration.fast`;
+  Android's 3-button nav follows it.
+- **Resting icons:** hand-drawn outline icons in `text3`, `iconSize.lg`;
+  labels `type.caption` semibold, `text3` at rest, `text` when selected.
+- **Active pill:** a 56×32 pill (`TAB_BAR.pill`) in the one selected style
+  (`inverse`) behind the icon slides between tabs on `spring.tabPill`,
+  stretching a little as it travels (`tabStretch`, off with reduce motion).
+  The same on every tab — lane colours are never decoration. Off the tabs
+  (a nested route) there is no pill.
+- **Unread dot:** a calm ember dot on the bell with no bounce, ringed in the
+  pill's ink when Inbox is selected; hidden in the Little lane.
 - **Active icon:** drawn in `onInverse` on the pill, and it plays its
   own move. Home hops, the compass spins, the controller wiggles, the bell
   rings and the person pops.

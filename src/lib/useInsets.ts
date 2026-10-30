@@ -26,7 +26,16 @@ export function useInsets(): EdgeInsets {
  * `height` is the bar without the gesture-bar inset; `pill` is the selected
  * highlight behind the icon.
  */
-export const TAB_BAR = { height: 64, pill: { width: 56, height: 32 } } as const;
+export const TAB_BAR = { height: 68, pill: { width: 56, height: 32 } } as const;
+
+/** The tab routes: the bar shows on these, and toasts lift above it there. */
+export const TAB_ROUTES = ['/', '/discover', '/play', '/inbox', '/me'] as const;
+
+/** Index of the tab a path belongs to (nested paths count), or -1 off the tabs. */
+export const tabIndex = (path: string) => TAB_ROUTES.findIndex((r) => (r === '/' ? path === '/' : path === r || path.startsWith(r + '/')));
+
+/** Room under the feed's caption, actions and progress line, above the docked bar. */
+export const FEED_CHROME_BOTTOM = space.xl;
 
 /**
  * Bottom padding a tab screen's scroll content needs. The bar is docked (in
