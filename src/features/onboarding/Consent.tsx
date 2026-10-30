@@ -94,5 +94,5 @@ const styles = themedStyles(() => ({
   pointText: { flex: 1, color: color.text, fontFamily: font.medium, fontSize: size.small, lineHeight: 20 },
   policy: { alignSelf: 'flex-start', minHeight: 48, justifyContent: 'center' },
   policyText: { color: color.text2, fontFamily: font.semibold, fontSize: size.small, textDecorationLine: 'underline' },
-  error: { color: color.ember, fontFamily: font.semibold, fontSize: size.small },
+  error: { color: color.danger, fontFamily: font.semibold, fontSize: size.small },
 }));

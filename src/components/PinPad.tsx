@@ -84,7 +84,7 @@ const styles = themedStyles(() => ({
   dots: { flexDirection: 'row', gap: space.lg },
   dot: { width: 14, height: 14, borderRadius: 7, borderWidth: 2, borderColor: color.text3 },
   dotOn: { backgroundColor: color.text, borderColor: color.text },
-  error: { color: color.ember, fontFamily: font.semibold, fontSize: size.small },
+  error: { color: color.danger, fontFamily: font.semibold, fontSize: size.small },
   grid: { width: 264, flexDirection: 'row', flexWrap: 'wrap', gap: 12, justifyContent: 'center' },
   key: { width: 76, height: 64, borderRadius: 20, backgroundColor: color.surface1, alignItems: 'center', justifyContent: 'center' },
   keyEmpty: { backgroundColor: 'transparent' },

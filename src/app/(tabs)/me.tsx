@@ -158,7 +158,7 @@ export default function MeScreen() {
             <View style={styles.metaRow}>
               <View style={[styles.laneChip, { backgroundColor: l.color + '24', borderColor: l.color + '55' }]}>
                 <View style={[styles.laneDot, { backgroundColor: l.color }]} />
-                <Text style={[styles.laneChipText, { color: l.color }]}>
+                <Text style={[styles.laneChipText, { color: l.text }]}>
                   {current.is_parent ? t(roleKey(current)) : `${t(laneKey(current.lane))} · ${l.ages}`}
                 </Text>
               </View>
@@ -570,7 +570,7 @@ function Row({ icon, tint, label, onPress, last, danger, children }: { icon: Ico
         <Icon name={icon} size={16} color={tint} strokeWidth={2.4} />
       </View>
       <View style={[styles.rowBody, !last && styles.rowBorder]}>
-        <Text style={[styles.rowLabel, danger && { color: color.ember }]} numberOfLines={1}>
+        <Text style={[styles.rowLabel, danger && { color: color.danger }]} numberOfLines={1}>
           {label}
         </Text>
         {children}

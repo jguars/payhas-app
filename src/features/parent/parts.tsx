@@ -541,7 +541,7 @@ const styles = themedStyles(() => ({
 
   card: { backgroundColor: color.surface1, borderRadius: 24, padding: space.lg, gap: space.md },
   planCard: { flexDirection: 'row', alignItems: 'center', minHeight: 72 },
-  planCta: { color: color.ember, fontFamily: font.bold, fontSize: size.small },
+  planCta: { color: color.emberText, fontFamily: font.bold, fontSize: size.small },
   locked: { alignItems: 'center', gap: space.sm, paddingVertical: space.xl, borderWidth: 1.5, borderStyle: 'dashed', borderColor: color.line },
   lockedTitle: { color: color.text, fontFamily: font.title, fontSize: size.lead, textAlign: 'center' },
   hero: { gap: space.lg },

@@ -140,6 +140,26 @@ only density, illustration and how much colour is allowed change:
 6. **Kids see things, parents read things.** Child screens: big targets,
    pictures, few words. Parent screens: lists, labels, values on the right.
 
+## Tokens (Phase 3, 2026-10-30) — the only allowed values
+
+Source of truth: `src/theme/tokens.ts` and `src/theme/motion.ts`. Board:
+`design/tokens-board.png`. Anything not listed here is not allowed in a
+screen; if a screen needs something new, add it here first.
+
+| Group | Tokens | Rules |
+| --- | --- | --- |
+| Colour | `bg`, `surface1`, `surface2`, `line`, `text`, `text2`, `text3`, `ember`, `emberText`, `emberEdge`, `inverse`/`onInverse`, `success`, `warning`, `danger`, `info`, `ink` | Every text/background pair passes AA (4.5:1) in all three themes. `ember` is a fill (ink text on it); `emberText` is ember as text. Errors are `danger`, never ember. Time used / progress is `success`. |
+| Lanes | `lane[x].color` (fill), `lane[x].text` (text) | Fills are the same bright four in every theme and always carry ink. Use `.text` when a lane colour is text. Only avatars, lane badges and lane text — never decoration, never the tab bar. |
+| States | selected = `inverse` fill + `onInverse` text · disabled = `surface2` fill + `text3` text · pressed = scale 0.97 (PressScale) | One selected style everywhere (chips, segmented, tabs, pickers). No opacity-faded buttons. |
+| Type | `type.caption … type.hero` (size + line height + tracking) with `font.*` | Bricolage for headings and big numbers, Figtree for everything read or tapped (numbers too), Mono only for codes. |
+| Spacing | `space.xs 4 · sm 8 · md 12 · lg 16 · xl 24 · xxl 32 · xxxl 48`, `layout.gutter 16`, `layout.section 24` | No raw padding, margin or gap. |
+| Radius | `radius.sm 12 · md 20 · lg 28 · pill` | sm: chips, tiles, inputs · md: cards, row groups · lg: heroes, video, sheets · pill: buttons, tab bar, badges. |
+| Border | `border.hairline 1 · strong 2` | Dividers and quiet outlines / focus and selection. |
+| Control height | `control.sm 40 · md 48 · lg 56` | md is also the minimum touch target. |
+| Icons | `iconSize.sm 16 · md 20 · lg 24 · xl 32`, `iconStroke(size)` | One glyph family (`Icon`); stroke from the size, not per screen. Emoji are not icons. |
+| Depth | `elevation.ledge 4` (child cards), `elevation.ledgeButton 3` (primary), `elevation.float` (tab bar, toasts, sheets) | Tonal layers first. |
+| Motion | `spring.snappy/smooth/bouncy`, `STAGGER_MS 45`, `duration.fast 150 · base 250 · slow 400` | Everything off under reduce-motion. |
+
 References: `design/direction/` and the Mobbin collection "Payhas — design
 direction". Workflow: `docs/UI_UX_WORKFLOW.md`.
 

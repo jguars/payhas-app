@@ -20,7 +20,7 @@ export function LaneBadge({ lane, label, onPress }: Props) {
       style={styles.badge}
     >
       <Icon name="shield" size={12} color={l.color} strokeWidth={2.4} />
-      <Text style={[styles.label, { color: l.color }]}>{name}</Text>
+      <Text style={[styles.label, { color: l.text }]}>{name}</Text>
     </Pressable>
   );
 }

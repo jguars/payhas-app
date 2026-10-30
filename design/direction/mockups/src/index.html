@@ -10,7 +10,8 @@
 .light{--bg:#E9ECF1;--s1:#F5F7FA;--s2:#DDE2EA;--line:#CBD2DC;--t1:#1B1E26;--t2:#454B5A;--t3:#646B7B;--ember:#E44D2C;--inv:#22252E;--oninv:#F5F7FA;--kids:#12916B;--adult:#7E55D6;--ok:#108F68;--danger:#C93F27}
 *{box-sizing:border-box;margin:0;padding:0}
 body{width:390px;height:844px;overflow:hidden;background:var(--bg);color:var(--t1);font-family:F;font-weight:500;position:relative}
-.screen{padding:16px 16px 120px;height:844px;overflow:hidden}
+.screen{padding:16px 16px 120px;min-height:844px}
+body.tall{height:auto;overflow:visible}
 /* header: one pattern — large left title, optional subtitle; back above it on pushed screens */
 .back{width:44px;height:44px;margin:4px 0 4px -10px;display:flex;align-items:center;justify-content:center}
 .h1{font-family:B;font-weight:800;font-size:30px;line-height:36px;letter-spacing:-.6px;margin-top:8px}
@@ -96,7 +97,7 @@ playB:()=>`<div class="h1">Play</div><div class="sub">45 min left today</div>
  <div class="sec">Quick play</div>
  <div class="shelf">${['pals:Pop-up Pals','star:Star Catcher','echo:Echo Lights'].map(x=>{const[a,b]=x.split(':');return`<div class="sq"><div class="art tactile" ${art(a)}></div><div class="title">${b}</div><div class="meta">45 sec</div></div>`}).join('')}</div>
  <div class="sec">Brain games</div>
- <div class="shelf">${['memory:Memory Match','odd:Odd One Out'].map(x=>{const[a,b]=x.split(':');return`<div class="sq dim"><div class="art" ${art(a)}></div><div class="title">${b}</div><div class="lockchip">${ic('lock',12)} Ask a parent</div></div>`}).join('')}</div>`,
+ <div class="grid">${game('memory','Memory Match','Find the pairs',1)}${game('odd','Odd One Out','Spot the different one',1)}</div>`,
 famA:()=>`<div class="back">${ic('back',26)}</div><div class="h1" style="margin-top:0">Family</div><div class="sub">Tap someone to see their day and change their rules.</div>
  <div class="sec">Children</div>
  <div class="group"><div class="row"><div class="av" ${art('av-kid')}></div><div class="grow"><div class="label">Aylar <span class="lane" style="background:var(--kids);margin-left:6px">Kids</span></div><div class="hint"><span class="dot"></span>In the app now</div><div class="bar barok" style="margin-top:8px;height:6px"><i style="width:25%"></i></div></div><div class="val">15 of 60 min</div><span style="color:var(--t3)">${ic('chev',18)}</span></div>

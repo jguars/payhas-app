@@ -105,38 +105,38 @@ Name what's available in each project; strike out what isn't.
   `design-skills:ux-strategy`; output: top of `DESIGN.md`_ — "Night-Light Playroom" in `DESIGN.md`; 6 principles approved, top of `DESIGN.md`
 - [~] **2.5 Explore 2–3 visual directions** on the same 2 key screens. —
   _skill: `superdesign:superdesign` (variants across models) or Figma_ — direction chosen first (2.1), so 2 variants of it on Play and Family: `design/direction/mockups/` (HTML in `src/`, real fonts and art, Dark + Light). Superdesign/Figma not used: their hosts aren't reachable from this session. Awaiting Gate 2
-- 🚦 **Gate 2:** the owner picks one direction.
+- 🚦 **Gate 2:** the owner picks one direction. — ✅ Guvanch, 2026-10-30: Play B (featured game + shelves) with Brain games as a grid, Family B (child cards) — `design/direction/mockups/play-approved.png`
 
 ## Phase 3 — Design system: foundations (tokens)
 
 Everything here is written once, in code **and** in Figma if Figma is used,
 with the same names.
 
-- [~] **3.1 Colour:** semantic tokens (bg, surface 1–3, line, text 1–3,
+- [x] **3.1 Colour:** semantic tokens (bg, surface 1–3, line, text 1–3,
   primary, on-primary, success, warning, danger, info), one set per theme,
   with AA contrast checked for every text/background pair. — _skills:
-  `design-skills:design-systems`, `design-skills:accessibility-audit`_ — Dark, Navy and Light palettes in `src/theme/tokens.ts`; contrast not yet checked
-- [~] **3.2 Type:** at most 2–3 families and 4–6 faces; one size scale of
+  `design-skills:design-systems`, `design-skills:accessibility-audit`_ — AA check of every text/background pair in 3 themes; fixed Navy text3, Light text3/status colours, added `emberText`, split lane fill/text — `design/tokens-board.png`
+- [x] **3.2 Type:** at most 2–3 families and 4–6 faces; one size scale of
   about 8–9 steps, with a line height per step; letter-spacing per step,
   not per screen; Cyrillic/CJK fallbacks if needed. — _output:
-  `theme/tokens` `font`, `size`, `leading`, `tracking`_ — `0dc04e4`: 3 families, 6 faces, 9-step `size`; line height and letter-spacing still per screen
-- [~] **3.3 Spacing:** one 4- or 8-point scale (e.g. 4 8 12 16 24 32 48),
-  plus screen gutters and section gaps. — _`space` tokens_ — scale exists; screens still use raw numbers in places
-- [~] **3.4 Shape:** at most 3–4 radii (small, medium, large, pill) and
-  border widths. — _`radius`, `border` tokens_ — `radius` exists (12/20/28/pill); screens also use 10, 14, 16, 18, 24, 34 by hand
-- [ ] **3.5 Elevation:** tonal layers first; 1–2 shadows at most, named. —
-  _`elevation` tokens_
-- [~] **3.6 Motion:** 2–3 durations, 2–3 springs/easings, stagger, and the
+  `theme/tokens` `font`, `size`, `leading`, `tracking`_ — `0dc04e4` (3 families, 6 faces, 9 sizes) + `leading`, `tracking`, `type.*` presets; Mono limited to codes
+- [x] **3.3 Spacing:** one 4- or 8-point scale (e.g. 4 8 12 16 24 32 48),
+  plus screen gutters and section gaps. — _`space` tokens_ — `layout.gutter`, `layout.section` added; screens move onto it in Phase 4–7
+- [x] **3.4 Shape:** at most 3–4 radii (small, medium, large, pill) and
+  border widths. — _`radius`, `border` tokens_ — `radius.sm/md/lg/pill`, `border.hairline/strong`, `control.sm/md/lg`
+- [x] **3.5 Elevation:** tonal layers first; 1–2 shadows at most, named. —
+  _`elevation` tokens_ — `elevation.ledge`, `ledgeButton`, `float`
+- [x] **3.6 Motion:** 2–3 durations, 2–3 springs/easings, stagger, and the
   reduce-motion rule. — _skill: `design-skills:interaction-design`;
-  `motion` tokens_ — springs in `src/theme/motion.ts`; durations not yet tokenized
-- [ ] **3.7 Iconography:** one icon set or one drawing style (stroke width,
+  `motion` tokens_ — `duration.fast/base/slow` added to `motion.ts`
+- [x] **3.7 Iconography:** one icon set or one drawing style (stroke width,
   corners, grid size), with sizes taken from the type scale. — _tools: Layer.ai
-  or Higgsfield for custom sets; `image-generation` skill_
-- [ ] **3.8 Mirror the tokens in Figma** as variables with modes per theme
+  or Higgsfield for custom sets; `image-generation` skill_ — `iconSize`, `iconStroke()`; audit found 21 sizes and 21 stroke widths; emoji interests to be replaced in 7.4
+- [-] **3.8 Mirror the tokens in Figma** as variables with modes per theme
   *(optional if no Figma)*. — _skills: `figma-use`,
-  `figma-generate-library`_
-- [ ] **3.9 Write `DESIGN.md`:** principles, every token with its use, and
-  do/don't examples. — _skill: `design:design-system`_
+  `figma-generate-library`_ — Figma connector can't connect from this session
+- [x] **3.9 Write `DESIGN.md`:** principles, every token with its use, and
+  do/don't examples. — _skill: `design:design-system`_ — Tokens section in `DESIGN.md`
 - 🚦 **Gate 3:** the owner approves the tokens from a token board (swatches,
   type ramp, spacing, radii on one page).
 
@@ -249,6 +249,8 @@ Per-screen tracker (copy a row per screen):
 | 2026-10-29 | Three themes: Dark (default), Navy, calm Light | Owner request; less eye strain than pure black or white | Guvanch |
 | 2026-10-29 | Type: 3 families, 6 faces, 9 sizes | Font audit found 22 sizes and 7 faces | Guvanch (asked for it) |
 | 2026-10-30 | Adopt this system-first workflow for all UI work | Screens looked inconsistent ("AI slop") | Guvanch |
+| 2026-10-30 | Gate 2: Play B with Brain games grid, Family B | Clear single action for kids; parents act without opening a screen | Guvanch |
+| 2026-10-30 | Tokens: AA everywhere, one selected style (inverse), disabled = surface2 + text3, errors = danger, Mono only for codes | Audit problems 1, 3, 5 | Claude (awaiting Gate 3) |
 | 2026-10-30 | Direction: one system, mixed volumes; feeling warm · playful · safe · calm; 6 principles | `design/direction/DIRECTION.md` | Guvanch |
 | 2026-10-30 | Gate 1: audit findings accepted | Top 10 in `design/audit/2026-10-30/AUDIT.md` | Guvanch |
 

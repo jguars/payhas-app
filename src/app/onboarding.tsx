@@ -283,7 +283,7 @@ const styles = themedStyles(() => ({
   pinWrap: { alignItems: 'center', gap: space.lg, paddingTop: space.xl },
   pinWhy: { color: color.text3, fontFamily: font.medium, fontSize: size.small, textAlign: 'center' },
   nameInput: { color: color.text, fontFamily: font.display, fontSize: size.headline, paddingVertical: space.md, borderBottomWidth: 2, borderBottomColor: color.line },
-  error: { color: color.ember, fontFamily: font.semibold, fontSize: size.small },
+  error: { color: color.danger, fontFamily: font.semibold, fontSize: size.small },
   planNote: { color: color.text3, fontFamily: font.medium, fontSize: size.small, lineHeight: 18, marginBottom: space.sm },
   member: { flexDirection: 'row', alignItems: 'center', gap: space.md, padding: space.md, borderRadius: radius.card, backgroundColor: color.surface1, borderWidth: 2, borderColor: color.line },
   memberName: { color: color.text, fontFamily: font.bold, fontSize: size.lead },

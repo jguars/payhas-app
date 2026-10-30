@@ -67,7 +67,7 @@ export function LaneChip({ lane, delay = 120 }: { lane: Lane; delay?: number }) 
           animatedProps={checkProps}
         />
       </Svg>
-      <Text style={[styles.label, { color: l.color }]} numberOfLines={1}>
+      <Text style={[styles.label, { color: l.text }]} numberOfLines={1}>
         {label}
       </Text>
     </Animated.View>

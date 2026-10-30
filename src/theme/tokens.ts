@@ -34,6 +34,8 @@ type Palette = {
   text2: string;
   text3: string;
   ember: string;
+  /** Ember as text or a thin icon on surfaces (links, "Enter it here"). Fills use `ember`. */
+  emberText: string;
   emberEdge: string;
   verified: string;
   success: string;
@@ -60,6 +62,7 @@ const PALETTES: Record<ThemeName, Palette> = {
     text2: '#B3B2BD',
     text3: '#8C8B97',
     ember: '#FF5A3C',
+    emberText: '#FF5A3C',
     emberEdge: '#9E3825',
     verified: '#78A6FF',
     success: '#4FE3B0',
@@ -81,8 +84,9 @@ const PALETTES: Record<ThemeName, Palette> = {
     line: '#2D3B6B',
     text: '#F2F4FB',
     text2: '#B8C1DC',
-    text3: '#8A95B8',
+    text3: '#97A2C4',
     ember: '#FF5A3C',
+    emberText: '#FF7A5F',
     emberEdge: '#9E3825',
     verified: '#8BB4FF',
     success: '#4FE3B0',
@@ -104,26 +108,37 @@ const PALETTES: Record<ThemeName, Palette> = {
     line: '#CBD2DC',
     text: '#1B1E26',
     text2: '#454B5A',
-    text3: '#646B7B',
+    text3: '#575D6C',
     ember: '#E44D2C',
+    emberText: '#B5371B',
     emberEdge: '#9E3825',
     verified: '#2F63D6',
-    success: '#108F68',
+    success: '#0A6E50',
     successSoft: '#DCF3EB',
-    warning: '#9C7100',
-    danger: '#C93F27',
-    info: '#2F63D6',
+    warning: '#735300',
+    danger: '#AE321C',
+    info: '#2452B8',
     reward: '#B98600',
     inverse: '#22252E',
     onInverse: '#F5F7FA',
   },
 };
 
-/** Lane colours per theme: the same four hues, deepened on light so they read as text there. */
+/**
+ * Lane colours per theme. `LANE_COLORS` are fills (avatars, lane badges) and
+ * always carry ink on top, so they stay bright in every theme. `LANE_TEXT` is
+ * the same hue as text on the page: equal to the fill on the dark themes,
+ * deepened on light so it passes AA (4.5:1) on bg and both surfaces.
+ */
 const LANE_COLORS: Record<ThemeName, Record<Lane, string>> = {
   dark: { little: '#FFD25E', kids: '#4FE3B0', teen: '#78A6FF', adult: '#C3A2FF' },
   navy: { little: '#FFD25E', kids: '#4FE3B0', teen: '#8BB4FF', adult: '#C9ABFF' },
-  light: { little: '#B88A00', kids: '#12916B', teen: '#3366D9', adult: '#7E55D6' },
+  light: { little: '#FFD25E', kids: '#4FE3B0', teen: '#78A6FF', adult: '#C3A2FF' },
+};
+const LANE_TEXT: Record<ThemeName, Record<Lane, string>> = {
+  dark: LANE_COLORS.dark,
+  navy: LANE_COLORS.navy,
+  light: { little: '#7D5E00', kids: '#0A6E50', teen: '#2452B8', adult: '#6A42C2' },
 };
 
 const THEME_KEY = 'payhas.theme';
@@ -169,18 +184,22 @@ export function alpha(hex: string, a: number) {
 
 export type Lane = 'little' | 'kids' | 'teen' | 'adult';
 
-export const lane: Record<Lane, { label: string; ages: string; color: string }> = {
-  little: { label: 'Little', ages: '0–6', color: LANE_COLORS[theme].little },
-  kids: { label: 'Kids', ages: '7–12', color: LANE_COLORS[theme].kids },
-  teen: { label: 'Teen', ages: '13–17', color: LANE_COLORS[theme].teen },
-  adult: { label: 'Adult', ages: '18+', color: LANE_COLORS[theme].adult },
+/** `color` is the fill (ink on top); `text` is the same hue as text on the page. */
+export const lane: Record<Lane, { label: string; ages: string; color: string; text: string }> = {
+  little: { label: 'Little', ages: '0–6', color: LANE_COLORS[theme].little, text: LANE_TEXT[theme].little },
+  kids: { label: 'Kids', ages: '7–12', color: LANE_COLORS[theme].kids, text: LANE_TEXT[theme].kids },
+  teen: { label: 'Teen', ages: '13–17', color: LANE_COLORS[theme].teen, text: LANE_TEXT[theme].teen },
+  adult: { label: 'Adult', ages: '18+', color: LANE_COLORS[theme].adult, text: LANE_TEXT[theme].adult },
 };
 
 /** Switch theme: rewrites `color` and `lane`, remembers it, and makes every themed sheet rebuild. */
 export function applyTheme(next: ThemeName) {
   theme = next;
   Object.assign(color, PALETTES[next], FIXED);
-  for (const l of Object.keys(lane) as Lane[]) lane[l].color = LANE_COLORS[next][l];
+  for (const l of Object.keys(lane) as Lane[]) {
+    lane[l].color = LANE_COLORS[next][l];
+    lane[l].text = LANE_TEXT[next][l];
+  }
   version += 1;
   try {
     localStorage.setItem(THEME_KEY, next);
@@ -237,11 +256,58 @@ export const font = {
  *   caption 12 · small 14 · body 16 · lead 18 · title 22 · heading 26 ·
  *   headline 30 · display 36 · hero 44
  * Bricolage (font.display / font.title) for headings and big numbers, Figtree
- * (medium / semibold / bold) for everything read or tapped, Mono for times,
- * counts and codes. Sizes inside game pieces scale with the board instead.
+ * (medium / semibold / bold) for everything read or tapped — numbers, times
+ * and counts included. Mono only for codes people type or read back
+ * (activation codes, card numbers). Sizes inside game pieces scale with the
+ * board instead.
  */
 export const size = { caption: 12, small: 14, body: 16, lead: 18, title: 22, heading: 26, headline: 30, display: 36, hero: 44 } as const;
 
+/**
+ * Line height and tracking per step — use these with `size`, never per screen.
+ * Tight tracking on the big Bricolage steps, none on Figtree text.
+ */
+export const leading = { caption: 16, small: 20, body: 22, lead: 24, title: 28, heading: 32, headline: 36, display: 42, hero: 52 } as const;
+export const tracking = { caption: 0.2, small: 0, body: 0, lead: 0, title: -0.3, heading: -0.4, headline: -0.6, display: -0.8, hero: -1.2 } as const;
+
+/** One text style per step: `...type.title` gives fontSize, lineHeight and letterSpacing together. */
+export const type = Object.fromEntries(
+  (Object.keys(size) as (keyof typeof size)[]).map((k) => [k, { fontSize: size[k], lineHeight: leading[k], letterSpacing: tracking[k] }]),
+) as Record<keyof typeof size, { fontSize: number; lineHeight: number; letterSpacing: number }>;
+
 export const space = { xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32, xxxl: 48 } as const;
 
-export const radius = { chip: 12, card: 20, video: 28, pill: 999 } as const;
+/** Screen edge padding and the gap between sections. */
+export const layout = { gutter: space.lg, section: space.xl } as const;
+
+/**
+ * Four radii and nothing else: sm (chips, tiles, inputs), md (cards, rows
+ * groups), lg (heroes, video, sheets), pill (buttons, tab bar, badges).
+ * `chip` / `card` / `video` are the old names for sm / md / lg.
+ */
+export const radius = { sm: 12, md: 20, lg: 28, pill: 999, chip: 12, card: 20, video: 28 } as const;
+
+/**
+ * Icon sizes, and the stroke that keeps every size at the same optical weight
+ * (about 1.8 px on screen). Pass `iconStroke(size)` instead of a per-screen
+ * strokeWidth. Illustrations and game pieces are not icons.
+ */
+export const iconSize = { sm: 16, md: 20, lg: 24, xl: 32 } as const;
+export const iconStroke = (px: number) => Math.round(((1.8 * 24) / px) * 10) / 10;
+
+/** Two border widths: hairline for dividers and quiet outlines, strong for focus and selection. */
+export const border = { hairline: 1, strong: 2 } as const;
+
+/** Control heights: sm (inline buttons, chips), md (rows, inputs — also the minimum touch target), lg (primary buttons). */
+export const control = { sm: 40, md: 48, lg: 56 } as const;
+
+/**
+ * Depth. Tonal layers first (bg → surface1 → surface2); the "ledge" is a hard
+ * offset under tactile things (child cards, primary buttons); the one soft
+ * shadow is for things that float over content (tab bar, toasts, sheets).
+ */
+export const elevation = {
+  ledge: 4,
+  ledgeButton: 3,
+  float: { shadowColor: '#000000', shadowOpacity: 0.25, shadowRadius: 16, shadowOffset: { width: 0, height: 6 }, elevation: 8 },
+} as const;

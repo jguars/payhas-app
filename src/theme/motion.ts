@@ -14,3 +14,6 @@ export const spring = {
 export const STAGGER_MS = 45;
 
 export const stagger = (i: number, step = STAGGER_MS) => i * step;
+
+/** Durations for timed (non-spring) changes: fades, colour changes, progress. */
+export const duration = { fast: 150, base: 250, slow: 400 } as const;

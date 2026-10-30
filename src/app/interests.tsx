@@ -110,7 +110,7 @@ const styles = themedStyles(() => ({
   hint: { color: color.text2, fontFamily: font.medium, fontSize: size.body, textAlign: 'center', paddingHorizontal: space.xl, paddingTop: space.sm, paddingBottom: space.xl },
   grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: space.sm, paddingHorizontal: space.lg, paddingBottom: space.xl },
   footer: { paddingHorizontal: space.xl, paddingBottom: space.lg, gap: space.sm },
-  error: { color: color.ember, fontFamily: font.medium, fontSize: size.small, textAlign: 'center' },
+  error: { color: color.danger, fontFamily: font.medium, fontSize: size.small, textAlign: 'center' },
   button: { height: 52, borderRadius: radius.pill, backgroundColor: color.ember, alignItems: 'center', justifyContent: 'center' },
   buttonOff: { opacity: 0.4 },
   buttonText: { color: color.ink, fontFamily: font.bold, fontSize: size.body },

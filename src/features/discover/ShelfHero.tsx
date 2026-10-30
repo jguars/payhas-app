@@ -187,7 +187,7 @@ const styles = themedStyles(() => ({
     borderRadius: radius.pill,
     backgroundColor: alpha(color.ink, 0.6),
   },
-  kickerText: { flexShrink: 1, color: color.ember, fontFamily: font.bold, fontSize: size.caption, letterSpacing: 0.7 },
+  kickerText: { flexShrink: 1, color: color.emberText, fontFamily: font.bold, fontSize: size.caption, letterSpacing: 0.7 },
   copy: { position: 'absolute', left: 20, right: 20, bottom: 20, alignItems: 'center', gap: 10 },
   title: { color: media.text, fontFamily: font.title, fontSize: size.heading, lineHeight: 34, letterSpacing: -0.4, textAlign: 'center' },
   tags: { color: media.text2, fontFamily: font.semibold, fontSize: size.small },

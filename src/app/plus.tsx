@@ -384,7 +384,7 @@ const styles = themedStyles(() => ({
   note: { flexDirection: 'row', alignItems: 'flex-start', gap: space.sm, paddingTop: space.md, borderTopWidth: 1, borderTopColor: color.line },
 
   codeHead: { flexDirection: 'row', alignItems: 'center', gap: space.sm, minHeight: 32 },
-  codeLink: { color: color.ember, fontFamily: font.bold, fontSize: size.small },
+  codeLink: { color: color.emberText, fontFamily: font.bold, fontSize: size.small },
   codeInput: {
     color: color.text,
     fontFamily: font.mono,

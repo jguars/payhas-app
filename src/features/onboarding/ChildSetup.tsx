@@ -378,5 +378,5 @@ const styles = themedStyles(() => ({
   stepRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   stepButton: { width: 36, height: 36, borderRadius: 18, backgroundColor: color.surface2, alignItems: 'center', justifyContent: 'center' },
   stepValue: { color: color.text, fontFamily: font.mono, fontSize: size.lead },
-  error: { color: color.ember, fontFamily: font.semibold, fontSize: size.small },
+  error: { color: color.danger, fontFamily: font.semibold, fontSize: size.small },
 }));
