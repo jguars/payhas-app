@@ -11,6 +11,7 @@ import { JetBrainsMono_500Medium } from '@expo-google-fonts/jetbrains-mono';
 import { Onest_500Medium, Onest_600SemiBold, Onest_700Bold, Onest_800ExtraBold } from '@expo-google-fonts/onest';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
@@ -20,6 +21,7 @@ import { usePresence } from '@/features/family/usePresence';
 import { I18nProvider, startupLang, useT } from '@/i18n';
 import { useParentAlerts } from '@/features/parent/push';
 import { LibraryProvider } from '@/features/library/LibraryProvider';
+import { Splash } from '@/features/start/Splash';
 import { initFeedback } from '@/lib/feedback';
 import { ThemeProvider } from '@/theme/ThemeProvider';
 import { color, pageFill } from '@/theme/tokens';
@@ -72,8 +74,11 @@ export default function RootLayout() {
   );
 }
 
+/** How long the splash holds on first launch. */
+const SPLASH_MS = 1200;
+
 /**
- * First launch → pick a language. Signed out → sign-in. A new family →
+ * First launch → splash, Welcome, then the language. Signed out → sign-in. A new family →
  * onboarding. No profile chosen → who's watching. Otherwise → the app.
  */
 function Routes() {
@@ -81,13 +86,21 @@ function Routes() {
   const { chosen: langChosen } = useT();
   usePresence();
   useParentAlerts(ready && !!session);
-  if (!ready) return <Blank />;
+  // On a new phone the splash stays a moment, so the brand is seen before Welcome.
+  const [holding, setHolding] = useState(!langChosen);
+  useEffect(() => {
+    if (!holding) return;
+    const id = setTimeout(() => setHolding(false), SPLASH_MS);
+    return () => clearTimeout(id);
+  }, [holding]);
+  if (!ready || holding) return <Splash />;
   const settled = !!session && !needsOnboarding;
 
   return (
     <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: color.bg } }}>
       <Stack.Protected guard={!langChosen}>
-        <Stack.Screen name="language" />
+        <Stack.Screen name="welcome" options={{ animation: 'fade' }} />
+        <Stack.Screen name="language" options={{ animation: 'slide_from_right' }} />
       </Stack.Protected>
       <Stack.Protected guard={langChosen && !session}>
         <Stack.Screen name="sign-in" />

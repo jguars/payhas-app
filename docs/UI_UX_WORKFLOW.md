@@ -201,7 +201,8 @@ Per-screen tracker (copy a row per screen). Built screens: `design/screens/*-bui
 | Paywall + locked 31st video | [x] | [x] | [x] HTML | [x] shown to anyone | [x] | [x] web screenshots | [ ] emulator + phone test |
 | Edit profile | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
 | Onboarding + consent | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
-| Sign in / Language | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
+| Splash · Welcome · Language (Continue) | [x] | [x] | [x] HTML | [x] Splash → Welcome → Language | [x] | [x] web screenshots (Dark, Light) | [ ] emulator + phone test |
+| Sign in | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
 | Saved | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
 | Following list | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
 | Channel page | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |

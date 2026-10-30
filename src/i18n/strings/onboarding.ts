@@ -3,6 +3,11 @@ import { defineStrings } from '../define';
 /** First run: language, welcome, the parent, the PIN, each child, the family summary. */
 export default defineStrings(
   {
+    'start.title': 'Videos and games picked for kids',
+    'start.body': 'Checked by people, set up by parents. Every child gets their own lane.',
+    'start.go': 'Get started',
+    'start.haveAccount': 'I have an account',
+    'lang.title': 'Choose your language',
     'welcome.title': 'Welcome to Payhas',
     'welcome.body': 'Short videos and games, chosen for each age.',
     'welcome.lanes': 'Every child gets their own lane — nothing above their age.',
@@ -69,6 +74,11 @@ export default defineStrings(
   },
   {
     tk: {
+      'start.title': 'Çagalar üçin saýlanan wideolar we oýunlar',
+      'start.body': 'Adamlar tarapyndan barlanýar, ene-atalar sazlaýar. Her çaganyň öz ýoly bar.',
+      'start.go': 'Başla',
+      'start.haveAccount': 'Hasabym bar',
+      'lang.title': 'Dili saýlaň',
       'welcome.title': 'Payhas-a hoş geldiňiz',
       'welcome.body': 'Her ýaşa görä saýlanan gysga wideolar we oýunlar.',
       'welcome.lanes': 'Her çaganyň öz ýoly bar — ýaşyndan uly zat görkezilmeýär.',
@@ -134,6 +144,11 @@ export default defineStrings(
       m7: 'Iýul', m8: 'Awg', m9: 'Sen', m10: 'Okt', m11: 'Noý', m12: 'Dek',
     },
     tr: {
+      'start.title': 'Çocuklar için seçilmiş videolar ve oyunlar',
+      'start.body': 'İnsanlar kontrol eder, ebeveynler ayarlar. Her çocuğun kendi alanı var.',
+      'start.go': 'Başla',
+      'start.haveAccount': 'Hesabım var',
+      'lang.title': 'Dilinizi seçin',
       'welcome.title': 'Payhas’a hoş geldiniz',
       'welcome.body': 'Her yaşa göre seçilmiş kısa videolar ve oyunlar.',
       'welcome.lanes': 'Her çocuğun kendi alanı var — yaşının üstünde hiçbir şey yok.',
@@ -199,6 +214,11 @@ export default defineStrings(
       m7: 'Tem', m8: 'Ağu', m9: 'Eyl', m10: 'Eki', m11: 'Kas', m12: 'Ara',
     },
     ru: {
+      'start.title': 'Видео и игры, подобранные для детей',
+      'start.body': 'Проверено людьми, настроено родителями. У каждого ребёнка своя полоса.',
+      'start.go': 'Начать',
+      'start.haveAccount': 'У меня есть аккаунт',
+      'lang.title': 'Выберите язык',
       'welcome.title': 'Добро пожаловать в Payhas',
       'welcome.body': 'Короткие видео и игры, подобранные для каждого возраста.',
       'welcome.lanes': 'У каждого ребёнка своя полоса — ничего не по возрасту.',

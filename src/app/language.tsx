@@ -1,43 +1,62 @@
+import { router } from 'expo-router';
+import { useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
 
-import { LanguagePicker } from '@/components/LanguagePicker';
+import { LanguagePicker, useChooseLanguage } from '@/components/LanguagePicker';
 import { Enter } from '@/components/motion/Enter';
+import { Button } from '@/components/ui/Button';
+import { IconButton } from '@/components/ui/IconButton';
+import { LaneMark } from '@/features/start/LaneMark';
+import { Lang, LANGS, translate, useT } from '@/i18n';
 import { useInsets } from '@/lib/useInsets';
-import { color, font, lane as lanes, pageFill, size, space, themedStyles } from '@/theme/tokens';
+import { color, font, layout, pageFill, space, themedStyles, type } from '@/theme/tokens';
 
 /**
- * The very first screen on a new phone, before sign-in: the language, asked
- * in all four at once. Picking one moves on by itself (the router watches it).
+ * First run, after Welcome: the language. It starts on the phone's own; a
+ * tap only marks a row (the title follows it, so you see the pick working)
+ * and Continue applies it — the router then moves on to sign-in.
  */
 export default function LanguageScreen() {
   const insets = useInsets();
+  const { lang } = useT();
+  const choose = useChooseLanguage();
+  const [picked, setPicked] = useState<Lang>(lang);
+  const others = LANGS.filter((l) => l.code !== picked).map((l) => translate(l.code, 'onboarding.lang.title'));
+
   return (
-    <ScrollView style={styles.root} contentContainerStyle={[styles.content, { paddingTop: insets.top + 48, paddingBottom: insets.bottom + space.xl }]}>
-      <Enter index={0}>
-        <View style={styles.lanesRow}>
-          {(['little', 'kids', 'teen', 'adult'] as const).map((l) => (
-            <View key={l} style={[styles.laneBar, { backgroundColor: lanes[l].color }]} />
-          ))}
-        </View>
-      </Enter>
-      <Enter index={1}>
-        <Text style={styles.brand}>Payhas</Text>
-      </Enter>
-      <Enter index={2}>
-        <Text style={styles.ask}>Dili saýlaň · Dil seçin · Выберите язык · Choose a language</Text>
-      </Enter>
-      <View style={{ marginTop: space.xl }}>
-        <LanguagePicker firstRun />
+    <View style={styles.root}>
+      <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + space.sm }]} showsVerticalScrollIndicator={false}>
+        {router.canGoBack() && (
+          <View style={styles.back}>
+            <IconButton icon="back" label={translate(picked, 'common.back')} onPress={() => router.back()} />
+          </View>
+        )}
+        <Enter index={0}>
+          <LaneMark />
+        </Enter>
+        <Enter index={1}>
+          <Text style={styles.title} accessibilityRole="header">
+            {translate(picked, 'onboarding.lang.title')}
+          </Text>
+          <Text style={styles.others}>{others.join(' · ')}</Text>
+        </Enter>
+        <Enter index={2} style={styles.list}>
+          <LanguagePicker value={picked} onChange={setPicked} />
+        </Enter>
+      </ScrollView>
+      <View style={[styles.actions, { paddingBottom: insets.bottom + space.xl }]}>
+        <Button label={translate(picked, 'common.continue')} onPress={() => choose(picked, true)} />
       </View>
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = themedStyles(() => ({
   root: { flex: 1, ...pageFill() },
-  content: { paddingHorizontal: space.xl, gap: space.md },
-  lanesRow: { flexDirection: 'row', gap: 6, marginBottom: space.md },
-  laneBar: { width: 36, height: 10, borderRadius: 5 },
-  brand: { color: color.text, fontFamily: font.display, fontSize: size.hero, letterSpacing: -1.2 },
-  ask: { color: color.text2, fontFamily: font.medium, fontSize: size.body, lineHeight: 22 },
+  content: { paddingHorizontal: layout.gutter, gap: space.lg },
+  back: { marginLeft: -space.md, alignSelf: 'flex-start' },
+  title: { color: color.text, fontFamily: font.display, ...type.headline },
+  others: { color: color.text2, fontFamily: font.medium, ...type.small, marginTop: space.xs },
+  list: { marginTop: space.sm },
+  actions: { paddingHorizontal: layout.gutter, paddingTop: space.lg },
 }));

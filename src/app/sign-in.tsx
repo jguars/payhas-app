@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from 'react-native';
 
 import { SafeScreen } from '@/components/SafeScreen';
+import { firstRun } from '@/features/start/firstRun';
 import { useT } from '@/i18n';
 import { supabase } from '@/lib/supabase';
 import { color, font, pageFill, radius, size, space, themedStyles } from '@/theme/tokens';
@@ -10,7 +11,7 @@ type Mode = 'signIn' | 'signUp';
 
 export default function SignInScreen() {
   const { t } = useT();
-  const [mode, setMode] = useState<Mode>('signIn');
+  const [mode, setMode] = useState<Mode>(firstRun.signUp ? 'signUp' : 'signIn');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
