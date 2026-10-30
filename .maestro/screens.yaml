@@ -1,0 +1,66 @@
+# Walks the test family through the main screens and screenshots each one.
+# Run by .github/workflows/android-emulator.yml; EMAIL and PASSWORD come from
+# repository secrets (the test family, never a real account).
+appId: com.onki.payhas
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "English"
+    timeout: 60000
+- takeScreenshot: 01-language
+- tapOn: "English"
+- extendedWaitUntil:
+    visible: "Parent sign in"
+    timeout: 20000
+- takeScreenshot: 02-sign-in
+- tapOn: "Email"
+- inputText: ${EMAIL}
+- tapOn: "Password.*"
+- inputText: ${PASSWORD}
+- hideKeyboard
+- tapOn: "Sign in"
+- extendedWaitUntil:
+    visible: "Who’s watching?"
+    timeout: 30000
+- takeScreenshot: 03-who
+# Parent dashboard behind the PIN (test PIN).
+- tapOn: ".*Parent dashboard.*"
+- extendedWaitUntil:
+    visible: "2"
+    timeout: 10000
+- tapOn: "2"
+- tapOn: "5"
+- tapOn: "8"
+- tapOn: "0"
+- extendedWaitUntil:
+    visible: "Family"
+    timeout: 20000
+- waitForAnimationToEnd
+- takeScreenshot: 04-family
+- scroll
+- takeScreenshot: 05-family-scrolled
+- back
+- extendedWaitUntil:
+    visible: "Who’s watching?"
+    timeout: 20000
+- tapOn: "Aylar.*"
+- extendedWaitUntil:
+    visible: "For you"
+    timeout: 30000
+- waitForAnimationToEnd
+- takeScreenshot: 06-home
+- tapOn: "Discover"
+- waitForAnimationToEnd
+- takeScreenshot: 07-discover
+- tapOn: "Play"
+- waitForAnimationToEnd
+- takeScreenshot: 08-play
+- scroll
+- takeScreenshot: 09-play-scrolled
+- tapOn: "Inbox.*"
+- waitForAnimationToEnd
+- takeScreenshot: 10-inbox
+- tapOn: "Me"
+- waitForAnimationToEnd
+- takeScreenshot: 11-me

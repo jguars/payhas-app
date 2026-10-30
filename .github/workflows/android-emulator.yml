@@ -1,0 +1,84 @@
+# Boots an Android emulator on GitHub's KVM runners, installs an x86_64 build
+# of the app and walks the test family through the main screens with Maestro
+# (.maestro/screens.yaml). Screenshots are uploaded as the "emulator-screens"
+# artifact for design review (.claude/skills/ui-screen, step 10).
+#
+# Off until set up: needs two repository secrets for the test family (never a
+# real account), PAYHAS_TEST_EMAIL and PAYHAS_TEST_PASSWORD, and the repository
+# variable EMULATOR_SCREENS = true. Runs by hand from the Actions tab too.
+name: Android emulator screens
+
+on:
+  push:
+    branches: [plus]
+  workflow_dispatch:
+
+concurrency:
+  group: android-emulator-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  screens:
+    if: ${{ vars.EMULATOR_SCREENS == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - run: npm ci --no-audit --no-fund
+
+      - run: cp .env.example .env
+
+      - run: npx expo prebuild --platform android --no-install
+
+      - name: Build x86_64 release APK for the emulator
+        working-directory: android
+        run: ./gradlew assembleRelease -PreactNativeArchitectures=x86_64 --no-daemon
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Install Maestro
+        run: |
+          curl -Ls "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+
+      - name: Run the screens flow on an emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        env:
+          EMAIL: ${{ secrets.PAYHAS_TEST_EMAIL }}
+          PASSWORD: ${{ secrets.PAYHAS_TEST_PASSWORD }}
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          profile: pixel_6
+          disable-animations: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          script: |
+            adb install -r android/app/build/outputs/apk/release/app-release.apk
+            mkdir -p emulator-screens
+            cd emulator-screens && maestro test ../.maestro/screens.yaml -e EMAIL="$EMAIL" -e PASSWORD="$PASSWORD" --format junit --output report.xml || (adb exec-out screencap -p > failure.png; exit 1)
+
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: emulator-screens
+          path: emulator-screens/
+          retention-days: 14
