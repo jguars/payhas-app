@@ -179,16 +179,16 @@ Repeat for each screen or flow, starting with the 4–6 that matter most.
   _skill: `design-skills:design-critique`_
 - 🚦 **Gate 5 (per screen):** the owner approves the mockup.
 
-Per-screen tracker (copy a row per screen). Built screens: `design/screens/*-built.png` (Dark · Navy · Light).
+Per-screen tracker (copy a row per screen). Built screens: `design/screens/*-built.png` (Dark · Navy · Light); reviews: `design/screens/CRITIQUE-*.md` (`design-skills:design-critique`), `design/screens/A11Y-*.md` (`design-skills:accessibility-audit` + axe-core).
 
 | Screen | Refs | Copy | Mockup | 🚦 | Built | QA | Shipped |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Home (feed) | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
 | Discover | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
-| Play (games) | [x] | [x] | [x] | [x] Gate 2 | [x] | [x] | [ ] phone test |
+| Play (games) | [x] | [x] | [x] | [x] Gate 2 | [x] | [x] critique + a11y (axe 0) | [ ] phone test |
 | Me | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
 | Who's watching | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
-| Family dashboard | [x] | [x] | [x] | [x] Gate 2 | [x] | [x] | [ ] phone test |
+| Family dashboard | [x] | [x] | [x] | [x] Gate 2 | [x] | [x] critique + a11y (axe 0) | [ ] phone test |
 | Child page | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
 | Payhas Plus | [x] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
 | Edit profile | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |

@@ -1,4 +1,4 @@
-import { Pressable, Text } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
 import { Icon } from '@/components/Icon';
 import { laneKey, useT } from '@/i18n';
@@ -15,17 +15,18 @@ export function LaneBadge({ lane, label, onPress, variant = 'filled' }: Props) {
   const l = lanes[lane];
   const { t } = useT();
   const name = label ?? t(laneKey(lane));
-  return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={t('common.laneBadge', { lane: name, ages: l.ages })}
-      hitSlop={8}
-      disabled={!onPress}
-      style={[styles.badge, variant === 'filled' ? { backgroundColor: l.color } : styles.media]}
-    >
+  const body = (
+    <>
       {variant === 'media' && <Icon name="shield" size={12} color={l.color} strokeWidth={2.4} />}
       <Text style={[styles.label, { color: variant === 'filled' ? color.ink : l.color }]}>{name}</Text>
+    </>
+  );
+  const style = [styles.badge, variant === 'filled' ? { backgroundColor: l.color } : styles.media];
+  // Only a tappable badge is a button ("… Switch profile"); otherwise it's just text.
+  if (!onPress) return <View style={style}>{body}</View>;
+  return (
+    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={t('common.laneBadge', { lane: name, ages: l.ages })} hitSlop={8} style={style}>
+      {body}
     </Pressable>
   );
 }

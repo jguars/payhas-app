@@ -11,7 +11,7 @@ export function ListGroup({ title, footer, children }: { title?: string; footer?
   return (
     <View style={{ gap: space.sm }}>
       {!!title && (
-        <Text style={styles.groupTitle} accessibilityRole="header">
+        <Text style={styles.groupTitle} accessibilityRole="header" aria-level={2}>
           {title}
         </Text>
       )}
@@ -56,7 +56,7 @@ export function ListRow({ label, sub, leading, icon, value, toggle, onPress, dan
           {label}
         </Text>
         {typeof sub === 'string' ? (
-          <Text style={styles.sub} numberOfLines={2}>
+          <Text style={styles.sub} numberOfLines={3}>
             {sub}
           </Text>
         ) : (
@@ -85,6 +85,7 @@ export function ListRow({ label, sub, leading, icon, value, toggle, onPress, dan
       }}
       accessibilityRole={toggle != null ? 'switch' : 'button'}
       accessibilityState={toggle != null ? { checked: toggle } : undefined}
+      aria-checked={toggle ?? undefined}
       accessibilityLabel={accessibilityLabel ?? label}
       style={({ pressed }) => [style, pressed && { backgroundColor: color.surface2 }]}
     >

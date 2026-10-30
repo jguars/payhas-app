@@ -1,6 +1,6 @@
 import { router, useIsFocused } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 
 import { BottomSheet } from '@/components/BottomSheet';
 import { Icon } from '@/components/Icon';
@@ -70,7 +70,7 @@ export default function PlayScreen() {
             title={t('play.title')}
             subtitle={limitMinutes != null ? t('play.leftToday', { n: Math.max(0, limitMinutes - todayMin) }) : t('play.playedToday', { n: todayMin })}
           />
-          {limitMinutes != null && limitMinutes > 0 && <ProgressBar progress={todayMin / limitMinutes} />}
+          {limitMinutes != null && limitMinutes > 0 && <ProgressBar progress={todayMin / limitMinutes} label={t('play.leftToday', { n: Math.max(0, limitMinutes - todayMin) })} />}
         </Enter>
 
         {featured && (
@@ -80,7 +80,8 @@ export default function PlayScreen() {
         )}
 
         {SECTIONS.map((section) => {
-          const games = section.games.filter((id) => id !== featured);
+          // Open games first, locked ones after: a child shouldn't meet a wall of locks.
+          const games = section.games.filter((id) => id !== featured).sort((a, b) => Number(!gameOpen(a)) - Number(!gameOpen(b)));
           if (games.length === 0) return null;
           const grid = GRID_SECTIONS.includes(section.title);
           return (
@@ -119,7 +120,8 @@ export default function PlayScreen() {
 function Stage({ meta, active, locked, height }: { meta: GameMeta; active: boolean; locked: boolean; height: number }) {
   const { Scene } = meta;
   return (
-    <View style={[styles.stage, { height, backgroundColor: meta.tint }]}>
+    // Decorative scene: the tile around it carries the name for screen readers.
+    <View style={[styles.stage, { height, backgroundColor: meta.tint }]} accessible={false} importantForAccessibility="no-hide-descendants" aria-hidden>
       <Scene active={active && !locked} />
       {locked && (
         <View style={styles.lockScrim}>
@@ -136,8 +138,11 @@ function Featured({ meta, lane, focused, onPlay }: { meta: GameMeta; lane: Lane;
   const { t } = useT();
   const name = t(meta.name);
   return (
-    <Card hero tactile flush onPress={onPlay} accessibilityLabel={`${name}. ${meta.sub(lane, t)}`}>
-      <Stage meta={meta} active={focused} locked={false} height={HERO_STAGE} />
+    <Card hero tactile flush>
+      {/* The art is a big tap target for small hands; screen readers get the one Play button instead. */}
+      <Pressable onPress={onPlay} accessible={false} importantForAccessibility="no-hide-descendants">
+        <Stage meta={meta} active={focused} locked={false} height={HERO_STAGE} />
+      </Pressable>
       <View style={styles.heroFoot}>
         <View style={styles.grow}>
           <Text style={styles.heroName} numberOfLines={1}>
@@ -147,7 +152,7 @@ function Featured({ meta, lane, focused, onPlay }: { meta: GameMeta; lane: Lane;
             {meta.sub(lane, t)}
           </Text>
         </View>
-        <Button label={t('play.play')} size="sm" block={false} onPress={onPlay} />
+        <Button label={t('play.play')} accessibilityLabel={`${t('play.play')}: ${name}`} size="sm" block={false} onPress={onPlay} />
       </View>
     </Card>
   );

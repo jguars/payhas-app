@@ -1,6 +1,6 @@
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, ScrollView, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
 
 import { Icon } from '@/components/Icon';
 import { LaneBadge } from '@/components/LaneBadge';
@@ -104,14 +104,15 @@ export default function FamilyScreen() {
     );
   }
 
-  const done = (ok: boolean, text: string) => {
+  /** Report an action; Pause passes `undo` so a mis-tap is one tap to reverse. */
+  const done = (ok: boolean, text: string, undo?: () => Promise<boolean>) => {
     if (!ok) {
       fx.error();
       toast({ text: t('parent.networkError'), icon: 'close' });
       return;
     }
     fx.success();
-    toast({ text, icon: 'check' });
+    toast({ text, icon: 'check', action: undo ? { label: t('parent.undo'), onPress: () => void undo() } : undefined });
   };
 
   const adults = profiles.filter((p) => p.lane === 'adult').sort((a, b) => Number(b.is_parent) - Number(a.is_parent));
@@ -125,7 +126,7 @@ export default function FamilyScreen() {
     <View style={styles.root}>
       <ScrollView contentContainerStyle={[styles.content, { paddingTop: top + space.sm, paddingBottom: bottom + space.xxl }]} showsVerticalScrollIndicator={false}>
         <Enter index={0}>
-          <PageHeader back title={t('parent.title')} subtitle={t('parent.familySub')} />
+          <PageHeader back title={t('parent.title')} subtitle={t('parent.familyGlance')} />
         </Enter>
 
         {(requests.length > 0 || flags.length > 0) && (
@@ -180,7 +181,7 @@ export default function FamilyScreen() {
                   onOpen={() => openChild(c)}
                   onPause={async () => {
                     const next = !c.paused;
-                    done(await setPaused(c, next), t(next ? 'parent.pausedToast' : 'parent.resumedToast', { name: c.display_name }));
+                    done(await setPaused(c, next), t(next ? 'parent.pausedToast' : 'parent.resumedToast', { name: c.display_name }), () => setPaused(c, !next));
                   }}
                   onAddTime={async () => done(await addTime(c, 15), t('parent.addedTime', { count: 15, name: c.display_name }))}
                 />
@@ -269,8 +270,8 @@ function ChildCard({ child, avatar, onOpen, onPause, onAddTime }: { child: Child
   const limit = child.daily_limit_minutes == null ? null : child.daily_limit_minutes + child.extra_minutes;
   const status = child.paused ? t('parent.paused') : p.text;
   return (
-    <Card onPress={onOpen} accessibilityLabel={`${child.display_name}, ${t(roleKey(child))}. ${status}`}>
-      <View style={styles.who}>
+    <Card>
+      <Pressable onPress={onOpen} accessibilityRole="button" accessibilityLabel={`${child.display_name}, ${t(roleKey(child))}. ${status}`} style={styles.who}>
         <View>
           <Avatar name={child.display_name} avatar={avatar} lane={child.lane} size={56} />
           {p.live && !child.paused && (
@@ -285,22 +286,22 @@ function ChildCard({ child, avatar, onOpen, onPause, onAddTime }: { child: Child
           </Text>
           <View style={styles.statusRow}>
             <LaneBadge lane={child.lane} label={`${t(roleKey(child))} · ${lanes[child.lane].ages}`} />
-            <Text style={[styles.status, child.paused ? { color: color.info } : p.live && { color: color.success }]} numberOfLines={1}>
+            <Text style={styles.status} numberOfLines={1}>
               {status}
             </Text>
           </View>
         </View>
         <Icon name="chevron" size={iconSize.sm} color={color.text3} strokeWidth={iconStroke(iconSize.sm)} />
-      </View>
+      </Pressable>
       <View style={styles.usedRow}>
         <Text style={styles.used}>{minutes(t, used)}</Text>
         <Text style={styles.muted}>{limit ? t('parent.ofToday', { limit: minutes(t, limit * 60) }) : t('parent.noLimit')}</Text>
       </View>
-      {limit != null && <ProgressBar progress={used / (limit * 60)} />}
+      {limit != null && <ProgressBar progress={used / (limit * 60)} label={`${child.display_name}: ${minutes(t, used)} ${t('parent.ofToday', { limit: minutes(t, limit * 60) })}`} />}
       <View style={styles.actions}>
-        <Button size="sm" variant="secondary" icon={child.paused ? 'play' : 'pause'} label={t(child.paused ? 'parent.resume' : 'parent.pauseShort')} onPress={onPause} />
-        {limit != null && <Button size="sm" variant="secondary" icon="plus" label={t('parent.addMin', { count: 15 })} onPress={onAddTime} />}
-        <Button size="sm" variant="secondary" icon="sliders" label={t('parent.rules')} onPress={onOpen} />
+        <Button size="sm" variant="secondary" icon={child.paused ? 'play' : 'pause'} label={t(child.paused ? 'parent.resume' : 'parent.pauseShort')} accessibilityLabel={`${t(child.paused ? 'parent.resume' : 'parent.pauseShort')}: ${child.display_name}`} onPress={onPause} />
+        {limit != null && <Button size="sm" variant="secondary" icon="plus" label={t('parent.addMin', { count: 15 })} accessibilityLabel={t('parent.addedTime', { count: 15, name: child.display_name })} onPress={onAddTime} />}
+        <Button size="sm" variant="secondary" icon="chevron" label={t('parent.details')} accessibilityLabel={`${t('parent.details')}: ${child.display_name}`} onPress={onOpen} />
       </View>
     </Card>
   );

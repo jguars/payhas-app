@@ -106,9 +106,9 @@ export default function GalleryScreen() {
       </Section>
 
       <Section title="Progress">
-        <ProgressBar progress={0.25} />
-        <ProgressBar progress={1} />
-        <ProgressBar progress={0.6} thin />
+        <ProgressBar progress={0.25} label="15 of 60 min" />
+        <ProgressBar progress={1} label="60 of 60 min" />
+        <ProgressBar progress={0.6} thin label="Thin, 60%" />
       </Section>
 
       <Section title="Empty state">

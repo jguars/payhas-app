@@ -21,7 +21,8 @@ export function Toggle({ on, tint = color.success }: { on: boolean; tint?: strin
   });
 
   return (
-    <Animated.View style={[styles.track, track]} accessibilityRole="switch" accessibilityState={{ checked: on }}>
+    // Display only: the row that holds it is the switch (role, state and label live there).
+    <Animated.View style={[styles.track, track]} accessible={false} importantForAccessibility="no-hide-descendants" aria-hidden>
       <Animated.View style={[styles.knob, knob]} />
     </Animated.View>
   );

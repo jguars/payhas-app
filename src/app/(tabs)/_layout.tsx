@@ -88,7 +88,7 @@ export default function TabsLayout() {
     <Tabs style={styles.root}>
       <TabSlot style={styles.root} />
       {/* Floats above the gesture bar; screens add useTabBarSpace() so content clears it. */}
-      <TabList style={[styles.bar, { bottom: bottom + TAB_BAR.gap }]} onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
+      <TabList accessibilityRole="tablist" style={[styles.bar, { bottom: bottom + TAB_BAR.gap }]} onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
         <Highlight width={width} />
         <TabTrigger name="index" href="/" asChild>
           <TabButton kind="home" label={t('nav.home')} />

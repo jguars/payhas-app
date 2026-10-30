@@ -8,7 +8,7 @@ export function SectionHeader({ title, subtitle, action, onAction }: { title: st
   return (
     <View style={styles.row}>
       <View style={{ flex: 1, gap: 2 }}>
-        <Text style={styles.title} accessibilityRole="header" numberOfLines={1}>
+        <Text style={styles.title} accessibilityRole="header" aria-level={2} numberOfLines={1}>
           {title}
         </Text>
         {!!subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
