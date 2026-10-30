@@ -13,6 +13,11 @@ name: iOS simulator screens
 on:
   push:
     branches: [plus]
+    # Docs, mockups and screenshots don't change the app: no build for them.
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - 'design/**'
   workflow_dispatch:
 
 concurrency:

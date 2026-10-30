@@ -3,6 +3,8 @@
 Everything in `.github/workflows/`. All run on GitHub Actions; the ones
 marked *plus* run on every push to the `plus` branch (a newer push cancels
 the run in progress) and can also be started by hand from the Actions tab.
+Pushes that only change Markdown files, `docs/` or `design/` don't start the
+*plus* builds.
 
 | Workflow | Runs on | What it does | Output |
 | --- | --- | --- | --- |
