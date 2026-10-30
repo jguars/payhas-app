@@ -434,7 +434,7 @@ function AlertsRow({ parent, first, onResult }: { parent: string | null; first: 
         fx.error();
         Alert.alert(
           t('parent.alertsFailTitle'),
-          r === 'denied' ? t('parent.alertsDenied') : r === 'unsupported' ? t('parent.alertsUnsupported') : t('parent.alertsError'),
+          r === 'denied' ? t('parent.alertsDenied') : r === 'unsupported' ? t('parent.alertsUnsupported') : r === 'notYetIos' ? t('parent.alertsNotYetIos') : t('parent.alertsError'),
         );
       }
     }

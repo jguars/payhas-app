@@ -12,7 +12,7 @@ import { color } from '@/theme/tokens';
 // The FCM token this phone registered as a parent phone, if it opted in.
 const KEY = 'payhas.pushToken';
 
-export type AlertsResult = 'on' | 'denied' | 'unsupported' | 'error';
+export type AlertsResult = 'on' | 'denied' | 'unsupported' | 'notYetIos' | 'error';
 
 if (Platform.OS !== 'web') {
   // Alerts arriving while Payhas is open still show as a banner.
@@ -43,6 +43,9 @@ function ensureChannel() {
 /** Opt this phone in (needs a live parent session). Asks for notification permission first. */
 export async function enableParentAlerts(parent: string): Promise<AlertsResult> {
   if (Platform.OS === 'web' || !Device.isDevice) return 'unsupported';
+  // Alerts are sent through Firebase Cloud Messaging, which reaches iPhones only
+  // once an Apple push key is set up for Payhas. Until then, say so plainly.
+  if (Platform.OS === 'ios') return 'notYetIos';
   await ensureChannel();
   let { status } = await Notifications.getPermissionsAsync();
   if (status !== 'granted') status = (await Notifications.requestPermissionsAsync()).status;

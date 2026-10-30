@@ -78,6 +78,7 @@ export default function PaywallScreen() {
           <Button label={t('plus.continuePin')} icon="lock" onPress={() => router.push('/plus')} />
           <Text style={styles.note}>{t('plus.parentBuys')}</Text>
         </Enter>
+        <View style={styles.end} />
       </ScrollView>
       <StatusScrim />
     </View>
@@ -86,8 +87,11 @@ export default function PaywallScreen() {
 
 const styles = themedStyles(() => ({
   root: { flex: 1, ...pageFill() },
-  content: { paddingHorizontal: layout.gutter, gap: layout.section },
-  top: { flexDirection: 'row' },
+  // Fills the screen so the body can centre on tall phones (Pro Max); scrolls on the smallest (SE).
+  content: { flexGrow: 1, paddingHorizontal: layout.gutter, gap: layout.section },
+  // Equal flexible space above the body and below it centres the body on tall phones.
+  top: { flexDirection: 'row', marginBottom: 'auto' },
+  end: { marginTop: 'auto' },
   hero: { alignItems: 'center', gap: space.sm },
   dots: { flexDirection: 'row', gap: space.xs + border.strong },
   dot: { width: space.xl, height: space.sm, borderRadius: radius.pill },

@@ -10,7 +10,10 @@
       "supportsTablet": false,
       "bundleIdentifier": "com.onki.payhas",
       "buildNumber": "1",
-      "appleTeamId": "M4V4D8KSX3"
+      "appleTeamId": "M4V4D8KSX3",
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
