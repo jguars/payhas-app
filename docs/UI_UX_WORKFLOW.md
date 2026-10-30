@@ -104,7 +104,7 @@ Name what's available in each project; strike out what isn't.
   decoration"). — _skills: `design-skills:design-critique`,
   `design-skills:ux-strategy`; output: top of `DESIGN.md`_ — "Night-Light Playroom" in `DESIGN.md`; 6 principles approved, top of `DESIGN.md`
 - [~] **2.5 Explore 2–3 visual directions** on the same 2 key screens. —
-  _skill: `superdesign:superdesign` (variants across models) or Figma_ — direction chosen first (2.1), so 2 variants of it on Play and Family: `design/direction/mockups/` (HTML in `src/`, real fonts and art, Dark + Light). Superdesign/Figma not used: their hosts aren't reachable from this session. Awaiting Gate 2
+  _skill: `superdesign:superdesign` (variants across models) or Figma_ — direction chosen first (2.1), so 2 variants of it on Play and Family: `design/direction/mockups/` (HTML in `src/`, real fonts and art, Dark + Light). Figma not used: its connector can't connect from this session. Superdesign not tried (no skill invoked; mockups hand-built in HTML instead). Awaiting Gate 2
 - 🚦 **Gate 2:** the owner picks one direction. — ✅ Guvanch, 2026-10-30: Play B (featured game + shelves) with Brain games as a grid, Family B (child cards) — `design/direction/mockups/play-approved.png`
 
 ## Phase 3 — Design system: foundations (tokens)
