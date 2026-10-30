@@ -189,8 +189,9 @@ export function presence(c: Child, t: T, now = Date.now()) {
   return { live: false, text: t('parent.lastSeen', { time: ago(t, Math.round(since / 60_000)) }) };
 }
 
-/** Seconds as "1h 5m" / "45m" (in the current language). */
+/** Seconds as "1 h 5 min" / "1 h" / "45 min" (in the current language) — the one duration format. */
 export const minutes = (t: T, s: number) => {
   const m = Math.round(s / 60);
-  return m >= 60 ? t('parent.durHM', { h: Math.floor(m / 60), m: m % 60 }) : t('parent.durM', { m });
+  if (m < 60) return t('parent.durM', { m });
+  return m % 60 === 0 ? t('parent.durH', { h: m / 60 }) : t('parent.durHM', { h: Math.floor(m / 60), m: m % 60 });
 };

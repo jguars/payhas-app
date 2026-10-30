@@ -163,7 +163,7 @@ with the same names.
   hand-built buttons and cards. Add a rule to `CLAUDE.md`/`AGENTS.md`: "screens
   use components and tokens only". — _eslint `no-restricted-syntax`;
   skill: `code-review`_ — `no-restricted-syntax` in `eslint.config.js` flags raw sizes/spacing/radii/hex on screens (434 warnings = drift to remove in Phases 6–7, then error); rule added to `AGENTS.md`
-- 🚦 **Gate 4:** the owner approves the component gallery.
+- 🚦 **Gate 4:** the owner approves the component gallery. — ✅ Guvanch, 2026-10-30
 
 ## Phase 5 — Screens: design before code
 
@@ -179,16 +179,16 @@ Repeat for each screen or flow, starting with the 4–6 that matter most.
   _skill: `design-skills:design-critique`_
 - 🚦 **Gate 5 (per screen):** the owner approves the mockup.
 
-Per-screen tracker (copy a row per screen):
+Per-screen tracker (copy a row per screen). Built screens: `design/screens/*-built.png` (Dark · Navy · Light).
 
 | Screen | Refs | Copy | Mockup | 🚦 | Built | QA | Shipped |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | Home (feed) | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
 | Discover | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
-| Play (games) | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
+| Play (games) | [x] | [x] | [x] | [x] Gate 2 | [x] | [x] | [ ] phone test |
 | Me | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
 | Who's watching | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
-| Family dashboard | [x] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
+| Family dashboard | [x] | [x] | [x] | [x] Gate 2 | [x] | [x] | [ ] phone test |
 | Child page | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
 | Payhas Plus | [x] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
 | Edit profile | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |

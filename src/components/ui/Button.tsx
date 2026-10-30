@@ -38,6 +38,8 @@ export function Button({ label, onPress, variant = 'primary', size = 'lg', icon,
       }}
       disabled={off}
       pressedScale={0.97}
+      // Small buttons draw at 40 but take touches across the 48 minimum.
+      hitSlop={lg ? undefined : (control.md - control.sm) / 2}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel ?? label}
       accessibilityState={{ disabled: !!off, busy: !!loading }}
