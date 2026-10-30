@@ -1,0 +1,133 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=390">
+<!-- Linking each family member's own phone: 5 variants × 4 screens. Open phones.html?v=A1..E4&t=dark|light -->
+<link rel="stylesheet" href="mock.css">
+<style>
+.who{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:700;background:var(--s2);color:var(--t2);margin-bottom:6px}
+.who i{width:8px;height:8px;border-radius:4px;display:block}
+.digits{display:flex;gap:8px;justify-content:center;margin-top:18px}
+.digits b{width:46px;height:60px;border-radius:14px;background:var(--s2);border:2px solid var(--line);display:flex;align-items:center;justify-content:center;font-family:B;font-weight:800;font-size:28px}
+.digits b.on{border-color:var(--t2)}
+.digits .gap{width:8px}
+.bigcode{font-family:B;font-weight:800;font-size:48px;letter-spacing:6px;text-align:center;margin-top:8px}
+.timer{display:flex;justify-content:center;align-items:center;gap:6px;color:var(--t2);font-size:14px;font-weight:600;margin-top:6px}
+.steps{margin-top:6px}
+.step{display:flex;gap:12px;align-items:flex-start;padding:10px 0;font-size:15px;line-height:20px}
+.step b{width:26px;height:26px;border-radius:13px;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+.kbd{position:absolute;left:0;right:0;bottom:0;padding:8px 8px 28px;background:var(--s1);display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.kbd div{height:48px;border-radius:10px;background:var(--s2);display:flex;align-items:center;justify-content:center;font-family:B;font-weight:700;font-size:22px}
+.kbd div.k0{background:transparent}
+.dim{position:absolute;inset:0;background:rgba(0,0,0,.55)}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--s1);border-radius:28px 28px 0 0;padding:10px 16px 30px}
+.grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 14px}
+.opt{display:flex;align-items:center;gap:12px;padding:12px;border-radius:16px;border:2px solid var(--line);margin-top:10px}
+.opt.sel{border-color:var(--t1)}
+.radio{width:22px;height:22px;border-radius:11px;border:2px solid var(--t3);flex:none}
+.opt.sel .radio{border:7px solid var(--t1)}
+.share{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px;text-align:center;font-size:12px;font-weight:600;color:var(--t2)}
+.share div div{width:56px;height:56px;border-radius:28px;background:var(--s2);margin:0 auto 6px;display:flex;align-items:center;justify-content:center;color:var(--t1);font-family:B;font-weight:800;font-size:18px}
+.spin{width:18px;height:18px;border-radius:9px;border:2.5px solid var(--line);border-top-color:var(--t1)}
+.center{text-align:center}
+.hero{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px}
+.logo{font-family:B;font-weight:800;font-size:44px;letter-spacing:-1px}
+.big{width:96px;height:96px;border-radius:50%;background-size:115%;background-position:center}
+.big.m{filter:hue-rotate(-100deg) saturate(1.3)}
+.mini{display:inline-block;width:22px;height:22px;border-radius:50%;background-size:115%;background-position:center;vertical-align:-6px;margin-right:4px}
+.tag2{display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 8px;border-radius:999px;background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok);font-size:12px;font-weight:700}
+.phonebar{position:absolute;left:0;right:0;top:0;height:6px}
+</style></head>
+<body>
+<div class="screen" id="s"></div>
+<script src="icons.js"></script>
+<script>
+const q=new URLSearchParams(location.search);const v=q.get('v');if(q.get('t')==='light')document.documentElement.className='light';
+const img=(n,x='')=>`style="background-image:url(img/${n}.png);${x}"`;
+const chev=`<span class="chev">${ic('chev',18)}</span>`;
+const back=(right='')=>`<div class="top"><div class="icobtn">${ic('back',26)}</div>${right}</div>`;
+// Whose phone the screen is on: the parent's (ember) or the new phone (lane colour).
+const onParent=`<span class="who"><i style="background:var(--ember)"></i>Parent's phone</span>`;
+const onNew=(n='Aylar’s new phone')=>`<span class="who"><i style="background:var(--kids)"></i>${n}</span>`;
+const kbd=`<div class="kbd">${[1,2,3,4,5,6,7,8,9,'',0,'⌫'].map((k,i)=>`<div class="${k===''?'k0':''}">${k==='⌫'?ic('del',22):k}</div>`).join('')}</div>`;
+const digits=(d,on)=>`<div class="digits">${d.split('').map((c,i)=>(i===3?'<span class="gap"></span>':'')+`<b class="${i===on?'on':''}">${c}</b>`).join('')}</div>`;
+const members=(sel)=>[['av-kid','','Aylar','Kids · 7–12'],['av-kid','m','Merdan','Little · 0–6'],[null,'','Shared by the family','“Who’s watching?” on this phone'],[null,'','Another parent','Signs in with their own number']].map((m,i)=>`<div class="opt ${i===sel?'sel':''}">${m[0]?`<div class="av ${m[1]}" ${img(m[0],'width:40px;height:40px')}></div>`:`<div class="tile">${ic(i===2?'home2':'me',18)}</div>`}<div class="grow"><div class="label">${m[2]}</div><div class="hint">${m[3]}</div></div><div class="radio"></div></div>`).join('');
+const phonesList=(pending)=>`<div class="group">
+  <div class="row"><div class="tile">${ic('phone',18)}</div><div class="grow"><div class="label">iPhone 12</div><div class="hint">Guvanch · this phone</div></div></div>
+  <div class="row"><div class="av" ${img('av-kid','width:36px;height:36px')}></div><div class="grow"><div class="label">Redmi 12</div><div class="hint">Aylar · ${pending?'waiting for you':'active now'}</div></div>${pending?'<span class="badge">Waiting</span>':'<span class="val danger">Remove</span>'}</div>
+  <div class="row"><div class="tile">${ic('plus',18)}</div><div class="grow label">Add a phone</div>${chev}</div></div>`;
+const S={
+/* ── A · Code on the parent's phone, then Allow ─────────────────────────── */
+A1:()=>`${onParent}${back()}<div class="h1">Family settings</div>
+ <div class="sec">Phones</div><div class="group">
+  <div class="row"><div class="tile">${ic('phone',18)}</div><div class="grow"><div class="label">iPhone 12</div><div class="hint">Guvanch · this phone</div></div></div>
+  <div class="row"><div class="tile">${ic('plus',18)}</div><div class="grow label">Add a phone</div>${chev}</div></div>
+ <div class="dim"></div><div class="sheet"><div class="grab"></div><div class="title">Who is this phone for?</div>${members(0)}<div class="btn primary" style="margin-top:16px">Get a code</div></div>`,
+A2:()=>`${onParent}${back()}<div class="h1">Aylar’s phone</div><div class="sub">Type this code on Aylar’s phone</div>
+ <div class="card pad" style="margin-top:20px"><div class="bigcode">482 913</div><div class="timer">${ic('clock',16)} Works once, for 10 min</div></div>
+ <div class="steps card pad" style="margin-top:12px"><div class="step"><b>1</b>Install Payhas on Aylar’s phone and open it</div><div class="step"><b>2</b>Tap <strong>&nbsp;Join my family</strong></div><div class="step"><b>3</b>Type the code. You’ll be asked to allow it</div></div>`,
+A3:()=>`${onNew()}<div class="hero" style="margin-top:40px"><div class="logo">payhas</div><div class="title" style="margin-top:20px">Join my family</div><div class="sub">Type the code from your parent’s phone</div></div>
+ ${digits('482913',5)}<div class="center hint" style="margin-top:16px">Asking Guvanch to allow…</div>${kbd}`,
+A4:()=>`${onParent}${back(`<div class="icobtn fill">${ic('sliders',20)}</div>`)}<div class="h1">Family</div>
+ <div class="dim"></div><div class="sheet"><div class="grab"></div><div class="hero"><div class="big" ${img('av-kid')}></div><div class="title" style="margin-top:6px">Allow Aylar’s phone?</div><div class="sub">Redmi 12 wants to join as Aylar. It will only show Aylar’s videos and games.</div></div>
+ <div class="btn primary" style="margin-top:18px">Allow</div><div class="btn secondary" style="margin-top:10px">Not now</div></div>`,
+
+/* ── B · The new phone shows a code; the parent types it (no Allow step) ── */
+B1:()=>`${onNew()}<div class="hero" style="margin-top:56px"><div class="logo">payhas</div><div class="title" style="margin-top:24px">Join my family</div><div class="sub">Ask your parent to type this code on their phone</div></div>
+ <div class="card pad" style="margin-top:22px"><div class="bigcode">731 502</div><div class="timer"><span class="spin"></span>&nbsp;Waiting for your parent</div></div>
+ <div class="center hint" style="margin-top:14px">Payhas → Me → Family → Add a phone</div>`,
+B2:()=>`${onParent}${back()}<div class="h1">Add a phone</div><div class="sub">Type the code shown on the new phone</div>${digits('731502',5)}${kbd}`,
+B3:()=>`${onParent}${back()}<div class="h1">Who uses this phone?</div><div class="sub">Redmi 12</div>${members(0)}<div class="btn primary" style="margin-top:18px">Link phone</div>`,
+B4:()=>`${onNew('Aylar’s phone')}<div class="hero" style="margin-top:90px"><div class="big" ${img('av-kid','width:120px;height:120px')}></div><div class="h1" style="margin-top:12px">You’re in, Aylar!</div><div class="sub">Your parent linked this phone. Your videos, games and time are all here.</div></div>
+ <div class="btn primary" style="position:absolute;left:16px;right:16px;bottom:40px">Start watching</div>`,
+
+/* ── C · Invite link sent in a message ───────────────────────────────────── */
+C1:()=>`${onParent}${back()}<div class="h1">Family</div>
+ <div class="dim"></div><div class="sheet"><div class="grab"></div><div class="title">Invite Aylar</div><div class="sub" style="font-size:14px">Send a link to Aylar’s phone. It works once, for 24 hours.</div>
+ <div class="share"><div><div>T</div>Telegram</div><div><div>imo</div>imo</div><div><div>W</div>WhatsApp</div><div><div>${ic('link',22)}</div>Copy link</div></div>
+ <div class="card pad" style="margin-top:16px;background:var(--s2)"><div class="hint" style="margin:0">Guvanch invited you to the family on Payhas. Open this on your own phone: payhas.app/j/K7Q-28F</div></div></div>`,
+C2:()=>`${onNew()}<div class="hero" style="margin-top:70px"><div class="big" ${img('av-parent')}></div><div class="title" style="margin-top:10px">Guvanch invited you</div><div class="sub">Join the family on Payhas</div></div>
+ <div class="card pad" style="margin-top:24px;display:flex;flex-direction:row;align-items:center;gap:12px"><div class="av" ${img('av-kid')}></div><div class="grow"><div class="label">Aylar</div><div class="hint">Kids · 7–12</div></div></div>
+ <div class="btn primary" style="margin-top:18px">Join as Aylar</div><div class="center label ghost" style="margin-top:14px">Not Aylar?</div>`,
+C3:()=>`${onParent}<div class="card pad" style="margin-top:6px;display:flex;flex-direction:row;gap:12px;align-items:center"><div class="tile">${ic('bell',18)}</div><div class="grow"><div class="label">Aylar joined from Redmi 12</div><div class="hint">Allow it to show Aylar’s feed?</div></div></div>
+ ${back()}<div class="h1">Family</div><div class="dim" style="top:110px"></div><div class="sheet"><div class="grab"></div><div class="title">Allow Aylar’s phone?</div><div class="sub" style="font-size:14px">Redmi 12 · joined 1 min ago</div><div class="btn primary" style="margin-top:16px">Allow</div><div class="btn secondary" style="margin-top:10px">Not now</div></div>`,
+C4:()=>`${onParent}${back()}<div class="h1">Phones</div><div class="sub">Who uses Payhas on which phone</div>
+ <div class="group" style="margin-top:18px">
+  <div class="row"><div class="av" ${img('av-parent','width:40px;height:40px')}></div><div class="grow"><div class="label">Guvanch</div><div class="hint">iPhone 12 · this phone</div></div></div>
+  <div class="row"><div class="av" ${img('av-kid','width:40px;height:40px')}></div><div class="grow"><div class="label">Aylar</div><div class="hint">Redmi 12 · active now</div></div><span class="val danger">Remove</span></div>
+  <div class="row"><div class="av m" ${img('av-kid','width:40px;height:40px')}></div><div class="grow"><div class="label">Merdan</div><div class="hint">Invite sent · 2 h left</div></div><span class="badge">Pending</span></div>
+  <div class="row"><div class="tile">${ic('home2',18)}</div><div class="grow"><div class="label">Family tablet</div><div class="hint">Shared · Who’s watching?</div></div><span class="val danger">Remove</span></div></div>
+ <div class="btn secondary" style="margin-top:16px">${ic('plus',18)} Invite someone</div>`,
+
+/* ── D · Per child, from the Family dashboard ───────────────────────────── */
+D1:()=>`${onParent}${back(`<div class="icobtn fill">${ic('sliders',20)}</div>`)}<div class="h1">Family</div>
+ <div class="chips"><div class="chip on"><div class="av" ${img('av-kid')}></div>Aylar</div><div class="chip"><div class="av m" ${img('av-kid')}></div>Merdan</div><div class="chip"><div class="add">${ic('plus',22)}</div>Add</div></div>
+ <div class="card pad" style="margin-top:16px"><div style="display:flex;justify-content:space-between;align-items:center"><div class="title">Aylar <span class="lane" style="background:var(--kids)">Kids · 7–12</span></div></div>
+  <div class="stat" style="margin-top:10px">52 min <span>of 1 h 15 min today</span></div><div class="bar" style="margin-top:10px"><i style="width:69%;background:var(--kids)"></i></div></div>
+ <div class="group" style="margin-top:12px"><div class="row"><div class="tile">${ic('phone',18)}</div><div class="grow"><div class="label">Aylar’s phone</div><div class="hint">Not linked yet</div></div><div class="btn secondary small">Link</div></div></div>`,
+D2:()=>`${onParent}${back()}<div class="h1">Link Aylar’s phone</div><div class="sub">On Aylar’s phone, open Payhas and tap Join my family</div>
+ <div class="card pad" style="margin-top:20px"><div class="bigcode">482 913</div><div class="timer">${ic('clock',16)} Works once, for 10 min</div></div>
+ <div class="card pad" style="margin-top:12px;display:flex;flex-direction:row;gap:12px;align-items:center"><span class="spin"></span><div class="grow"><div class="label">Waiting for Aylar’s phone…</div><div class="hint">This page updates by itself</div></div></div>`,
+D3:()=>`${onNew()}<div class="hero" style="margin-top:40px"><div class="logo">payhas</div><div class="title" style="margin-top:20px">Join my family</div><div class="sub">Type the code from your parent’s phone</div></div>${digits('482913',5)}${kbd}`,
+D4:()=>`${onParent}${back(`<div class="icobtn fill">${ic('sliders',20)}</div>`)}<div class="h1">Family</div>
+ <div class="chips"><div class="chip on"><div class="av" ${img('av-kid')}></div>Aylar</div><div class="chip"><div class="av m" ${img('av-kid')}></div>Merdan</div><div class="chip"><div class="add">${ic('plus',22)}</div>Add</div></div>
+ <div class="card pad" style="margin-top:16px"><div class="title">Aylar <span class="lane" style="background:var(--kids)">Kids · 7–12</span></div>
+  <div class="stat" style="margin-top:10px">52 min <span>of 1 h 15 min today</span></div><div class="bar" style="margin-top:10px"><i style="width:69%;background:var(--kids)"></i></div></div>
+ <div class="group" style="margin-top:12px"><div class="row"><div class="tile">${ic('phone',18)}</div><div class="grow"><div class="label">Redmi 12</div><div class="hint"><span class="dot"></span>Aylar’s phone · active now</div></div>${chev}</div></div>
+ <div class="note">${ic('check',16)}Linked. Pause and +15 reach this phone at once.</div>`,
+
+/* ── E · The parent sets it up on the child's phone ─────────────────────── */
+E1:()=>`${onNew('New phone')}<div class="hero" style="margin-top:40px"><div class="logo">payhas</div><div class="title" style="margin-top:20px">Whose phone is this?</div></div>
+ <div class="opt sel" style="margin-top:20px"><div class="tile">${ic('me',18)}</div><div class="grow"><div class="label">A child’s phone</div><div class="hint">A parent sets it up</div></div><div class="radio"></div></div>
+ <div class="opt"><div class="tile">${ic('home2',18)}</div><div class="grow"><div class="label">Shared by the family</div><div class="hint">Everyone picks themselves</div></div><div class="radio"></div></div>
+ <div class="opt"><div class="tile">${ic('lock',18)}</div><div class="grow"><div class="label">My own — I’m a parent</div><div class="hint">Sign in or create the family</div></div><div class="radio"></div></div>
+ <div class="btn primary" style="position:absolute;left:16px;right:16px;bottom:40px">Continue</div>`,
+E2:()=>`${onNew('New phone')}${back()}<div class="h1">Parent, it’s you?</div><div class="sub">Confirm with your own number. Your login won’t stay on this phone.</div>
+ <div class="label" style="margin-top:20px">Phone number</div><div style="display:flex;gap:8px;margin-top:8px"><div class="code" style="margin:0;width:84px;justify-content:center;color:var(--t1)">+993</div><div class="code" style="margin:0;flex:1;color:var(--t1)">61 23 45 67</div></div>
+ <div class="label" style="margin-top:16px">Code</div><div class="code" style="color:var(--t1)">0 0 0 0</div><div class="btn primary" style="margin-top:16px">Confirm</div>`,
+E3:()=>`${onNew('New phone')}${back()}<div class="h1">Who is this phone for?</div><div class="sub">Guvanch’s family</div>
+ <div class="tiles"><div class="card" style="padding:18px;text-align:center;border:2px solid var(--t1)"><div class="big" ${img('av-kid','margin:0 auto')}></div><div class="title" style="margin-top:8px">Aylar</div><div class="hint">Kids · 7–12</div></div><div class="card" style="padding:18px;text-align:center"><div class="big m" ${img('av-kid','margin:0 auto')}></div><div class="title" style="margin-top:8px">Merdan</div><div class="hint">Little · 0–6</div></div></div>
+ <div class="btn primary" style="position:absolute;left:16px;right:16px;bottom:40px">Set up for Aylar</div>`,
+E4:()=>`${onNew('Aylar’s phone')}<div class="hero" style="margin-top:110px"><div class="big" ${img('av-kid','width:120px;height:120px')}></div><div class="h1" style="margin-top:12px">All set</div><div class="sub">Hand the phone to Aylar. It only opens Aylar’s Payhas, and your login wasn’t kept.</div></div>
+ <div class="btn primary" style="position:absolute;left:16px;right:16px;bottom:40px">Done</div>`,
+};
+document.getElementById('s').innerHTML=S[v]();
+</script></body></html>

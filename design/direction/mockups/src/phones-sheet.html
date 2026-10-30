@@ -1,0 +1,17 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:F;font-weight:700;src:url(fonts/f700.ttf)}
+@font-face{font-family:B;font-weight:800;src:url(fonts/b800.ttf)}
+body{margin:0;background:#2A2A35;width:1640px;padding:0 0 10px}
+.row{display:flex;gap:10px;padding:0 10px}
+h2{font:800 22px B;color:#F4F3EF;margin:0;padding:18px 12px 10px}
+h2 small{font:700 15px F;color:#B3B2BD;margin-left:10px}
+img{width:390px;height:844px;display:block;border-radius:6px}
+</style></head><body><script>
+const t=new URLSearchParams(location.search).get('t')||'dark';
+const V=[['A','Code on the parent’s phone, then Allow','Parent picks who → 6-digit code → typed on the new phone → parent taps Allow'],
+['B','The new phone shows the code','New phone shows a code → parent types it and picks who → linked, no extra Allow'],
+['C','Invite link in a message','Parent sends a link (Telegram, imo…) → “Join as Aylar” → parent allows → Phones list'],
+['D','Per child, on the Family dashboard','“Aylar’s phone · Not linked” on her card → code with live status → linked row'],
+['E','Parent sets it up on the child’s phone','“Whose phone is this?” → parent confirms with own number → picks the child → hand it over']];
+document.body.innerHTML=V.map(([k,n,d])=>`<h2>${k} · ${n}<small>${d}</small></h2><div class="row">${[1,2,3,4].map(i=>`<img src="shots/ph${k}${i}-${t}.png">`).join('')}</div>`).join('');
+</script></body></html>
