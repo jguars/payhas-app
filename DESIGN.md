@@ -157,7 +157,7 @@ screen; if a screen needs something new, add it here first.
 | Radius | `radius.sm 12 · md 20 · lg 28 · pill` | sm: chips, tiles, inputs · md: cards, row groups · lg: heroes, video, sheets · pill: buttons, tab bar, badges. |
 | Border | `border.hairline 1 · strong 2` | Dividers and quiet outlines / focus and selection. |
 | Control height | `control.sm 40 · md 48 · lg 56` | md is also the minimum touch target. |
-| Icons | `iconSize.sm 16 · md 20 · lg 24 · xl 32`, `iconStroke(size)` | One glyph family (`Icon`); stroke from the size, not per screen. Emoji are not icons. |
+| Icons | `iconSize.sm 16 · md 20 · lg 24 · feed 28 · xl 32`, `iconStroke(size)` | One glyph family (`Icon`); stroke from the size, not per screen. Emoji are not icons. `feed`: the four actions over video. |
 | Depth | `elevation.ledge 4` (child cards), `elevation.ledgeButton 3` (primary), `elevation.float` (toasts, sheets) | Tonal layers first. |
 | Motion | `spring.snappy/smooth/bouncy`, `STAGGER_MS 45`, `duration.fast 150 · base 250 · slow 400` | Everything off under reduce-motion. |
 
