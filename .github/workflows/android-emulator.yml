@@ -1,7 +1,8 @@
 # Boots an Android emulator on GitHub's KVM runners, installs an x86_64 build
 # of the app and walks the test family through the main screens with Maestro
 # (.maestro/screens.yaml). Screenshots are uploaded as the "emulator-screens"
-# artifact for design review (.claude/skills/ui-screen, step 10).
+# artifact for design review (.claude/skills/ui-screen, step 10), and pushed
+# to the ci-screens branch (git fetch origin ci-screens).
 #
 # Signs in as the CI test family (payhas-audit@example.com — a throwaway
 # account, never a real family). Its password lives only in Supabase Vault
@@ -35,6 +36,8 @@ jobs:
     if: ${{ needs.ready.outputs.ok == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -98,3 +101,19 @@ jobs:
             emulator-screens/
             ~/.maestro/tests/**/*.png
           retention-days: 14
+
+      # Also keep the latest screenshots on the ci-screens branch: a plain git
+      # fetch reaches them where artifact storage is blocked (e.g. cloud sessions).
+      - name: Publish screenshots to the ci-screens branch
+        if: always()
+        run: |
+          mkdir -p /tmp/screens
+          find emulator-screens ~/.maestro/tests -name '*.png' -exec cp {} /tmp/screens/ \; 2>/dev/null || true
+          [ -n "$(ls -A /tmp/screens)" ] || exit 0
+          cd /tmp/screens
+          git init -q -b ci-screens
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          echo "Emulator screenshots for ${GITHUB_SHA}" > README.md
+          git add -A && git commit -q -m "Emulator screenshots for ${GITHUB_SHA::7}"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" ci-screens
