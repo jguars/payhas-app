@@ -189,6 +189,8 @@ export default function FeedScreen() {
                         chromeBottom={FEED_CHROME_BOTTOM}
                         // Only the feed on screen plays.
                         active={focused && !lock && mode === m && index === activeIndex[m]}
+                        // The feed you're not on keeps only its current video ready for the swipe back.
+                        warm={mode === m || index === activeIndex[m]}
                         onShare={onShare}
                         onOptions={onOptions}
                         onCreator={onCreator}

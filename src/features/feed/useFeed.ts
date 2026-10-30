@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Image } from 'expo-image';
 
 import { useFamily } from '@/features/family/FamilyProvider';
@@ -84,5 +84,7 @@ export function useFeed(mode: FeedMode = 'forYou') {
     setVideos((cur) => (cur.some((c) => c.id === v.id) ? cur : [v, ...cur]));
   }, []);
 
-  return { videos: videos.filter((v) => !hidden.has(v.id)), loading, done, reload: load, loadMore, insert };
+  // Same array until something changes, so the list doesn't recheck every row on each render.
+  const shown = useMemo(() => videos.filter((v) => !hidden.has(v.id)), [videos, hidden]);
+  return { videos: shown, loading, done, reload: load, loadMore, insert };
 }

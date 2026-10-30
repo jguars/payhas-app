@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useFamily } from '@/features/family/FamilyProvider';
 import type { Lang } from '@/i18n';
 
-import { useLibrary } from './LibraryProvider';
+import { useUsage } from './LibraryProvider';
 
 export type Lock = 'paused' | 'quiet' | 'limit' | 'games' | null;
 
@@ -28,7 +28,7 @@ export function useScreenTime(opts: { games?: boolean } = {}): {
   extraMinutes: number;
 } {
   const { current } = useFamily();
-  const { todaySeconds } = useLibrary();
+  const { todaySeconds } = useUsage();
   const [now, setNow] = useState(() => new Date());
 
   // Re-check every 30s so quiet hours and expiring extra time apply without a reload.

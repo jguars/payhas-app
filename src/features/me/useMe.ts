@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { useFamily } from '@/features/family/FamilyProvider';
 import { FeedVideo, toFeedVideos } from '@/features/feed/data';
-import { deviceTimeZone, useLibrary } from '@/features/library/LibraryProvider';
+import { deviceTimeZone, useLibrary, useUsage } from '@/features/library/LibraryProvider';
 import { useT } from '@/i18n';
 import { supabase } from '@/lib/supabase';
 
@@ -13,7 +13,7 @@ export type MeData = { today_seconds: number; saved: number; following: number; 
 /** The Me tab's numbers, refetched whenever the library changes. */
 export function useMe() {
   const { active } = useFamily();
-  const { version } = useLibrary();
+  const { version } = useUsage();
   const [data, setData] = useState<MeData | null>(null);
   const token = active?.token;
 

@@ -17,7 +17,7 @@ import { ProgressBar } from '@/components/ui/ProgressBar';
 import { useRoles } from '@/features/creator/useRoles';
 import { REVIEW_ENABLED } from '@/features/creator/useReviewQueue';
 import { useFamily } from '@/features/family/FamilyProvider';
-import { useLibrary } from '@/features/library/LibraryProvider';
+import { useLibrary, useUsage } from '@/features/library/LibraryProvider';
 import { useScreenTime } from '@/features/library/useScreenTime';
 import { TasteCard } from '@/features/me/TasteCard';
 import { useMe } from '@/features/me/useMe';
@@ -43,7 +43,8 @@ export default function MeScreen() {
   const barSpace = useTabBarSpace();
   const focused = useIsFocused();
   const { current, leaveProfile, signOut } = useFamily();
-  const { todaySeconds, unread } = useLibrary();
+  const { unread } = useLibrary();
+  const { todaySeconds } = useUsage();
   const { limitMinutes } = useScreenTime();
   const { data, reload, resetTaste } = useMe();
   const roles = useRoles();

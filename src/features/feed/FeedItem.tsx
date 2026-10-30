@@ -1,5 +1,5 @@
 import { useEvent } from 'expo';
-import { useVideoPlayer, VideoView } from 'expo-video';
+import { useVideoPlayer, VideoPlayer, VideoView } from 'expo-video';
 import { memo, useEffect, useRef, useState } from 'react';
 import { GestureResponderEvent, Platform, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { Image } from 'expo-image';
@@ -24,6 +24,8 @@ const DOUBLE_TAP_MS = 280;
 const IMPRESSION_MS = 1000; // on screen this long = seen
 const QUICK_SKIP_MS = 2000; // gone before this = skipped (tasteEngine quickSkip)
 const FINISH_AT = 0.9;
+/** Longer than a feed snap, so work that can wait doesn't land on it. */
+const SETTLE_MS = 450;
 // The clips next to the playing one (the list keeps them mounted) buffer just enough to start
 // at once; the playing clip goes back to the platform defaults (Android 20 s, iOS automatic).
 const PRELOAD_BUFFER = { preferredForwardBufferDuration: 5, minBufferForPlayback: 1, waitsToMinimizeStalling: true };
@@ -38,6 +40,8 @@ const DISC = 34;
 type Props = {
   video: FeedVideo;
   active: boolean;
+  /** False keeps the page without a video player (the feed you're not on, except its current video). */
+  warm?: boolean;
   height: number;
   /** Space taken by the floating tab bar; captions and the rail sit above it. */
   chromeBottom: number;
@@ -53,18 +57,18 @@ type Props = {
   onPinching?: (pinching: boolean) => void;
 };
 
-function FeedItemBase({ video, active, height, chromeBottom, onShare, onOptions, onCreator, onClear, full = false, onFull, onPinching }: Props) {
-  const player = useVideoPlayer(video.source, (p) => {
+function FeedItemBase({ video, active, warm = true, height, chromeBottom, onShare, onOptions, onCreator, onClear, full = false, onFull, onPinching }: Props) {
+  // Without a source the player holds no decoder or buffer; the blurred poster stands in.
+  const player = useVideoPlayer(warm || active ? video.source : null, (p) => {
     p.loop = true;
     // Browsers block autoplay with sound; native starts unmuted.
     p.muted = Platform.OS === 'web';
-    p.timeUpdateEventInterval = 0.25;
+    // Time updates tick for paused and off-screen players too, so only the playing one gets them.
+    p.timeUpdateEventInterval = 0;
     if (Platform.OS !== 'web') p.bufferOptions = PRELOAD_BUFFER;
   });
 
   const { muted } = useEvent(player, 'mutedChange', { muted: player.muted });
-  const time = useEvent(player, 'timeUpdate', { currentTime: 0, currentLiveTimestamp: null, currentOffsetFromLive: null, bufferedPosition: 0 });
-  const progress = player.duration > 0 ? Math.min(1, time.currentTime / player.duration) : 0;
   const { width } = useWindowDimensions();
 
   // Every video plays whole, exactly as shot, centred over a blurred copy of its poster —
@@ -76,6 +80,19 @@ function FeedItemBase({ video, active, height, chromeBottom, onShare, onOptions,
   const videoAspect = track?.width && track?.height ? track.width / track.height : null;
   const screenAspect = width / height;
   const fill = videoAspect != null && Math.abs(videoAspect - screenAspect) / screenAspect < 0.03;
+  // The video view is sized to the clip itself rather than letterboxed inside a full-page
+  // view: a SurfaceView paints black wherever there's no picture, which would hide the blurred
+  // fill. Until the clip's shape is known there's no view at all, and the poster shows.
+  const frame =
+    videoAspect == null
+      ? loaded
+        ? { left: 0, top: 0, width, height } // loaded, but the track reports no size
+        : null
+      : fill
+        ? { left: 0, top: 0, width, height }
+        : videoAspect > screenAspect
+          ? { left: 0, top: (height - width / videoAspect) / 2, width, height: width / videoAspect }
+          : { left: (width - height * videoAspect) / 2, top: 0, width: height * videoAspect, height };
 
   const lib = useLibrary();
   const toast = useToast();
@@ -139,6 +156,7 @@ function FeedItemBase({ video, active, height, chromeBottom, onShare, onOptions,
 
   useEffect(() => {
     if (Platform.OS !== 'web') player.bufferOptions = active ? PLAYING_BUFFER : PRELOAD_BUFFER;
+    player.timeUpdateEventInterval = active ? 0.25 : 0;
     if (active) {
       player.currentTime = 0;
       player.play();
@@ -150,34 +168,22 @@ function FeedItemBase({ video, active, height, chromeBottom, onShare, onOptions,
 
   // ── signals: watch time, impression, quick skip, finish, rewatch ──────────
   const startedAt = useRef<number | null>(null);
-  const finished = useRef(false);
-  const lastTime = useRef(0);
   useEffect(() => {
     if (!active) return;
     startedAt.current = Date.now();
-    finished.current = false;
-    lastTime.current = 0;
     const seen = setTimeout(() => lib.signal(video.id, 'impression'), IMPRESSION_MS);
     return () => {
       clearTimeout(seen);
       const ms = startedAt.current ? Date.now() - startedAt.current : 0;
-      if (ms < QUICK_SKIP_MS) lib.signal(video.id, 'quick_skip');
-      lib.logWatch(video.id, ms / 1000);
       startedAt.current = null;
+      // Logged once the swipe has settled: the watch-time update redraws the screen-time
+      // readers, and the snap is the one moment that must stay smooth.
+      setTimeout(() => {
+        if (ms < QUICK_SKIP_MS) lib.signal(video.id, 'quick_skip');
+        lib.logWatch(video.id, ms / 1000);
+      }, SETTLE_MS);
     };
   }, [active, video.id]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    if (!active || player.duration <= 0) return;
-    const t = time.currentTime;
-    if (!finished.current && t / player.duration >= FINISH_AT) {
-      finished.current = true;
-      lib.signal(video.id, 'finish');
-    } else if (finished.current && t + 1 < lastTime.current) {
-      lib.signal(video.id, 'rewatch'); // looped back to the start after finishing
-    }
-    lastTime.current = t;
-  }, [time.currentTime]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── taps: single = sound/pause (after a short wait), double = like ───────
   const lastTap = useRef(0);
@@ -248,15 +254,18 @@ function FeedItemBase({ video, active, height, chromeBottom, onShare, onOptions,
           <View style={styles.blurDim} />
         </View>
       )}
-      <VideoView
-        player={player}
-        style={styles.video}
-        contentFit={fill ? 'cover' : 'contain'}
-        // A TextureView lets the blurred fill show around a fitted video (a SurfaceView paints it black).
-        surfaceType="textureView"
-        nativeControls={false}
-        playsInline
-      />
+      {frame && (
+        <VideoView
+          player={player}
+          style={[styles.video, frame]}
+          contentFit={fill ? 'cover' : 'contain'}
+          // A SurfaceView hands frames straight to the display. A TextureView redraws the whole
+          // page with every video frame, which stalled the feed's scrolling on Android.
+          surfaceType="surfaceView"
+          nativeControls={false}
+          playsInline
+        />
+      )}
       <Pressable
         style={StyleSheet.absoluteFill}
         onPress={onTap}
@@ -434,15 +443,47 @@ function FeedItemBase({ video, active, height, chromeBottom, onShare, onOptions,
             onDone={() => setFloaters((all) => all.filter((x) => x.id !== f.id))}
           />
         ))}
-        <View style={[styles.progressTrack, { bottom: chromeBottom - space.sm }]}>
-          <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
-        </View>
+        <Playback player={player} active={active} videoId={video.id} signal={lib.signal} bottom={chromeBottom - space.sm} />
       </View>
     </View>
   );
 }
 
 export const FeedItem = memo(FeedItemBase);
+
+/**
+ * The progress line, plus the finish / rewatch signals. It owns the 4-a-second time
+ * updates so they redraw this line, not the whole video page around it.
+ */
+function Playback({ player, active, videoId, signal, bottom }: { player: VideoPlayer; active: boolean; videoId: string; signal: (id: string, kind: 'finish' | 'rewatch') => void; bottom: number }) {
+  const time = useEvent(player, 'timeUpdate', { currentTime: 0, currentLiveTimestamp: null, currentOffsetFromLive: null, bufferedPosition: 0 });
+  const progress = player.duration > 0 ? Math.min(1, time.currentTime / player.duration) : 0;
+  const finished = useRef(false);
+  const lastTime = useRef(0);
+
+  useEffect(() => {
+    finished.current = false;
+    lastTime.current = 0;
+  }, [active]);
+
+  useEffect(() => {
+    if (!active || player.duration <= 0) return;
+    const t = time.currentTime;
+    if (!finished.current && t / player.duration >= FINISH_AT) {
+      finished.current = true;
+      signal(videoId, 'finish');
+    } else if (finished.current && t + 1 < lastTime.current) {
+      signal(videoId, 'rewatch'); // looped back to the start after finishing
+    }
+    lastTime.current = t;
+  }, [time.currentTime]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return (
+    <View style={[styles.progressTrack, { bottom }]}>
+      <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
+    </View>
+  );
+}
 
 const SHADOW = { textShadowColor: alpha(color.black, 0.45), textShadowOffset: { width: 0, height: 1 }, textShadowRadius: 4 } as const;
 

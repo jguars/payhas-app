@@ -39,16 +39,25 @@ type Library = {
   logWatch: (videoId: string, seconds: number) => void;
   /** Same, for time spent in a Play game. */
   logPlay: (game: GameId, seconds: number) => void;
-  todaySeconds: number;
-  /** Bumped after any change, so screens showing derived numbers can refetch. */
-  version: number;
   inbox: InboxItem[];
   unread: number;
   refreshInbox: () => Promise<void>;
   markInboxRead: () => void;
 };
 
+/**
+ * Today's watch time and the change counter, kept apart from Library: they move on
+ * every swipe, and only a few screens show them. Inside Library they would redraw
+ * every video in the feed each time.
+ */
+type Usage = {
+  todaySeconds: number;
+  /** Bumped after any change, so screens showing derived numbers can refetch. */
+  version: number;
+};
+
 const Ctx = createContext<Library | null>(null);
+const UsageCtx = createContext<Usage | null>(null);
 export const deviceTimeZone = () => Intl.DateTimeFormat().resolvedOptions().timeZone ?? 'UTC';
 
 const flip = (set: Set<string>, key: string, on?: boolean) => {
@@ -269,8 +278,6 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
       signal,
       logWatch,
       logPlay,
-      todaySeconds,
-      version,
       inbox,
       unread,
       refreshInbox,
@@ -278,15 +285,26 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
     }),
     [
       saved, following, liked, reacted, hidden, likeDelta, saveDelta, reactionDelta, toggleSave, toggleFollow, toggleLike, likeOnce,
-      toggleReaction, hide, report, sendToFamily, logExternalShare, signal, logWatch, logPlay, todaySeconds, version, inbox,
+      toggleReaction, hide, report, sendToFamily, logExternalShare, signal, logWatch, logPlay, inbox,
       unread, refreshInbox, markInboxRead,
     ],
   );
-  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
+  const usage = useMemo(() => ({ todaySeconds, version }), [todaySeconds, version]);
+  return (
+    <Ctx.Provider value={value}>
+      <UsageCtx.Provider value={usage}>{children}</UsageCtx.Provider>
+    </Ctx.Provider>
+  );
 }
 
 export function useLibrary() {
   const ctx = useContext(Ctx);
   if (!ctx) throw new Error('useLibrary must be used inside <LibraryProvider>');
+  return ctx;
+}
+
+export function useUsage() {
+  const ctx = useContext(UsageCtx);
+  if (!ctx) throw new Error('useUsage must be used inside <LibraryProvider>');
   return ctx;
 }
