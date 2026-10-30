@@ -1,0 +1,130 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=390">
+<style>
+@font-face{font-family:B;font-weight:800;src:url(fonts/b800.ttf)}
+@font-face{font-family:B;font-weight:700;src:url(fonts/b700.ttf)}
+@font-face{font-family:F;font-weight:500;src:url(fonts/f500.ttf)}
+@font-face{font-family:F;font-weight:600;src:url(fonts/f600.ttf)}
+@font-face{font-family:F;font-weight:700;src:url(fonts/f700.ttf)}
+:root{--bg:#0A0A0F;--s1:#14141B;--s2:#1D1D26;--line:#2A2A35;--t1:#F4F3EF;--t2:#B3B2BD;--t3:#8C8B97;--ember:#FF5A3C;--edge:#9E3825;--ink:#0A0A0F;--inv:#F4F3EF;--oninv:#0A0A0F;--kids:#4FE3B0;--adult:#C3A2FF;--ok:#4FE3B0;--danger:#FF8A73}
+.light{--bg:#E9ECF1;--s1:#F5F7FA;--s2:#DDE2EA;--line:#CBD2DC;--t1:#1B1E26;--t2:#454B5A;--t3:#646B7B;--ember:#E44D2C;--inv:#22252E;--oninv:#F5F7FA;--kids:#12916B;--adult:#7E55D6;--ok:#108F68;--danger:#C93F27}
+*{box-sizing:border-box;margin:0;padding:0}
+body{width:390px;height:844px;overflow:hidden;background:var(--bg);color:var(--t1);font-family:F;font-weight:500;position:relative}
+.screen{padding:16px 16px 120px;height:844px;overflow:hidden}
+/* header: one pattern — large left title, optional subtitle; back above it on pushed screens */
+.back{width:44px;height:44px;margin:4px 0 4px -10px;display:flex;align-items:center;justify-content:center}
+.h1{font-family:B;font-weight:800;font-size:30px;line-height:36px;letter-spacing:-.6px;margin-top:8px}
+.sub{color:var(--t2);font-size:16px;line-height:22px;margin-top:4px}
+.sec{font-family:B;font-weight:700;font-size:18px;line-height:24px;margin:24px 0 12px;display:flex;justify-content:space-between;align-items:baseline}
+.sec small{font-family:F;font-weight:600;font-size:14px;color:var(--t3)}
+.cap{font-size:12px;line-height:16px;color:var(--t3);font-weight:600;letter-spacing:.2px}
+/* card: one radius, tonal, optional ledge for tactile (child) cards */
+.card{background:var(--s1);border-radius:20px;overflow:hidden}
+.tactile{box-shadow:0 4px 0 var(--line)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.art{height:96px;background-size:cover;background-position:center}
+.gc .body{padding:12px 14px 14px}
+.title{font-family:B;font-weight:700;font-size:18px;line-height:22px}
+.meta{color:var(--t2);font-size:14px;line-height:18px;margin-top:2px}
+.lockchip{display:inline-flex;align-items:center;gap:4px;margin-top:8px;padding:0 10px;height:24px;border-radius:999px;background:var(--s2);color:var(--t2);font-size:12px;font-weight:700}
+.dim .art{filter:saturate(.35) brightness(.75)}
+/* progress */
+.bar{height:8px;border-radius:4px;background:var(--s2);overflow:hidden}.bar i{display:block;height:100%;background:var(--ember);border-radius:4px}
+.barok i{background:var(--ok)}
+/* buttons: one family */
+.btn{height:52px;border-radius:999px;display:flex;align-items:center;justify-content:center;gap:8px;font-weight:700;font-size:16px}
+.primary{background:var(--ember);color:var(--ink);box-shadow:0 3px 0 var(--edge)}
+.secondary{background:var(--s2);color:var(--t1)}
+.small{height:40px;font-size:14px;padding:0 16px}
+/* rows: one list pattern */
+.group{background:var(--s1);border-radius:20px}
+.row{display:flex;align-items:center;gap:12px;min-height:64px;padding:10px 16px}
+.row+.row{border-top:1px solid var(--line)}
+.tile{width:36px;height:36px;border-radius:12px;background:var(--s2);display:flex;align-items:center;justify-content:center;flex:none}
+.av{width:44px;height:44px;border-radius:50%;background-size:115%;background-position:center;flex:none}
+.grow{flex:1;min-width:0}
+.label{font-size:16px;line-height:20px;font-weight:600}
+.hint{font-size:14px;line-height:18px;color:var(--t2);margin-top:2px}
+.val{font-size:14px;color:var(--t2);font-weight:600;white-space:nowrap}
+.lane{display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:999px;font-size:12px;font-weight:700;color:var(--ink)}
+.badge{display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:700;background:var(--s2);color:var(--t2)}
+.danger{color:var(--danger)}
+.toggle{width:48px;height:28px;border-radius:14px;background:var(--s2);position:relative;flex:none}.toggle:after{content:'';position:absolute;left:3px;top:3px;width:22px;height:22px;border-radius:50%;background:#FFFFFF;box-shadow:0 1px 2px rgba(0,0,0,.25)}
+.dot{width:8px;height:8px;border-radius:4px;background:var(--ok);display:inline-block;margin-right:6px}
+/* tab bar: neutral; active = the one selected style (inverse pill) */
+.tabs{position:absolute;left:16px;right:16px;bottom:24px;height:64px;border-radius:999px;background:var(--s1);border:1px solid var(--line);display:flex;align-items:center;justify-content:space-around;padding:0 8px}
+.tab{width:56px;height:44px;border-radius:999px;display:flex;align-items:center;justify-content:center;color:var(--t3)}
+.tab.on{background:var(--inv);color:var(--oninv)}
+svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.hero{border-radius:28px;overflow:hidden;background:var(--s1)}
+.hero .art{height:200px}
+.shelf{display:flex;gap:12px;overflow:hidden}
+.sq{width:140px;flex:none}.sq .art{height:140px;border-radius:20px}.sq .title{font-size:16px;margin-top:8px}
+.stat{font-family:B;font-weight:800;font-size:36px;line-height:40px;letter-spacing:-.6px}
+.stat span{font-family:F;font-weight:600;font-size:16px;color:var(--t2);letter-spacing:0}
+.screen > * + .grid{margin-top:0}
+</style></head>
+<body>
+<div class="screen" id="s"></div>
+<div class="tabs" id="tabs"></div>
+<script>
+const I={
+home:'<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+disc:'<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>',
+play:'<rect x="2" y="7" width="20" height="11" rx="5"/><path d="M7 11v3M5.5 12.5h3M15 11.5h.01M17 13.5h.01"/>',
+bell:'<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/><path d="M10 21h4"/>',
+me:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/>',
+lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+chev:'<path d="M9 6l6 6-6 6"/>',back:'<path d="M15 6l-6 6 6 6"/>',
+spark:'<path d="M12 3l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/>',bellS:'<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4z"/>',
+x:'<path d="M6 6l12 12M18 6L6 18"/>',plus:'<path d="M12 5v14M5 12h14"/>',pause:'<path d="M9 5v14M15 5v14"/>',clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+};
+const ic=(n,s=22)=>`<svg viewBox="0 0 24 24" style="width:${s}px;height:${s}px">${I[n]}</svg>`;
+const q=new URLSearchParams(location.search);const v=q.get('v');if(q.get('t')==='light')document.documentElement.className='light';
+const tabs=on=>['home','disc','play','bell','me'].map(t=>`<div class="tab ${t===on?'on':''}">${ic(t)}</div>`).join('');
+const art=(n,x='')=>`style="background-image:url(img/${n}.png);${x}"`;
+const game=(n,t,m,locked)=>`<div class="card tactile gc ${locked?'dim':''}"><div class="art" ${art(n)}></div><div class="body"><div class="title">${t}</div><div class="meta">${m}</div>${locked?`<div class="lockchip">${ic('lock',12)} Ask a parent</div>`:''}</div></div>`;
+const S={
+playA:()=>`<div class="h1">Play</div><div class="sub">45 min left today</div>
+ <div class="bar barok" style="margin-top:12px"><i style="width:25%"></i></div>
+ <div class="sec">Quick play <small>45 sec each</small></div>
+ <div class="grid">${game('bubble','Bubble Pop','Find the right ones')}${game('pals','Pop-up Pals','Tap the pals')}${game('star','Star Catcher','Dodge the rain')}${game('echo','Echo Lights','Copy the lights')}</div>
+ <div class="sec">Brain games</div>
+ <div class="grid">${game('memory','Memory Match','Find the pairs',1)}${game('odd','Odd One Out','Spot the different one',1)}</div>`,
+playB:()=>`<div class="h1">Play</div><div class="sub">45 min left today</div>
+ <div class="hero card tactile" style="margin-top:16px"><div class="art" ${art('bubble')}></div><div style="padding:16px;display:flex;align-items:center;gap:12px"><div class="grow"><div class="title" style="font-size:22px;line-height:26px">Bubble Pop</div><div class="meta">Find the right ones · 45 sec</div></div><div class="btn primary small" style="width:96px">Play</div></div></div>
+ <div class="sec">Quick play</div>
+ <div class="shelf">${['pals:Pop-up Pals','star:Star Catcher','echo:Echo Lights'].map(x=>{const[a,b]=x.split(':');return`<div class="sq"><div class="art tactile" ${art(a)}></div><div class="title">${b}</div><div class="meta">45 sec</div></div>`}).join('')}</div>
+ <div class="sec">Brain games</div>
+ <div class="shelf">${['memory:Memory Match','odd:Odd One Out'].map(x=>{const[a,b]=x.split(':');return`<div class="sq dim"><div class="art" ${art(a)}></div><div class="title">${b}</div><div class="lockchip">${ic('lock',12)} Ask a parent</div></div>`}).join('')}</div>`,
+famA:()=>`<div class="back">${ic('back',26)}</div><div class="h1" style="margin-top:0">Family</div><div class="sub">Tap someone to see their day and change their rules.</div>
+ <div class="sec">Children</div>
+ <div class="group"><div class="row"><div class="av" ${art('av-kid')}></div><div class="grow"><div class="label">Aylar <span class="lane" style="background:var(--kids);margin-left:6px">Kids</span></div><div class="hint"><span class="dot"></span>In the app now</div><div class="bar barok" style="margin-top:8px;height:6px"><i style="width:25%"></i></div></div><div class="val">15 of 60 min</div><span style="color:var(--t3)">${ic('chev',18)}</span></div>
+ <div class="row"><div class="tile">${ic('plus',18)}</div><div class="grow"><div class="label">Add a child</div><div class="hint">A third profile comes with Plus</div></div><span class="badge">Plus</span></div></div>
+ <div class="sec">You</div>
+ <div class="group"><div class="row"><div class="av" ${art('av-parent')}></div><div class="grow"><div class="label">Guvanch</div><div class="hint">Parent</div></div><span style="color:var(--t3)">${ic('chev',18)}</span></div></div>
+ <div class="sec">Account</div>
+ <div class="group">
+  <div class="row"><div class="tile">${ic('spark',18)}</div><div class="grow label">Payhas Plus</div><div class="val">Free</div><span style="color:var(--t3)">${ic('chev',18)}</span></div>
+  <div class="row"><div class="tile">${ic('bellS',18)}</div><div class="grow"><div class="label">Alerts on this phone</div><div class="hint">Limits, flags and requests</div></div><div class="toggle"></div></div>
+  <div class="row"><div class="tile">${ic('lock',18)}</div><div class="grow label">Lock dashboard</div></div>
+  <div class="row"><div class="tile">${ic('x',18)}</div><div class="grow label danger">Sign out</div></div></div>`,
+famB:()=>`<div class="back">${ic('back',26)}</div><div class="h1" style="margin-top:0">Family</div><div class="sub">Today, Thursday</div>
+ <div class="card" style="margin-top:20px;padding:16px">
+  <div style="display:flex;align-items:center;gap:12px"><div class="av" ${art('av-kid','width:56px;height:56px')}></div><div class="grow"><div class="title">Aylar</div><div class="hint"><span class="lane" style="background:var(--kids);margin-right:6px">Kids · 7–12</span><span class="dot"></span>In the app now</div></div><span style="color:var(--t3)">${ic('chev',18)}</span></div>
+  <div style="margin-top:16px" class="stat">15 min <span>of 60 min today</span></div>
+  <div class="bar barok" style="margin-top:10px"><i style="width:25%"></i></div>
+  <div style="display:flex;gap:8px;margin-top:16px"><div class="btn secondary small" style="flex:1">${ic('pause',16)} Pause</div><div class="btn secondary small" style="flex:1">${ic('plus',16)} 15 min</div><div class="btn secondary small" style="flex:1">${ic('clock',16)} Rules</div></div>
+ </div>
+ <div class="card" style="margin-top:12px;padding:16px;display:flex;align-items:center;gap:12px;border:1.5px dashed var(--line);background:transparent"><div class="tile">${ic('plus',18)}</div><div class="grow"><div class="label">Add a child</div><div class="hint">A third profile comes with Plus</div></div><span class="badge">Plus</span></div>
+ <div class="sec">Account</div>
+ <div class="group">
+  <div class="row"><div class="av" ${art('av-parent','width:36px;height:36px')}></div><div class="grow"><div class="label">Guvanch</div><div class="hint">Parent · you</div></div><span style="color:var(--t3)">${ic('chev',18)}</span></div>
+  <div class="row"><div class="tile">${ic('spark',18)}</div><div class="grow label">Payhas Plus</div><div class="val">Free</div><span style="color:var(--t3)">${ic('chev',18)}</span></div>
+  <div class="row"><div class="tile">${ic('bellS',18)}</div><div class="grow label">Alerts on this phone</div><div class="toggle"></div></div>
+  <div class="row"><div class="tile">${ic('x',18)}</div><div class="grow label danger">Sign out</div></div></div>`,
+};
+document.getElementById('s').innerHTML=S[v]();
+document.getElementById('tabs').innerHTML=v.startsWith('play')?tabs('play'):'';
+if(!v.startsWith('play'))document.getElementById('tabs').remove();
+</script></body></html>

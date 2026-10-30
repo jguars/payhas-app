@@ -1,0 +1,1 @@
+Fonts: copy from node_modules/@expo-google-fonts (bricolage-grotesque 700/800, figtree 500/600/700) into src/fonts as b700.ttf, b800.ttf, f500.ttf, f600.ttf, f700.ttf. Open index.html?v=playA|playB|famA|famB&t=dark|light

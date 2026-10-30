@@ -112,6 +112,37 @@ components:
 
 # Design System: Payhas
 
+## Direction and principles (approved 2026-10-30)
+
+**Feeling:** warm · playful · safe · calm.
+
+**One system, two volumes.** The same tokens and components on every screen;
+only density, illustration and how much colour is allowed change:
+
+| Context | Volume | Like |
+| --- | --- | --- |
+| Video feed, Who's watching | Low — the content leads | Cinema-night streaming apps |
+| Child areas: Play, Discover, Me, Inbox, child onboarding | High — tactile, playful, illustrated | Duolingo, Finch, Spotify Kids |
+| Parent areas: dashboard, child page, Plus, consent, settings | Medium — calm lists, clear numbers | Headspace, GoHenry |
+
+**Principles** (they settle arguments):
+
+1. **One loud thing per screen.** One ember action; everything else quiet.
+2. **Colour means something.** Ember = do this. Lane colours = who and how
+   old (avatars and lane badges only). Status colours = state. Nothing is
+   coloured for decoration — including the tab bar.
+3. **Same thing, same look.** One selected style, one input style, one
+   button family, one header pattern per screen type.
+4. **Content and characters carry the joy, not the chrome.** Thumbnails,
+   animal avatars and illustrations bring colour; UI stays calm.
+5. **Numbers in words, not code.** The UI face for numbers; one duration
+   format ("45 min", "1 h 15 min").
+6. **Kids see things, parents read things.** Child screens: big targets,
+   pictures, few words. Parent screens: lists, labels, values on the right.
+
+References: `design/direction/` and the Mobbin collection "Payhas — design
+direction". Workflow: `docs/UI_UX_WORKFLOW.md`.
+
 ## Overview
 
 **Creative North Star: "The Night-Light Playroom"**

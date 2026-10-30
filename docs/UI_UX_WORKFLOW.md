@@ -89,9 +89,9 @@ Name what's available in each project; strike out what isn't.
 
 ## Phase 2 — Direction
 
-- [ ] **2.1 Choose the feeling in three to five words** (e.g. "calm, warm,
+- [x] **2.1 Choose the feeling in three to five words** (e.g. "calm, warm,
   playful, trustworthy") and 2–3 apps it should sit next to. — _owner +
-  Claude, `design-skills:ux-strategy`_
+  Claude, `design-skills:ux-strategy`_ — warm · playful · safe · calm; one system, two volumes (Cinema-night feed, Playroom child areas, Calm-studio parent areas); approved 2026-10-30
 - [x] **2.2 Collect references per pattern, not per screen:** 20–40 screens
   across onboarding, home, lists, cards, detail, settings, paywall, empty
   states, sheets and forms. Save them to a Mobbin collection named after the
@@ -99,12 +99,12 @@ Name what's available in each project; strike out what isn't.
   `create_collection`, `save_content`_ — Mobbin collection "Payhas — design direction" (21 screens): https://mobbin.com/collections/b5eb3b41-4b7a-444c-866a-ea44cea149f1
 - [x] **2.3 Build the mood board:** references side by side with one line
   each on *what to take*. — _Artifact page or Figma board_ — `design/direction/{A-playroom,B-calm,C-cinema}.png` + `DIRECTION.md`
-- [~] **2.4 Write the design principles:** 4–6 rules that settle arguments
+- [x] **2.4 Write the design principles:** 4–6 rules that settle arguments
   (e.g. "one primary action per screen", "colour means identity, never
   decoration"). — _skills: `design-skills:design-critique`,
-  `design-skills:ux-strategy`; output: top of `DESIGN.md`_ — "Night-Light Playroom" in `DESIGN.md`; draft of 6 principles in `design/direction/DIRECTION.md`, awaiting approval
-- [ ] **2.5 Explore 2–3 visual directions** on the same 2 key screens. —
-  _skill: `superdesign:superdesign` (variants across models) or Figma_
+  `design-skills:ux-strategy`; output: top of `DESIGN.md`_ — "Night-Light Playroom" in `DESIGN.md`; 6 principles approved, top of `DESIGN.md`
+- [~] **2.5 Explore 2–3 visual directions** on the same 2 key screens. —
+  _skill: `superdesign:superdesign` (variants across models) or Figma_ — direction chosen first (2.1), so 2 variants of it on Play and Family: `design/direction/mockups/` (HTML in `src/`, real fonts and art, Dark + Light). Superdesign/Figma not used: their hosts aren't reachable from this session. Awaiting Gate 2
 - 🚦 **Gate 2:** the owner picks one direction.
 
 ## Phase 3 — Design system: foundations (tokens)
@@ -249,6 +249,7 @@ Per-screen tracker (copy a row per screen):
 | 2026-10-29 | Three themes: Dark (default), Navy, calm Light | Owner request; less eye strain than pure black or white | Guvanch |
 | 2026-10-29 | Type: 3 families, 6 faces, 9 sizes | Font audit found 22 sizes and 7 faces | Guvanch (asked for it) |
 | 2026-10-30 | Adopt this system-first workflow for all UI work | Screens looked inconsistent ("AI slop") | Guvanch |
+| 2026-10-30 | Direction: one system, mixed volumes; feeling warm · playful · safe · calm; 6 principles | `design/direction/DIRECTION.md` | Guvanch |
 | 2026-10-30 | Gate 1: audit findings accepted | Top 10 in `design/audit/2026-10-30/AUDIT.md` | Guvanch |
 
 ## Rules Claude follows in this workflow

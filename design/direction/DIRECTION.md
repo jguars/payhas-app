@@ -73,3 +73,16 @@ Proposed feeling words: **warm · playful · safe · calm**.
    format ("45 min", "1 h 15 min").
 6. **Kids see things, parents read things.** Child screens: big targets,
    pictures, few words. Parent screens: lists, labels, values on the right.
+
+## Step 2.5 — two variants on two key screens
+
+`mockups/play-A-vs-B.png` and `mockups/family-A-vs-B.png` (Dark, then Light).
+Both variants share the same parts: one header pattern, one card radius, one
+list row, one button family, a neutral tab bar whose active tab uses the one
+selected style (inverse pill), green for time used, lane colour only on
+avatars and lane badges, numbers in the UI face.
+
+| Screen | A | B |
+| --- | --- | --- |
+| Play | **Grid**: tactile 2×2 cards, every game equal | **Shelf**: one featured game with the one ember Play button, then horizontal shelves |
+| Family | **List**: grouped rows, each child is a row with time on the right | **Cards**: each child gets a card with big time used and Pause / +15 min / Rules |
