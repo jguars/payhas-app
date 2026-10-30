@@ -61,10 +61,9 @@ appId: com.onki.payhas
 - scroll
 - takeScreenshot: 09-play-scrolled
 - tapOn:
-    id: "tab-inbox"
-- waitForAnimationToEnd
-- takeScreenshot: 10-inbox
-- tapOn:
     id: "tab-me"
 - waitForAnimationToEnd
-- takeScreenshot: 11-me
+- takeScreenshot: 10-me
+- tapOn: "Inbox.*"
+- waitForAnimationToEnd
+- takeScreenshot: 11-inbox

@@ -107,6 +107,7 @@ function Routes() {
         <Stack.Screen name="saved" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="channel" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="following" options={{ animation: 'slide_from_right' }} />
+        <Stack.Screen name="inbox" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="studio" options={{ animation: 'slide_from_right' }} />
         <Stack.Screen name="upload" options={{ animation: 'slide_from_bottom', gestureEnabled: false }} />
         <Stack.Screen name="review" options={{ animation: 'slide_from_right' }} />

@@ -29,7 +29,7 @@ export function useInsets(): EdgeInsets {
 export const TAB_BAR = { height: 68, pill: { width: 56, height: 32 } } as const;
 
 /** The tab routes: the bar shows on these, and toasts lift above it there. */
-export const TAB_ROUTES = ['/', '/discover', '/play', '/inbox', '/me'] as const;
+export const TAB_ROUTES = ['/', '/discover', '/play', '/me'] as const;
 
 /** Index of the tab a path belongs to (nested paths count), or -1 off the tabs. */
 export const tabIndex = (path: string) => TAB_ROUTES.findIndex((r) => (r === '/' ? path === '/' : path === r || path.startsWith(r + '/')));

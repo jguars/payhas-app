@@ -16,6 +16,7 @@ import Animated, {
 import { useInsets, useTabBarSpace } from '@/lib/useInsets';
 
 import { Icon, IconName } from '@/components/Icon';
+import { PageHeader } from '@/components/ui/PageHeader';
 import { StatusScrim } from '@/components/StatusScrim';
 import { Enter } from '@/components/motion/Enter';
 import { PressScale } from '@/components/motion/PressScale';
@@ -114,11 +115,10 @@ export default function InboxScreen() {
 
   return (
     <View style={styles.root}>
-      <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + 14, paddingBottom: barSpace }]} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + space.sm, paddingBottom: insets.bottom + barSpace }]} showsVerticalScrollIndicator={false}>
+        {/* Inbox lives inside Me now (owner's Me option D): a page with a back button, not a tab. */}
         <Enter index={0}>
-          <Text style={styles.title} accessibilityRole="header">
-            {t('inbox.title')}
-          </Text>
+          <PageHeader title={t('inbox.title')} back />
         </Enter>
         {inbox.length === 0 ? (
           <Empty />

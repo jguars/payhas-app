@@ -192,8 +192,8 @@ Per-screen tracker (copy a row per screen). Built screens: `design/screens/*-bui
 | Home (feed) | [x] | [x] | [x] HTML | [x] A | [x] | [x] self-review (skills), axe 0 | [x] emulator (a49677c) · [ ] phone test |
 | Discover | [x] | [x] | [x] HTML | [x] B | [x] | [x] self-review (skills), axe 0 | [x] emulator (a49677c) · [ ] phone test |
 | Play (games) | [x] | [x] | [x] | [x] Gate 2 | [x] | [x] critique + a11y (axe 0) + panel ×4 (beta: yes) | [ ] phone test |
-| Inbox (tab) | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
-| Me | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
+| Inbox (now inside Me) | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
+| Me (with Inbox inside) | [x] | [x] | [x] HTML ×5 | [x] D | [x] | [x] web screenshots | [ ] emulator + phone test |
 | Who's watching | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
 | Family dashboard | [x] | [x] | [x] | [x] Gate 2 | [x] | [x] critique + a11y (axe 0) + panel ×4 (beta: yes) | [ ] phone test |
 | Child page | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] | [ ] |
@@ -264,6 +264,10 @@ Per-screen tracker (copy a row per screen). Built screens: `design/screens/*-bui
 | 2026-10-29 | Three themes: Dark (default), Navy, calm Light | Owner request; less eye strain than pure black or white | Guvanch |
 | 2026-10-29 | Type: 3 families, 6 faces, 9 sizes | Font audit found 22 sizes and 7 faces | Guvanch (asked for it) |
 | 2026-10-30 | Adopt this system-first workflow for all UI work | Screens looked inconsistent ("AI slop") | Guvanch |
+| 2026-10-30 | Me D (list hub); Inbox moves inside Me; tab bar = Home, Discover, Play, Me | One place for the child's own things; fewer tabs | Guvanch |
+| 2026-10-30 | Paywall page reachable by anyone from the locked 31st video, price shown; buying needs the parent PIN (replaces "no price on child screens" for this page) | Owner decision | Guvanch |
+| 2026-10-30 | Onboarding: Splash → Welcome (phone's language) → Language with Continue | Don't open on a language picker | Guvanch |
+| 2026-10-30 | Home full display: pinch out on, pinch in off; one tap stays mute | Owner request | Guvanch |
 | 2026-10-30 | Discover B: keep For you / Channels / Topics, cleaner; no Top 10; channel list; topic tints | Parents find all channels in one list; no rankings for kids | Guvanch |
 | 2026-10-30 | Home round 2: reaction in the rail, no grown-up line, tick for Following, icon contrast on white, press-and-hold hides all chrome | Owner feedback on the build | Guvanch |
 | 2026-10-30 | Home A: quiet icon column, no counts for children, Follow pill + toast | Familiar layout, more picture; numbers are a nudge for kids | Guvanch |

@@ -75,15 +75,16 @@ const TabButton = forwardRef<View, TabButtonProps>(({ kind, label, a11yLabel, is
 TabButton.displayName = 'TabButton';
 
 // TabTrigger clones props (isFocused, onPress…) onto its child, so pass them through.
-const InboxTabButton = forwardRef<View, PressableProps & { isFocused?: boolean }>((props, ref) => {
+// The Inbox lives inside Me, so Me carries its unread dot.
+const MeTabButton = forwardRef<View, PressableProps & { isFocused?: boolean }>((props, ref) => {
   const { unread } = useLibrary();
   const { current } = useFamily();
   const { t } = useT();
   // Little ones (0–6) get no unread dot: their inbox is grown-up notices, not something to check.
   const badge = unread > 0 && current?.lane !== 'little';
-  return <TabButton ref={ref} kind="inbox" label={t('nav.inbox')} a11yLabel={unread ? t('nav.inboxUnread', { count: unread }) : undefined} badge={badge} {...props} />;
+  return <TabButton ref={ref} kind="me" label={t('nav.me')} a11yLabel={unread ? `${t('nav.me')}, ${t('nav.inboxUnread', { count: unread })}` : undefined} badge={badge} {...props} />;
 });
-InboxTabButton.displayName = 'InboxTabButton';
+MeTabButton.displayName = 'MeTabButton';
 
 /**
  * The pill behind the active tab's icon. It slides on a spring and stretches a
@@ -166,11 +167,8 @@ function TabsWithBar() {
         <TabTrigger name="play" href="/play" asChild>
           <TabButton kind="play" label={t('nav.play')} />
         </TabTrigger>
-        <TabTrigger name="inbox" href="/inbox" asChild>
-          <InboxTabButton />
-        </TabTrigger>
         <TabTrigger name="me" href="/me" asChild>
-          <TabButton kind="me" label={t('nav.me')} />
+          <MeTabButton />
         </TabTrigger>
         {hidden && <View pointerEvents="none" style={styles.cover} />}
       </TabList>
