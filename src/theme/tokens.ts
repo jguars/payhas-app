@@ -292,7 +292,8 @@ export const radius = { sm: 12, md: 20, lg: 28, pill: 999, chip: 12, card: 20, v
  * (about 1.8 px on screen). Pass `iconStroke(size)` instead of a per-screen
  * strokeWidth. Illustrations and game pieces are not icons.
  */
-export const iconSize = { sm: 16, md: 20, lg: 24, xl: 32 } as const;
+/** `feed`: the action icons over video (heart, save, send, more) — big enough for small thumbs, quieter than xl. */
+export const iconSize = { sm: 16, md: 20, lg: 24, feed: 28, xl: 32 } as const;
 export const iconStroke = (px: number) => Math.round(((1.8 * 24) / px) * 10) / 10;
 
 /** Two border widths: hairline for dividers and quiet outlines, strong for focus and selection. */

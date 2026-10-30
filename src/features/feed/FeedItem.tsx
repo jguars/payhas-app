@@ -4,17 +4,18 @@ import { useVideoPlayer, VideoView } from 'expo-video';
 import { memo, useEffect, useRef, useState } from 'react';
 import { GestureResponderEvent, Platform, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { Image } from 'expo-image';
-import Animated, { FadeIn, FadeOut, useAnimatedStyle, useReducedMotion, useSharedValue, withSequence, withSpring, withTiming } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut, useAnimatedStyle, useReducedMotion, useSharedValue, withSpring } from 'react-native-reanimated';
 
 import { Icon } from '@/components/Icon';
 import { Pop } from '@/components/motion/Pop';
 import { PressScale } from '@/components/motion/PressScale';
 import { useToast } from '@/components/Toast';
+import { useFamily } from '@/features/family/FamilyProvider';
 import { useLibrary } from '@/features/library/LibraryProvider';
-import { useT } from '@/i18n';
+import { laneKey, useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { spring } from '@/theme/motion';
-import { alpha, color, font, lane as lanes, media, radius, size, themedStyles } from '@/theme/tokens';
+import { alpha, border, color, control, font, iconSize, iconStroke, media, radius, size, space, themedStyles } from '@/theme/tokens';
 
 import { FeedVideo, formatCount } from './data';
 import { HeartBurst } from './HeartBurst';
@@ -76,6 +77,10 @@ function FeedItemBase({ video, active, height, chromeBottom, onShare, onOptions,
   const following = lib.following.has(video.creator.name);
   const mine = lib.reacted.get(video.id) ?? new Set<string>();
   const likeCount = video.likes + lib.likeDelta(video.id);
+  // Children never see popularity numbers; adults see them only when there is one.
+  const { current } = useFamily();
+  const child = current?.lane !== 'adult';
+  const showCount = (n: number) => !child && n > 0;
 
   const [bursts, setBursts] = useState<{ id: number; x: number; y: number }[]>([]);
   const [floaters, setFloaters] = useState<{ id: number; emoji: string }[]>([]);
@@ -161,6 +166,21 @@ function FeedItemBase({ video, active, height, chromeBottom, onShare, onOptions,
     if (adding) setFloaters((f) => [...f, { id: ++seq.current, emoji }]);
   };
 
+  const follow = () => {
+    const now = !following;
+    lib.toggleFollow(video.creator.name);
+    if (now) {
+      fx.follow();
+      toast({ text: t('feed.nowFollowing', { name: video.creator.name }), icon: 'check' });
+    } else fx.tap();
+  };
+
+  const like = () => {
+    if (liked) fx.unlike();
+    else fx.like();
+    lib.toggleLike(video.id);
+  };
+
   const save = () => {
     lib.toggleSave(video.id);
     if (saved) fx.tap();
@@ -184,8 +204,9 @@ function FeedItemBase({ video, active, height, chromeBottom, onShare, onOptions,
   return (
     <View style={[styles.root, { height }]}>
       {!fill && (
-        <View style={StyleSheet.absoluteFill} pointerEvents="none">
-          <Image source={video.thumb} cachePolicy="memory-disk" style={StyleSheet.absoluteFill} contentFit="cover" blurRadius={28} />
+        // Decorative backdrop: hidden from screen readers.
+        <View style={StyleSheet.absoluteFill} pointerEvents="none" aria-hidden importantForAccessibility="no-hide-descendants">
+          <Image source={video.thumb} cachePolicy="memory-disk" style={StyleSheet.absoluteFill} contentFit="cover" blurRadius={28} alt="" accessible={false} />
           <View style={styles.blurDim} />
         </View>
       )}
@@ -206,14 +227,24 @@ function FeedItemBase({ video, active, height, chromeBottom, onShare, onOptions,
           onOptions(video);
         }}
         delayLongPress={420}
+        accessibilityRole="button"
         accessibilityLabel={muted ? t('feed.a11y.unmute') : t('feed.a11y.playPause')}
+        // Screen readers get the gestures as actions instead of "double tap to like" hints.
+        accessibilityActions={[
+          { name: 'like', label: t('feed.like') },
+          { name: 'longpress', label: t('feed.moreOptions') },
+        ]}
+        onAccessibilityAction={(e) => {
+          if (e.nativeEvent.actionName === 'like') like();
+          else if (e.nativeEvent.actionName === 'longpress') onOptions(video);
+        }}
       />
 
       <View pointerEvents="none" style={styles.scrimBottom} />
 
       {muted && (
         <View pointerEvents="none" style={styles.mutedHint}>
-          <Icon name="muted" size={16} />
+          <Icon name="muted" size={iconSize.sm} color={media.text} />
           <Text style={styles.mutedText}>{t('feed.tapForSound')}</Text>
         </View>
       )}
@@ -222,63 +253,77 @@ function FeedItemBase({ video, active, height, chromeBottom, onShare, onOptions,
         <HeartBurst key={b.id} x={b.x} y={b.y} onDone={() => setBursts((all) => all.filter((x) => x.id !== b.id))} />
       ))}
 
-      {/* Right rail: icon + count, no discs (Sora). */}
+      {/* Right rail: quiet icons (Sora); counts only for adults, never a zero. */}
       <View style={[styles.rail, { bottom: railBottom }]}>
-        <Pressable style={styles.action} onPress={() => {
-            if (liked) fx.unlike();
-            else fx.like();
-            lib.toggleLike(video.id);
-          }} accessibilityLabel={t('feed.like')} accessibilityState={{ selected: liked }}>
+        <Pressable style={styles.action} onPress={like} accessibilityRole="button" accessibilityLabel={t('feed.like')} accessibilityState={{ selected: liked }}>
           <Pop on={liked}>
-            <Icon name="heart" size={30} color={liked ? color.ember : media.text} filled={liked} strokeWidth={1.8} />
+            <Icon name="heart" size={iconSize.feed} color={liked ? color.ember : media.text} filled={liked} strokeWidth={iconStroke(iconSize.feed)} />
           </Pop>
-          <Text style={styles.count}>{formatCount(likeCount)}</Text>
+          {showCount(likeCount) && <Text style={styles.count}>{formatCount(likeCount)}</Text>}
         </Pressable>
 
-        <Pressable style={styles.action} onPress={save} accessibilityLabel={t('feed.save')} accessibilityState={{ selected: saved }}>
+        <Pressable style={styles.action} onPress={save} accessibilityRole="button" accessibilityLabel={t('feed.save')} accessibilityState={{ selected: saved }}>
           <Pop on={saved}>
-            <Icon name="save" size={27} color={saved ? lanes.little.color : media.text} filled={saved} strokeWidth={1.8} />
+            <Icon name="save" size={iconSize.feed} color={media.text} filled={saved} strokeWidth={iconStroke(iconSize.feed)} />
           </Pop>
-          <Text style={styles.count}>{formatCount(video.saves + lib.saveDelta(video.id))}</Text>
+          {showCount(video.saves + lib.saveDelta(video.id)) && <Text style={styles.count}>{formatCount(video.saves + lib.saveDelta(video.id))}</Text>}
         </Pressable>
 
-        <Pressable style={styles.action} onPress={() => {
+        <Pressable
+          style={styles.action}
+          onPress={() => {
             fx.sheet();
             onShare(video);
-          }} accessibilityLabel={t('feed.share')}>
-          <Icon name="send" size={27} strokeWidth={1.8} />
-          <Text style={styles.count}>{formatCount(video.shares)}</Text>
+          }}
+          accessibilityRole="button"
+          accessibilityLabel={t('feed.share')}
+        >
+          <Icon name="send" size={iconSize.feed} color={media.text} strokeWidth={iconStroke(iconSize.feed)} />
+          {showCount(video.shares) && <Text style={styles.count}>{formatCount(video.shares)}</Text>}
         </Pressable>
 
-        <Pressable style={styles.action} onPress={() => {
+        <Pressable
+          style={styles.action}
+          onPress={() => {
             fx.longPress();
             onOptions(video);
-          }} accessibilityLabel={t('feed.moreOptions')}>
-          <Icon name="more" size={26} strokeWidth={2.2} />
+          }}
+          accessibilityRole="button"
+          accessibilityLabel={t('feed.moreOptions')}
+        >
+          <Icon name="more" size={iconSize.feed} color={media.text} strokeWidth={iconStroke(iconSize.feed)} />
         </Pressable>
       </View>
 
       {/* Bottom-left: creator, caption, reaction pills (Sora + Character AI). */}
       <View style={[styles.meta, { bottom: metaBottom }]} pointerEvents="box-none">
         <View style={styles.creatorRow}>
-          <View style={styles.discWrap}>
-            <Pressable onPress={() => {
-                fx.sheet();
-                onCreator(video.creator.name);
-              }} accessibilityRole="button" accessibilityLabel={t('feed.creatorVideos', { name: video.creator.name })} hitSlop={6}>
-              <View style={styles.disc}>
-                <Text style={styles.discLetter}>{video.creator.name[0]?.toUpperCase()}</Text>
-              </View>
-            </Pressable>
-            <FollowBadge following={following} onFollow={() => lib.toggleFollow(video.creator.name)} name={video.creator.name} />
-          </View>
-          <Pressable onPress={() => {
+          <Pressable
+            onPress={() => {
               fx.sheet();
               onCreator(video.creator.name);
-            }} style={styles.creatorName} hitSlop={8} importantForAccessibility="no" accessibilityElementsHidden>
+            }}
+            style={styles.creatorName}
+            accessibilityRole="button"
+            accessibilityLabel={t('feed.creatorVideos', { name: video.creator.name })}
+          >
+            <View style={styles.disc}>
+              <Text style={styles.discLetter}>{video.creator.name[0]?.toUpperCase()}</Text>
+            </View>
             <Text style={styles.creator} numberOfLines={1}>{video.creator.name}</Text>
-            {video.creator.verified && <Icon name="verified" size={14} color={color.verified} />}
+            {video.creator.verified && <Icon name="verified" size={iconSize.sm} color={color.verified} />}
           </Pressable>
+          <PressScale
+            onPress={follow}
+            pressedScale={0.94}
+            hitSlop={space.sm}
+            accessibilityRole="button"
+            accessibilityLabel={following ? t('feed.unfollowName', { name: video.creator.name }) : t('feed.followName', { name: video.creator.name })}
+            accessibilityState={{ selected: following }}
+            style={[styles.followPill, following && styles.followPillOn]}
+          >
+            <Text style={[styles.followText, following && styles.followTextOn]}>{following ? t('feed.following') : t('feed.follow')}</Text>
+          </PressScale>
         </View>
         <Pressable
           onPress={() => {
@@ -306,9 +351,17 @@ function FeedItemBase({ video, active, height, chromeBottom, onShare, onOptions,
             </Animated.View>
           )}
         </Pressable>
+        {child && current && (
+          <View style={styles.why}>
+            <Icon name="shield" size={iconSize.sm} color={media.text2} strokeWidth={iconStroke(iconSize.sm)} />
+            <Text style={styles.whyText} numberOfLines={1}>
+              {t('feed.why.lane', { lane: t(laneKey(current.lane)) })}
+            </Text>
+          </View>
+        )}
         <View style={styles.pills}>
           {topReactions.map(([emoji, n]) => (
-            <ReactionPill key={emoji} emoji={emoji} count={n} on={mine.has(emoji)} onPress={() => react(emoji)} />
+            <ReactionPill key={emoji} emoji={emoji} count={n} showCount={!child} on={mine.has(emoji)} onPress={() => react(emoji)} />
           ))}
           <View onLayout={(e) => setPlusX(e.nativeEvent.layout.x + e.nativeEvent.layout.width / 2)}>
             <MorePill
@@ -346,7 +399,7 @@ function FeedItemBase({ video, active, height, chromeBottom, onShare, onOptions,
 }
 
 /** One of the top reactions: emoji + count in a small translucent pill; tap toggles yours. */
-function ReactionPill({ emoji, count, on, onPress }: { emoji: string; count: number; on: boolean; onPress: () => void }) {
+function ReactionPill({ emoji, count, showCount, on, onPress }: { emoji: string; count: number; showCount: boolean; on: boolean; onPress: () => void }) {
   const { t } = useT();
   return (
     <PressScale
@@ -354,14 +407,14 @@ function ReactionPill({ emoji, count, on, onPress }: { emoji: string; count: num
       pressedScale={0.92}
       hitSlop={{ top: 6, bottom: 6, left: 2, right: 2 }}
       accessibilityRole="button"
-      accessibilityLabel={t('feed.reactionPill', { emoji, count })}
+      accessibilityLabel={showCount ? t('feed.reactionPill', { emoji, count }) : t('feed.react')}
       accessibilityState={{ selected: on }}
       style={[styles.pill, on && styles.pillOn]}
     >
       <Pop on={on}>
         <Text style={styles.pillEmoji}>{emoji}</Text>
       </Pop>
-      <Text style={styles.pillCount}>{formatCount(count)}</Text>
+      {showCount && <Text style={styles.pillCount}>{formatCount(count)}</Text>}
     </PressScale>
   );
 }
@@ -385,49 +438,11 @@ function MorePill({ open, onPress }: { open: boolean; onPress: () => void }) {
       accessibilityState={{ expanded: open }}
       style={[styles.pill, styles.pillMore, open && styles.pillOn]}
     >
-      <Icon name="smile" size={17} strokeWidth={2} />
+      <Icon name="smile" size={iconSize.md} color={media.text} strokeWidth={iconStroke(iconSize.md)} />
       <Animated.View style={anim}>
-        <Icon name="plus" size={12} strokeWidth={2.8} />
+        <Icon name="plus" size={iconSize.sm - space.xs} color={media.text} strokeWidth={iconStroke(iconSize.sm - space.xs)} />
       </Animated.View>
     </PressScale>
-  );
-}
-
-/** The "+" on the creator disc: tap → spins into a green tick, holds, then tucks away. */
-function FollowBadge({ following, onFollow, name }: { following: boolean; onFollow: () => void; name: string }) {
-  const { t } = useT();
-  const [phase, setPhase] = useState<'plus' | 'tick' | 'gone'>(following ? 'gone' : 'plus');
-  const s = useSharedValue(1);
-  const r = useSharedValue(0);
-
-  // Unfollowed elsewhere (creator sheet, Following list) → the "+" comes back.
-  useEffect(() => {
-    if (!following) {
-      setPhase('plus');
-      s.value = withSpring(1, spring.snappy);
-      r.value = 0;
-    } else if (phase === 'plus') {
-      setPhase('gone');
-    }
-  }, [following]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const press = () => {
-    fx.follow();
-    setPhase('tick');
-    r.value = withTiming(360, { duration: 380 });
-    s.value = withSequence(withSpring(1.3, spring.bouncy), withTiming(1, { duration: 120 }), withTiming(1, { duration: 700 }), withTiming(0, { duration: 180 }));
-    onFollow();
-    setTimeout(() => setPhase('gone'), 1300);
-  };
-
-  const anim = useAnimatedStyle(() => ({ transform: [{ scale: s.value }, { rotate: `${r.value}deg` }] }));
-  if (phase === 'gone') return null;
-  return (
-    <Animated.View style={[styles.follow, phase === 'tick' && styles.followDone, anim]}>
-      <Pressable onPress={press} disabled={phase === 'tick'} accessibilityLabel={t('feed.followName', { name })} hitSlop={10} style={styles.followHit}>
-        <Icon name={phase === 'tick' ? 'check' : 'plus'} size={12} color={color.ink} strokeWidth={3.5} />
-      </Pressable>
-    </Animated.View>
   );
 }
 
@@ -460,12 +475,11 @@ const styles = themedStyles(() => ({
     backgroundColor: alpha(color.ink, 0.55),
   },
   mutedText: { color: media.text, fontFamily: font.semibold, fontSize: size.small },
-  rail: { position: 'absolute', right: RAIL_RIGHT, alignItems: 'center', gap: 14 },
-  action: { minWidth: 48, minHeight: 48, alignItems: 'center', justifyContent: 'center', gap: 3 },
+  rail: { position: 'absolute', right: RAIL_RIGHT, alignItems: 'center', gap: space.xs },
+  action: { minWidth: control.md, minHeight: control.md, alignItems: 'center', justifyContent: 'center', gap: space.xs / 2 },
   count: { color: media.text, fontFamily: font.mono, fontSize: size.caption, ...SHADOW },
   meta: { position: 'absolute', left: META_LEFT, right: 76, gap: 8 },
-  creatorRow: { flexDirection: 'row', alignItems: 'center', gap: 10, alignSelf: 'flex-start' },
-  discWrap: { width: DISC + 4, height: DISC + 4, alignItems: 'center', justifyContent: 'center' },
+  creatorRow: { flexDirection: 'row', alignItems: 'center', gap: space.sm, alignSelf: 'flex-start' },
   disc: {
     width: DISC,
     height: DISC,
@@ -477,11 +491,31 @@ const styles = themedStyles(() => ({
     justifyContent: 'center',
   },
   discLetter: { color: media.text, fontFamily: font.title, fontSize: size.body },
-  creatorName: { flexDirection: 'row', alignItems: 'center', gap: 5, flexShrink: 1 },
+  creatorName: { flexDirection: 'row', alignItems: 'center', gap: space.sm, flexShrink: 1, minHeight: control.md },
   creator: { color: media.text, fontFamily: font.bold, fontSize: size.body, flexShrink: 1, ...SHADOW },
-  follow: { position: 'absolute', right: -3, bottom: -3, width: 18, height: 18, borderRadius: 9, borderWidth: 1.5, borderColor: color.ink, backgroundColor: color.ember },
-  followDone: { backgroundColor: lanes.kids.color },
-  followHit: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  followPill: {
+    height: control.sm - space.sm,
+    paddingHorizontal: space.md,
+    borderRadius: radius.pill,
+    borderWidth: border.strong,
+    borderColor: alpha(media.text, 0.7),
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  followPillOn: { borderColor: 'transparent', backgroundColor: alpha(media.text, 0.16) },
+  followText: { color: media.text, fontFamily: font.bold, fontSize: size.small },
+  followTextOn: { color: media.text2 },
+  why: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.xs,
+    alignSelf: 'flex-start',
+    paddingHorizontal: space.sm,
+    paddingVertical: space.xs,
+    borderRadius: radius.pill,
+    backgroundColor: alpha(media.text, 0.1),
+  },
+  whyText: { color: media.text2, fontFamily: font.semibold, fontSize: size.caption, flexShrink: 1 },
   caption: { color: media.text, fontFamily: font.medium, fontSize: size.small, lineHeight: 20, ...SHADOW },
   credit: { color: alpha(media.text, 0.72), fontFamily: font.medium, fontSize: size.caption, lineHeight: 17 },
   captionBox: { marginHorizontal: -10, marginVertical: -4, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 14 },

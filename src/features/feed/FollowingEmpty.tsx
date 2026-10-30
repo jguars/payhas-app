@@ -32,7 +32,7 @@ export function FollowingEmpty({ videos, top }: { videos: FeedVideo[]; top: numb
           const thumb = thumbFor(c.latest_video_id);
           return (
             <Enter key={c.creator_name} index={2 + i} rise={24} style={styles.card}>
-              {thumb != null && <Image source={thumb} cachePolicy="memory-disk" style={styles.poster} contentFit="cover" />}
+              {thumb != null && <Image source={thumb} cachePolicy="memory-disk" style={styles.poster} contentFit="cover" aria-hidden accessible={false} />}
               <View style={styles.scrim} />
               <View style={styles.cardBody}>
                 <View style={styles.avatar}>
