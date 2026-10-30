@@ -41,3 +41,15 @@ plus a devil's-advocate pass (owner asked for no subagents).
 | Lane chip at the top is 28 px tall (passes 24 px AA, below 48) | Home top bar, next pass |
 | Unfollow has no Undo | next pass |
 | Emulator + phone check of the feed | #32 / phone test |
+
+## Round 2 — owner feedback (mockup `home-mock-v2.png`, approved)
+
+| Owner point | Built |
+| --- | --- |
+| 1. Reaction to the right | ☺ is the 2nd action in the rail (under the heart); shows your emoji once you react; the picker opens beside the rail. The reaction pills under the caption are gone |
+| 2. Remove "A grown-up checked…" | Removed from the feed (still in "Why this?") |
+| 3. Icon instead of "Following" | After Follow, the pill becomes a tick; screen readers hear "Unfollow {name}" |
+| 4. Icons never get lost | Bottom fade, rail glow and top fade redrawn in SVG (CSS gradients drew nothing on web) and tuned on a **pure white frame**: heart 3.7:1, react 5.4, save 6.5, send 7.0, more 7.5, caption 6.7, top tabs 5.4 (`home-built-v2.png`, last frame). Icons also carry a shape-following shadow (iOS layer shadow; drop-shadow filter on Android/web) |
+| 5. Full size without UI | **Press and hold**: everything on the video and Home's top bar hide while held; release brings them back (Instagram Reels). The options menu lives on ••• only (screen readers keep it as an action) |
+
+Checks: tsc clean, lint 699 (was 708), axe 0 in Dark and Light.

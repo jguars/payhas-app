@@ -9,6 +9,7 @@ import { useFamily } from '@/features/family/FamilyProvider';
 import { CreatorSheet } from '@/features/feed/CreatorSheet';
 import { FeedVideo } from '@/features/feed/data';
 import { FeedItem } from '@/features/feed/FeedItem';
+import { TopScrim } from '@/features/feed/FeedScrims';
 import { FollowingEmpty } from '@/features/feed/FollowingEmpty';
 import { LockedNext } from '@/features/feed/LockedNext';
 import { takeOpened } from '@/features/feed/openVideo';
@@ -122,6 +123,8 @@ export default function FeedScreen() {
   const onOptions = useCallback((video: FeedVideo) => setSheet({ video, mode: 'options' }), []);
   const onCreator = useCallback((name: string) => setCreator(name), []);
 
+  // True while a finger holds the video down: all chrome steps aside.
+  const [clear, setClear] = useState(false);
   const showEmptyFollowing = !followingFeed.loading && followingFeed.videos.length === 0 && !capReached;
   // The tab bar turns dark only while a video is really under it.
   useReportVideoUnderBar(!lock && !(mode === 'following' && showEmptyFollowing));
@@ -171,6 +174,7 @@ export default function FeedScreen() {
                         onShare={onShare}
                         onOptions={onOptions}
                         onCreator={onCreator}
+                        onClear={setClear}
                       />
                     )}
                     // One swipe = one video. Without disableIntervalMomentum a fast flick on
@@ -198,8 +202,11 @@ export default function FeedScreen() {
         </Animated.ScrollView>
       )}
 
-      <View pointerEvents="box-none" style={[styles.top, { paddingTop: insets.top + 4 }]}>
-        <View pointerEvents="none" style={styles.scrimTop} />
+      {/* Holding the video hides this too: nothing but the picture. */}
+      <View pointerEvents="box-none" style={[styles.top, { paddingTop: insets.top + 4 }, clear && styles.hidden]}>
+        <View pointerEvents="none" style={styles.scrimTop}>
+          <TopScrim />
+        </View>
         <View style={styles.side} pointerEvents="box-none">
           {active && <LaneBadge variant="media" lane={active.profile.lane} label={t(roleKey(active.profile))} onPress={leaveProfile} />}
         </View>
@@ -282,13 +289,13 @@ const styles = themedStyles(() => ({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  hidden: { opacity: 0 },
   scrimTop: {
     position: 'absolute',
     left: 0,
     right: 0,
     top: 0,
     bottom: 0,
-    experimental_backgroundImage: 'linear-gradient(180deg, rgba(10,10,15,0.4), rgba(10,10,15,0))',
   },
   // Equal side slots keep the tabs centred whatever the lane badge's width.
   side: { flex: 1, flexDirection: 'row', alignItems: 'center' },

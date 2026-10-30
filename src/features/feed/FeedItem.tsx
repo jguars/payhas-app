@@ -4,7 +4,7 @@ import { useVideoPlayer, VideoView } from 'expo-video';
 import { memo, useEffect, useRef, useState } from 'react';
 import { GestureResponderEvent, Platform, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { Image } from 'expo-image';
-import Animated, { FadeIn, FadeOut, useAnimatedStyle, useReducedMotion, useSharedValue, withSpring } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
 import { Icon } from '@/components/Icon';
 import { Pop } from '@/components/motion/Pop';
@@ -12,12 +12,12 @@ import { PressScale } from '@/components/motion/PressScale';
 import { useToast } from '@/components/Toast';
 import { useFamily } from '@/features/family/FamilyProvider';
 import { useLibrary } from '@/features/library/LibraryProvider';
-import { laneKey, useT } from '@/i18n';
+import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
-import { spring } from '@/theme/motion';
 import { alpha, border, color, control, font, iconSize, iconStroke, media, radius, size, space, themedStyles } from '@/theme/tokens';
 
 import { FeedVideo, formatCount } from './data';
+import { FeedScrims } from './FeedScrims';
 import { HeartBurst } from './HeartBurst';
 import { FloatingEmoji, ReactionBar } from './ReactionBar';
 
@@ -31,7 +31,6 @@ const PRELOAD_BUFFER = { preferredForwardBufferDuration: 5, minBufferForPlayback
 const PLAYING_BUFFER = { preferredForwardBufferDuration: Platform.OS === 'ios' ? 0 : 20, minBufferForPlayback: 2, waitsToMinimizeStalling: true };
 const RAIL_RIGHT = 10;
 const META_LEFT = 16;
-const PILL_H = 32;
 const DISC = 34;
 
 type Props = {
@@ -43,9 +42,11 @@ type Props = {
   onShare: (v: FeedVideo) => void;
   onOptions: (v: FeedVideo) => void;
   onCreator: (name: string) => void;
+  /** Called with true while the video is held down (all chrome hides), false on release. */
+  onClear?: (clear: boolean) => void;
 };
 
-function FeedItemBase({ video, active, height, chromeBottom, onShare, onOptions, onCreator }: Props) {
+function FeedItemBase({ video, active, height, chromeBottom, onShare, onOptions, onCreator, onClear }: Props) {
   const player = useVideoPlayer(video.source, (p) => {
     p.loop = true;
     // Browsers block autoplay with sound; native starts unmuted.
@@ -85,6 +86,12 @@ function FeedItemBase({ video, active, height, chromeBottom, onShare, onOptions,
   const [bursts, setBursts] = useState<{ id: number; x: number; y: number }[]>([]);
   const [floaters, setFloaters] = useState<{ id: number; emoji: string }[]>([]);
   const [picking, setPicking] = useState(false);
+  // Press and hold: everything on the video hides until the finger lifts (Instagram Reels).
+  const [clear, setClear] = useState(false);
+  const hold = (on: boolean) => {
+    setClear(on);
+    onClear?.(on);
+  };
   // The caption opens on tap to show all of it, plus credit and source; it closes again when the video changes.
   const [expanded, setExpanded] = useState(false);
   useEffect(() => {
@@ -188,18 +195,10 @@ function FeedItemBase({ video, active, height, chromeBottom, onShare, onOptions,
     if (!saved) toast({ text: t('feed.saved'), icon: 'save', action: { label: t('feed.view'), onPress: () => router.push('/saved') } });
   };
 
-  // The top three reactions (own picks count too), shown as pills under the caption.
-  const counts = new Map<string, number>();
-  for (const [e, c] of Object.entries(video.reactions)) counts.set(e, c + lib.reactionDelta(video.id, e));
-  for (const e of mine) if (!(e in video.reactions)) counts.set(e, 1);
-  const topReactions = [...counts.entries()]
-    .filter(([, c]) => c > 0)
-    .sort((a, b) => b[1] - a[1] || Number(mine.has(b[0])) - Number(mine.has(a[0])))
-    .slice(0, 3);
-
   const metaBottom = chromeBottom + 4;
   const railBottom = chromeBottom + 2;
-  const [plusX, setPlusX] = useState(0);
+  // The react button is 4th from the bottom of the rail (more, send, save, react, heart).
+  const reactBottom = railBottom + 3 * (control.md + space.xs);
 
   return (
     <View style={[styles.root, { height }]}>
@@ -224,225 +223,181 @@ function FeedItemBase({ video, active, height, chromeBottom, onShare, onOptions,
         onPress={onTap}
         onLongPress={() => {
           fx.longPress();
-          onOptions(video);
+          setPicking(false);
+          hold(true);
         }}
+        onPressOut={() => clear && hold(false)}
         delayLongPress={420}
         accessibilityRole="button"
         accessibilityLabel={muted ? t('feed.a11y.unmute') : t('feed.a11y.playPause')}
         // Screen readers get the gestures as actions instead of "double tap to like" hints.
         accessibilityActions={[
           { name: 'like', label: t('feed.like') },
-          { name: 'longpress', label: t('feed.moreOptions') },
+          { name: 'options', label: t('feed.moreOptions') },
         ]}
         onAccessibilityAction={(e) => {
           if (e.nativeEvent.actionName === 'like') like();
-          else if (e.nativeEvent.actionName === 'longpress') onOptions(video);
+          else if (e.nativeEvent.actionName === 'options') onOptions(video);
         }}
       />
 
-      <View pointerEvents="none" style={styles.scrimBottom} />
+      {/* Everything on top of the picture; hidden while the video is held down. */}
+      <View pointerEvents={clear ? 'none' : 'box-none'} style={[StyleSheet.absoluteFill, clear && styles.hidden]}>
+        <FeedScrims railBottom={railBottom} />
 
-      {muted && (
-        <View pointerEvents="none" style={styles.mutedHint}>
-          <Icon name="muted" size={iconSize.sm} color={media.text} />
-          <Text style={styles.mutedText}>{t('feed.tapForSound')}</Text>
-        </View>
-      )}
-
-      {bursts.map((b) => (
-        <HeartBurst key={b.id} x={b.x} y={b.y} onDone={() => setBursts((all) => all.filter((x) => x.id !== b.id))} />
-      ))}
-
-      {/* Right rail: quiet icons (Sora); counts only for adults, never a zero. */}
-      <View style={[styles.rail, { bottom: railBottom }]}>
-        <Pressable style={styles.action} onPress={like} accessibilityRole="button" accessibilityLabel={t('feed.like')} accessibilityState={{ selected: liked }}>
-          <Pop on={liked}>
-            <Icon name="heart" size={iconSize.feed} color={liked ? color.ember : media.text} filled={liked} strokeWidth={iconStroke(iconSize.feed)} />
-          </Pop>
-          {showCount(likeCount) && <Text style={styles.count}>{formatCount(likeCount)}</Text>}
-        </Pressable>
-
-        <Pressable style={styles.action} onPress={save} accessibilityRole="button" accessibilityLabel={t('feed.save')} accessibilityState={{ selected: saved }}>
-          <Pop on={saved}>
-            <Icon name="save" size={iconSize.feed} color={media.text} filled={saved} strokeWidth={iconStroke(iconSize.feed)} />
-          </Pop>
-          {showCount(video.saves + lib.saveDelta(video.id)) && <Text style={styles.count}>{formatCount(video.saves + lib.saveDelta(video.id))}</Text>}
-        </Pressable>
-
-        <Pressable
-          style={styles.action}
-          onPress={() => {
-            fx.sheet();
-            onShare(video);
-          }}
-          accessibilityRole="button"
-          accessibilityLabel={t('feed.share')}
-        >
-          <Icon name="send" size={iconSize.feed} color={media.text} strokeWidth={iconStroke(iconSize.feed)} />
-          {showCount(video.shares) && <Text style={styles.count}>{formatCount(video.shares)}</Text>}
-        </Pressable>
-
-        <Pressable
-          style={styles.action}
-          onPress={() => {
-            fx.longPress();
-            onOptions(video);
-          }}
-          accessibilityRole="button"
-          accessibilityLabel={t('feed.moreOptions')}
-        >
-          <Icon name="more" size={iconSize.feed} color={media.text} strokeWidth={iconStroke(iconSize.feed)} />
-        </Pressable>
-      </View>
-
-      {/* Bottom-left: creator, caption, reaction pills (Sora + Character AI). */}
-      <View style={[styles.meta, { bottom: metaBottom }]} pointerEvents="box-none">
-        <View style={styles.creatorRow}>
-          <Pressable
-            onPress={() => {
-              fx.sheet();
-              onCreator(video.creator.name);
-            }}
-            style={styles.creatorName}
-            accessibilityRole="button"
-            accessibilityLabel={t('feed.creatorVideos', { name: video.creator.name })}
-          >
-            <View style={styles.disc}>
-              <Text style={styles.discLetter}>{video.creator.name[0]?.toUpperCase()}</Text>
-            </View>
-            <Text style={styles.creator} numberOfLines={1}>{video.creator.name}</Text>
-            {video.creator.verified && <Icon name="verified" size={iconSize.sm} color={color.verified} />}
-          </Pressable>
-          <PressScale
-            onPress={follow}
-            pressedScale={0.94}
-            hitSlop={space.sm}
-            accessibilityRole="button"
-            accessibilityLabel={following ? t('feed.unfollowName', { name: video.creator.name }) : t('feed.followName', { name: video.creator.name })}
-            accessibilityState={{ selected: following }}
-            style={[styles.followPill, following && styles.followPillOn]}
-          >
-            <Text style={[styles.followText, following && styles.followTextOn]}>{following ? t('feed.following') : t('feed.follow')}</Text>
-          </PressScale>
-        </View>
-        <Pressable
-          onPress={() => {
-            fx.tap();
-            setExpanded((e) => !e);
-          }}
-          accessibilityRole="button"
-          accessibilityState={{ expanded }}
-          accessibilityHint={expanded ? t('feed.caption.less') : t('feed.caption.more')}
-          hitSlop={8}
-          style={[styles.captionBox, expanded && styles.captionBoxOpen]}
-        >
-          <Text style={styles.caption} numberOfLines={expanded ? undefined : 1}>
-            {video.caption}
-          </Text>
-          {expanded && (video.credit || video.origin) && (
-            <Animated.View entering={FadeIn.duration(180)} style={styles.captionMore}>
-              {!!video.credit && <Text style={styles.credit}>{video.credit}</Text>}
-              {!!video.origin && (
-                <Text style={styles.credit}>
-                  {t('feed.caption.source', { name: video.origin.name })}
-                  {video.origin.license ? ` · ${video.origin.license}` : ''}
-                </Text>
-              )}
-            </Animated.View>
-          )}
-        </Pressable>
-        {child && current && (
-          <View style={styles.why}>
-            <Icon name="shield" size={iconSize.sm} color={media.text2} strokeWidth={iconStroke(iconSize.sm)} />
-            <Text style={styles.whyText} numberOfLines={1}>
-              {t('feed.why.lane', { lane: t(laneKey(current.lane)) })}
-            </Text>
+        {muted && (
+          <View pointerEvents="none" style={styles.mutedHint}>
+            <Icon name="muted" size={iconSize.sm} color={media.text} />
+            <Text style={styles.mutedText}>{t('feed.tapForSound')}</Text>
           </View>
         )}
-        <View style={styles.pills}>
-          {topReactions.map(([emoji, n]) => (
-            <ReactionPill key={emoji} emoji={emoji} count={n} showCount={!child} on={mine.has(emoji)} onPress={() => react(emoji)} />
-          ))}
-          <View onLayout={(e) => setPlusX(e.nativeEvent.layout.x + e.nativeEvent.layout.width / 2)}>
-            <MorePill
-              open={picking}
+
+        {bursts.map((b) => (
+          <HeartBurst key={b.id} x={b.x} y={b.y} onDone={() => setBursts((all) => all.filter((x) => x.id !== b.id))} />
+        ))}
+
+        {/* Right rail: quiet icons (Sora); counts only for adults, never a zero. */}
+        <View style={[styles.rail, { bottom: railBottom }]}>
+          <Pressable style={styles.action} onPress={like} accessibilityRole="button" accessibilityLabel={t('feed.like')} accessibilityState={{ selected: liked }}>
+            <Pop on={liked}>
+              <Icon name="heart" size={iconSize.feed} color={liked ? color.ember : media.text} filled={liked} strokeWidth={iconStroke(iconSize.feed)} />
+            </Pop>
+            {showCount(likeCount) && <Text style={styles.count}>{formatCount(likeCount)}</Text>}
+          </Pressable>
+
+          {/* React: the smiley, or the emoji you picked. Opens the picker beside the rail. */}
+          <Pressable
+            style={styles.action}
+            onPress={() => {
+              fx.tap();
+              setPicking((p) => !p);
+            }}
+            accessibilityRole="button"
+            accessibilityLabel={t('feed.react')}
+            accessibilityState={{ expanded: picking, selected: mine.size > 0 }}
+          >
+            {mine.size > 0 ? (
+              <Text style={styles.myEmoji}>{[...mine][0]}</Text>
+            ) : (
+              <Icon name="smile" size={iconSize.feed} color={media.text} strokeWidth={iconStroke(iconSize.feed)} />
+            )}
+          </Pressable>
+
+          <Pressable style={styles.action} onPress={save} accessibilityRole="button" accessibilityLabel={t('feed.save')} accessibilityState={{ selected: saved }}>
+            <Pop on={saved}>
+              <Icon name="save" size={iconSize.feed} color={media.text} filled={saved} strokeWidth={iconStroke(iconSize.feed)} />
+            </Pop>
+            {showCount(video.saves + lib.saveDelta(video.id)) && <Text style={styles.count}>{formatCount(video.saves + lib.saveDelta(video.id))}</Text>}
+          </Pressable>
+
+          <Pressable
+            style={styles.action}
+            onPress={() => {
+              fx.sheet();
+              onShare(video);
+            }}
+            accessibilityRole="button"
+            accessibilityLabel={t('feed.share')}
+          >
+            <Icon name="send" size={iconSize.feed} color={media.text} strokeWidth={iconStroke(iconSize.feed)} />
+            {showCount(video.shares) && <Text style={styles.count}>{formatCount(video.shares)}</Text>}
+          </Pressable>
+
+          <Pressable
+            style={styles.action}
+            onPress={() => {
+              fx.longPress();
+              onOptions(video);
+            }}
+            accessibilityRole="button"
+            accessibilityLabel={t('feed.moreOptions')}
+          >
+            <Icon name="more" size={iconSize.feed} color={media.text} strokeWidth={iconStroke(iconSize.feed)} />
+          </Pressable>
+        </View>
+
+        {/* Bottom-left: creator and caption (Sora). */}
+        <View style={[styles.meta, { bottom: metaBottom }]} pointerEvents="box-none">
+          <View style={styles.creatorRow}>
+            <Pressable
               onPress={() => {
-                fx.tap();
-                setPicking((p) => !p);
+                fx.sheet();
+                onCreator(video.creator.name);
               }}
-            />
+              style={styles.creatorName}
+              accessibilityRole="button"
+              accessibilityLabel={t('feed.creatorVideos', { name: video.creator.name })}
+            >
+              <View style={styles.disc}>
+                <Text style={styles.discLetter}>{video.creator.name[0]?.toUpperCase()}</Text>
+              </View>
+              <Text style={styles.creator} numberOfLines={1}>{video.creator.name}</Text>
+              {video.creator.verified && <Icon name="verified" size={iconSize.sm} color={color.verified} />}
+            </Pressable>
+            <PressScale
+              onPress={follow}
+              pressedScale={0.94}
+              hitSlop={space.sm}
+              accessibilityRole="button"
+              accessibilityLabel={following ? t('feed.unfollowName', { name: video.creator.name }) : t('feed.followName', { name: video.creator.name })}
+              accessibilityState={{ selected: following }}
+              style={[styles.followPill, following && styles.followPillOn]}
+            >
+              {following ? (
+                <Icon name="check" size={iconSize.md} color={media.text} strokeWidth={iconStroke(iconSize.md)} />
+              ) : (
+                <Text style={styles.followText}>{t('feed.follow')}</Text>
+              )}
+            </PressScale>
           </View>
+          <Pressable
+            onPress={() => {
+              fx.tap();
+              setExpanded((e) => !e);
+            }}
+            accessibilityRole="button"
+            accessibilityState={{ expanded }}
+            accessibilityHint={expanded ? t('feed.caption.less') : t('feed.caption.more')}
+            hitSlop={8}
+            style={[styles.captionBox, expanded && styles.captionBoxOpen]}
+          >
+            <Text style={styles.caption} numberOfLines={expanded ? undefined : 1}>
+              {video.caption}
+            </Text>
+            {expanded && (video.credit || video.origin) && (
+              <Animated.View entering={FadeIn.duration(180)} style={styles.captionMore}>
+                {!!video.credit && <Text style={styles.credit}>{video.credit}</Text>}
+                {!!video.origin && (
+                  <Text style={styles.credit}>
+                    {t('feed.caption.source', { name: video.origin.name })}
+                    {video.origin.license ? ` · ${video.origin.license}` : ''}
+                  </Text>
+                )}
+              </Animated.View>
+            )}
+          </Pressable>
+        </View>
+
+        {picking && (
+          <Animated.View entering={FadeIn.duration(120)} exiting={FadeOut.duration(100)} style={[styles.reactionBar, { bottom: reactBottom }]}>
+            <ReactionBar mine={mine} onPick={react} />
+          </Animated.View>
+        )}
+
+        {floaters.map((f) => (
+          <FloatingEmoji
+            key={f.id}
+            emoji={f.emoji}
+            fromX={width - RAIL_RIGHT - control.md / 2}
+            fromY={height - reactBottom - control.md / 2}
+            onDone={() => setFloaters((all) => all.filter((x) => x.id !== f.id))}
+          />
+        ))}
+        <View style={[styles.progressTrack, { bottom: chromeBottom - space.sm }]}>
+          <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
         </View>
       </View>
-
-      {picking && (
-        <Animated.View entering={FadeIn.duration(120)} exiting={FadeOut.duration(100)} style={[styles.reactionBar, { bottom: metaBottom + PILL_H + 10 }]}>
-          <ReactionBar mine={mine} onPick={react} />
-        </Animated.View>
-      )}
-
-      {floaters.map((f) => (
-        <FloatingEmoji
-          key={f.id}
-          emoji={f.emoji}
-          fromX={META_LEFT + plusX}
-          fromY={height - metaBottom - PILL_H / 2}
-          onDone={() => setFloaters((all) => all.filter((x) => x.id !== f.id))}
-        />
-      ))}
-
-      <View style={[styles.progressTrack, { bottom: chromeBottom - 8 }]}>
-        <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
-      </View>
     </View>
-  );
-}
-
-/** One of the top reactions: emoji + count in a small translucent pill; tap toggles yours. */
-function ReactionPill({ emoji, count, showCount, on, onPress }: { emoji: string; count: number; showCount: boolean; on: boolean; onPress: () => void }) {
-  const { t } = useT();
-  return (
-    <PressScale
-      onPress={onPress}
-      pressedScale={0.92}
-      hitSlop={{ top: 6, bottom: 6, left: 2, right: 2 }}
-      accessibilityRole="button"
-      accessibilityLabel={showCount ? t('feed.reactionPill', { emoji, count }) : t('feed.react')}
-      accessibilityState={{ selected: on }}
-      style={[styles.pill, on && styles.pillOn]}
-    >
-      <Pop on={on}>
-        <Text style={styles.pillEmoji}>{emoji}</Text>
-      </Pop>
-      {showCount && <Text style={styles.pillCount}>{formatCount(count)}</Text>}
-    </PressScale>
-  );
-}
-
-/** The "+" pill that opens the full reaction picker; the plus turns into a × while it's open. */
-function MorePill({ open, onPress }: { open: boolean; onPress: () => void }) {
-  const { t } = useT();
-  const reduce = useReducedMotion();
-  const r = useSharedValue(0);
-  useEffect(() => {
-    r.value = reduce ? (open ? 45 : 0) : withSpring(open ? 45 : 0, spring.snappy);
-  }, [open, reduce, r]);
-  const anim = useAnimatedStyle(() => ({ transform: [{ rotate: `${r.value}deg` }] }));
-  return (
-    <PressScale
-      onPress={onPress}
-      pressedScale={0.92}
-      hitSlop={{ top: 6, bottom: 6, left: 2, right: 6 }}
-      accessibilityRole="button"
-      accessibilityLabel={t('feed.react')}
-      accessibilityState={{ expanded: open }}
-      style={[styles.pill, styles.pillMore, open && styles.pillOn]}
-    >
-      <Icon name="smile" size={iconSize.md} color={media.text} strokeWidth={iconStroke(iconSize.md)} />
-      <Animated.View style={anim}>
-        <Icon name="plus" size={iconSize.sm - space.xs} color={media.text} strokeWidth={iconStroke(iconSize.sm - space.xs)} />
-      </Animated.View>
-    </PressScale>
   );
 }
 
@@ -454,14 +409,6 @@ const styles = themedStyles(() => ({
   root: { width: '100%', backgroundColor: color.ink, overflow: 'hidden' },
   video: { position: 'absolute', left: 0, top: 0, width: '100%', height: '100%', backgroundColor: 'transparent' },
   blurDim: { ...StyleSheet.absoluteFill, backgroundColor: alpha(color.ink, 0.45) },
-  scrimBottom: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height: 300,
-    experimental_backgroundImage: 'linear-gradient(0deg, rgba(10,10,15,0.72), rgba(10,10,15,0))',
-  },
   mutedHint: {
     position: 'absolute',
     alignSelf: 'center',
@@ -475,8 +422,22 @@ const styles = themedStyles(() => ({
     backgroundColor: alpha(color.ink, 0.55),
   },
   mutedText: { color: media.text, fontFamily: font.semibold, fontSize: size.small },
+  hidden: { opacity: 0 },
   rail: { position: 'absolute', right: RAIL_RIGHT, alignItems: 'center', gap: space.xs },
-  action: { minWidth: control.md, minHeight: control.md, alignItems: 'center', justifyContent: 'center', gap: space.xs / 2 },
+  myEmoji: { fontSize: iconSize.feed - space.xs, lineHeight: iconSize.feed + space.xs },
+  // A shadow that follows the icon's own shape: iOS draws it from the layer, Android and web
+  // from a drop-shadow filter (a box shadow would draw a grey square).
+  action: {
+    minWidth: control.md,
+    minHeight: control.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: space.xs / 2,
+    ...Platform.select({
+      ios: { shadowColor: media.scrim, shadowOpacity: 0.55, shadowRadius: space.xs, shadowOffset: { width: 0, height: border.hairline } },
+      default: { filter: `drop-shadow(0px ${border.hairline}px ${space.xs}px ${alpha(media.scrim, 0.6)})` },
+    }),
+  },
   count: { color: media.text, fontFamily: font.mono, fontSize: size.caption, ...SHADOW },
   meta: { position: 'absolute', left: META_LEFT, right: 76, gap: 8 },
   creatorRow: { flexDirection: 'row', alignItems: 'center', gap: space.sm, alignSelf: 'flex-start' },
@@ -502,42 +463,14 @@ const styles = themedStyles(() => ({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  followPillOn: { borderColor: 'transparent', backgroundColor: alpha(media.text, 0.16) },
+  followPillOn: { borderColor: 'transparent', backgroundColor: alpha(media.text, 0.16), width: control.sm - space.sm, paddingHorizontal: 0 },
   followText: { color: media.text, fontFamily: font.bold, fontSize: size.small },
-  followTextOn: { color: media.text2 },
-  why: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: space.xs,
-    alignSelf: 'flex-start',
-    paddingHorizontal: space.sm,
-    paddingVertical: space.xs,
-    borderRadius: radius.pill,
-    backgroundColor: alpha(media.text, 0.1),
-  },
-  whyText: { color: media.text2, fontFamily: font.semibold, fontSize: size.caption, flexShrink: 1 },
   caption: { color: media.text, fontFamily: font.medium, fontSize: size.small, lineHeight: 20, ...SHADOW },
   credit: { color: alpha(media.text, 0.72), fontFamily: font.medium, fontSize: size.caption, lineHeight: 17 },
   captionBox: { marginHorizontal: -10, marginVertical: -4, paddingHorizontal: 10, paddingVertical: 4, borderRadius: 14 },
   captionBoxOpen: { backgroundColor: alpha(color.ink, 0.55), marginVertical: 0, paddingVertical: 8 },
   captionMore: { gap: 2, marginTop: 8, paddingTop: 8, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: alpha(media.text, 0.25) },
-  pills: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2 },
-  pill: {
-    height: PILL_H,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    paddingHorizontal: 10,
-    borderRadius: radius.pill,
-    borderWidth: 1,
-    borderColor: alpha(media.text, 0.18),
-    backgroundColor: alpha(color.ink, 0.38),
-  },
-  pillOn: { borderColor: color.ember, backgroundColor: alpha(color.ember, 0.22) },
-  pillMore: { gap: 2, paddingHorizontal: 9 },
-  pillEmoji: { fontSize: 15 },
-  pillCount: { color: media.text, fontFamily: font.mono, fontSize: size.caption },
-  reactionBar: { position: 'absolute', left: META_LEFT - 6 },
+  reactionBar: { position: 'absolute', right: RAIL_RIGHT + control.md },
   progressTrack: { position: 'absolute', left: 16, right: 16, height: 2, borderRadius: 1, overflow: 'hidden', backgroundColor: alpha(media.text, 0.2) },
   progressFill: { height: 2, backgroundColor: media.text },
 }));
