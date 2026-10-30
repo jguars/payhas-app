@@ -13,7 +13,6 @@ when the owner says so (merged 2026-10-30 on the owner's word).
 - [ ] **Phone test** of the latest APK (and iPhone once TestFlight works).
 - [ ] **TestFlight**: create the app record `com.onki.payhas` in App Store Connect, make an App Store Connect API key (App Manager), and add the repository secrets `ASC_KEY_ID`, `ASC_ISSUER_ID`, `ASC_KEY_P8`. The workflow `ios-testflight.yml` then uploads every push to `plus`.
 - [ ] **APNs key** (Apple push) added to Firebase, so parent alerts reach iPhones. Until then the iPhone says "Alerts on iPhone are coming soon".
-- [ ] Apply `supabase/migrations/20261029190000_update_profile.sql` to the live database — saving an edited profile needs it (checked Oct 30: not applied yet).
 - [ ] Turn on leaked password protection (Supabase → Authentication → Providers → Email).
 - [ ] Native-speaker check of the new Turkmen, Turkish and Russian texts (Welcome, language title, Paywall, iPhone alerts note).
 - [ ] Before launch: turn Plus test mode off — `update private.settings set value = 'false' where key = 'plus_test_mode';`
@@ -22,7 +21,7 @@ when the owner says so (merged 2026-10-30 on the owner's word).
 ## In progress
 
 - [ ] **iPhone**: the simulator build passes; the walk-through on iPhone SE, iPhone 17 and 17 Pro Max is being made reliable (`ios-simulator.yml`, screenshots on the `ci-screens-ios` branch).
-- [ ] Edit profile info and change avatar — built; waits on the migration above.
+- [ ] Edit profile info and change avatar — built; `update_profile` applied to the live database (Oct 30); needs a phone test.
 - [ ] Figma file for tokens and components — blocked by the Figma Starter plan's call limit; HTML mockups and the SVG app map are used instead.
 
 ## Done today (Oct 30)

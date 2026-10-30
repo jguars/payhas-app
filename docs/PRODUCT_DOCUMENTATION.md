@@ -244,7 +244,7 @@ The core app is built and running on Android and iPhone; content is growing thro
 - [ ] Decide where activation codes are sold, and print the first batch
 - [ ] Tablet layouts (iPad support is off until then)
 - [x] Edit a profile: name, avatar and a child's birth month (moves lane), behind the PIN — from Me, the dashboard and a child's page
-- [ ] Apply `20261029190000_update_profile.sql` to the live database
+- [x] `20261029190000_update_profile.sql` applied to the live database (Oct 30; verified: parent session required, not callable signed out)
 - [x] Tapping outside the keyboard closes it, on every screen and sheet
 - [x] Type audit: 3 families / 7 faces / 22 sizes → 3 families / 6 faces / 9-step scale
 - [x] Payhas Plus page redesigned: price hero, Your plan (profile slots, active until), Free vs Plus with checks, card payment as the one call to action, folded activation-code row
