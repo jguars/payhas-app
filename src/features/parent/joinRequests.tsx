@@ -103,13 +103,15 @@ export function JoinRequestsProvider({ children }: { children: ReactNode }) {
  */
 function RequestSheet({ request, open, onDone, onLater }: { request: JoinRequest; open: boolean; onDone: (id: string) => void; onLater: (id: string) => void }) {
   const { t } = useT();
-  const { profiles } = useFamily();
+  const { profiles, plan } = useFamily();
   const toast = useToast();
   const kidsCount = profiles.filter((p) => !p.is_parent).length;
   const [picked, setPicked] = useState<string | null>(request.held || kidsCount === 0 ? NEW : null);
   const [step, setStep] = useState<'pick' | 'pin'>('pick');
   const [busy, setBusy] = useState(false);
   const kids = profiles.filter((p) => !p.is_parent);
+  // No room for another profile on Free: say so before set-up, not after.
+  const full = !!plan && !plan.plus && profiles.length >= plan.profile_limit;
   const child = kids.find((p) => p.id === picked);
 
   const gone = () => {
@@ -184,7 +186,20 @@ function RequestSheet({ request, open, onDone, onLater }: { request: JoinRequest
               </View>
             </>
           )}
-          {picked === NEW ? (
+          {picked === NEW && full ? (
+            <>
+              <Text style={styles.hint}>{t('ask.planFull')}</Text>
+              <Button
+                label={t('ask.seePlus')}
+                onPress={() => {
+                  // Held while they look, so the phone is still waiting when they come back (dashboard row).
+                  supabase.rpc('hold_join_request', { p_request: request.id }).then(() => {});
+                  onLater(request.id);
+                  router.push('/plus');
+                }}
+              />
+            </>
+          ) : picked === NEW ? (
             <Button label={t('ask.addChild')} loading={busy} onPress={setUp} />
           ) : (
             <Button label={t('ask.allow')} disabled={!picked || busy} onPress={() => setStep('pin')} />

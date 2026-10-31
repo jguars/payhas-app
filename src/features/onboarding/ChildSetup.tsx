@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
 
@@ -6,6 +7,7 @@ import { PressScale } from '@/components/motion/PressScale';
 import { Enter } from '@/components/motion/Enter';
 import { Toggle } from '@/components/motion/Toggle';
 import { Segmented } from '@/components/Segmented';
+import { Button } from '@/components/ui/Button';
 import { Chip } from '@/components/ui/Chip';
 import { hourLabel } from '@/features/library/useScreenTime';
 import { laneKey, TKey, topicLabel, useT } from '@/i18n';
@@ -80,6 +82,7 @@ export function ChildSetup({ progress, onDone, onCancel, quick }: Props) {
   const [wake, setWake] = useState(7);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [planFull, setPlanFull] = useState(false);
   const timeSeeded = useRef<Lane | null>(null);
 
   useEffect(() => {
@@ -134,6 +137,7 @@ export function ChildSetup({ progress, onDone, onCancel, quick }: Props) {
     if (res.error || !res.data) {
       fx.error();
       const msg = res.error?.message ?? '';
+      setPlanFull(msg.includes('plan_profile_limit'));
       return setError(msg.includes('plan_profile_limit') ? t('plus.limitReached') : msg.includes('6 profiles') ? t('onboarding.error.full') : t('onboarding.error.generic'));
     }
     fx.success();
@@ -202,6 +206,8 @@ export function ChildSetup({ progress, onDone, onCancel, quick }: Props) {
             </View>
           </Enter>
         )}
+        {quick && !!error && <Text style={styles.error}>{error}</Text>}
+        {quick && planFull && <Button variant="secondary" icon="sparkle" label={t('ask.seePlus')} onPress={() => router.push('/plus')} />}
       </Step>
     );
   }
