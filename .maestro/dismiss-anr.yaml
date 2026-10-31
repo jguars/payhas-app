@@ -1,0 +1,9 @@
+# A slow CI emulator sometimes shows "Pixel Launcher isn't responding" over
+# the app, at any moment. Tapping Wait clears it; run before every step.
+appId: com.onki.payhas
+---
+- runFlow:
+    when:
+      visible: ".*isn.t responding"
+    commands:
+      - tapOn: "Wait"

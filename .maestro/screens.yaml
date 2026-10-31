@@ -7,41 +7,45 @@ appId: com.onki.payhas
 ---
 - launchApp:
     clearState: true
-# A slow CI emulator sometimes shows "Pixel Launcher isn't responding" over the app.
-- runFlow:
-    when:
-      visible: ".*isn’t responding|.*isn't responding"
-    commands:
-      - tapOn: "Wait"
 - extendedWaitUntil:
     visible: "I have an account"
     timeout: 60000
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 00-welcome
 
 # A child's phone: Join my family → language → Ask my parent, and the code.
+- runFlow: dismiss-anr.yaml
 - tapOn: "Join my family"
 - extendedWaitUntil:
     visible: "English"
     timeout: 20000
+- runFlow: dismiss-anr.yaml
 - tapOn: "English"
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 01-language
+- runFlow: dismiss-anr.yaml
 - tapOn: "Continue"
 - extendedWaitUntil:
     visible: "Ask my parent"
     timeout: 20000
 - hideKeyboard
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 02-join-ask
+- runFlow: dismiss-anr.yaml
 - tapOn: "I have a code"
 - hideKeyboard
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 03-join-code
 # The app's own back arrows: join → language → Welcome (the system back would leave the app).
+- runFlow: dismiss-anr.yaml
 - tapOn: "Back"
 - extendedWaitUntil:
     visible: "English"
     timeout: 20000
+- runFlow: dismiss-anr.yaml
 - tapOn: "Back"
 - waitForAnimationToEnd
 
@@ -49,132 +53,187 @@ appId: com.onki.payhas
 - extendedWaitUntil:
     visible: "Get started"
     timeout: 20000
+- runFlow: dismiss-anr.yaml
 - tapOn: "Get started"
 - extendedWaitUntil:
     visible: "Continue"
     timeout: 20000
+- runFlow: dismiss-anr.yaml
 - tapOn: "Continue"
 - extendedWaitUntil:
     visible: "Parent sign in"
     timeout: 20000
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 04-sign-in
+- runFlow: dismiss-anr.yaml
 - tapOn: "Use email instead"
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 05-sign-in-email
+- runFlow: dismiss-anr.yaml
 - tapOn: "Email"
 - inputText: ${EMAIL}
+- runFlow: dismiss-anr.yaml
 - tapOn: "Password.*"
 - inputText: ${PASSWORD}
 - hideKeyboard
+- runFlow: dismiss-anr.yaml
 - tapOn:
     id: "sign-in-submit"
 - extendedWaitUntil:
     visible: "Who’s watching?"
     timeout: 30000
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 06-who
 
 # Family, behind the PIN (the test family's test PIN).
+- runFlow: dismiss-anr.yaml
 - tapOn:
     id: "who-dashboard"
 - extendedWaitUntil:
     visible: "2"
     timeout: 10000
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 07-pin
+- runFlow: dismiss-anr.yaml
 - tapOn: "2"
+- runFlow: dismiss-anr.yaml
 - tapOn: "5"
+- runFlow: dismiss-anr.yaml
 - tapOn: "8"
+- runFlow: dismiss-anr.yaml
 - tapOn: "0"
 - extendedWaitUntil:
     visible: "Add a child"
     timeout: 20000
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 08-family
+- runFlow: dismiss-anr.yaml
 - scroll
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 09-family-scrolled
+- runFlow: dismiss-anr.yaml
 - scrollUntilVisible:
     element: "Payhas Plus"
     direction: DOWN
+- runFlow: dismiss-anr.yaml
 - tapOn: "Payhas Plus"
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 10-plus
+- runFlow: dismiss-anr.yaml
 - back
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - scrollUntilVisible:
     element: "Aylar"
     direction: UP
+- runFlow: dismiss-anr.yaml
 - tapOn: "Aylar"
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 11-child
+- runFlow: dismiss-anr.yaml
 - scroll
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 12-child-scrolled
+- runFlow: dismiss-anr.yaml
 - back
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - scrollUntilVisible:
     element: "Guvanch"
     direction: UP
+- runFlow: dismiss-anr.yaml
 - tapOn: "Guvanch"
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 13-profile
+- runFlow: dismiss-anr.yaml
 - back
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - back
 - extendedWaitUntil:
     visible: "Who’s watching?"
     timeout: 20000
 
 # The child's app.
+- runFlow: dismiss-anr.yaml
 - tapOn: "Aylar.*"
 - extendedWaitUntil:
     visible: "For you"
     timeout: 30000
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 14-home
+- runFlow: dismiss-anr.yaml
 - tapOn:
     text: "Following"
     optional: true
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 15-home-following
+- runFlow: dismiss-anr.yaml
 - tapOn:
     id: "tab-discover"
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 16-discover
+- runFlow: dismiss-anr.yaml
 - tapOn:
     id: "tab-play"
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 17-play
+- runFlow: dismiss-anr.yaml
 - tapOn:
     text: "Play"
     index: 1
     optional: true
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 18-game
+- runFlow: dismiss-anr.yaml
 - back
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - tapOn:
     id: "tab-me"
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 19-me
+- runFlow: dismiss-anr.yaml
 - tapOn:
     text: "Inbox.*"
     optional: true
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 20-inbox
+- runFlow: dismiss-anr.yaml
 - back
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - tapOn:
     text: "Saved"
     optional: true
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 21-saved
+- runFlow: dismiss-anr.yaml
 - back
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - tapOn:
     text: "Following"
     optional: true
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 22-following
+- runFlow: dismiss-anr.yaml
 - back
