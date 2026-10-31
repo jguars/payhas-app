@@ -29,7 +29,7 @@ const NEW = 'new';
 
 const POLL_MS = 8000;
 /** Parent screens: the sheet may come up here whoever's profile is open underneath. */
-const PARENT_SCREENS = ['/parent', '/parent-child', '/parent-settings', '/link-phone', '/plus', '/profile-edit'];
+const PARENT_SCREENS = ['/parent', '/parent-child', '/link-phone', '/plus', '/profile-edit'];
 
 type Ctx = { requests: JoinRequest[]; snoozed: boolean; reopen: () => void };
 const JoinCtx = createContext<Ctx>({ requests: [], snoozed: false, reopen: () => {} });

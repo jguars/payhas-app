@@ -1,0 +1,94 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=390">
+<!-- Family as a clean hub + one page per person. family-pages.html?v=F1|F2|G|Y&t=dark|light -->
+<link rel="stylesheet" href="mock.css">
+<style>
+body{height:auto;min-height:844px;overflow:visible}
+.screen{padding-bottom:40px}
+.danger{color:var(--danger)}
+.delete{text-align:center;color:var(--t3);font-size:14px;font-weight:600;text-decoration:underline;margin-top:22px}
+.trust{display:flex;gap:8px;color:var(--t3);font-size:13px;line-height:18px;margin-top:18px}
+.trust svg{flex:none;margin-top:1px}
+.tag{display:inline-flex;align-items:center;gap:3px;height:20px;padding:0 8px;border-radius:999px;font-size:11px;font-weight:700;background:var(--s2);color:var(--t2);margin-left:6px;vertical-align:2px}
+.person{display:flex;flex-direction:column;align-items:center;text-align:center;gap:6px;margin-top:6px}
+.person .av{width:88px;height:88px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.tilec{background:var(--s1);border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:8px;min-height:150px}
+.tilec .av{width:48px;height:48px}
+.tilec.add{border:1.5px dashed var(--line);background:transparent;align-items:center;justify-content:center;color:var(--t2);font-weight:600}
+.alert{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:10px;background:var(--ember);color:var(--ink);font-size:11px;font-weight:800;margin-left:6px;vertical-align:1px}
+</style></head>
+<body>
+<div class="screen" id="s"></div>
+<script src="icons.js"></script>
+<script>
+const q=new URLSearchParams(location.search);const v=q.get('v');if(q.get('t')==='light')document.documentElement.className='light';
+const img=(n,x='')=>`style="background-image:url(img/${n}.png);${x}"`;
+const chev=`<span class="chev">${ic('chev',18)}</span>`;
+const back=`<div class="top"><div class="icobtn">${ic('back',26)}</div></div>`;
+
+const you=`<div class="row" style="min-height:72px"><div class="av" ${img('av-parent')}></div><div class="grow"><div class="label">Ybrayym <span class="tag">You</span></div><div class="hint">Parent · Adult lane</div></div>${chev}</div>`;
+const kid=(n,cls,lane,line,dot,pct,phone,alert)=>`<div class="row" style="min-height:76px"><div class="av ${cls}" ${img('av-kid')}></div><div class="grow"><div class="label">${n}${alert?'<span class="alert">1</span>':''}${phone?`<span class="tag">${ic('phone',11)} phone</span>`:''}</div><div class="bar thin" style="margin-top:8px"><i style="width:${pct}%;background:var(--${lane})"></i></div><div class="hint" style="margin-top:6px"><span class="dot ${dot}"></span>${line}</div></div>${chev}</div>`;
+const members=`<div class="group">${you}
+ ${kid('Guga','','kids','Watching · 52 min of 1 h 15 min','',69,true,true)}
+ ${kid('Dudu','m','little','Not on · 9 min of 30 min','off',30,false,false)}
+ <div class="row"><div class="tile">${ic('plus',18)}</div><div class="grow label">Add a child</div><span class="val">2 of 3</span></div></div>`;
+const settings=`<div class="sec">Phones <small>Children’s phones are on their page</small></div><div class="group">
+  <div class="row"><div class="tile">${ic('home2',18)}</div><div class="grow"><div class="label">Living-room tablet</div><div class="hint">Shared · Who’s watching?</div></div><div class="val danger">Remove</div></div>
+  <div class="row"><div class="tile">${ic('plus',18)}</div><div class="grow label">Add a shared phone</div>${chev}</div>
+  <div class="row"><div class="tile">${ic('me',18)}</div><div class="grow label">Invite another parent</div>${chev}</div></div>
+ <div class="sec">Plan &amp; this phone</div><div class="group">
+  <div class="row"><div class="tile">${ic('spark',18)}</div><div class="grow label">Payhas Plus</div><div class="val">Until Jan 31</div>${chev}</div>
+  <div class="row"><div class="tile">${ic('bell',18)}</div><div class="grow"><div class="label">Alerts on this phone</div><div class="hint">Limits, flags and time requests. Only you get these.</div></div><div class="toggle on"></div></div>
+  <div class="row"><div class="tile">${ic('lock',18)}</div><div class="grow label">Lock dashboard</div></div>
+  <div class="row"><div class="tile">${ic('out',18)}</div><div class="grow label">Sign out</div></div></div>
+ <div class="trust">${ic('shield',16)}<span>Locks itself after 15 min. Your child can’t open this without your PIN.</span></div><div class="delete">Delete family account</div>`;
+
+const S={
+/* F1 · The hub as a list: one row per person (live status + today's bar), then the family's settings. */
+F1:()=>`${back}<div class="h1">Family</div><div class="sub">1 thing needs you</div>
+ <div class="sec">People</div>${members}${settings}`,
+
+/* F2 · The hub as tiles: a card per person, settings underneath. */
+F2:()=>`${back}<div class="h1">Family</div><div class="sub">1 thing needs you</div>
+ <div class="grid2">
+  <div class="tilec"><div class="av" ${img('av-kid')}></div><div class="label">Guga<span class="alert">1</span></div><div class="hint" style="margin:0"><span class="dot"></span>Watching</div><div class="bar thin"><i style="width:69%;background:var(--kids)"></i></div><div class="hint" style="margin:0">52 of 75 min</div></div>
+  <div class="tilec"><div class="av m" ${img('av-kid')}></div><div class="label">Dudu</div><div class="hint" style="margin:0"><span class="dot off"></span>Not on</div><div class="bar thin"><i style="width:30%;background:var(--little)"></i></div><div class="hint" style="margin:0">9 of 30 min</div></div>
+  <div class="tilec"><div class="av" ${img('av-parent')}></div><div class="label">Ybrayym <span class="tag">You</span></div><div class="hint" style="margin:0">Parent</div></div>
+  <div class="tilec add">${ic('plus',24)}Add a child<div class="hint" style="margin:0">2 of 3</div></div></div>
+ ${settings}`,
+
+/* G · A child's own page: who, what needs you, today with the remote buttons, rules, their phone, the week, what they watched. */
+G:()=>`${back}<div class="person"><div class="av" ${img('av-kid')}></div><div class="h1" style="margin:0">Guga</div><div><span class="lane" style="background:var(--kids)">Kids · 7–12</span></div></div>
+ <div class="card pad" style="margin-top:18px"><div style="display:flex;gap:12px;align-items:center"><div class="tile">${ic('clock',18)}</div><div class="grow"><div class="label">Guga asks for more time</div><div class="hint">2 min ago</div></div></div>
+  <div style="display:flex;gap:8px;margin-top:12px"><div class="btn secondary small" style="flex:1">+15 min</div><div class="btn secondary small" style="flex:1">+30 min</div><div class="btn small" style="flex:1;color:var(--t2)">Not today</div></div></div>
+ <div class="card pad" style="margin-top:12px">
+  <div style="display:flex;justify-content:space-between;align-items:center"><div class="over">Today</div><span class="hint" style="margin:0"><span class="dot"></span>Watching now</span></div>
+  <div class="stat" style="margin-top:8px">52 min <span>of 1 h 15 min</span></div>
+  <div class="bar" style="margin-top:10px"><i style="width:69%;background:var(--kids)"></i></div>
+  <div style="display:flex;gap:8px;margin-top:14px"><div class="btn secondary small" style="flex:1">${ic('pause',16)} Pause</div><div class="btn secondary small" style="flex:1">${ic('plus',16)} 15 min</div></div></div>
+ <div class="sec">Rules</div><div class="group">
+  <div class="row"><div class="tile">${ic('clock',18)}</div><div class="grow label">Daily limit</div><div class="val">1 h 15 min</div>${chev}</div>
+  <div class="row"><div class="tile">${ic('moon',18)}</div><div class="grow label">Quiet hours</div><div class="val">20:00–07:00</div>${chev}</div>
+  <div class="row"><div class="tile">${ic('game',18)}</div><div class="grow label">Games</div><div class="toggle on"></div></div></div>
+ <div class="sec">Guga’s phone</div><div class="group">
+  <div class="row"><div class="tile">${ic('phone',18)}</div><div class="grow"><div class="label">POCO C71</div><div class="hint">Used 5 min ago</div></div><div class="val danger">Remove</div></div></div>
+ <div class="card pad" style="margin-top:22px"><div style="display:flex;justify-content:space-between"><div class="label">This week</div><div class="val">Avg 55 min</div></div>
+  <div class="week" style="height:84px">${[40,65,30,75,50,70,52].map((m,i)=>`<div class="wd ${i==6?'today':''}"><div class="stack" style="height:${m}%"><i style="display:block;height:100%;background:var(--kids);opacity:${i==6?1:.55}"></i></div><small>${'SMTWTFS'[i]}</small></div>`).join('')}</div></div>
+ <div class="sec">Watched today <small>See all</small></div><div class="thumbs">${['#2D6A8F,#79C2D0','#3E7D4F,#A9D18E','#8A5A2B,#E2B07A'].map(g=>`<div style="background:linear-gradient(160deg,${g});display:flex;align-items:flex-end;padding:8px;color:#fff">${ic('playI',16)}</div>`).join('')}</div>
+ <div class="group" style="margin-top:22px"><div class="row"><div class="tile">${ic('me',18)}</div><div class="grow label">Edit Guga’s profile</div>${chev}</div></div>
+ <div class="delete">Delete Guga’s profile</div>`,
+
+/* G0 · The same page for a child with no phone of their own yet. */
+G0:()=>`<div class="sec" style="margin-top:0">Dudu’s phone</div><div class="group"><div class="row"><div class="tile">${ic('phone',18)}</div><div class="grow"><div class="label">Not linked yet</div><div class="hint">Dudu watches on your phone</div></div><div class="btn secondary small">${ic('link',16)} Link</div></div></div>`,
+
+/* Y · The parent's own page: their profile, the PIN, and their own watching. */
+Y:()=>`${back}<div class="person"><div class="av" ${img('av-parent')}></div><div class="h1" style="margin:0">Ybrayym</div><div><span class="lane" style="background:var(--adult)">Parent · Adult</span></div></div>
+ <div class="sec">Profile</div><div class="group">
+  <div class="row"><div class="tile">${ic('me',18)}</div><div class="grow label">Name, picture and birthday</div>${chev}</div>
+</div>
+ <div class="sec">Signed in with</div><div class="group">
+  <div class="row"><div class="tile">${ic('phone',18)}</div><div class="grow"><div class="label">+993 63 24 44 27</div><div class="hint">iPhone 12 · this phone</div></div></div></div>`,
+};
+document.getElementById('s').innerHTML=S[v||'F1']();
+</script></body></html>

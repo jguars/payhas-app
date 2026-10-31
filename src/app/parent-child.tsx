@@ -12,6 +12,8 @@ import { Segmented } from '@/components/Segmented';
 import { useToast } from '@/components/Toast';
 import { Avatar } from '@/components/ui/Avatar';
 import { useFamily } from '@/features/family/FamilyProvider';
+import { ChildPhone } from '@/features/parent/ChildPhone';
+import { useLinkedPhones } from '@/features/parent/devices';
 import { hourLabel, inQuietHours } from '@/features/library/useScreenTime';
 import {
   confirmDestructive,
@@ -44,7 +46,8 @@ const LIMITS: (number | null)[] = [null, 15, 30, 45, 60, 90, 120];
  */
 export default function ChildScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { unlocked, children, plus, unlock, reload, setControls, setPaused, addTime, answer, hideVideo } = useParent();
+  const { token, unlocked, children, plus, unlock, reload, setControls, setPaused, addTime, answer, hideVideo } = useParent();
+  const linked = useLinkedPhones(token);
   const { profiles, refresh } = useFamily();
   const { bottom } = useInsets();
   const toast = useToast();
@@ -56,8 +59,11 @@ export default function ChildScreen() {
 
   useFocusEffect(
     useCallback(() => {
-      if (unlocked) reload();
-    }, [unlocked, reload]),
+      if (unlocked) {
+        reload();
+        linked.reload();
+      }
+    }, [unlocked, reload, linked.reload]), // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   if (!unlocked) {
@@ -214,16 +220,20 @@ export default function ChildScreen() {
           </Group>
         </Enter>
 
+        <Enter index={3}>
+          <ChildPhone child={child} phones={linked.phones} onRemove={linked.remove} />
+        </Enter>
+
         {plus === false ? (
-          <Enter index={3}>
+          <Enter index={4}>
             <LockedHistory />
           </Enter>
         ) : (
           <>
-            <Enter index={3}>
+            <Enter index={4}>
               <WeekChart child={child} />
             </Enter>
-            <Enter index={4}>
+            <Enter index={5}>
               <Latest child={child} onHide={setHiding} />
             </Enter>
           </>
