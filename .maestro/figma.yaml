@@ -7,9 +7,15 @@ appId: com.onki.payhas
 ---
 - launchApp:
     clearState: true
-- extendedWaitUntil:
-    visible: "I have an account"
-    timeout: 60000
+- repeat:
+    times: 12
+    while:
+      notVisible: "I have an account"
+    commands:
+      - runFlow: dismiss-anr.yaml
+      - waitForAnimationToEnd:
+          timeout: 5000
+- assertVisible: "I have an account"
 - waitForAnimationToEnd
 - runFlow: dismiss-anr.yaml
 - takeScreenshot: 00-welcome
@@ -17,9 +23,15 @@ appId: com.onki.payhas
 # A child's phone: Join my family → language → Ask my parent, and the code.
 - runFlow: dismiss-anr.yaml
 - tapOn: "Join my family"
-- extendedWaitUntil:
-    visible: "English"
-    timeout: 20000
+- repeat:
+    times: 4
+    while:
+      notVisible: "English"
+    commands:
+      - runFlow: dismiss-anr.yaml
+      - waitForAnimationToEnd:
+          timeout: 5000
+- assertVisible: "English"
 - runFlow: dismiss-anr.yaml
 - tapOn: "English"
 - waitForAnimationToEnd
@@ -27,9 +39,15 @@ appId: com.onki.payhas
 - takeScreenshot: 01-language
 - runFlow: dismiss-anr.yaml
 - tapOn: "Continue"
-- extendedWaitUntil:
-    visible: "Ask my parent"
-    timeout: 20000
+- repeat:
+    times: 4
+    while:
+      notVisible: "Ask my parent"
+    commands:
+      - runFlow: dismiss-anr.yaml
+      - waitForAnimationToEnd:
+          timeout: 5000
+- assertVisible: "Ask my parent"
 - hideKeyboard
 - runFlow: dismiss-anr.yaml
 - takeScreenshot: 02-join-ask
@@ -42,27 +60,51 @@ appId: com.onki.payhas
 # The app's own back arrows: join → language → Welcome (the system back would leave the app).
 - runFlow: dismiss-anr.yaml
 - tapOn: "Back"
-- extendedWaitUntil:
-    visible: "English"
-    timeout: 20000
+- repeat:
+    times: 4
+    while:
+      notVisible: "English"
+    commands:
+      - runFlow: dismiss-anr.yaml
+      - waitForAnimationToEnd:
+          timeout: 5000
+- assertVisible: "English"
 - runFlow: dismiss-anr.yaml
 - tapOn: "Back"
 - waitForAnimationToEnd
 
 # A parent: Get started → sign-in (new account) → email sign-in.
-- extendedWaitUntil:
-    visible: "Get started"
-    timeout: 20000
+- repeat:
+    times: 4
+    while:
+      notVisible: "Get started"
+    commands:
+      - runFlow: dismiss-anr.yaml
+      - waitForAnimationToEnd:
+          timeout: 5000
+- assertVisible: "Get started"
 - runFlow: dismiss-anr.yaml
 - tapOn: "Get started"
-- extendedWaitUntil:
-    visible: "Continue"
-    timeout: 20000
+- repeat:
+    times: 4
+    while:
+      notVisible: "Continue"
+    commands:
+      - runFlow: dismiss-anr.yaml
+      - waitForAnimationToEnd:
+          timeout: 5000
+- assertVisible: "Continue"
 - runFlow: dismiss-anr.yaml
 - tapOn: "Continue"
-- extendedWaitUntil:
-    visible: "Parent sign in"
-    timeout: 20000
+- repeat:
+    times: 4
+    while:
+      notVisible: "Parent sign in"
+    commands:
+      - runFlow: dismiss-anr.yaml
+      - waitForAnimationToEnd:
+          timeout: 5000
+- assertVisible: "Parent sign in"
 - waitForAnimationToEnd
 - runFlow: dismiss-anr.yaml
 - takeScreenshot: 04-sign-in
@@ -81,9 +123,15 @@ appId: com.onki.payhas
 - runFlow: dismiss-anr.yaml
 - tapOn:
     id: "sign-in-submit"
-- extendedWaitUntil:
-    visible: "Who’s watching?"
-    timeout: 30000
+- repeat:
+    times: 6
+    while:
+      notVisible: "Who’s watching?"
+    commands:
+      - runFlow: dismiss-anr.yaml
+      - waitForAnimationToEnd:
+          timeout: 5000
+- assertVisible: "Who’s watching?"
 - waitForAnimationToEnd
 - runFlow: dismiss-anr.yaml
 - takeScreenshot: 06-who
@@ -92,9 +140,15 @@ appId: com.onki.payhas
 - runFlow: dismiss-anr.yaml
 - tapOn:
     id: "who-dashboard"
-- extendedWaitUntil:
-    visible: "2"
-    timeout: 10000
+- repeat:
+    times: 4
+    while:
+      notVisible: "2"
+    commands:
+      - runFlow: dismiss-anr.yaml
+      - waitForAnimationToEnd:
+          timeout: 5000
+- assertVisible: "2"
 - runFlow: dismiss-anr.yaml
 - takeScreenshot: 07-pin
 - runFlow: dismiss-anr.yaml
@@ -105,9 +159,15 @@ appId: com.onki.payhas
 - tapOn: "8"
 - runFlow: dismiss-anr.yaml
 - tapOn: "0"
-- extendedWaitUntil:
-    visible: "Add a child"
-    timeout: 20000
+- repeat:
+    times: 4
+    while:
+      notVisible: "Add a child"
+    commands:
+      - runFlow: dismiss-anr.yaml
+      - waitForAnimationToEnd:
+          timeout: 5000
+- assertVisible: "Add a child"
 - waitForAnimationToEnd
 - runFlow: dismiss-anr.yaml
 - takeScreenshot: 08-family
@@ -159,16 +219,28 @@ appId: com.onki.payhas
 - waitForAnimationToEnd
 - runFlow: dismiss-anr.yaml
 - back
-- extendedWaitUntil:
-    visible: "Who’s watching?"
-    timeout: 20000
+- repeat:
+    times: 4
+    while:
+      notVisible: "Who’s watching?"
+    commands:
+      - runFlow: dismiss-anr.yaml
+      - waitForAnimationToEnd:
+          timeout: 5000
+- assertVisible: "Who’s watching?"
 
 # The child's app.
 - runFlow: dismiss-anr.yaml
 - tapOn: "Aylar.*"
-- extendedWaitUntil:
-    visible: "For you"
-    timeout: 30000
+- repeat:
+    times: 6
+    while:
+      notVisible: "For you"
+    commands:
+      - runFlow: dismiss-anr.yaml
+      - waitForAnimationToEnd:
+          timeout: 5000
+- assertVisible: "For you"
 - waitForAnimationToEnd
 - runFlow: dismiss-anr.yaml
 - takeScreenshot: 14-home
