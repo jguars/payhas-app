@@ -17,6 +17,7 @@ import { ProgressBar } from '@/components/ui/ProgressBar';
 import { useRoles } from '@/features/creator/useRoles';
 import { REVIEW_ENABLED } from '@/features/creator/useReviewQueue';
 import { useFamily } from '@/features/family/FamilyProvider';
+import { useStartOver } from '@/features/start/startOver';
 import { useLibrary, useUsage } from '@/features/library/LibraryProvider';
 import { useScreenTime } from '@/features/library/useScreenTime';
 import { TasteCard } from '@/features/me/TasteCard';
@@ -43,7 +44,8 @@ export default function MeScreen() {
   const insets = useInsets();
   const barSpace = useTabBarSpace();
   const focused = useIsFocused();
-  const { current, leaveProfile, signOut, device } = useFamily();
+  const { current, leaveProfile, signOut, device, plan } = useFamily();
+  const startOver = useStartOver();
   // A linked phone (a member's own or a shared one) has no parent dashboard; the parent manages it from theirs.
   // A co-parent is a parent: they keep everything.
   const linked = !!device && device.kind !== 'coparent';
@@ -194,6 +196,19 @@ export default function MeScreen() {
               <Text style={styles.trustBody}>{t(PARENT_SEES[current.lane])}</Text>
             </Card>
           </Enter>
+        )}
+        {/* Testing only: back to Welcome as a fresh install. */}
+        {plan?.test_mode && (
+          <ListGroup>
+            <ListRow
+              first
+              icon="sparkle"
+              label={t('me.startOver')}
+              sub={t('me.startOverSub')}
+              chevron={false}
+              onPress={() => confirmDestructive(t('me.startOver'), t('me.startOverSub'), t('me.startOverConfirm'), t('common.cancel'), startOver)}
+            />
+          </ListGroup>
         )}
         <Text style={styles.footer}>{t('me.footer')}</Text>
       </ScrollView>

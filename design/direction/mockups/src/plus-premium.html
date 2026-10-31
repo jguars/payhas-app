@@ -1,0 +1,115 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=390">
+<!-- Payhas Plus, 5 premium variants: airy, picture-led, little text. plus-premium.html?v=1..5&t=dark|light -->
+<link rel="stylesheet" href="mock.css">
+<style>
+body{overflow:hidden}
+.screen{padding:0}
+.top{position:absolute;top:10px;left:10px;right:10px;z-index:5;margin:0}
+.icobtn.glass{background:color-mix(in srgb,var(--bg) 55%,transparent);backdrop-filter:blur(10px)}
+.cta{position:absolute;left:0;right:0;bottom:0;padding:14px 20px 30px;background:linear-gradient(0deg,var(--bg) 70%,transparent);z-index:4}
+.cta .btn{height:56px;font-size:17px}
+.cta .fine{text-align:center;color:var(--t3);font-size:13px;margin-top:10px;font-weight:600}
+.display{font-family:B;font-weight:800;font-size:40px;line-height:42px;letter-spacing:-1.2px}
+.display.xl{font-size:48px;line-height:48px}
+.mut{color:var(--t2);font-size:16px;line-height:22px}
+.pricepill{display:inline-flex;align-items:baseline;gap:6px;height:36px;padding:0 14px;border-radius:999px;background:var(--s1);font-family:B;font-weight:800;font-size:18px}
+.pricepill small{font-family:F;font-weight:600;font-size:13px;color:var(--t2)}
+.ember-glow{position:absolute;border-radius:50%;filter:blur(60px);opacity:.55;pointer-events:none}
+.av{background-size:115%;background-position:center}
+.ring{box-shadow:0 0 0 4px var(--bg)}
+.ph{background-size:cover;background-position:center}
+.chipv{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-radius:999px;background:var(--s1);font-size:13px;font-weight:700;color:var(--t1)}
+.code-link{text-align:center;color:var(--t2);font-size:14px;font-weight:700;margin-top:12px;text-decoration:underline;text-underline-offset:3px}
+.big-num{font-family:B;font-weight:800;font-size:34px;line-height:36px;letter-spacing:-.8px}
+.lbl{font-size:13px;font-weight:700;color:var(--t2);margin-top:4px}
+.glass-card{background:color-mix(in srgb,var(--s1) 80%,transparent);border-radius:24px}
+.inf{font-family:B;font-weight:800}
+</style></head>
+<body>
+<div class="screen" id="s"></div>
+<script src="icons.js"></script>
+<script>
+const q=new URLSearchParams(location.search);const v=q.get('v')||'1';const light=q.get('t')==='light';if(light)document.documentElement.className='light';
+const ph=(n,x='')=>`style="background-image:url(img/${n});${x}"`;
+const av=(n,size,x='')=>`<div class="av ring" style="width:${size}px;height:${size}px;border-radius:50%;background-image:url(img/${n}.png);${x}"></div>`;
+const kid=(size,hue,x='')=>av('av-kid',size,`filter:hue-rotate(${hue}deg) saturate(1.2);${x}`);
+const GAMES=['bubble','echo','memory','odd','pals','star','bubble','echo','memory','pals'];
+const game=(g,i,size,locked)=>`<div style="width:${size}px;height:${size}px;border-radius:${size*.28}px;background:url(img/${g}.png) center/cover;${i>5?`filter:hue-rotate(${i*40}deg)`:''};${locked?'opacity:.25':''}"></div>`;
+const back=`<div class="top"><div class="icobtn glass">${ic('back',24)}</div></div>`;
+const cta=(label='Get Plus · 20 TMT a month',fine='Have an activation code?')=>`<div class="cta"><div class="btn primary">${label}</div><div class="code-link">${fine}</div></div>`;
+const family=(s)=>`<div style="display:flex;justify-content:center;align-items:flex-end">${av('av-parent',s*1.15,'z-index:4')}${kid(s,0,'margin-left:-14px;z-index:3')}${kid(s,-100,'margin-left:-14px;z-index:2')}${kid(s,120,'margin-left:-14px;z-index:1')}</div>`;
+
+const S={
+/* 1 · Window onto the world: a photo collage bleeds off the top, the promise in two lines, four picture-tiles. */
+1:()=>`${back}
+ <div style="height:330px;position:relative;overflow:hidden">
+  <div style="position:absolute;inset:-20px -40px 0;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;transform:rotate(-6deg)">
+   ${['w-a.jpg','bunny.jpg','w-b.jpg','playground.jpg','w-c.jpg','eyes-rhyme.jpg','w-d.jpg','w-a.jpg','bunny.jpg'].map(n=>`<div class="ph" ${ph(n,'height:150px;border-radius:22px')}></div>`).join('')}</div>
+  <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 35%,var(--bg) 100%)"></div></div>
+ <div style="padding:0 24px;margin-top:-30px;position:relative">
+  <div class="display">Payhas Plus</div><div class="mut" style="margin-top:8px">More to watch and play, for the whole family.</div>
+  <div class="tiles" style="gap:12px;margin-top:22px">
+   <div class="card pad" style="border-radius:22px">${family(30)}<div class="label" style="margin-top:12px">3 children</div></div>
+   <div class="card pad" style="border-radius:22px"><div style="display:flex;gap:4px">${GAMES.slice(0,4).map((g,i)=>game(g,i,30)).join('')}</div><div class="label" style="margin-top:12px">All 10 games</div></div>
+   <div class="card pad" style="border-radius:22px"><div class="inf" style="font-size:34px;line-height:34px;color:var(--kids)">∞</div><div class="label" style="margin-top:8px">No video cap</div></div>
+   <div class="card pad" style="border-radius:22px"><div class="week" style="height:34px;margin-top:0;gap:4px">${[40,70,35,80,55,90,60].map(m=>`<div class="wd"><div class="stack" style="height:${m}%"><i style="display:block;height:100%;background:var(--teen)"></i></div></div>`).join('')}</div><div class="label" style="margin-top:8px">7 days of history</div></div>
+  </div></div>${cta()}`,
+
+/* 2 · The family on stage: everyone glowing in their lane colour; the plan is room for them all. */
+2:()=>`${back}
+ <div class="ember-glow" style="width:320px;height:320px;left:35px;top:60px;background:var(--ember)"></div>
+ <div class="ember-glow" style="width:200px;height:200px;left:10px;top:150px;background:var(--kids);opacity:.35"></div>
+ <div class="ember-glow" style="width:200px;height:200px;right:0;top:120px;background:var(--adult);opacity:.35"></div>
+ <div style="position:relative;padding:120px 24px 0;text-align:center">
+  ${family(78)}
+  <div class="display xl" style="margin-top:34px">Room for<br>everyone</div>
+  <div class="mut" style="margin-top:12px">You and up to 3 children, each in their own lane.</div>
+  <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-top:26px">
+   <span class="chipv">${ic('game',16)} All 10 games</span><span class="chipv">${ic('playI',14)} No video cap</span><span class="chipv">${ic('chart',16)} 7-day history</span></div>
+  <div style="margin-top:22px"><span class="pricepill">20 TMT <small>a month · whole family</small></span></div>
+ </div>${cta('Get Plus')}`,
+
+/* 3 · Free vs Plus, shown not told: two picture cards — a small family and 4 games, then the full house. */
+3:()=>`${back}
+ <div style="padding:70px 20px 0">
+  <div class="display">Go Plus</div><div class="mut" style="margin-top:6px">See the difference</div>
+  <div class="card" style="margin-top:20px;padding:18px;border-radius:24px;opacity:.85">
+   <div style="display:flex;justify-content:space-between;align-items:center"><div class="label" style="color:var(--t2)">Free</div><span class="badge">Now</span></div>
+   <div style="display:flex;align-items:center;gap:14px;margin-top:14px">${av('av-parent',40)}${kid(40,0,'margin-left:-18px')}<div style="width:1px;height:34px;background:var(--line);margin:0 4px"></div><div style="display:flex;gap:5px">${GAMES.slice(0,4).map((g,i)=>game(g,i,30)).join('')}</div></div></div>
+  <div style="margin-top:14px;padding:20px;border-radius:26px;position:relative;overflow:hidden;background:linear-gradient(150deg,color-mix(in srgb,var(--ember) 30%,var(--s1)),var(--s1) 70%);border:1.5px solid color-mix(in srgb,var(--ember) 60%,transparent)">
+   <div style="display:flex;justify-content:space-between;align-items:center"><div class="title">Plus</div><div class="pricepill" style="background:color-mix(in srgb,var(--bg) 40%,transparent)">20 TMT <small>/ month</small></div></div>
+   <div style="display:flex;margin-top:16px">${av('av-parent',48)}${kid(48,0,'margin-left:-16px')}${kid(48,-100,'margin-left:-16px')}${kid(48,120,'margin-left:-16px')}</div>
+   <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:16px">${GAMES.map((g,i)=>game(g,i,54)).join('')}</div>
+   <div style="display:flex;gap:16px;margin-top:16px;font-size:14px;font-weight:700"><span><span class="inf" style="color:var(--kids)">∞</span> videos</span><span>${ic('chart',15)} 7 days</span></div></div>
+ </div>${cta('Get Plus')}`,
+
+/* 4 · The games wall: all ten games as the hero, glowing; a short promise and one number underneath. */
+4:()=>`${back}
+ <div class="ember-glow" style="width:360px;height:260px;left:15px;top:80px;background:var(--ember);opacity:.4"></div>
+ <div style="position:relative;padding:76px 24px 0">
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;transform:perspective(700px) rotateX(14deg)">
+   ${[...GAMES,'odd','star'].map((g,i)=>`<div style="aspect-ratio:1;border-radius:22px;background:url(img/${g}.png) center/cover;${i>5?`filter:hue-rotate(${i*35}deg)`:''};box-shadow:0 10px 24px rgba(0,0,0,.35)"></div>`).join('')}</div>
+  <div style="text-align:center;margin-top:30px"><div class="display">Every game.<br>Every child.</div>
+   <div class="mut" style="margin-top:10px">All 10 games, no daily video cap, 3 children and a week of history.</div></div>
+  <div class="glass-card" style="margin-top:22px;padding:16px 18px;display:flex;align-items:center;gap:14px">${family(34)}<div class="grow"></div><div style="text-align:right"><div class="big-num" style="font-size:26px;line-height:28px">20 TMT</div><div class="lbl" style="margin:0">a month</div></div></div>
+ </div>${cta('Get Plus')}`,
+
+/* 5 · The membership card: a premium card with the family on it, then four big numbers. */
+5:()=>`${back}
+ <div style="padding:72px 22px 0">
+  <div style="height:208px;border-radius:28px;padding:20px;position:relative;overflow:hidden;background:linear-gradient(135deg,#FF7A45 0%,#FF5A3C 35%,#9B3BD6 100%);box-shadow:0 24px 50px -16px rgba(255,90,60,.55)">
+   <div style="position:absolute;right:-50px;top:-60px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.12)"></div>
+   <div style="position:absolute;right:30px;bottom:-90px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.08)"></div>
+   <div style="display:flex;justify-content:space-between;color:#0A0A0F"><div style="font-family:B;font-weight:800;font-size:24px">payhas</div><span style="display:inline-flex;align-items:center;gap:4px;height:28px;padding:0 12px;border-radius:999px;background:rgba(10,10,15,.85);color:#fff;font-size:13px;font-weight:700">${ic('spark',14)} PLUS</span></div>
+   <div style="position:absolute;left:20px;bottom:20px;right:20px;display:flex;justify-content:space-between;align-items:flex-end"><div style="display:flex">${av('av-parent',44,'box-shadow:0 0 0 3px #FF5A3C')}${kid(44,0,'margin-left:-12px;box-shadow:0 0 0 3px #FF5A3C')}${kid(44,-100,'margin-left:-12px;box-shadow:0 0 0 3px #E04A6E')}${kid(44,120,'margin-left:-12px;box-shadow:0 0 0 3px #C043A0')}</div><div style="color:#0A0A0F;font-weight:800;font-size:15px">Family</div></div></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:26px 12px;margin-top:34px;text-align:center">
+   <div><div class="big-num">3</div><div class="lbl">children</div></div>
+   <div><div class="big-num">10</div><div class="lbl">games</div></div>
+   <div><div class="big-num inf" style="color:var(--kids)">∞</div><div class="lbl">videos a day</div></div>
+   <div><div class="big-num">7</div><div class="lbl">days of history</div></div></div>
+  <div class="note" style="justify-content:center;margin-top:26px;font-size:13px">${ic('shield',16)}<span>Limits, pause and flags stay free.</span></div>
+ </div>${cta()}`,
+};
+document.getElementById('s').innerHTML=S[v]();
+</script></body></html>

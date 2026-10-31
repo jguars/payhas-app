@@ -1,0 +1,174 @@
+# The main journeys, one screenshot per screen, for the clickable Figma
+# prototype. Android only (uses the system back button). Run by
+# .github/workflows/android-emulator.yml with FLOW=figma; EMAIL and PASSWORD
+# are the test family's (repository secrets, never a real account). Reads
+# only: nothing here changes the family.
+appId: com.onki.payhas
+---
+- launchApp:
+    clearState: true
+- extendedWaitUntil:
+    visible: "I have an account"
+    timeout: 60000
+- waitForAnimationToEnd
+- takeScreenshot: 00-welcome
+
+# A child's phone: Join my family → language → Ask my parent, and the code.
+- tapOn: "Join my family"
+- extendedWaitUntil:
+    visible: "English"
+    timeout: 20000
+- tapOn: "English"
+- waitForAnimationToEnd
+- takeScreenshot: 01-language
+- tapOn: "Continue"
+- extendedWaitUntil:
+    visible: "Ask my parent"
+    timeout: 20000
+- hideKeyboard
+- takeScreenshot: 02-join-ask
+- tapOn: "I have a code"
+- hideKeyboard
+- waitForAnimationToEnd
+- takeScreenshot: 03-join-code
+# The app's own back arrows: join → language → Welcome (the system back would leave the app).
+- tapOn: "Back"
+- extendedWaitUntil:
+    visible: "English"
+    timeout: 20000
+- tapOn: "Back"
+- waitForAnimationToEnd
+
+# A parent: Get started → sign-in (new account) → email sign-in.
+- extendedWaitUntil:
+    visible: "Get started"
+    timeout: 20000
+- tapOn: "Get started"
+- extendedWaitUntil:
+    visible: "Continue"
+    timeout: 20000
+- tapOn: "Continue"
+- extendedWaitUntil:
+    visible: "Parent sign in"
+    timeout: 20000
+- waitForAnimationToEnd
+- takeScreenshot: 04-sign-in
+- tapOn: "Use email instead"
+- waitForAnimationToEnd
+- takeScreenshot: 05-sign-in-email
+- tapOn: "Email"
+- inputText: ${EMAIL}
+- tapOn: "Password.*"
+- inputText: ${PASSWORD}
+- hideKeyboard
+- tapOn:
+    id: "sign-in-submit"
+- extendedWaitUntil:
+    visible: "Who’s watching?"
+    timeout: 30000
+- waitForAnimationToEnd
+- takeScreenshot: 06-who
+
+# Family, behind the PIN (the test family's test PIN).
+- tapOn:
+    id: "who-dashboard"
+- extendedWaitUntil:
+    visible: "2"
+    timeout: 10000
+- takeScreenshot: 07-pin
+- tapOn: "2"
+- tapOn: "5"
+- tapOn: "8"
+- tapOn: "0"
+- extendedWaitUntil:
+    visible: "Add a child"
+    timeout: 20000
+- waitForAnimationToEnd
+- takeScreenshot: 08-family
+- scroll
+- waitForAnimationToEnd
+- takeScreenshot: 09-family-scrolled
+- scrollUntilVisible:
+    element: "Payhas Plus"
+    direction: DOWN
+- tapOn: "Payhas Plus"
+- waitForAnimationToEnd
+- takeScreenshot: 10-plus
+- back
+- waitForAnimationToEnd
+- scrollUntilVisible:
+    element: "Aylar"
+    direction: UP
+- tapOn: "Aylar"
+- waitForAnimationToEnd
+- takeScreenshot: 11-child
+- scroll
+- waitForAnimationToEnd
+- takeScreenshot: 12-child-scrolled
+- back
+- waitForAnimationToEnd
+- scrollUntilVisible:
+    element: "Guvanch"
+    direction: UP
+- tapOn: "Guvanch"
+- waitForAnimationToEnd
+- takeScreenshot: 13-profile
+- back
+- waitForAnimationToEnd
+- back
+- extendedWaitUntil:
+    visible: "Who’s watching?"
+    timeout: 20000
+
+# The child's app.
+- tapOn: "Aylar.*"
+- extendedWaitUntil:
+    visible: "For you"
+    timeout: 30000
+- waitForAnimationToEnd
+- takeScreenshot: 14-home
+- tapOn:
+    text: "Following"
+    optional: true
+- waitForAnimationToEnd
+- takeScreenshot: 15-home-following
+- tapOn:
+    id: "tab-discover"
+- waitForAnimationToEnd
+- takeScreenshot: 16-discover
+- tapOn:
+    id: "tab-play"
+- waitForAnimationToEnd
+- takeScreenshot: 17-play
+- tapOn:
+    text: "Play"
+    index: 1
+    optional: true
+- waitForAnimationToEnd
+- takeScreenshot: 18-game
+- back
+- waitForAnimationToEnd
+- tapOn:
+    id: "tab-me"
+- waitForAnimationToEnd
+- takeScreenshot: 19-me
+- tapOn:
+    text: "Inbox.*"
+    optional: true
+- waitForAnimationToEnd
+- takeScreenshot: 20-inbox
+- back
+- waitForAnimationToEnd
+- tapOn:
+    text: "Saved"
+    optional: true
+- waitForAnimationToEnd
+- takeScreenshot: 21-saved
+- back
+- waitForAnimationToEnd
+- tapOn:
+    text: "Following"
+    optional: true
+- waitForAnimationToEnd
+- takeScreenshot: 22-following
+- back
