@@ -1,9 +1,12 @@
-# A slow CI emulator sometimes shows "Pixel Launcher isn't responding" over
-# the app, at any moment. Tapping Wait clears it; run before every step.
+# A slow CI emulator's home screen (Pixel Launcher) freezes and Android shows
+# "Pixel Launcher isn't responding" over the app at any moment. The dialog
+# isn't in the tree Maestro reads, so instead the launcher is stopped (it's
+# not needed while Payhas runs) and the dialog, if it is readable, is tapped.
 appId: com.onki.payhas
 ---
+- stopApp: com.google.android.apps.nexuslauncher
 - runFlow:
     when:
-      visible: ".*isn.t responding"
+      visible: "Wait"
     commands:
       - tapOn: "Wait"

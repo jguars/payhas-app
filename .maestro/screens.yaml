@@ -5,6 +5,7 @@
 # only: nothing here changes the family.
 appId: com.onki.payhas
 ---
+- runFlow: dismiss-anr.yaml
 - launchApp:
     clearState: true
 - repeat:
