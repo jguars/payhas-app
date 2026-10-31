@@ -31,6 +31,9 @@ fixed *and* checked; note how.
   login whenever its link goes, however it goes. Live database checked
   2026-10-31: no leftovers today, so the cleanup line removes nothing.
   *Built 2026-10-31; migration live (checked: trigger `family_devices_drop_login` on, 0 leftover logins). Needs a real removal to confirm the login goes.*
+- [ ] **9. Join request limits are off for testing.** `private.settings`
+  `join_request_limits = false` (migration `…170000_join_requests_no_limits.sql`).
+  Turn back on before launch: `update private.settings set value = 'true' where key = 'join_request_limits';`
 - [ ] **6. Any child can sign up their own family.** Test mode: `0000` works
   for every number. Closes when real SMS codes replace `PHONE_TEST_CODE`
   (before launch).
