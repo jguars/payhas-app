@@ -49,12 +49,10 @@ appId: com.onki.payhas
       - waitForAnimationToEnd:
           timeout: 5000
 - assertVisible: "Ask my parent"
-- hideKeyboard
 - runFlow: dismiss-anr.yaml
 - takeScreenshot: 02-join-ask
 - runFlow: dismiss-anr.yaml
 - tapOn: "I have a code"
-- hideKeyboard
 - waitForAnimationToEnd
 - runFlow: dismiss-anr.yaml
 - takeScreenshot: 03-join-code
