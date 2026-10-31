@@ -16,7 +16,8 @@ export function useCreators(onlyFollowing = false) {
 
   const load = useCallback(async () => {
     if (!active) return;
-    const { data } = await supabase.rpc('get_creators', { p_session: active.token, p_only_following: onlyFollowing });
+    const { data, error } = await supabase.rpc('get_creators', { p_session: active.token, p_only_following: onlyFollowing });
+    if (error) console.warn('get_creators', error.message);
     setCreators(data ?? []);
     setLoading(false);
   }, [active, onlyFollowing]);

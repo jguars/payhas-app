@@ -51,7 +51,8 @@ export default function SignInScreen() {
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex}>
         <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
           <Text style={styles.logo}>payhas</Text>
-          <Text style={styles.title}>{t('auth.signInTitle')}</Text>
+          {/* Get started reads as a new account, I have an account as signing in; the email form titles itself. */}
+          {method === 'phone' && <Text style={styles.title}>{t(firstRun.signUp ? 'auth.signUpTitle' : 'auth.signInTitle')}</Text>}
 
           {method === 'phone' ? <PhoneForm onMessage={setMessage} /> : <EmailForm onMessage={setMessage} />}
 

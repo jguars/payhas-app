@@ -194,7 +194,8 @@ export function Latest({ child, onHide }: { child: Child; onHide: (v: RecentRow)
   ].sort((a, b) => b.at - a.at);
   const items: LatestItem[] = [
     ...events,
-    ...child.topics.slice(0, 3).map((x) => ({ kind: 'topic' as const, key: 't' + x.slug, what: `${x.emoji} ${topicLabel(t, x.slug, x.label)}`, seconds: x.seconds })),
+    // Under a minute reads as "0 min": only topics with real time count.
+    ...child.topics.filter((x) => x.seconds >= 60).slice(0, 3).map((x) => ({ kind: 'topic' as const, key: 't' + x.slug, what: `${x.emoji} ${topicLabel(t, x.slug, x.label)}`, seconds: x.seconds })),
   ];
   const shown = open ? items : items.slice(0, LATEST_FOLD);
   const name = child.display_name;

@@ -23,7 +23,7 @@ import { fx } from '@/lib/feedback';
 import { useHideTabBar, useReportVideoUnderBar } from '@/lib/tabBarTone';
 import { FEED_CHROME_BOTTOM, useInsets } from '@/lib/useInsets';
 import { duration } from '@/theme/motion';
-import { alpha, color, font, media, radius, size, space, themedStyles } from '@/theme/tokens';
+import { alpha, color, control, font, media, radius, size, space, themedStyles } from '@/theme/tokens';
 
 /** How long the "pinch in to bring the buttons back" hint stays after full display turns on. */
 const FULL_HINT_MS = 2500;
@@ -182,7 +182,7 @@ export default function FeedScreen() {
             return (
               <View key={m} style={{ width, height }}>
                 {m === 'following' && showEmptyFollowing ? (
-                  <FollowingEmpty videos={forYou.videos} top={insets.top + 40} />
+                  <FollowingEmpty videos={forYou.videos} top={insets.top + space.xs + control.md + space.md} />
                 ) : (
                   <FlatList
                     ref={lists[m]}

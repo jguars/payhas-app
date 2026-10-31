@@ -308,6 +308,10 @@ export type Database = {
           follower_count: number
           following: boolean
           latest_video_id: string
+          // Since 20261031190000_creators_poster; absent until that migration runs.
+          latest_asset_key?: string | null
+          latest_storage_path?: string | null
+          latest_thumb_path?: string | null
           verified: boolean
           video_count: number
         }[]

@@ -5,170 +5,306 @@
 # only: nothing here changes the family.
 appId: com.onki.payhas
 ---
+- runFlow: dismiss-anr.yaml
 - launchApp:
     clearState: true
-- extendedWaitUntil:
-    visible: "I have an account"
-    timeout: 60000
+- repeat:
+    times: 12
+    while:
+      notVisible: "I have an account"
+    commands:
+      - runFlow: dismiss-anr.yaml
+      - waitForAnimationToEnd:
+          timeout: 5000
+- assertVisible: "I have an account"
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 00-welcome
 
 # A child's phone: Join my family → language → Ask my parent, and the code.
+- runFlow: dismiss-anr.yaml
 - tapOn: "Join my family"
-- extendedWaitUntil:
-    visible: "English"
-    timeout: 20000
+- repeat:
+    times: 4
+    while:
+      notVisible: "English"
+    commands:
+      - runFlow: dismiss-anr.yaml
+      - waitForAnimationToEnd:
+          timeout: 5000
+- assertVisible: "English"
+- runFlow: dismiss-anr.yaml
 - tapOn: "English"
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 01-language
+- runFlow: dismiss-anr.yaml
 - tapOn: "Continue"
-- extendedWaitUntil:
-    visible: "Ask my parent"
-    timeout: 20000
-- hideKeyboard
+- repeat:
+    times: 4
+    while:
+      notVisible: "Ask my parent"
+    commands:
+      - runFlow: dismiss-anr.yaml
+      - waitForAnimationToEnd:
+          timeout: 5000
+- assertVisible: "Ask my parent"
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 02-join-ask
+- runFlow: dismiss-anr.yaml
 - tapOn: "I have a code"
-- hideKeyboard
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 03-join-code
 # The app's own back arrows: join → language → Welcome (the system back would leave the app).
+- runFlow: dismiss-anr.yaml
 - tapOn: "Back"
-- extendedWaitUntil:
-    visible: "English"
-    timeout: 20000
+- repeat:
+    times: 4
+    while:
+      notVisible: "English"
+    commands:
+      - runFlow: dismiss-anr.yaml
+      - waitForAnimationToEnd:
+          timeout: 5000
+- assertVisible: "English"
+- runFlow: dismiss-anr.yaml
 - tapOn: "Back"
 - waitForAnimationToEnd
 
 # A parent: Get started → sign-in (new account) → email sign-in.
-- extendedWaitUntil:
-    visible: "Get started"
-    timeout: 20000
+- repeat:
+    times: 4
+    while:
+      notVisible: "Get started"
+    commands:
+      - runFlow: dismiss-anr.yaml
+      - waitForAnimationToEnd:
+          timeout: 5000
+- assertVisible: "Get started"
+- runFlow: dismiss-anr.yaml
 - tapOn: "Get started"
-- extendedWaitUntil:
-    visible: "Continue"
-    timeout: 20000
+- repeat:
+    times: 4
+    while:
+      notVisible: "Continue"
+    commands:
+      - runFlow: dismiss-anr.yaml
+      - waitForAnimationToEnd:
+          timeout: 5000
+- assertVisible: "Continue"
+- runFlow: dismiss-anr.yaml
 - tapOn: "Continue"
-- extendedWaitUntil:
-    visible: "Parent sign in"
-    timeout: 20000
+- repeat:
+    times: 4
+    while:
+      notVisible: "Parent sign in"
+    commands:
+      - runFlow: dismiss-anr.yaml
+      - waitForAnimationToEnd:
+          timeout: 5000
+- assertVisible: "Parent sign in"
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 04-sign-in
+- runFlow: dismiss-anr.yaml
 - tapOn: "Use email instead"
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 05-sign-in-email
+- runFlow: dismiss-anr.yaml
 - tapOn: "Email"
 - inputText: ${EMAIL}
+- runFlow: dismiss-anr.yaml
 - tapOn: "Password.*"
 - inputText: ${PASSWORD}
 - hideKeyboard
+- runFlow: dismiss-anr.yaml
 - tapOn:
     id: "sign-in-submit"
-- extendedWaitUntil:
-    visible: "Who’s watching?"
-    timeout: 30000
+- repeat:
+    times: 6
+    while:
+      notVisible: "Who’s watching?"
+    commands:
+      - runFlow: dismiss-anr.yaml
+      - waitForAnimationToEnd:
+          timeout: 5000
+- assertVisible: "Who’s watching?"
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 06-who
 
 # Family, behind the PIN (the test family's test PIN).
+- runFlow: dismiss-anr.yaml
 - tapOn:
     id: "who-dashboard"
-- extendedWaitUntil:
-    visible: "2"
-    timeout: 10000
+- repeat:
+    times: 4
+    while:
+      notVisible: "2"
+    commands:
+      - runFlow: dismiss-anr.yaml
+      - waitForAnimationToEnd:
+          timeout: 5000
+- assertVisible: "2"
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 07-pin
+- runFlow: dismiss-anr.yaml
 - tapOn: "2"
+- runFlow: dismiss-anr.yaml
 - tapOn: "5"
+- runFlow: dismiss-anr.yaml
 - tapOn: "8"
+- runFlow: dismiss-anr.yaml
 - tapOn: "0"
-- extendedWaitUntil:
-    visible: "Add a child"
-    timeout: 20000
+- repeat:
+    times: 4
+    while:
+      notVisible: "Add a child"
+    commands:
+      - runFlow: dismiss-anr.yaml
+      - waitForAnimationToEnd:
+          timeout: 5000
+- assertVisible: "Add a child"
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 08-family
+- runFlow: dismiss-anr.yaml
 - scroll
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 09-family-scrolled
+- runFlow: dismiss-anr.yaml
 - scrollUntilVisible:
     element: "Payhas Plus"
     direction: DOWN
+- runFlow: dismiss-anr.yaml
 - tapOn: "Payhas Plus"
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 10-plus
+- runFlow: dismiss-anr.yaml
 - back
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - scrollUntilVisible:
     element: "Aylar"
     direction: UP
+- runFlow: dismiss-anr.yaml
 - tapOn: "Aylar"
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 11-child
+- runFlow: dismiss-anr.yaml
 - scroll
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 12-child-scrolled
+- runFlow: dismiss-anr.yaml
 - back
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - scrollUntilVisible:
     element: "Guvanch"
     direction: UP
+- runFlow: dismiss-anr.yaml
 - tapOn: "Guvanch"
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 13-profile
+- runFlow: dismiss-anr.yaml
 - back
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - back
-- extendedWaitUntil:
-    visible: "Who’s watching?"
-    timeout: 20000
+- repeat:
+    times: 4
+    while:
+      notVisible: "Who’s watching?"
+    commands:
+      - runFlow: dismiss-anr.yaml
+      - waitForAnimationToEnd:
+          timeout: 5000
+- assertVisible: "Who’s watching?"
 
 # The child's app.
+- runFlow: dismiss-anr.yaml
 - tapOn: "Aylar.*"
-- extendedWaitUntil:
-    visible: "For you"
-    timeout: 30000
+- repeat:
+    times: 6
+    while:
+      notVisible: "For you"
+    commands:
+      - runFlow: dismiss-anr.yaml
+      - waitForAnimationToEnd:
+          timeout: 5000
+- assertVisible: "For you"
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 14-home
+- runFlow: dismiss-anr.yaml
 - tapOn:
     text: "Following"
     optional: true
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 15-home-following
+- runFlow: dismiss-anr.yaml
 - tapOn:
     id: "tab-discover"
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 16-discover
+- runFlow: dismiss-anr.yaml
 - tapOn:
     id: "tab-play"
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 17-play
+- runFlow: dismiss-anr.yaml
 - tapOn:
     text: "Play"
     index: 1
     optional: true
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 18-game
+- runFlow: dismiss-anr.yaml
 - back
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - tapOn:
     id: "tab-me"
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 19-me
+- runFlow: dismiss-anr.yaml
 - tapOn:
     text: "Inbox.*"
     optional: true
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 20-inbox
+- runFlow: dismiss-anr.yaml
 - back
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - tapOn:
     text: "Saved"
     optional: true
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 21-saved
+- runFlow: dismiss-anr.yaml
 - back
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - tapOn:
     text: "Following"
     optional: true
 - waitForAnimationToEnd
+- runFlow: dismiss-anr.yaml
 - takeScreenshot: 22-following
+- runFlow: dismiss-anr.yaml
 - back
