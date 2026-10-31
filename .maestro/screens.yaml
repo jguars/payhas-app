@@ -1,6 +1,8 @@
-# Walks the test family through the main screens and screenshots each one.
-# Run by .github/workflows/android-emulator.yml; EMAIL and PASSWORD come from
-# repository secrets (the test family, never a real account).
+# The main journeys, one screenshot per screen, for the clickable Figma
+# prototype. Android only (uses the system back button). Run by
+# .github/workflows/android-emulator.yml with FLOW=figma; EMAIL and PASSWORD
+# are the test family's (repository secrets, never a real account). Reads
+# only: nothing here changes the family.
 appId: com.onki.payhas
 ---
 - launchApp:
@@ -8,20 +10,52 @@ appId: com.onki.payhas
 - extendedWaitUntil:
     visible: "I have an account"
     timeout: 60000
+- waitForAnimationToEnd
 - takeScreenshot: 00-welcome
-- tapOn: "I have an account"
+
+# A child's phone: Join my family → language → Ask my parent, and the code.
+- tapOn: "Join my family"
 - extendedWaitUntil:
     visible: "English"
     timeout: 20000
 - tapOn: "English"
+- waitForAnimationToEnd
 - takeScreenshot: 01-language
+- tapOn: "Continue"
+- extendedWaitUntil:
+    visible: "Ask my parent"
+    timeout: 20000
+- hideKeyboard
+- takeScreenshot: 02-join-ask
+- tapOn: "I have a code"
+- hideKeyboard
+- waitForAnimationToEnd
+- takeScreenshot: 03-join-code
+# The app's own back arrows: join → language → Welcome (the system back would leave the app).
+- tapOn: "Back"
+- extendedWaitUntil:
+    visible: "English"
+    timeout: 20000
+- tapOn: "Back"
+- waitForAnimationToEnd
+
+# A parent: Get started → sign-in (new account) → email sign-in.
+- extendedWaitUntil:
+    visible: "Get started"
+    timeout: 20000
+- tapOn: "Get started"
+- extendedWaitUntil:
+    visible: "Continue"
+    timeout: 20000
 - tapOn: "Continue"
 - extendedWaitUntil:
     visible: "Parent sign in"
     timeout: 20000
-- takeScreenshot: 02-sign-in
-# Phone is the main way in; the test family signs in by email.
+- waitForAnimationToEnd
+- takeScreenshot: 04-sign-in
 - tapOn: "Use email instead"
+- waitForAnimationToEnd
+- takeScreenshot: 05-sign-in-email
 - tapOn: "Email"
 - inputText: ${EMAIL}
 - tapOn: "Password.*"
@@ -32,50 +66,109 @@ appId: com.onki.payhas
 - extendedWaitUntil:
     visible: "Who’s watching?"
     timeout: 30000
-- takeScreenshot: 03-who
-# Parent dashboard behind the PIN (test PIN).
+- waitForAnimationToEnd
+- takeScreenshot: 06-who
+
+# Family, behind the PIN (the test family's test PIN).
 - tapOn:
     id: "who-dashboard"
 - extendedWaitUntil:
     visible: "2"
     timeout: 10000
+- takeScreenshot: 07-pin
 - tapOn: "2"
 - tapOn: "5"
 - tapOn: "8"
 - tapOn: "0"
 - extendedWaitUntil:
-    visible: "Family"
+    visible: "Add a child"
     timeout: 20000
 - waitForAnimationToEnd
-- takeScreenshot: 04-family
+- takeScreenshot: 08-family
 - scroll
-- takeScreenshot: 05-family-scrolled
-# iOS has no system back button; the header's back works on both.
-- tapOn:
-    id: "header-back"
+- waitForAnimationToEnd
+- takeScreenshot: 09-family-scrolled
+- scrollUntilVisible:
+    element: "Payhas Plus"
+    direction: DOWN
+- tapOn: "Payhas Plus"
+- waitForAnimationToEnd
+- takeScreenshot: 10-plus
+- back
+- waitForAnimationToEnd
+- scrollUntilVisible:
+    element: "Aylar"
+    direction: UP
+- tapOn: "Aylar"
+- waitForAnimationToEnd
+- takeScreenshot: 11-child
+- scroll
+- waitForAnimationToEnd
+- takeScreenshot: 12-child-scrolled
+- back
+- waitForAnimationToEnd
+- scrollUntilVisible:
+    element: "Guvanch"
+    direction: UP
+- tapOn: "Guvanch"
+- waitForAnimationToEnd
+- takeScreenshot: 13-profile
+- back
+- waitForAnimationToEnd
+- back
 - extendedWaitUntil:
     visible: "Who’s watching?"
     timeout: 20000
+
+# The child's app.
 - tapOn: "Aylar.*"
 - extendedWaitUntil:
     visible: "For you"
     timeout: 30000
 - waitForAnimationToEnd
-- takeScreenshot: 06-home
+- takeScreenshot: 14-home
+- tapOn:
+    text: "Following"
+    optional: true
+- waitForAnimationToEnd
+- takeScreenshot: 15-home-following
 - tapOn:
     id: "tab-discover"
 - waitForAnimationToEnd
-- takeScreenshot: 07-discover
+- takeScreenshot: 16-discover
 - tapOn:
     id: "tab-play"
 - waitForAnimationToEnd
-- takeScreenshot: 08-play
-- scroll
-- takeScreenshot: 09-play-scrolled
+- takeScreenshot: 17-play
+- tapOn:
+    text: "Play"
+    index: 1
+    optional: true
+- waitForAnimationToEnd
+- takeScreenshot: 18-game
+- back
+- waitForAnimationToEnd
 - tapOn:
     id: "tab-me"
 - waitForAnimationToEnd
-- takeScreenshot: 10-me
-- tapOn: "Inbox.*"
+- takeScreenshot: 19-me
+- tapOn:
+    text: "Inbox.*"
+    optional: true
 - waitForAnimationToEnd
-- takeScreenshot: 11-inbox
+- takeScreenshot: 20-inbox
+- back
+- waitForAnimationToEnd
+- tapOn:
+    text: "Saved"
+    optional: true
+- waitForAnimationToEnd
+- takeScreenshot: 21-saved
+- back
+- waitForAnimationToEnd
+- tapOn:
+    text: "Following"
+    optional: true
+- waitForAnimationToEnd
+- takeScreenshot: 22-following
+- back
