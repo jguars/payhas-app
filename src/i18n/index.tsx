@@ -64,7 +64,7 @@ export function translate(lang: Lang, key: string, params?: Params): string {
 /** Translate outside React, in the language last set. */
 export const tNow: T = (key, params) => translate(current, key, params);
 
-type Ctx = { lang: Lang; setLang: (l: Lang) => void; t: T; chosen: boolean };
+type Ctx = { lang: Lang; setLang: (l: Lang) => void; t: T; chosen: boolean; unchoose: () => void };
 const I18nContext = createContext<Ctx | null>(null);
 
 export function I18nProvider({ children }: { children: ReactNode }) {
@@ -80,8 +80,15 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     setLangState(l);
     setChosen(true);
   }, []);
+  /** Back from sign-in to the first-run screens: the language step shows again (the language itself stays). */
+  const unchoose = useCallback(() => {
+    try {
+      localStorage.removeItem(KEY);
+    } catch {}
+    setChosen(false);
+  }, []);
   const t = useCallback<T>((key, params) => translate(lang, key, params), [lang]);
-  const value = useMemo(() => ({ lang, setLang, t, chosen }), [lang, setLang, t, chosen]);
+  const value = useMemo(() => ({ lang, setLang, t, chosen, unchoose }), [lang, setLang, t, chosen, unchoose]);
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 }
 

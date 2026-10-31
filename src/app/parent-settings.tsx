@@ -84,6 +84,7 @@ export default function ParentSettingsScreen() {
     fx.success();
     toast({ text, icon: 'check' });
   };
+  const others = (linked.phones ?? []).filter((ph) => ph.kind !== 'child');
   const adults = profiles.filter((p) => p.lane === 'adult').sort((a, b) => Number(b.is_parent) - Number(a.is_parent));
 
   return (
@@ -141,10 +142,10 @@ export default function ParentSettingsScreen() {
           </ListGroup>
         </Enter>
 
-        {/* Every phone linked to the family, and the one way to cut a lost one off. */}
+        {/* Phones that aren't one child's: those are linked and removed on that child's card in Family. */}
         <Enter index={2}>
           <ListGroup title={t('parent.phonesTitle')} footer={t('parent.phonesFooter')}>
-            {(linked.phones ?? []).map((ph, i) => (
+            {others.map((ph, i) => (
               <ListRow
                 key={ph.id}
                 first={i === 0}
@@ -155,9 +156,7 @@ export default function ParentSettingsScreen() {
                     ? t('parent.phoneWaiting')
                     : ph.kind === 'coparent'
                       ? `${t('parent.coParent')} · ${ph.phone ?? ''}`
-                      : ph.kind === 'shared'
-                        ? t('parent.sharedPhone')
-                        : t('parent.phoneOf', { name: ph.profile_name ?? '' })
+                      : t('parent.sharedPhone')
                 }
                 value={<Text style={styles.remove}>{t('parent.removePhone')}</Text>}
                 chevron={false}
@@ -168,7 +167,7 @@ export default function ParentSettingsScreen() {
                 }
               />
             ))}
-            <ListRow first={(linked.phones ?? []).length === 0} icon="plus" label={t('parent.addSharedPhone')} onPress={() => router.push('/link-phone')} />
+            <ListRow first={others.length === 0} icon="plus" label={t('parent.addSharedPhone')} onPress={() => router.push('/link-phone')} />
             {/* Another grown-up with their own login: same code and Allow, plus their own number. */}
             <ListRow icon="me" label={t('parent.inviteParent')} onPress={() => router.push({ pathname: '/link-phone', params: { kind: 'coparent' } })} />
           </ListGroup>

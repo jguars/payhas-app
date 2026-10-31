@@ -1,5 +1,6 @@
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
+import { useEffect } from 'react';
 import { ScrollView, Text, useWindowDimensions, View } from 'react-native';
 
 import { Enter } from '@/components/motion/Enter';
@@ -22,8 +23,9 @@ const MASCOT_SHARE = 0.36;
 
 /**
  * First screen on a new phone, after the splash: what Payhas is, in the
- * phone's own language, then one way in. Both buttons lead to the language
- * step; the choice decides whether sign-in opens on a new account.
+ * phone's own language, then one way in. All three lead to the language
+ * step; the choice decides whether sign-in opens on a new account, or a
+ * child's phone goes straight on to the parent's code.
  */
 export default function WelcomeScreen() {
   const insets = useInsets();
@@ -31,8 +33,15 @@ export default function WelcomeScreen() {
   const { width, height } = useWindowDimensions();
   // Square, as wide as the page allows, but never taller than its share of a short screen.
   const collage = Math.min(width - layout.gutter * 2, layout.maxContent, height * COLLAGE_SHARE);
-  const go = (signUp: boolean) => {
+  // Back from sign-in: land on the language step again, with Welcome under it.
+  useEffect(() => {
+    if (!firstRun.reopenLanguage) return;
+    firstRun.reopenLanguage = false;
+    router.push('/language');
+  }, []);
+  const go = (signUp: boolean, join = false) => {
     firstRun.signUp = signUp;
+    firstRun.join = join;
     router.push('/language');
   };
   return (
@@ -66,6 +75,8 @@ export default function WelcomeScreen() {
       <View style={[styles.actions, { paddingBottom: insets.bottom + space.xl }]}>
         <Button label={t('onboarding.start.go')} onPress={() => go(true)} />
         <Button label={t('onboarding.start.haveAccount')} variant="secondary" onPress={() => go(false)} />
+        {/* A child's phone: no account of its own, it joins with the code on the parent's phone. */}
+        <Button label={t('auth.joinFamily')} variant="quiet" icon="link" onPress={() => go(false, true)} />
       </View>
     </View>
   );

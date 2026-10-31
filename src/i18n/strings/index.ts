@@ -1,3 +1,4 @@
+import ask from './ask';
 import auth from './auth';
 import catchGame from './catch';
 import common from './common';
@@ -20,7 +21,7 @@ import slide from './slide';
 import three from './three';
 
 /** Every namespace; keys are `<namespace>.<key>`, e.g. t('feed.like'). Each game past the first two has its own. */
-export const STRINGS = { auth, catch: catchGame, common, count, creator, discover, echo, feed, inbox, maze, me, moles, nav, odd, onboarding, parent, play, plus, slide, three };
+export const STRINGS = { ask, auth, catch: catchGame, common, count, creator, discover, echo, feed, inbox, maze, me, moles, nav, odd, onboarding, parent, play, plus, slide, three };
 
 type NS = typeof STRINGS;
 export type TKey = { [N in keyof NS]: `${N & string}.${keyof NS[N]['en'] & string}` }[keyof NS];

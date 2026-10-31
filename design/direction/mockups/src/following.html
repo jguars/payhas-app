@@ -1,0 +1,51 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=390">
+<!-- Following with nobody followed: current (one big card row) vs proposed (2 cards per row, vertical). following.html?v=now|grid -->
+<link rel="stylesheet" href="mock.css">
+<style>
+/* Home is always the dark media world, in every theme. */
+body{background:#0A0A0F;color:#F4F3EF}
+.status{height:36px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;font:600 14px F;color:#F4F3EF}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 12px;height:48px}
+.lanepill{display:inline-flex;align-items:center;gap:4px;height:26px;padding:0 10px;border-radius:999px;background:rgba(195,162,255,.16);color:#C3A2FF;font:700 12px F}
+.tabs2{display:flex;gap:18px;font:600 16px F}
+.tabs2 b{color:#F4F3EF;font-weight:700;position:relative}
+.tabs2 b:after{content:'';position:absolute;left:50%;margin-left:-7px;bottom:-8px;width:14px;height:2px;border-radius:2px;background:#F4F3EF}
+.tabs2 span{color:rgba(244,243,239,.55)}
+.ttl{font-family:B;font-weight:800;font-size:26px;line-height:32px;letter-spacing:-.4px}
+.sb{color:#B3B2BD;font-size:15px;line-height:21px;margin-top:4px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}
+.cc{position:relative;border-radius:20px;overflow:hidden;background:#14141B;aspect-ratio:3/4}
+.cc .poster{position:absolute;inset:0}
+.cc .shade{position:absolute;inset:0;background:linear-gradient(0deg,rgba(10,10,15,.96) 30%,rgba(10,10,15,0) 75%)}
+.cc .body{position:absolute;left:0;right:0;bottom:0;padding:12px;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
+.cc .avl{width:40px;height:40px;border-radius:20px;background:#1D1D26;border:2px solid #F4F3EF;display:flex;align-items:center;justify-content:center;font:800 17px B;margin-bottom:2px}
+.cc .nm{font:700 14px F;line-height:18px;display:flex;align-items:center;gap:4px;max-width:100%}
+.cc .nm span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cc .mt{font:500 12px F;color:#B3B2BD}
+.fbtn{margin-top:6px;height:34px;padding:0 18px;border-radius:999px;background:#FF5A3C;color:#0A0A0F;font:700 13px F;display:flex;align-items:center;gap:6px}
+.fbtn.on{background:rgba(244,243,239,.16);color:#F4F3EF}
+.tabbar{position:absolute;left:0;right:0;bottom:0;height:78px;background:#0E1631;display:flex;justify-content:space-around;align-items:flex-start;padding-top:8px;color:rgba(244,243,239,.6);font:600 11px F}
+.tabbar div{display:flex;flex-direction:column;align-items:center;gap:3px}
+.tabbar .on i{background:#F4F3EF;color:#0A0A0F}
+.tabbar i{width:52px;height:30px;border-radius:15px;display:flex;align-items:center;justify-content:center;font-style:normal}
+.fade{position:absolute;left:0;right:0;bottom:78px;height:60px;background:linear-gradient(0deg,#0A0A0F,rgba(10,10,15,0))}
+/* current: one row of big cards */
+.big{display:flex;gap:12px;padding-left:85px;margin-top:28px}
+.big .cc{width:220px;flex:none;aspect-ratio:auto;height:330px}
+.big .cc .avl{width:56px;height:56px;border-radius:28px;font-size:22px}
+</style></head>
+<body>
+<div id="s"></div>
+<script src="icons.js"></script>
+<script>
+const v=new URLSearchParams(location.search).get('v');
+I.search='<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>';I.disc='<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>';
+const C=[['Benny the Bunny',1,5,'#3a2f5c,#6b5fa8',0],['Children’s Rhymes',4,12,'#5c3a2f,#c98a5a',0],['Payhas Science',20,0,'#2f4a5c,#7fb3c9',1],['Payhas Space',28,1,'#141a33,#4b5a8f',1,'on'],['Payhas Nature',75,0,'#2f5c3a,#8fc97f',1],['Payhas Wild',55,0,'#5c4a2f,#c9b37f',1]];
+const card=(c,i)=>`<div class="cc"><div class="poster" style="background:linear-gradient(160deg,${c[3]})"></div><div class="shade"></div><div class="body"><div class="avl">${c[0][0]}</div><div class="nm"><span>${c[0]}</span>${c[4]?`<svg viewBox="0 0 24 24" style="width:14px;height:14px;flex:none;color:#78A6FF;fill:#78A6FF;stroke:#0A0A0F;stroke-width:2"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6" fill="none"/></svg>`:''}</div><div class="mt">${c[1]} video${c[1]>1?'s':''} · ${c[2]} follower${c[2]===1?'':'s'}</div><div class="fbtn ${c[5]||''}">${c[5]?ic('check',14,3)+' Following':'Follow'}</div></div></div>`;
+const chrome=`<div class="status"><span>2:32</span><span>▂▄▆ ◔ 91</span></div><div class="topbar"><span class="lanepill">${ic('shield',13)} Parent</span><div class="tabs2"><b>Following</b><span>For you</span></div><span style="width:62px;text-align:right">${ic('search',22)}</span></div>`;
+const tabbar=`<div class="fade"></div><div class="tabbar"><div class="on"><i>${ic('home2',20)}</i>Home</div><div><i>${ic('disc',20)}</i>Discover</div><div><i>${ic('game',20)}</i>Play</div><div><i>${ic('me',20)}</i>Me</div></div>`;
+document.getElementById('s').innerHTML = v==='now'
+ ? `${chrome}<div style="text-align:center;margin-top:120px"><div class="ttl">Follow creators you like</div><div class="sb">Their new videos show up here.</div></div><div class="big">${C.slice(0,2).map(card).join('')}</div>${tabbar}`
+ : `${chrome}<div style="padding:18px 16px 0"><div class="ttl">Follow creators you like</div><div class="sb">Their new videos show up here.</div><div class="grid2">${C.map(card).join('')}</div></div>${tabbar}`;
+</script></body></html>

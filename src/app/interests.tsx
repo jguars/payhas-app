@@ -5,6 +5,7 @@ import { Enter } from '@/components/motion/Enter';
 import { PressScale } from '@/components/motion/PressScale';
 import { SafeScreen } from '@/components/SafeScreen';
 import { Chip } from '@/components/ui/Chip';
+import { IconButton } from '@/components/ui/IconButton';
 import { topicLabel, useT } from '@/i18n';
 import { useFamily } from '@/features/family/FamilyProvider';
 import { Constants, Tables } from '@/lib/database.types';
@@ -60,6 +61,10 @@ export default function InterestsScreen() {
 
   return (
     <SafeScreen style={styles.root}>
+      {/* Back to "Who's watching?", like "Not you?" below. */}
+      <View style={styles.back}>
+        <IconButton icon="back" label={t('common.back')} onPress={leaveProfile} />
+      </View>
       <Enter index={0}>
         <Text style={styles.title} accessibilityRole="header">
           {profile ? t('onboarding.child.interestsTitle', { name: profile.display_name }) : ''}
@@ -105,7 +110,8 @@ export default function InterestsScreen() {
 
 const styles = themedStyles(() => ({
   root: { flex: 1, ...pageFill() },
-  title: { color: color.text, fontFamily: font.display, fontSize: size.headline, lineHeight: 39, letterSpacing: -0.6, textAlign: 'center', paddingHorizontal: space.xl, paddingTop: space.xxl },
+  back: { alignSelf: 'flex-start', marginLeft: space.sm, marginTop: space.sm },
+  title: { color: color.text, fontFamily: font.display, fontSize: size.headline, lineHeight: 39, letterSpacing: -0.6, textAlign: 'center', paddingHorizontal: space.xl, paddingTop: space.sm },
   hint: { color: color.text2, fontFamily: font.medium, fontSize: size.body, textAlign: 'center', paddingHorizontal: space.xl, paddingTop: space.sm, paddingBottom: space.xl },
   grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: space.sm, paddingHorizontal: space.lg, paddingBottom: space.xl },
   footer: { paddingHorizontal: space.xl, paddingBottom: space.lg, gap: space.sm },

@@ -147,7 +147,7 @@ export default function MeScreen() {
         </Enter>
 
         {ownPhone ? (
-          // A child's own phone: leave it (the parent links it again with a new code), or delete the account with the parent PIN.
+          // A child's own phone: leave it (the parent links it again with a new code) or delete the account, both with the parent PIN.
           <Enter index={5}>
             <ListGroup title={t('me.group.account')}>
               <ListRow
@@ -156,10 +156,9 @@ export default function MeScreen() {
                 label={t('me.signOutPhone')}
                 chevron={false}
                 onPress={() =>
-                  confirmDestructive(t('me.signOutPhoneTitle'), t('me.signOutPhoneBody'), t('me.signOut'), t('common.cancel'), async () => {
-                    await supabase.rpc('leave_family_phone');
-                    signOut();
-                  })
+                  confirmDestructive(t('me.signOutPhoneTitle'), t('me.signOutPhoneBody'), t('me.signOut'), t('common.cancel'), () =>
+                    router.push({ pathname: '/delete-me', params: { leave: '1' } }),
+                  )
                 }
               />
               <ListRow

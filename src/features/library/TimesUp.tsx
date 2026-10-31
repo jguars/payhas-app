@@ -15,11 +15,12 @@ import Svg, { Circle, Path } from 'react-native-svg';
 import { Icon } from '@/components/Icon';
 import { Enter } from '@/components/motion/Enter';
 import { PressScale } from '@/components/motion/PressScale';
+import { Avatar } from '@/components/ui/Avatar';
 import { useFamily } from '@/features/family/FamilyProvider';
 import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
-import { color, font, radius, size, space, themedStyles } from '@/theme/tokens';
+import { color, font, radius, size, space, themedStyles, type } from '@/theme/tokens';
 
 import { hourLabel, Lock } from './useScreenTime';
 
@@ -55,6 +56,17 @@ export function TimesUp({ lock }: { lock: Exclude<Lock, null> }) {
           <Float>{quiet ? <Moon /> : lock === 'paused' ? <PauseArt /> : lock === 'games' ? <GamesOff /> : <Hourglass />}</Float>
         </View>
       </Enter>
+      {/* Whose stop this is: on a shared phone, the lock is per profile. */}
+      {!!current && (
+        <Enter index={1}>
+          <View style={styles.who}>
+            <Avatar name={current.display_name} avatar={current.avatar} lane={current.lane} size={28} />
+            <Text style={styles.whoName} numberOfLines={1}>
+              {current.display_name}
+            </Text>
+          </View>
+        </Enter>
+      )}
       <Enter index={2}>
         <Text style={styles.title}>{copy.title}</Text>
       </Enter>
@@ -228,6 +240,8 @@ const styles = themedStyles(() => ({
   root: { ...StyleSheet.absoluteFill, backgroundColor: color.bg, alignItems: 'center', justifyContent: 'center', gap: space.md, padding: space.xl },
   art: { width: 220, height: 160, alignItems: 'center', justifyContent: 'center', marginBottom: space.lg },
   star: { position: 'absolute', backgroundColor: color.text, left: '50%', top: '50%' },
+  who: { flexDirection: 'row', alignItems: 'center', gap: space.sm, alignSelf: 'center' },
+  whoName: { color: color.text2, fontFamily: font.semibold, ...type.body },
   title: { color: color.text, fontFamily: font.display, fontSize: size.heading, textAlign: 'center', letterSpacing: -0.6 },
   body: { color: color.text2, fontFamily: font.medium, fontSize: size.body, textAlign: 'center' },
   ask: { minHeight: 48, paddingHorizontal: space.xxl, borderRadius: radius.pill, backgroundColor: color.reward, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: space.sm, marginTop: space.lg },

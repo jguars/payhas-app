@@ -20,6 +20,8 @@ when the owner says so (merged 2026-10-30 on the owner's word).
 
 ## In progress
 
+- [ ] **Family links backlog** — `docs/FAMILY_LINKS_BACKLOG.md` (Mum + 3 children first)
+
 - [ ] **iPhone**: the simulator build passes; the walk-through on iPhone SE, iPhone 17 and 17 Pro Max is being made reliable (`ios-simulator.yml`, screenshots on the `ci-screens-ios` branch).
 - [ ] Edit profile info and change avatar — built; `update_profile` applied to the live database (Oct 30); needs a phone test.
 - [ ] Figma file for tokens and components — blocked by the Figma Starter plan's call limit; HTML mockups and the SVG app map are used instead.

@@ -120,6 +120,13 @@ export default function FeedScreen() {
     if (width > 0) pager.current?.scrollTo({ x: PAGES.indexOf(mode) * width, animated: false });
   }, [width]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Android ignores contentOffset and drops a scrollTo made before the pages have laid out, so a
+  // cold start landed on Following while For you played unseen. Place it again once the content
+  // has its full width.
+  const onPagerContent = (w: number) => {
+    if (width > 0 && w >= PAGES.length * width) pager.current?.scrollTo({ x: PAGES.indexOf(mode) * width, animated: false });
+  };
+
   const onPagerScroll = useAnimatedScrollHandler((e) => {
     scrollX.value = e.contentOffset.x;
   });
@@ -159,6 +166,7 @@ export default function FeedScreen() {
           overScrollMode="never"
           showsHorizontalScrollIndicator={false}
           contentOffset={{ x: PAGES.indexOf(mode) * width, y: 0 }}
+          onContentSizeChange={onPagerContent}
           onScroll={onPagerScroll}
           scrollEventThrottle={16}
           onMomentumScrollEnd={(e) => {

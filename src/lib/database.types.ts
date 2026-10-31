@@ -509,8 +509,11 @@ export type Database = {
       why_this: { Args: { p_session: string; p_video_id: string }; Returns: Json }
       get_family_plan: { Args: never; Returns: Json }
       my_device: { Args: never; Returns: Json }
+      pending_join_requests: { Args: never; Returns: { id: string; device_name: string; match: string; created_at: string; expires_at: string }[] }
+      answer_join_request: { Args: { p_request: string; p_allow: boolean; p_profile?: string | null; p_pin?: string | null }; Returns: string }
+      sync_family_time_zone: { Args: { p_tz: string }; Returns: undefined }
       create_link_code: { Args: { p_parent: string; p_profile?: string | null; p_kind?: string }; Returns: Json }
-      leave_family_phone: { Args: never; Returns: boolean }
+      leave_family_phone: { Args: { p_pin: string }; Returns: boolean }
       delete_my_profile: { Args: { p_pin: string }; Returns: boolean }
       link_code_status: { Args: { p_parent: string; p_code_id: string }; Returns: Json }
       answer_device: { Args: { p_parent: string; p_device: string; p_allow: boolean }; Returns: boolean }

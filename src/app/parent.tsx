@@ -18,8 +18,9 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { SectionHeader } from '@/components/ui/SectionHeader';
 import { useFamily } from '@/features/family/FamilyProvider';
-import { LiveDot, LockedHistory, WeekChart } from '@/features/parent/parts';
+import { confirmDestructive, LiveDot, LockedHistory, WeekChart } from '@/features/parent/parts';
 import { LinkedPhone, useLinkedPhones } from '@/features/parent/devices';
+import { JoinRequestRow } from '@/features/parent/joinRequests';
 import { RecentStrip } from '@/features/parent/RecentStrip';
 import { ago, Child, minutes, presence, useParent } from '@/features/parent/useParent';
 import { localized, roleKey, useT } from '@/i18n';
@@ -166,6 +167,8 @@ export default function FamilyScreen() {
           )}
         </Enter>
 
+        <JoinRequestRow />
+
         {children != null && failed && (
           <View style={styles.stale}>
             <Icon name="help" size={iconSize.sm} color={color.warning} strokeWidth={iconStroke(iconSize.sm)} />
@@ -238,7 +241,7 @@ export default function FamilyScreen() {
 
             <Enter index={2} style={styles.section}>
               <TodayCard child={child} onPause={() => onPause(child)} onAddTime={() => onAddTime(child)} onRules={() => openChild(child)} />
-              <PhoneRows child={child} phones={linked.phones} />
+              <PhoneRows child={child} phones={linked.phones} onRemove={linked.remove} />
             </Enter>
 
             {plus === false ? (
@@ -266,14 +269,25 @@ export default function FamilyScreen() {
 }
 
 /**
- * The child's own phone (linked phones, flow D): the phone and when it was last
- * used, or "Not linked yet" with Link. Phones are managed in Family settings.
+ * The child's own phone (linked phones, flow D): the one place a child's phone
+ * is linked and removed — the phone and when it was last used, with Remove,
+ * or "Not linked yet" with Link.
  */
-function PhoneRows({ child, phones }: { child: Child; phones: LinkedPhone[] | null }) {
+function PhoneRows({ child, phones, onRemove }: { child: Child; phones: LinkedPhone[] | null; onRemove: (id: string) => Promise<boolean> }) {
   const { t } = useT();
+  const toast = useToast();
   if (!phones) return null;
   const mine = phones.filter((p) => p.profile_id === child.id);
   const name = child.display_name;
+  const remove = (p: LinkedPhone) =>
+    confirmDestructive(t('parent.removePhoneTitle', { name: p.name }), t('parent.removePhoneBody'), t('parent.removePhone'), t('common.cancel'), async () => {
+      if (!(await onRemove(p.id))) {
+        fx.error();
+        return toast({ text: t('parent.networkError'), icon: 'close' });
+      }
+      fx.success();
+      toast({ text: t('parent.removedToast', { name: p.name }), icon: 'check' });
+    });
   return (
     <ListGroup>
       {mine.length === 0 ? (
@@ -297,7 +311,8 @@ function PhoneRows({ child, phones }: { child: Child; phones: LinkedPhone[] | nu
                 ? t('parent.phoneWaiting')
                 : `${t('parent.phoneOf', { name })}${p.last_seen_at ? ` · ${ago(t, Math.round((Date.now() - new Date(p.last_seen_at).getTime()) / 60_000))}` : ''}`
             }
-            onPress={() => router.push('/parent-settings')}
+            value={<Button size="sm" variant="secondary" label={t('parent.removePhone')} onPress={() => remove(p)} />}
+            chevron={false}
           />
         ))
       )}

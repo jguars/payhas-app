@@ -8,6 +8,7 @@ import { Enter } from '@/components/motion/Enter';
 import { PressScale } from '@/components/motion/PressScale';
 import { PinPad } from '@/components/PinPad';
 import { Avatar } from '@/components/ui/Avatar';
+import { IconButton } from '@/components/ui/IconButton';
 import { useFamily } from '@/features/family/FamilyProvider';
 import { ChildSetup } from '@/features/onboarding/ChildSetup';
 import { ConsentStep, useParentalConsent } from '@/features/onboarding/Consent';
@@ -37,7 +38,7 @@ export default function OnboardingScreen() {
 
 function Flow() {
   const { t, lang } = useT();
-  const { profiles, hasPin, plan, refresh } = useFamily();
+  const { profiles, hasPin, plan, refresh, signOut } = useFamily();
   const gate = useParentSession();
   const consent = useParentalConsent();
   const [stage, setStage] = useState<Stage>('welcome');
@@ -54,7 +55,7 @@ function Flow() {
   /** After the PIN: the parent's own profile if there isn't one, then the first child, then the family. */
   const afterPin = () => (!adult ? setStage('you') : kids.length === 0 ? toChild() : setStage('family'));
 
-  if (stage === 'welcome') return <Welcome onStart={() => setStage('pin')} />;
+  if (stage === 'welcome') return <Welcome onStart={() => setStage('pin')} onBack={signOut} />;
 
   if (stage === 'pin' || stage === 'pinConfirm') {
     const creating = !hasPin;
@@ -99,6 +100,7 @@ function Flow() {
       <Step
         stepKey="you"
         progress={0.25}
+        onBack={() => setStage('welcome')}
         title={t('onboarding.you.title')}
         hint={t('onboarding.you.hint')}
         action={{
@@ -164,6 +166,7 @@ function Flow() {
     <Step
       stepKey="family"
       progress={1}
+      onBack={() => setStage('welcome')}
       title={t('onboarding.review.title')}
       hint={t('onboarding.review.hint')}
       action={{
@@ -216,7 +219,8 @@ const POINTS: { icon: IconName; key: TKey; tint: string }[] = [
   { icon: 'sparkle', key: 'onboarding.welcome.learn', tint: color.reward },
 ];
 
-function Welcome({ onStart }: { onStart: () => void }) {
+/** Back signs out: the account stays, and the same number signs in again. */
+function Welcome({ onStart, onBack }: { onStart: () => void; onBack: () => void }) {
   const { t, lang } = useT();
   const insets = useInsets();
   const [langOpen, setLangOpen] = useState(false);
@@ -225,6 +229,7 @@ function Welcome({ onStart }: { onStart: () => void }) {
   return (
     <View style={[styles.welcome, { paddingTop: insets.top + 12, paddingBottom: insets.bottom + space.lg }]}>
       <View style={styles.welcomeTop}>
+        <IconButton icon="back" label={t('common.back')} onPress={onBack} />
         <PressScale onPress={() => setLangOpen(true)} hitSlop={6} accessibilityRole="button" accessibilityLabel={t('common.language')} style={styles.langChip}>
           <Icon name="discover" size={16} color={color.text2} strokeWidth={2.2} />
           <Text style={styles.langChipText}>{native}</Text>
@@ -289,7 +294,7 @@ const styles = themedStyles(() => ({
   memberName: { color: color.text, fontFamily: font.bold, fontSize: size.lead },
   memberMeta: { color: color.text3, fontFamily: font.medium, fontSize: size.small },
   welcome: { flex: 1, ...pageFill(), paddingHorizontal: space.xl },
-  welcomeTop: { flexDirection: 'row', justifyContent: 'flex-end' },
+  welcomeTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginLeft: -space.md },
   langChip: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 36, paddingHorizontal: 14, borderRadius: radius.pill, backgroundColor: color.surface1, borderWidth: 1, borderColor: color.line },
   langChipText: { color: color.text, fontFamily: font.semibold, fontSize: size.small },
   welcomeBody: { flex: 1, justifyContent: 'center', gap: space.md },

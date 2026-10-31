@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Image } from 'expo-image';
 
 import { useFamily } from '@/features/family/FamilyProvider';
-import { useLibrary } from '@/features/library/LibraryProvider';
+import { useLibrary, useUsage } from '@/features/library/LibraryProvider';
 import { useT } from '@/i18n';
 import { supabase } from '@/lib/supabase';
 
@@ -23,15 +23,17 @@ const PAGE = 6;
  */
 export function useFeed(mode: FeedMode = 'forYou') {
   const { active, leaveProfile } = useFamily();
-  const { hidden, following } = useLibrary();
+  const { hidden } = useLibrary();
+  const { followsSaved } = useUsage();
   const { lang } = useT();
   const [videos, setVideos] = useState<FeedVideo[]>([]);
   const [loading, setLoading] = useState(true);
   const [done, setDone] = useState(false);
   const busy = useRef(false);
 
-  // Following refetches when the follow list changes, so a new follow shows up.
-  const followKey = mode === 'following' ? [...following].sort().join('|') : '';
+  // Following refetches once a follow is saved on the server. Keying it on the optimistic
+  // follow list raced the save: the refetch landed first and came back empty.
+  const followKey = mode === 'following' ? followsSaved : 0;
 
   const fetchPage = useCallback(
     async (exclude: string[]) => {

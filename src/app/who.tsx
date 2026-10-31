@@ -9,16 +9,18 @@ import { PinPad } from '@/components/PinPad';
 import { SafeScreen } from '@/components/SafeScreen';
 import { Avatar } from '@/components/ui/Avatar';
 import { Profile, useFamily } from '@/features/family/FamilyProvider';
+import { useJoinRequests } from '@/features/parent/joinRequests';
 import { roleKey, useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
-import { color, font, pageFill, size, space, themedStyles } from '@/theme/tokens';
+import { border, color, font, pageFill, radius, size, space, themedStyles } from '@/theme/tokens';
 
 const AVATAR = 104;
 const TILE = 132;
 
 export default function WhoScreen() {
   const { profiles, hasPin, plan, selectProfile, refresh } = useFamily();
+  const { requests: joinRequests } = useJoinRequests();
   const { t } = useT();
   const [pinFor, setPinFor] = useState<Profile | null>(null);
 
@@ -74,7 +76,11 @@ export default function WhoScreen() {
                   accessibilityLabel={t('auth.profileA11y', { name: p.display_name, lane: laneName })}
                   style={styles.tile}
                 >
-                  <Avatar name={p.display_name} avatar={p.avatar} lane={p.lane} size={AVATAR} locked={p.pin_protected} ribbon={laneName.toUpperCase()} />
+                  <View>
+                    <Avatar name={p.display_name} avatar={p.avatar} lane={p.lane} size={AVATAR} locked={p.pin_protected} ribbon={laneName.toUpperCase()} />
+                    {/* A phone asking to join: the request opens in the parent's profile, not here where a child may be choosing. */}
+                    {p.is_parent && joinRequests.length > 0 && <View style={styles.dot} />}
+                  </View>
                   <Text style={styles.name} numberOfLines={1}>
                     {p.display_name}
                   </Text>
@@ -134,6 +140,7 @@ const styles = themedStyles(() => ({
   add: { width: AVATAR, height: AVATAR, borderRadius: AVATAR / 2, backgroundColor: color.surface2, alignItems: 'center', justifyContent: 'center' },
   name: { color: color.text, fontFamily: font.semibold, fontSize: size.body, maxWidth: TILE },
   addName: { color: color.text2 },
+  dot: { position: 'absolute', top: space.xs, right: space.xs, width: space.lg, height: space.lg, borderRadius: radius.pill, backgroundColor: color.ember, borderWidth: border.strong, borderColor: color.bg },
   footer: { flexDirection: 'row', justifyContent: 'center', paddingVertical: space.lg },
   footerButton: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: 48, paddingHorizontal: space.md },
   footerText: { color: color.text3, fontFamily: font.medium, fontSize: size.small },

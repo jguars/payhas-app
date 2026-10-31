@@ -86,6 +86,8 @@ export function FamilyProvider({ children }: { children: ReactNode }) {
     setDevice((me as Device | null) ?? null);
     // Not allowed yet: the family isn't readable until it is.
     if (me && (me as Device).status !== 'active') return;
+    // The server counts "today" in the family's time zone; a parent's phone keeps it right.
+    if (!linked && (!me || (me as Device).kind === 'coparent')) supabase.rpc('sync_family_time_zone', { p_tz: Intl.DateTimeFormat().resolvedOptions().timeZone ?? 'UTC' }).then(() => {});
     const [{ data: rows }, { data: pinSet }, { data: fam }, familyPlan] = await Promise.all([
       supabase.from('profiles').select('*, profile_interests(count)').order('created_at'),
       supabase.rpc('has_parent_pin'),

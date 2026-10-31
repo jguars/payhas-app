@@ -1,11 +1,13 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from 'react-native';
 
 import { SafeScreen } from '@/components/SafeScreen';
 import { Button } from '@/components/ui/Button';
+import { IconButton } from '@/components/ui/IconButton';
 import { TextField } from '@/components/ui/TextField';
 import { firstRun } from '@/features/start/firstRun';
+import { useBackToLanguage } from '@/features/start/useBackToLanguage';
 import { useT } from '@/i18n';
 import { supabase } from '@/lib/supabase';
 import { border, color, control, font, layout, pageFill, radius, space, themedStyles, type } from '@/theme/tokens';
@@ -32,9 +34,20 @@ export default function SignInScreen() {
   const { t } = useT();
   const [method, setMethod] = useState<Method>('phone');
   const [message, setMessage] = useState<string | null>(null);
+  const backToLanguage = useBackToLanguage();
+  // "Join my family" on Welcome: past the language step, on to the code. Back returns here.
+  useEffect(() => {
+    if (!firstRun.join) return;
+    firstRun.join = false;
+    firstRun.joinedFromWelcome = true;
+    router.push('/join');
+  }, []);
 
   return (
     <SafeScreen style={styles.root}>
+      <View style={styles.back}>
+        <IconButton icon="back" label={t('common.back')} onPress={backToLanguage} />
+      </View>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex}>
         <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
           <Text style={styles.logo}>payhas</Text>
@@ -223,6 +236,7 @@ function EmailForm({ onMessage }: { onMessage: (m: string | null) => void }) {
 const styles = themedStyles(() => ({
   root: { flex: 1, ...pageFill() },
   flex: { flex: 1 },
+  back: { alignSelf: 'flex-start', marginLeft: layout.gutter - space.md, marginTop: space.sm },
   body: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: layout.gutter + space.sm, paddingVertical: space.xl, gap: space.md },
   logo: { color: color.text, fontFamily: font.display, ...type.hero, textAlign: 'center' },
   title: { color: color.text2, fontFamily: font.medium, ...type.body, textAlign: 'center', marginBottom: space.lg },

@@ -52,6 +52,8 @@ type Library = {
  */
 type Usage = {
   todaySeconds: number;
+  /** Bumped once the server has saved a follow or unfollow — not on the optimistic tap — so the Following feed refetches what's really there. */
+  followsSaved: number;
   /** Bumped after any change, so screens showing derived numbers can refetch. */
   version: number;
 };
@@ -81,6 +83,7 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
   const [hidden, setHidden] = useState<Set<string>>(new Set());
   const [todaySeconds, setTodaySeconds] = useState(0);
   const [version, setVersion] = useState(0);
+  const [followsSaved, setFollowsSaved] = useState(0);
   const [inbox, setInbox] = useState<InboxItem[]>([]);
   const bump = useCallback(() => setVersion((v) => v + 1), []);
 
@@ -143,6 +146,7 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
       setFollowing((s) => flip(s, creator));
       supabase.rpc('toggle_follow', { p_session: token, p_creator: creator }).then(({ data, error }) => {
         if (!error) setFollowing((s) => flip(s, creator, !!data));
+        setFollowsSaved((n) => n + 1);
         bump();
       });
     },
@@ -289,7 +293,7 @@ export function LibraryProvider({ children }: { children: ReactNode }) {
       unread, refreshInbox, markInboxRead,
     ],
   );
-  const usage = useMemo(() => ({ todaySeconds, version }), [todaySeconds, version]);
+  const usage = useMemo(() => ({ todaySeconds, version, followsSaved }), [todaySeconds, version, followsSaved]);
   return (
     <Ctx.Provider value={value}>
       <UsageCtx.Provider value={usage}>{children}</UsageCtx.Provider>
