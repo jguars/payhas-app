@@ -133,11 +133,14 @@ function AskForm({ message, onAsked, onCode }: { message: string | null; onAsked
 function Asking({ request, onEnd }: { request: AskRequest; onEnd: (message: string | null) => void }) {
   const { t } = useT();
   const [allowed, setAllowed] = useState(false);
+  // The parent chose "New child" and is setting them up.
+  const [held, setHeld] = useState(false);
   useEffect(() => {
     let stopped = false;
     const check = async () => {
       const res = await askStatus(request);
       if (stopped) return;
+      setHeld(res.state === 'held');
       if (res.state === 'allowed') {
         stopped = true;
         setAllowed(true);
@@ -162,7 +165,7 @@ function Asking({ request, onEnd }: { request: AskRequest; onEnd: (message: stri
   return (
     <View style={styles.form}>
       <View style={styles.waiting} accessibilityLiveRegion="polite">
-        <Text style={styles.waitTitle}>{allowed ? t('ask.allowed') : t('ask.waitTitle')}</Text>
+        <Text style={styles.waitTitle}>{allowed ? t('ask.allowed') : held ? t('ask.held') : t('ask.waitTitle')}</Text>
         <Text style={styles.match} accessibilityLabel={request.match.split('').join(' ')}>
           {request.match}
         </Text>

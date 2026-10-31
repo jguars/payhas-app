@@ -40,16 +40,21 @@ fixed *and* checked; note how.
   has a third button, Join my family: language, then straight to the code.
   *Checked 2026-10-31 on a POCO C71 (fresh install → Join my family → language → code screen).*
 
-- [ ] **8. Only the parent could start a link.** → A child's phone can ask:
+- [x] **8. Only the parent could start a link.** → A child's phone can ask:
   Join my family → Ask my parent → the parent's number → a 2-digit match
   number on both phones. The parent's phone gets a sheet (only in the parent's
   own profile or on parent screens; Who's watching? shows a dot on the parent;
   Android push), picks the child, and allows with the PIN. "Later" leaves a
-  row on the dashboard. The code stays as "I have a code".
+  row on the dashboard. The code stays as "I have a code". The parent
+  needn't add the child first: **New child** holds the request (30 min) while
+  they set the child up, then the new child gets the phone
+  (`hold_join_request`, `assign_join_request`; migration `…160000_join_requests_new_child.sql`).
   Server: `private.join_requests`, `ask-family` edge function (deployed),
   migration `20261031150000_join_requests.sql`. Unknown numbers get the same
   reply; 3 asks/hour per phone and IP, 5/day per number, 2 declines → a day.
-  *Built 2026-10-31; needs the migration run, then a phone check. iOS push later.*
+  Adding the child from a request asks only name and birth month (age
+  defaults; the child picks interests on their phone). No "Later" button.
+  *Checked 2026-10-31: Android child asked → iPhone 12 parent added the child → phone opened into them. iOS push later.*
 
 ## Parked — tablet (shared phone)
 

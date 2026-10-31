@@ -50,6 +50,12 @@ type Props = {
   progress: [from: number, to: number];
   onDone: (child: ChildSummary) => void;
   onCancel: () => void;
+  /**
+   * A phone is waiting for this child (a join request): just the name and
+   * birth month, saved with the lane's suggested screen time. The child picks
+   * interests on their own phone; the parent can change the rest later.
+   */
+  quick?: boolean;
 };
 
 /**
@@ -57,7 +63,7 @@ type Props = {
  * month (→ lane, shown live), interests for that lane, learning-vs-fun, and
  * screen time with age-based suggestions. Saved in one call at the end.
  */
-export function ChildSetup({ progress, onDone, onCancel }: Props) {
+export function ChildSetup({ progress, onDone, onCancel, quick }: Props) {
   const { t, lang } = useT();
   const gate = useParentSession();
   const now = new Date();
@@ -101,7 +107,8 @@ export function ChildSetup({ progress, onDone, onCancel }: Props) {
   }, [lane]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const idx = SUBS.indexOf(sub);
-  const prog = progress[0] + ((progress[1] - progress[0]) * idx) / SUBS.length;
+  const steps = quick ? 2 : SUBS.length;
+  const prog = progress[0] + ((progress[1] - progress[0]) * idx) / steps;
   const go = (d: 1 | -1) => (idx + d < 0 ? onCancel() : setSub(SUBS[idx + d]));
 
   const save = async () => {
@@ -165,7 +172,11 @@ export function ChildSetup({ progress, onDone, onCancel }: Props) {
         progress={prog}
         onBack={() => go(-1)}
         title={t('onboarding.child.birthTitle', { name: nm })}
-        action={{ label: t('common.continue'), onPress: () => go(1), disabled: !lane }}
+        action={
+          quick
+            ? { label: saving ? '…' : t('ask.saveAndLink'), onPress: save, disabled: !lane || saving }
+            : { label: t('common.continue'), onPress: () => go(1), disabled: !lane }
+        }
       >
         <Text style={styles.label}>{t('onboarding.child.year')}</Text>
         <View style={styles.grid}>

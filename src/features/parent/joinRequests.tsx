@@ -12,7 +12,7 @@ import { useFamily } from '@/features/family/FamilyProvider';
 import { useT } from '@/i18n';
 import { fx } from '@/lib/feedback';
 import { supabase } from '@/lib/supabase';
-import { color, font, space, themedStyles, type } from '@/theme/tokens';
+import { color, font, layout, space, themedStyles, type } from '@/theme/tokens';
 
 /**
  * A child's phone asking to join (supabase/functions/ask-family), seen from
@@ -21,7 +21,11 @@ import { color, font, space, themedStyles, type } from '@/theme/tokens';
  * own profile or on the parent screens, never while a child is watching on
  * this phone (Who's watching? shows a dot on the parent instead).
  */
-export type JoinRequest = { id: string; device_name: string; match: string; created_at: string; expires_at: string };
+/** `held`: the parent chose New child and set-up isn't finished; the sheet offers it again. */
+export type JoinRequest = { id: string; device_name: string; match: string; held: boolean; created_at: string; expires_at: string };
+
+/** "New child" on the sheet: set the child up first, then they get the phone. */
+const NEW = 'new';
 
 const POLL_MS = 8000;
 /** Parent screens: the sheet may come up here whoever's profile is open underneath. */
@@ -92,12 +96,17 @@ export function JoinRequestsProvider({ children }: { children: ReactNode }) {
   );
 }
 
-/** The request: the phone and its match number, which child it's for, then the PIN. */
+/**
+ * The request: the phone and its match number, which child it's for, then
+ * the PIN. "New child" holds the request and opens child set-up, which asks
+ * for the PIN and gives the new profile the phone (add-child?request=).
+ */
 function RequestSheet({ request, open, onDone, onLater }: { request: JoinRequest; open: boolean; onDone: (id: string) => void; onLater: (id: string) => void }) {
   const { t } = useT();
   const { profiles } = useFamily();
   const toast = useToast();
-  const [picked, setPicked] = useState<string | null>(null);
+  const kidsCount = profiles.filter((p) => !p.is_parent).length;
+  const [picked, setPicked] = useState<string | null>(request.held || kidsCount === 0 ? NEW : null);
   const [step, setStep] = useState<'pick' | 'pin'>('pick');
   const [busy, setBusy] = useState(false);
   const kids = profiles.filter((p) => !p.is_parent);
@@ -107,6 +116,18 @@ function RequestSheet({ request, open, onDone, onLater }: { request: JoinRequest
     fx.error();
     toast({ text: t('ask.gone'), icon: 'close' });
     onDone(request.id);
+  };
+
+  const setUp = async () => {
+    if (busy) return;
+    setBusy(true);
+    const { data, error } = await supabase.rpc('hold_join_request', { p_request: request.id });
+    setBusy(false);
+    if (error) return toast({ text: t('parent.networkError'), icon: 'close' });
+    if (data !== 'ok') return gone();
+    // Quiet while set-up runs; finishing it answers the request.
+    onLater(request.id);
+    router.push({ pathname: '/add-child', params: { request: request.id } });
   };
 
   const decline = async () => {
@@ -122,7 +143,7 @@ function RequestSheet({ request, open, onDone, onLater }: { request: JoinRequest
   };
 
   return (
-    <BottomSheet open={open} onClose={() => onLater(request.id)} title={step === 'pin' ? undefined : t('ask.sheetTitle')}>
+    <BottomSheet open={open} onClose={() => onLater(request.id)} title={step === 'pin' ? undefined : t(request.held ? 'ask.heldTitle' : 'ask.sheetTitle')}>
       {step === 'pin' ? (
         <View style={styles.pin}>
           <PinPad
@@ -151,31 +172,25 @@ function RequestSheet({ request, open, onDone, onLater }: { request: JoinRequest
             <Text style={styles.device}>{request.device_name}</Text>
             <Text style={styles.hint}>{t('ask.matchHint')}</Text>
           </View>
-          <Text style={styles.label}>{t('ask.whoFor')}</Text>
-          {kids.length === 0 && <Text style={styles.hint}>{t('ask.noChildren')}</Text>}
-          <View style={styles.chips}>
-            {kids.map((k) => (
-              <Chip key={k.id} label={k.display_name} selected={picked === k.id} accessibilityRole="radio" onPress={() => setPicked(k.id)} />
-            ))}
-            <Chip
-              label={t('ask.newChild')}
-              icon="plus"
-              accessibilityRole="button"
-              onPress={() => {
-                onLater(request.id);
-                router.push('/add-child');
-              }}
-            />
-          </View>
-          <Button label={t('ask.allow')} disabled={!picked || busy} onPress={() => setStep('pin')} />
-          <View style={styles.row}>
-            <View style={styles.grow}>
-              <Button variant="secondary" label={t('ask.decline')} loading={busy} onPress={decline} />
-            </View>
-            <View style={styles.grow}>
-              <Button variant="quiet" label={t('ask.later')} onPress={() => onLater(request.id)} />
-            </View>
-          </View>
+          {/* With no children yet there's nothing to choose: the one way on is adding the child. */}
+          {!request.held && kids.length > 0 && (
+            <>
+              <Text style={styles.label}>{t('ask.whoFor')}</Text>
+              <View style={styles.chips}>
+                {kids.map((k) => (
+                  <Chip key={k.id} label={k.display_name} selected={picked === k.id} accessibilityRole="radio" onPress={() => setPicked(k.id)} />
+                ))}
+                <Chip label={t('ask.newChild')} icon="plus" selected={picked === NEW} accessibilityRole="radio" onPress={() => setPicked(NEW)} />
+              </View>
+            </>
+          )}
+          {picked === NEW ? (
+            <Button label={t('ask.addChild')} loading={busy} onPress={setUp} />
+          ) : (
+            <Button label={t('ask.allow')} disabled={!picked || busy} onPress={() => setStep('pin')} />
+          )}
+          {/* Swiping the sheet away puts it off: the dashboard keeps a row to come back to it. */}
+          <Button variant="quiet" label={t('ask.decline')} loading={busy} onPress={decline} />
         </View>
       )}
     </BottomSheet>
@@ -195,14 +210,12 @@ export function JoinRequestRow() {
 }
 
 const styles = themedStyles(() => ({
-  body: { gap: space.md },
-  pin: { alignItems: 'center', paddingVertical: space.md },
+  body: { gap: space.md, paddingHorizontal: layout.gutter },
+  pin: { alignItems: 'center', paddingVertical: space.md, paddingHorizontal: layout.gutter },
   matchBox: { alignItems: 'center', gap: space.xs, paddingVertical: space.sm },
   match: { color: color.text, fontFamily: font.display, ...type.hero, letterSpacing: space.sm },
   device: { color: color.text, fontFamily: font.semibold, ...type.body },
   hint: { color: color.text3, fontFamily: font.medium, ...type.small, textAlign: 'center' },
   label: { color: color.text, fontFamily: font.semibold, ...type.small },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
-  row: { flexDirection: 'row', gap: space.sm },
-  grow: { flex: 1 },
 }));

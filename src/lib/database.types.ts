@@ -509,7 +509,9 @@ export type Database = {
       why_this: { Args: { p_session: string; p_video_id: string }; Returns: Json }
       get_family_plan: { Args: never; Returns: Json }
       my_device: { Args: never; Returns: Json }
-      pending_join_requests: { Args: never; Returns: { id: string; device_name: string; match: string; created_at: string; expires_at: string }[] }
+      pending_join_requests: { Args: never; Returns: { id: string; device_name: string; match: string; held: boolean; created_at: string; expires_at: string }[] }
+      hold_join_request: { Args: { p_request: string }; Returns: string }
+      assign_join_request: { Args: { p_parent: string; p_request: string; p_profile: string }; Returns: string }
       answer_join_request: { Args: { p_request: string; p_allow: boolean; p_profile?: string | null; p_pin?: string | null }; Returns: string }
       sync_family_time_zone: { Args: { p_tz: string }; Returns: undefined }
       create_link_code: { Args: { p_parent: string; p_profile?: string | null; p_kind?: string }; Returns: Json }

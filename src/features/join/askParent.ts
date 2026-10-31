@@ -7,7 +7,7 @@ import { supabase } from '@/lib/supabase';
  */
 export type AskRequest = { id: string; secret: string; match: string; expires_at: string };
 export type AskResult = { ok: true; request: AskRequest } | { ok: false; error: 'too_many' | 'blocked' | 'connection' };
-export type AskStatus = { state: 'pending' | 'declined' | 'expired' | 'connection' } | { state: 'allowed'; email: string; password: string };
+export type AskStatus = { state: 'pending' | 'held' | 'declined' | 'expired' | 'connection' } | { state: 'allowed'; email: string; password: string };
 
 const REQUEST_KEY = 'payhas.askRequest';
 const INSTALL_KEY = 'payhas.installId';
